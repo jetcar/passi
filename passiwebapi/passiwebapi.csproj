@@ -12,12 +12,9 @@
 		<BaseOutputPath>publish</BaseOutputPath>
 	</PropertyGroup>
 
-	<ItemGroup>
-		<Content Remove="google-services.json" />
-	</ItemGroup>
 
 	<ItemGroup>
-		<None Include="google-services.json">
+		<None Include="../../google-services.json">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
 	</ItemGroup>

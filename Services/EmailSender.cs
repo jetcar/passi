@@ -22,7 +22,7 @@ namespace Services
         public string SendInvitationEmail(string email, string code)
         {
             if (Convert.ToBoolean(_appSetting["DoNotSendMail"]))
-                email = "jetcarq@gmail.com";
+                email = _appSetting["testMail"];
             var message = MailHelper.CreateSingleTemplateEmail(new EmailAddress(_appSetting["EmailFrom"]), new EmailAddress(email),
                 "d-b6873d40e5c74e6bab695b5bf12a636e", new { code = code });
             var responce = client.SendEmailAsync(message).Result;

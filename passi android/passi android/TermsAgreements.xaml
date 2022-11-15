@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:passiAndroid="clr-namespace:passi_android;assembly=passi android"
+             x:Class="passi_android.TermsAgreements" x:DataType="passiAndroid:TermsAgreements">
+    <ContentPage.Content>
+        <StackLayout Margin="10">
+            <Label FontSize="18" HorizontalTextAlignment="Center" Text="I agree that my email which i have presented is used for generating my account certificates. I agree that my account and certificates are used to identify me in e-services. I'm aware that by entering my PIN code for authentification I verify that I have initiated a session, agree with it and that I am responsible for it's consenquences. I agree that i have made sure that the verification image sent to me is correct. I allow my email to be sent to the e-service provider. I agree to make public part of generated certificate be publicly available to e-service provider.By choosing 'I Igree' I confirm that I'm familiar and agree with the terms and conditions on the user of Passi certificates and with Passi end-user license agreement."
+                VerticalOptions="CenterAndExpand"
+                HorizontalOptions="CenterAndExpand" />
+            <Button Background="White" CornerRadius="100"  Clicked="Button_OnAgreeClicked" Text="I agree"></Button>
+            <Button Background="White" CornerRadius="100"  Clicked="Button_OnCancelClicked" Text="I don't agree"></Button>
+        </StackLayout>
+    </ContentPage.Content>
+</ContentPage>

@@ -1,0 +1,71 @@
+﻿@model IdentityServer.Controllers.ClientRegistration.ClientItemInput
+
+@{
+    ViewBag.Title = "title";
+    Layout = "_Layout";
+}
+
+<partial name="_ValidationSummary" />
+
+<section class="vh-100" style="background-color: #eee;">
+    <div class="container">
+        <div class="row d-flex justify-content-center align-items-center">
+            <div class="col-lg-12 col-xl-11">
+                <div class="card text-black" style="border-radius: 25px;">
+                    <div class="card-body p-md-5">
+                        <div class="row justify-content-center">
+                            <div class="col">
+                                <p class="text-center h1 fw-bold col">Client details</p>
+                                <form asp-route="Details">
+
+                                    <div class="flex-row align-items-center">
+                                        <h6 class="col">ClientId:</h6>
+                                        <div class="form-outline flex-fill col">
+                                            <input class="form-control" placeholder="ClientId" asp-for="ClientId" autofocus>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex-row align-items-center">
+                                        <h6 class="col">Client Secret:</h6>
+                                        <div class="form-outline flex-fill col">
+                                            <input class="form-control" placeholder="New Client Secret" asp-for="ClientSecret" />
+                                        </div>
+                                    </div>
+
+                                   
+
+                                    <div class="flex-row align-items-center">
+                                        <h6 class="col">Client Url:</h6>
+                                        <div class="form-outline flex-fill col">
+                                            <input class="form-control" placeholder="Client Url" asp-for="Url" />
+                                        </div>
+                                    </div>
+                                    <div class="flex-row align-items-center">
+                                        <h6 class="col">Return Url:</h6>
+                                        <div class="form-outline flex-fill col">
+                                            <textarea asp-for="ReturnUrl" class="form-control" placeholder="Return Url"
+                                                      rows="@Model.ReturnUrlCount"></textarea>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="flex-row align-items-center">
+                                        <h6 class="col">Enabled:</h6>
+                                        <div class="form-outline flex-fill col">
+                                            <input class="col-md-1" type="checkbox" asp-for="Enabled" />
+                                        </div>
+                                    </div>
+
+                                    <div class="flex-row align-items-center">
+                                        <button class="btn btn-primary" name="button" asp-action="Details" value="details">Update</button>
+                                        <button class="btn btn-secondary" name="button" asp-action="Cancel" value="Cancel">Cancel</button>
+
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

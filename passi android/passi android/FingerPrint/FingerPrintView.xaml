@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:tools="clr-namespace:passi_android.Tools;assembly=passi android"
+             xmlns:fingerPrint="clr-namespace:passi_android.FingerPrint;assembly=passi android"
+             x:DataType="fingerPrint:FingerPrintView"
+             x:Class="passi_android.FingerPrint.FingerPrintView">
+    <ContentPage.Content>
+        <StackLayout HorizontalOptions="Center" VerticalOptions="Center">
+            <Image Source="baseline_fingerprint_black_18.png"></Image>
+            <Label Text="{Binding Message}"></Label>
+            <Button Background="White" CornerRadius="100"  Text="Cancel" Clicked="CancelButton_OnClicked"></Button>
+        </StackLayout>
+    </ContentPage.Content>
+</ContentPage>

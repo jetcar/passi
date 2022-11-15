@@ -1,0 +1,76 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<UserSecretsId>e31b262d-e4cd-49c3-95e3-3bae7743d28d</UserSecretsId>
+		<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+		<DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>
+		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+		<OutputPath>publish</OutputPath>
+		<BaseOutputPath>publish</BaseOutputPath>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<_ContentIncludedByDefault Remove="Views\Client\Index.cshtml" />
+		<_ContentIncludedByDefault Remove="Views\Account\AccessDenied.cshtml" />
+		<_ContentIncludedByDefault Remove="Views\Account\LoggedOut.cshtml" />
+		<_ContentIncludedByDefault Remove="Views\Account\Login.cshtml" />
+		<_ContentIncludedByDefault Remove="Views\Account\Logout.cshtml" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="IdentityServer4" Version="4.1.2" />
+		<PackageReference Include="IdentityServer4.EntityFramework" Version="4.1.2" />
+		<PackageReference Include="Microsoft.AspNetCore.DataProtection.EntityFrameworkCore" Version="6.0.10" />
+
+
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.10" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.10">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="6.0.10">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0.7" />
+
+		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.17.0" />
+		<PackageReference Include="RestSharp" Version="106.15.0" />
+		<PackageReference Include="Serilog" Version="2.11.0" />
+		<PackageReference Include="Serilog.AspNetCore" Version="5.0.0" />
+		<PackageReference Include="Serilog.Enrichers.Context" Version="4.6.0" />
+		<PackageReference Include="Serilog.Enrichers.Thread" Version="3.1.0" />
+		<PackageReference Include="Serilog.Settings.Configuration" Version="3.3.0" />
+		<PackageReference Include="Serilog.Sinks.Console" Version="4.0.1" />
+		<PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
+		<PackageReference Include="Serilog.Sinks.LogDNA" Version="1.0.3" />
+
+	</ItemGroup>
+
+	<ItemGroup>
+		<UpToDateCheckInput Remove="Views\Account\AccessDenied.cshtml" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<UpToDateCheckInput Remove="Views\Account\Logout.cshtml" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<UpToDateCheckInput Remove="Views\Account\Login.cshtml" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<UpToDateCheckInput Remove="Views\Account\LoggedOut.cshtml" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<UpToDateCheckInput Remove="Views\Client\Index.cshtml" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\ConfigurationManager\ConfigurationManager.csproj" />
+	  <ProjectReference Include="..\WebApiDto\WebApiDto.csproj" />
+	</ItemGroup>
+
+</Project>

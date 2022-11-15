@@ -1,0 +1,35 @@
+@model IdentityServer.Controllers.ViewModels.CheckViewModel
+
+
+
+<div class="check-page">
+    <partial name="_ValidationSummary" />
+    <div class="row">
+        <div class="col-md-6">
+            <form asp-route="Check" id="theForm">
+                <input type="hidden" asp-for="ReturnUrl" />
+                <input type="hidden" asp-for="Username" />
+                <input type="hidden" asp-for="RememberLogin" />
+                <input type="hidden" asp-for="SessionId" />
+                <input type="hidden" asp-for="CheckColor" />
+
+                <label asp-for="CheckColor"></label>
+                <div class="coloredBox @Model.CheckColor">&nbsp;</div>
+
+                @if (Model.NeedRefresh)
+                {
+                    <button class="btn btn-primary" id="refreshBtn" name="button" asp-action="Check" value="Refresh">Refresh</button>
+                }
+                <button class="btn btn-secondary" name="button" value="cancel" asp-action="CancelLogin" onclick="stopRedirect();">Cancel</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+@if (Model.NeedRefresh)
+{
+@section scripts {
+    <script type="text/javascript" language="javascript" src="~/js/site.js"></script>
+
+}
+}

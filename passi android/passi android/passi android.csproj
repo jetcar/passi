@@ -1,0 +1,87 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <ProduceReferenceAssembly>true</ProduceReferenceAssembly>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DebugType>portable</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="Portable.BouncyCastle" Version="1.9.0" />
+    <PackageReference Include="RestSharp" Version="106.15.0" />
+    <PackageReference Include="Xamarin.Forms" Version="5.0.0.2478" />
+    <PackageReference Include="Xamarin.Essentials" Version="1.7.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\AppCommon\AppCommon.csproj" />
+    <ProjectReference Include="..\..\AppConfig\AppConfig.csproj" />
+    <ProjectReference Include="..\..\WebApiDto\WebApiDto.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="AccountView.xaml.cs">
+      <DependentUpon>AccountView.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="FingerPrint\FingerPrintView.xaml.cs">
+      <DependentUpon>FingerPrintView.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="FingerPrint\FingerPrintConfirmByPinView.xaml.cs">
+      <DependentUpon>FingerPrintConfirmByPinView.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="UpdateCertificate.xaml.cs">
+      <DependentUpon>UpdateCertificate.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Registration\FinishConfirmation.xaml.cs">
+      <DependentUpon>FinishConfirmation.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Registration\RegistrationConfirmation.xaml.cs">
+      <DependentUpon>RegistrationConfirmation.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Notifications\NotificationVerifyRequestView.xaml.cs">
+      <DependentUpon>NotificationVerifyRequestView.xaml</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Admin\AdminButton.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Admin\AdminPage.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="AccountView.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="FingerPrint\FingerPrintView.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="TermsAgreements.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Tools\LoadingPage.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Notifications\ConfirmByPinView.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Registration\FinishConfirmation.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="NumbersPad.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Registration\RegistrationConfirmation.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Notifications\NotificationVerifyRequestView.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+  </ItemGroup>
+</Project>

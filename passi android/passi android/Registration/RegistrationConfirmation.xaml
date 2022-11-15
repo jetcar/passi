@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:passiAndroid="clr-namespace:passi_android;assembly=passi android"
+             xmlns:registration="clr-namespace:passi_android.Registration;assembly=passi android"
+             x:DataType="registration:RegistrationConfirmation"
+             x:Class="passi_android.Registration.RegistrationConfirmation">
+    <StackLayout VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand">
+
+        <Label HorizontalOptions="Center" Text="{ Binding Path=ResponseError}" />
+
+        <Label HorizontalOptions="Center" Text="{Binding Path=Email}" />
+
+        <Label HorizontalOptions="Center" Text="Confirmation Code" />
+        <Label HorizontalTextAlignment="Center" Margin="5" TextColor="Black" FontAttributes="Bold" HorizontalOptions="Fill" Text="{Binding Path=Code}"></Label>
+        <passiAndroid:NumbersPad  NumberClicked="NumbersPad_OnNumberClicked"></passiAndroid:NumbersPad>
+        <Button Background="White" CornerRadius="100"  Clicked="CancelButton_OnClicked" Text="Cancel"></Button>
+    </StackLayout>
+</ContentPage>

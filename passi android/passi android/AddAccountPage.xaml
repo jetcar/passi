@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:passi_android="clr-namespace:passi_android"
+             xmlns:admin="clr-namespace:passi_android.Admin"
+             x:DataType="passi_android:AddAccountPage"
+             x:Class="passi_android.AddAccountPage">
+    <StackLayout VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand">
+        <StackLayout VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand">
+
+            <Label HorizontalOptions="Center" Text="{ Binding Path=ResponseError}" />
+            <Label HorizontalOptions="Center" Text="{ Binding Path=EmailError.Text}" />
+            <Label HorizontalOptions="Center" Text="Email" />
+            <Entry HorizontalOptions="FillAndExpand" Margin="5" Text="{Binding Path=EmailText}">
+                <Entry.Triggers>
+                    <DataTrigger  Binding="{Binding Path=EmailError.HasError}" TargetType="Entry" Value="true">
+                        <Setter Property="Editor.BackgroundColor"
+                            Value="Red" />
+                    </DataTrigger>
+                </Entry.Triggers>
+            </Entry>
+            <Button Background="White" CornerRadius="100"  Clicked="Button_OnClicked" Text="Register"></Button>
+            <Button Background="White" CornerRadius="100"  Clicked="CancelButton_OnClicked" Text="Cancel"></Button>
+        </StackLayout>
+    </StackLayout>
+</ContentPage>

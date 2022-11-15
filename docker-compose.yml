@@ -1,0 +1,88 @@
+version: '3.4'
+
+services:
+
+  database:
+    image: 'postgres:13.8'
+    container_name: postgres
+    networks:
+    - dock_net
+    ports:
+      - 5432:5432
+    env_file:
+    - ../passi_config/dev.env
+    volumes:
+    - ../db-data/:/var/lib/postgresql/data/
+    restart: always
+
+  nginx:
+    container_name: nginx
+    image: nginx:1.23.0
+    volumes:
+      - ../passi_cert:/etc/cert:ro
+      - ./nginx/conf:/etc/nginx:ro
+      - /logs:/logs
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+    - webapp
+    - identityserver
+    - passiwebapi
+    networks:
+      - dock_net
+
+  webapp:
+    image: webapp:1
+    build:
+      context: .
+      dockerfile: SampleApp/WebApp/Dockerfile
+    networks:
+      - dock_net
+    ports:
+    - "5002:5002"
+    env_file:
+    - ../passi_config/dev.env
+    depends_on:
+    - database
+    restart: always
+
+  identityserver:
+    image: identityserver:1
+    build:
+      context: .
+      dockerfile: IdentityServer/Dockerfile
+    networks:
+      - dock_net
+    container_name: identityserver   
+    ports:
+    - "5003:5003"
+    env_file:
+    - ../passi_config/dev.env
+    depends_on:
+    - database    
+    restart: always
+
+  passiwebapi:
+    image: passiwebapi:1
+    build:
+      context: .
+      dockerfile: passiwebapi/Dockerfile
+    networks:
+      - dock_net
+    ports:
+    - "5004:5004"
+    env_file:
+    - ../passi_config/dev.env
+    depends_on:
+    - database    
+    restart: always
+    
+
+networks:
+  dock_net:
+    driver: bridge
+
+
+
+

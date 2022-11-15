@@ -17,8 +17,8 @@ namespace passi_android.utils
                 client = new RestClient(ConfigSettings.WebApiUrlLocal);
             else
                 client = new RestClient(ConfigSettings.WebApiUrl);
-            client.ReadWriteTimeout = 10000;
-            client.Timeout = 10000;
+            client.ReadWriteTimeout = 100000;
+            client.Timeout = 100000;
         }
 
         public static Task<IRestResponse> ExecuteGetAsync(string requestUri)

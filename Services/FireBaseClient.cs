@@ -3,6 +3,7 @@ using FirebaseAdmin.Messaging;
 using Google.Apis.Auth.OAuth2;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,7 +14,9 @@ namespace Services
     {
         public FireBaseClient()
         {
-            var filePath = "publish/google-services.json";
+            var filePath = "google-services.json";
+            if (!File.Exists(filePath))
+                filePath = "publish/google-services.json";
             var credential = GoogleCredential.FromFile(filePath);
             FirebaseApp.Create(new AppOptions()
             {

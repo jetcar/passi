@@ -2,7 +2,19 @@
 <ContentView xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="passi_android.NumbersPad">
+    <ContentView.Resources>
+        <ResourceDictionary>
+            <Style TargetType="Button">
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="Background" Value="White" />
+                <Setter Property="CornerRadius" Value="100" />
+                <Setter Property="FontSize" Value="15" />
+                <Setter Property="Margin" Value="10" />
+            </Style>
+        </ResourceDictionary>
+    </ContentView.Resources>
     <ContentView.Content>
+
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
@@ -15,22 +27,22 @@
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            <Button Margin="10" Grid.Row="0" Grid.Column="0" CommandParameter="1" Background="White" Clicked="ImageButton_OnClicked" Text="1" CornerRadius="100"  FontSize="15"></Button>
-            <Button Margin="10" Grid.Row="0" Grid.Column="1" CommandParameter="2" Background="White" Clicked="ImageButton_OnClicked" Text="2" CornerRadius="100"  FontSize="15"></Button>
-            <Button Margin="10" Grid.Row="0" Grid.Column="2" CommandParameter="3" Background="White" Clicked="ImageButton_OnClicked" Text="3" CornerRadius="100"  FontSize="15"></Button>
+            <Button  Grid.Row="0" Grid.Column="0" CommandParameter="1"  Clicked="ImageButton_OnClicked" Text="1"   ></Button>
+            <Button  Grid.Row="0" Grid.Column="1" CommandParameter="2"  Clicked="ImageButton_OnClicked" Text="2"   ></Button>
+            <Button  Grid.Row="0" Grid.Column="2" CommandParameter="3"  Clicked="ImageButton_OnClicked" Text="3"   ></Button>
 
-            <Button Margin="10" Grid.Row="1" Grid.Column="0" CommandParameter="4" Background="White" Clicked="ImageButton_OnClicked" Text="4" CornerRadius="100"  FontSize="15"></Button>
-            <Button Margin="10" Grid.Row="1" Grid.Column="1" CommandParameter="5" Background="White" Clicked="ImageButton_OnClicked" Text="5" CornerRadius="100"  FontSize="15"></Button>
-            <Button Margin="10" Grid.Row="1" Grid.Column="2" CommandParameter="6" Background="White" Clicked="ImageButton_OnClicked" Text="6" CornerRadius="100"  FontSize="15"></Button>
+            <Button  Grid.Row="1" Grid.Column="0" CommandParameter="4"  Clicked="ImageButton_OnClicked" Text="4"   ></Button>
+            <Button  Grid.Row="1" Grid.Column="1" CommandParameter="5"  Clicked="ImageButton_OnClicked" Text="5"   ></Button>
+            <Button  Grid.Row="1" Grid.Column="2" CommandParameter="6"  Clicked="ImageButton_OnClicked" Text="6"   ></Button>
 
-            <Button Margin="10" Grid.Row="2" Grid.Column="0" CommandParameter="7" Background="White" Clicked="ImageButton_OnClicked" Text="7" CornerRadius="100"  FontSize="15"></Button>
-            <Button Margin="10" Grid.Row="2" Grid.Column="1" CommandParameter="8" Background="White" Clicked="ImageButton_OnClicked" Text="8" CornerRadius="100"  FontSize="15"></Button>
-            <Button Margin="10" Grid.Row="2" Grid.Column="2" CommandParameter="9" Background="White" Clicked="ImageButton_OnClicked" Text="9" CornerRadius="100"  FontSize="15"></Button>
+            <Button  Grid.Row="2" Grid.Column="0" CommandParameter="7"  Clicked="ImageButton_OnClicked" Text="7"   ></Button>
+            <Button  Grid.Row="2" Grid.Column="1" CommandParameter="8"  Clicked="ImageButton_OnClicked" Text="8"   ></Button>
+            <Button  Grid.Row="2" Grid.Column="2" CommandParameter="9"  Clicked="ImageButton_OnClicked" Text="9"   ></Button>
 
-            <ImageButton Padding="30"  Grid.Row="3" Grid.Column="0" CommandParameter="del" BackgroundColor="White"  Clicked="ImageButton_OnClicked"
-                       Source="baseline_backspace_black_24.png" HorizontalOptions="Center" VerticalOptions="Center" CornerRadius="100"></ImageButton>
-            <Button Margin="10" Grid.Row="3" Grid.Column="1" CommandParameter="0" CornerRadius="100" Background="White"  Clicked="ImageButton_OnClicked" Text="0"  FontSize="15"></Button>
-            <ImageButton Padding="30" Grid.Row="3" Grid.Column="2" CommandParameter="confirm" BackgroundColor="White"  Clicked="ImageButton_OnClicked" Source="baseline_keyboard_arrow_right_black_24.png" HorizontalOptions="Center" VerticalOptions="Center" CornerRadius="100" ></ImageButton>
+            <ImageButton Padding="30"  Grid.Row="3" Grid.Column="0" CommandParameter="del" BackgroundColor="White" CornerRadius="100"  Clicked="ImageButton_OnClicked"
+                       Source="baseline_backspace_black_24.png" HorizontalOptions="Center" VerticalOptions="Center" ></ImageButton>
+            <Button  Grid.Row="3" Grid.Column="1" CommandParameter="0" Clicked="ImageButton_OnClicked" Text="0"  ></Button>
+            <ImageButton Padding="30" Grid.Row="3" Grid.Column="2" CommandParameter="confirm" BackgroundColor="White" CornerRadius="100"    Clicked="ImageButton_OnClicked" Source="baseline_keyboard_arrow_right_black_24.png" HorizontalOptions="Center" VerticalOptions="Center"  ></ImageButton>
         </Grid>
     </ContentView.Content>
 </ContentView>

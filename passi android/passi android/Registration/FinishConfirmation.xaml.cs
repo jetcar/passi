@@ -99,39 +99,17 @@ namespace passi_android.Registration
             base.OnAppearing();
         }
 
-        private void Confirm()
+        private void Confirm(string code, string email, string pin)
         {
-            ResponseError = "";
-
-            if (Pin1.Length < MinPinLenght)
-            {
-                SecondPin = false;
-                //error
-                Pin1Error.HasError = true;
-                Pin1Error.Text = $"Pin1 should be min {MinPinLenght} numbers";
-
-                return;
-            }
-
-            if (Pin1 != Pin2)
-            {
-                SecondPin = false;
-                //error
-                Pin2Error.HasError = true;
-                Pin2Error.Text = "Pin2 doesn't match with Pin1";
-
-                return;
-            }
-
             Navigation.PushModalSinglePage(new LoadingPage(() =>
             {
-                GenerateCert().ContinueWith(x =>
+                GenerateCert(email, pin).ContinueWith(x =>
                 {
                     var signupConfirmationDto = new SignupConfirmationDto()
                     {
-                        Code = Code,
+                        Code = code,
                         PublicCert = x.Result.PublicCertBinary,
-                        Email = EmailText,
+                        Email = email,
                         Guid = x.Result.Guid.ToString(),
                         DeviceId = SecureRepository.GetDeviceId()
                     };
@@ -172,14 +150,14 @@ namespace passi_android.Registration
         public string Code { get; set; }
         public string EmailText { get; set; }
 
-        private async Task<AccountDb> GenerateCert()
+        private async Task<AccountDb> GenerateCert(string email, string pin)
         {
-            return await Certificates.GenerateCertificate(EmailText, Pin1).ContinueWith(certificate =>
+            return await Certificates.GenerateCertificate(email, pin).ContinueWith(certificate =>
              {
                  Account.Password = certificate.Result.Item2;
                  var certificateBytes = Convert.ToBase64String(certificate.Result.Item3); //importable certificate
                  Account.PrivateCertBinary = certificateBytes;
-                 Account.pinLength = Pin1.Length;
+                 Account.pinLength = pin?.Length ?? 0;
                  var publicCertHelper = CertHelper.ConvertToPublicCertificate(certificate.Result.Item1);
                  Account.Thumbprint = publicCertHelper.Thumbprint;
                  Account.ValidFrom = publicCertHelper.NotBefore.Value;
@@ -258,7 +236,29 @@ namespace passi_android.Registration
             {
                 if (SecondPin)
                 {
-                    Confirm();
+                    ResponseError = "";
+
+                    if (Pin1.Length < MinPinLenght)
+                    {
+                        SecondPin = false;
+                        //error
+                        Pin1Error.HasError = true;
+                        Pin1Error.Text = $"Pin1 should be min {MinPinLenght} numbers";
+
+                        return;
+                    }
+
+                    if (Pin1 != Pin2)
+                    {
+                        SecondPin = false;
+                        //error
+                        Pin2Error.HasError = true;
+                        Pin2Error.Text = "Pin2 doesn't match with Pin1";
+
+                        return;
+                    }
+
+                    Confirm(Code, EmailText, Pin1);
                 }
                 if (!SecondPin)
                 {
@@ -292,6 +292,11 @@ namespace passi_android.Registration
         {
             Pin2 = "";
             SecondPin = true;
+        }
+
+        private void SkipButton_OnClicked(object sender, EventArgs e)
+        {
+            Confirm(Code, EmailText, null);
         }
     }
 }

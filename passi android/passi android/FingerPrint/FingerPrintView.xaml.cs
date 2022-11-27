@@ -21,13 +21,17 @@ namespace passi_android.FingerPrint
 
         public string Message
         {
-            get => _message;
+            get
+            {
+                return _message;
+            }
             set
             {
                 _message = value;
                 OnPropertyChanged();
             }
         }
+
 
         protected override void OnAppearing()
         {

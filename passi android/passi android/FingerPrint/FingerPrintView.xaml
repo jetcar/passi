@@ -6,9 +6,9 @@
              x:DataType="fingerPrint:FingerPrintView"
              x:Class="passi_android.FingerPrint.FingerPrintView">
     <ContentPage.Content>
-        <StackLayout HorizontalOptions="Center" VerticalOptions="Center">
+        <StackLayout HorizontalOptions="Center" VerticalOptions="Center" Orientation="Vertical">
+            <Label HorizontalTextAlignment="Center" TextColor="Red" Margin="10" Text="{Binding Path=Message}"></Label>
             <Image Source="baseline_fingerprint_black_18.png"></Image>
-            <Label Text="{Binding Message}"></Label>
             <Button Background="White" CornerRadius="100"  Text="Cancel" Clicked="CancelButton_OnClicked"></Button>
         </StackLayout>
     </ContentPage.Content>

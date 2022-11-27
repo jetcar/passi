@@ -123,40 +123,16 @@ namespace passi_android
 
         protected override void OnAppearing()
         {
-            EmailText = Account.Email;
+            if (Account.pinLength == 0)
+                Confirm(null, null);
             base.OnAppearing();
         }
 
-        private void Confirm()
+        private void Confirm(string pinNew, string pinOld)
         {
-            ResponseError = "";
-            PinOldError.Clear();
-            Pin1Error.Clear();
-            Pin2Error.Clear();
-
-            if (Pin1.Length < MinPinLenght)
-            {
-                SetTextBox(1);
-                //error
-                Pin1Error.HasError = true;
-                Pin1Error.Text = $"Pin1 should be min {MinPinLenght} numbers";
-
-                return;
-            }
-
-            if (Pin1 != Pin2)
-            {
-                SetTextBox(2);
-                //error
-                Pin2Error.HasError = true;
-                Pin2Error.Text = "Pin2 doesn't match with Pin1";
-
-                return;
-            }
-
             Navigation.PushModalSinglePage(new LoadingPage(() =>
             {
-                GenerateCert().ContinueWith(certDto =>
+                GenerateCert(pinNew, pinOld).ContinueWith(certDto =>
                 {
                     if (certDto != null)
                     {
@@ -173,7 +149,7 @@ namespace passi_android
                                 Account.PublicCertBinary = NewAccount.PublicCertBinary;
 
                                 SecureRepository.UpdateAccount(Account);
-                                SecureRepository.AddfingerPrintKey(Account.Guid, Pin1).GetAwaiter().GetResult();
+                                SecureRepository.AddfingerPrintKey(Account.Guid, pinNew).GetAwaiter().GetResult();
 
                                 MainThread.BeginInvokeOnMainThread(() => { Navigation.NavigateTop(); });
                             }
@@ -191,21 +167,18 @@ namespace passi_android
             }));
         }
 
-        public string Code { get; set; }
-        public string EmailText { get; set; }
-
-        private async Task<CertificateDto> GenerateCert()
+        private async Task<CertificateDto> GenerateCert(string pinNew, string pinOld)
         {
             var cert = new CertificateDto();
             cert.ParentCertThumbprint = Account.Thumbprint;
-            return await Certificates.GenerateCertificate(EmailText, Pin1).ContinueWith(certificate =>
+            return await Certificates.GenerateCertificate(Account.Email, pinNew).ContinueWith(certificate =>
             {
                 var certificateBase64 = Convert.ToBase64String(certificate.Result.Item3); //importable certificate
                 var publicCertHelper = CertHelper.ConvertToPublicCertificate(certificate.Result.Item1);
 
                 try
                 {
-                    cert.ParentCertHashSignature = CertHelper.Sign(Account.Guid, PinOld, publicCertHelper.BinaryData).Result;
+                    cert.ParentCertHashSignature = CertHelper.Sign(Account.Guid, pinOld, publicCertHelper.BinaryData).Result;
                 }
                 catch (Exception e)
                 {
@@ -325,7 +298,32 @@ namespace passi_android
             {
                 if (currentfieldIndex == 2)
                 {
-                    Confirm();
+                    ResponseError = "";
+                    PinOldError.Clear();
+                    Pin1Error.Clear();
+                    Pin2Error.Clear();
+
+                    if (Pin1.Length < MinPinLenght)
+                    {
+                        SetTextBox(1);
+                        //error
+                        Pin1Error.HasError = true;
+                        Pin1Error.Text = $"Pin1 should be min {MinPinLenght} numbers";
+
+                        return;
+                    }
+
+                    if (Pin1 != Pin2)
+                    {
+                        SetTextBox(2);
+                        //error
+                        Pin2Error.HasError = true;
+                        Pin2Error.Text = "Pin2 doesn't match with Pin1";
+
+                        return;
+                    }
+
+                    Confirm(Pin1, PinOld);
                     return;
                 }
                 if (currentfieldIndex == 0)

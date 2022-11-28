@@ -1,10 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Timers;
 using AppCommon;
 using AppConfig;
+using Newtonsoft.Json;
+using passi_android.Tools;
 using passi_android.utils;
+using passi_android.utils.Certificate;
 using WebApiDto;
+using WebApiDto.Auth;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
@@ -25,6 +30,7 @@ namespace passi_android.Notifications
         private Timer _timer;
         private string _timeLeft;
         private bool _isButtonEnabled = true;
+        private string _responseError;
         private static object locker = new object();
         private static NotificationVerifyRequestView _instance;
 
@@ -87,6 +93,7 @@ namespace passi_android.Notifications
 
         protected override void OnAppearing()
         {
+            this.Account = SecureRepository.GetAccount(Message.AccountGuid);
             RequesterName = Message.Sender;
             ReturnHost = Message.ReturnHost;
 
@@ -124,6 +131,8 @@ namespace passi_android.Notifications
             base.OnAppearing();
             App.CancelNotifications.Invoke();
         }
+
+        public AccountDb Account { get; set; }
 
         private Xamarin.Forms.Color RandomColor()
         {
@@ -235,10 +244,81 @@ namespace passi_android.Notifications
             }
         }
 
+        public string ResponseError
+        {
+            get => _responseError;
+            set
+            {
+                _responseError = value;
+                OnPropertyChanged();
+            }
+        }
+
         private void ImageButton1_OnClicked(object sender, EventArgs e)
         {
             if (Color1 == GetColor(Message.ConfirmationColor))
+            {
+                if (Account.pinLength == 0)
+                {
+                    Navigation.PushModalSinglePage(new LoadingPage(() =>
+                        {
+                            CertHelper.Sign(Message.AccountGuid, null, Message.RandomString).ContinueWith(signedGuid =>
+                            {
+                                if (signedGuid.IsFaulted)
+                                {
+                                    MainThread.BeginInvokeOnMainThread(() =>
+                                    {
+                                        Navigation.PopModal().ContinueWith((task =>
+                                        {
+                                            ResponseError = "Certificate Error:" + signedGuid.Exception.Message;
+                                        }));
+                                    });
+
+                                    return;
+                                }
+
+                                var authorizeDto = new AuthorizeDto
+                                {
+                                    SignedHash = signedGuid.Result,
+                                    PublicCertThumbprint = SecureRepository.GetAccount(Message.AccountGuid).Thumbprint,
+                                    SessionId = Message.SessionId
+                                };
+                                RestService.ExecutePostAsync(ConfigSettings.Authorize, authorizeDto).ContinueWith((response) =>
+                                {
+                                    if (response.Result.IsSuccessful)
+                                    {
+                                        MainThread.BeginInvokeOnMainThread(() =>
+                                        {
+                                            App.CloseApp.Invoke();
+                                        });
+                                    }
+                                    else if (!response.Result.IsSuccessful && response.Result.StatusCode == HttpStatusCode.BadRequest)
+                                    {
+                                        MainThread.BeginInvokeOnMainThread(() =>
+                                        {
+                                            Navigation.PopModal().ContinueWith((task =>
+                                            {
+                                                ResponseError = JsonConvert
+                                                    .DeserializeObject<ApiResponseDto<string>>(response.Result.Content).Message;
+                                            }));
+                                        });
+                                    }
+                                    else
+                                    {
+                                        MainThread.BeginInvokeOnMainThread(() =>
+                                        {
+                                            Navigation.PopModal().ContinueWith((s) =>
+                                            {
+                                                ResponseError = "Network error. Try again";
+                                            });
+                                        });
+                                    }
+                                });
+                            });
+                        }));
+                }
                 Navigation.PushModalSinglePage(new ConfirmByPinView() { Message = Message });
+            }
             else
             {
                 IsButtonEnabled = false;

@@ -121,13 +121,6 @@ namespace passi_android
             }
         }
 
-        protected override void OnAppearing()
-        {
-            if (Account.pinLength == 0)
-                Confirm(null, null);
-            base.OnAppearing();
-        }
-
         private void Confirm(string pinNew, string pinOld)
         {
             Navigation.PushModalSinglePage(new LoadingPage(() =>
@@ -155,11 +148,18 @@ namespace passi_android
                             }
                             if (!response.Result.IsSuccessful && response.Result.StatusCode == HttpStatusCode.BadRequest)
                             {
-                                ResponseError = JsonConvert.DeserializeObject<ApiResponseDto<string>>(response.Result.Content).Message;
+                                Navigation.PopModal().ContinueWith((task) =>
+                                {
+                                    ResponseError = JsonConvert
+                                        .DeserializeObject<ApiResponseDto<string>>(response.Result.Content).Message;
+                                });
                             }
                             else
                             {
-                                ResponseError = "Network error. Try again";
+                                Navigation.PopModal().ContinueWith((task) =>
+                                {
+                                    ResponseError = "Network error. Try again";
+                                });
                             }
                         });
                     }

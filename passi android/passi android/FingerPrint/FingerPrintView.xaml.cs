@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using AppCommon;
 using passi_android.utils;
 using Xamarin.Essentials;
@@ -17,6 +18,7 @@ namespace passi_android.FingerPrint
         {
             _accountDb = accountDb;
             InitializeComponent();
+            BindingContext = this;
         }
 
         public string Message
@@ -32,43 +34,43 @@ namespace passi_android.FingerPrint
             }
         }
 
-
         protected override void OnAppearing()
         {
             if (!App.FingerprintManager.IsHardwareDetected)
             {
                 Message = "FingerPrint scanner not found";
-                return;
             }
-            if (!App.FingerprintManager.HasEnrolledFingerprints)
+            else if (!App.FingerprintManager.HasEnrolledFingerprints)
             {
-                Message = "FingerPrints not found";
-                return;
+                Message = "FingerPrints not found.";
             }
+            else if (!App.IsKeyguardSecure)
+            {
+                Message =
+                    "Secure lock screen hasn\'t been set up. Goto Settings &gt; Security to set up a keyguard.";
+            }
+            else
+            {
+                //Message = "";
 
-            if (!App.IsKeyguardSecure)
-            {
-                Message = "Secure lock screen hasn\'t been set up. Goto Settings &gt; Security to set up a keyguard.";
-                return;
-            }
-
-            Message = "";
-            App.StartFingerPrintReading();
-            App.FingerPrintReadingResult = (result) =>
-            {
-                if (result.ErrorMessage == null)
+                App.StartFingerPrintReading();
+                App.FingerPrintReadingResult = (result) =>
                 {
-                    MainThread.BeginInvokeOnMainThread(() =>
+                    if (result.ErrorMessage == null)
                     {
-                        Navigation.PushModalSinglePage(new FingerPrintConfirmByPinView(_accountDb));
-                    });
-                }
-                else
-                {
-                    Message = result.ErrorMessage;
-                    App.StartFingerPrintReading();
-                }
-            };
+                        MainThread.BeginInvokeOnMainThread(() =>
+                        {
+                            Navigation.PushModalSinglePage(new FingerPrintConfirmByPinView(_accountDb));
+                        });
+                    }
+                    else
+                    {
+                        Message = result.ErrorMessage;
+                        App.StartFingerPrintReading();
+                    }
+                };
+            }
+
             base.OnAppearing();
         }
 

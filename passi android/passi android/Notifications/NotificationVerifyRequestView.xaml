@@ -18,6 +18,8 @@
         <Label HorizontalOptions="Center" Text="{ Binding Path=ColorError.Text}" />
 
         <StackLayout Orientation="Horizontal" HorizontalOptions="CenterAndExpand">
+            <Label HorizontalOptions="Center" Text="{ Binding Path=ResponseError}" />
+
             <ImageButton CornerRadius="100"  WidthRequest="60" HeightRequest="60" IsEnabled="{Binding Path=IsButtonEnabled}" Margin="10" BackgroundColor="{Binding Path=Color1}" Clicked="ImageButton1_OnClicked" ></ImageButton>
             <ImageButton CornerRadius="100"  WidthRequest="60" HeightRequest="60" IsEnabled="{Binding Path=IsButtonEnabled}" Margin="10" BackgroundColor="{Binding Path=Color2}" Clicked="ImageButton2_OnClicked"></ImageButton>
             <ImageButton CornerRadius="100"  WidthRequest="60" HeightRequest="60" IsEnabled="{Binding Path=IsButtonEnabled}" Margin="10" BackgroundColor="{Binding Path=Color3}" Clicked="ImageButton3_OnClicked"></ImageButton>

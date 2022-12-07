@@ -13,6 +13,7 @@ services:
     - ../passi_config/dev.env
     volumes:
     - ../db-data/:/var/lib/postgresql/data/
+    - ../db-backup/:/home/
     restart: always
 
   nginx:

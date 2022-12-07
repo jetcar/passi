@@ -317,7 +317,10 @@ namespace passi_android.Notifications
                             });
                         }));
                 }
-                Navigation.PushModalSinglePage(new ConfirmByPinView() { Message = Message });
+                else
+                {
+                    Navigation.PushModalSinglePage(new ConfirmByPinView() { Message = Message });
+                }
             }
             else
             {

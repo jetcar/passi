@@ -130,13 +130,20 @@ namespace IdentityServer
                         .Include(x => x.ClientSecrets));
                     context.UserClients.RemoveRange(
                         context.UserClients.Where(x => x.Client.ClientId == appsettings["ClientId"]));
+
+                    context.Clients.RemoveRange(context.Clients.Where(x => x.ClientId == appsettings["PassiClientId"])
+                        .Include(x => x.RedirectUris).Include(x => x.PostLogoutRedirectUris)
+                        .Include(x => x.AllowedScopes)
+                        .Include(x => x.ClientSecrets));
+                    context.UserClients.RemoveRange(
+                        context.UserClients.Where(x => x.Client.ClientId == appsettings["PassiClientId"]));
                 }
 
                 var client = new Client()
                 {
                     ClientId = appsettings["ClientId"],
                     ClientSecrets = new List<IdentityServer4.Models.Secret>() { new IdentityServer4.Models.Secret() { Value = appsettings["ClientSecret"].ToSha256() } },
-                    RedirectUris = new List<string>() { "https://localhost/oauth/callback", "https://127.0.0.1:5002/oauth/callback", "https://localhost:5002/oauth/callback", "https://192.168.0.208/oauth/callback", "https://passi.cloud/oauth/callback", "https://192.168.0.208:5002/oauth/callback" },
+                    RedirectUris = new List<string>() { "https://localhost/passiweb/oauth/callback", "https://localhost/oauth/callback", "https://127.0.0.1:5002/oauth/callback", "https://localhost:5002/oauth/callback", "https://192.168.0.208/oauth/callback", "https://passi.cloud/oauth/callback", "https://192.168.0.208:5002/oauth/callback" },
                     PostLogoutRedirectUris = new List<string>() { "https://localhost", "https://passi.cloud" },
                     RequirePkce = false,
                     AllowedGrantTypes = GrantTypes.CodeAndClientCredentials,
@@ -146,6 +153,20 @@ namespace IdentityServer
                     AlwaysSendClientClaims = true,
                 }.ToEntity();
                 context.Clients.Add(client);
+                var client2 = new Client()
+                {
+                    ClientId = appsettings["PassiClientId"],
+                    ClientSecrets = new List<IdentityServer4.Models.Secret>() { new IdentityServer4.Models.Secret() { Value = appsettings["PassiSecret"].ToSha256() } },
+                    RedirectUris = new List<string>() { "https://localhost/passiapi/oauth/callback", "https://127.0.0.1:5004/passiapi/oauth/callback", "https://localhost:5004/passiapi/oauth/callback", "https://192.168.0.208/passiapi/oauth/callback", "https://passi.cloud/passiapi/oauth/callback", "https://192.168.0.208:5004/passiapi/oauth/callback" },
+                    PostLogoutRedirectUris = new List<string>() { "https://localhost", "https://passi.cloud" },
+                    RequirePkce = false,
+                    AllowedGrantTypes = GrantTypes.CodeAndClientCredentials,
+                    AllowedScopes = new List<string>() { "openid" },
+                    AlwaysIncludeUserClaimsInIdToken = true,
+                    ClientUri = "https://passi.cloud",
+                    AlwaysSendClientClaims = true,
+                }.ToEntity();
+                context.Clients.Add(client2);
 
                 if (!context.IdentityResources.Any())
                     context.IdentityResources.AddRange(new List<IdentityResource>()

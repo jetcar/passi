@@ -44,10 +44,12 @@
 
 
 	<ItemGroup>
-	  <ProjectReference Include="..\..\AppCommon\AppCommon.csproj" />
-	  <ProjectReference Include="..\..\ConfigurationManager\ConfigurationManager.csproj" />
-	  <ProjectReference Include="..\..\Services\Services.csproj" />
-	  <ProjectReference Include="..\..\WebApiDto\WebApiDto.csproj" />
+	  <ProjectReference Include="..\OpenIdLib\OpenIdLib.csproj" />
+	  <ProjectReference Include="..\AppCommon\AppCommon.csproj" />
+	  <ProjectReference Include="..\ConfigurationManager\ConfigurationManager.csproj" />
+	  <ProjectReference Include="..\OpenIdLib\OpenIdLib.csproj" />
+	  <ProjectReference Include="..\Services\Services.csproj" />
+	  <ProjectReference Include="..\WebApiDto\WebApiDto.csproj" />
 	</ItemGroup>
 
 

@@ -110,6 +110,9 @@ namespace passi_webapi.Controllers
                 if (sessionDb.Status != SessionStatus.Confirmed)
                     throw new BadRequestException("Waiting for response");
 
+                //sessionDb.PublicCertThumbprint = "s";
+                //sessionDb.SignedHash = "s";
+
                 return new CheckResponceDto() { SignedHash = sessionDb.SignedHash, PublicCertThumbprint = sessionDb.PublicCertThumbprint, Username = sessionDb.User.EmailHash };
             }
         }

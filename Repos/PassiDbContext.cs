@@ -15,10 +15,11 @@ using Npgsql;
 using Serilog;
 using Serilog.Core;
 using NodaTime;
+using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 
 namespace Repos
 {
-    public class PassiDbContext : DbContext
+    public class PassiDbContext : DbContext, IDataProtectionKeyContext
     {
         private AppSetting _appSetting;
         private CurrentContext _currentContext;
@@ -39,7 +40,7 @@ namespace Repos
                 {"AppSetting:DbSslMode", "prefer"},
             };
             var config = new ConfigurationBuilder().AddInMemoryCollection(myConfiguration).Build();
-            var appSetting = new AppSetting(config, _logger);
+            var appSetting = new AppSetting(config);
             appSetting.PrefferAppsettingFile = true;
             _appSetting = appSetting;
         }
@@ -260,5 +261,7 @@ namespace Repos
 
             base.OnModelCreating(modelBuilder);
         }
+
+        public DbSet<DataProtectionKey> DataProtectionKeys { get; set; }
     }
 }

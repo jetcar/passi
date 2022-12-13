@@ -36,7 +36,7 @@ namespace IdentityServer.DbContext
                 {"AppSetting:DbHost", "localhost"},
             };
             var config = new ConfigurationBuilder().AddInMemoryCollection(myConfiguration).Build();
-            var appSetting = new AppSetting(config, _logger);
+            var appSetting = new AppSetting(config);
             appSetting.PrefferAppsettingFile = true;
             _appSetting = appSetting;
         }

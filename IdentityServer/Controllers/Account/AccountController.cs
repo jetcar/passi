@@ -158,7 +158,7 @@ namespace IdentityServer.Controllers.Account
             else
             {
                 //var errorResult = JsonConvert.DeserializeObject<ApiResponse<string>>(result.Content);
-                ModelState.AddModelError(result.Content, result.Content);
+                ModelState.AddModelError(result.Content, result.ErrorMessage);
                 //ModelState.AddModelError(errorResult.Message, errorResult.Message);
             }
             return View(new LoginViewModel()

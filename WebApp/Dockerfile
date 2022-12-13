@@ -2,6 +2,6 @@
 
 FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
 EXPOSE 5002
-COPY SampleApp/WebApp app/
+COPY WebApp app/
 WORKDIR /app/publish
 ENTRYPOINT ["dotnet", "WebApp.dll"]

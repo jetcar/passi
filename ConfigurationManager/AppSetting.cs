@@ -9,13 +9,10 @@ namespace ConfigurationManager
     {
         public bool PrefferAppsettingFile = false;
         private IConfiguration _configuration;
-        private ILogger _logger;
-        private ConcurrentDictionary<string, string> _values = new ConcurrentDictionary<string, string>();
 
-        public AppSetting(IConfiguration configuration, ILogger logger)
+        public AppSetting(IConfiguration configuration)
         {
             _configuration = configuration;
-            _logger = logger;
         }
 
         public string this[string key]

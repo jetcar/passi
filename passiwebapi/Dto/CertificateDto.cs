@@ -1,4 +1,7 @@
-﻿namespace passi_webapi.Dto
+﻿using NodaTime;
+using System;
+
+namespace passi_webapi.Dto
 {
     public class CertificateDto
     {
@@ -8,5 +11,6 @@
         public string PrivateCert { get; set; }
         public string ParentCertSignature { get; set; }
         public string ParentCertId { get; set; }
+        public DateTime CreationTime { get; set; }
     }
 }

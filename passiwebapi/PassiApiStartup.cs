@@ -23,6 +23,7 @@ using System.Linq;
 using Models;
 using AutoMapper;
 using passi_webapi.Dto;
+using NodaTime;
 
 namespace passi_webapi
 {
@@ -45,6 +46,7 @@ namespace passi_webapi
                 cfg.CreateMap<CertificateDb, CertificateDto>();
                 cfg.CreateMap<UserInvitationDb, UserInvitationDto>();
                 cfg.CreateMap<SessionDb, SessionDto>();
+                cfg.CreateMap<Instant, DateTime>().ConvertUsing(s => s.ToDateTimeUtc());
             });
             var mapper = config.CreateMapper();
 
@@ -119,9 +121,12 @@ namespace passi_webapi
 
                 applicationBuilder.UseRouting();
 
+                //applicationBuilder.UseMiddleware<MyAuthenticationMiddleware>();
                 applicationBuilder.UseMiddleware<ErrorHandlerMiddleware>();
                 applicationBuilder.UseForwardedHeaders();
                 applicationBuilder.UseHttpsRedirection();
+                applicationBuilder.UseAuthentication();
+                applicationBuilder.UseAuthorization();
                 applicationBuilder.UseCookiePolicy(
                     new CookiePolicyOptions
                     {

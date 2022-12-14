@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using passi_webapi.Dto;
 using passi_webapi.Filters;
 using Repos;
@@ -56,7 +57,13 @@ namespace passi_webapi.Controllers
         [Authorization]
         public async Task<List<UserDto>> GetUsers(int page = 0)
         {
-            return _db.Users.Skip(page * page).Take(pagesize).Select(_mapper.Map<UserDto>).ToList();
+            return _db.Users
+                .Include(x => x.Device)
+                .Include(x => x.Certificates.OrderByDescending(a => a.CreationTime).Take(1))
+                .Include(x => x.Invitations.OrderByDescending(a => a.CreationTime).Take(1))
+                .Include(x => x.SessionUsers.OrderByDescending(a => a.CreationTime).Take(1))
+                .OrderByDescending(x => x.CreationTime)
+                .Skip(page * page).Take(pagesize).Select(_mapper.Map<UserDto>).ToList();
         }
     }
 }

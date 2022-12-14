@@ -36,7 +36,7 @@ services:
     image: webapp:1
     build:
       context: .
-      dockerfile: webApp/Dockerfile
+      dockerfile: WebApp/Dockerfile
     networks:
       - dock_net
     ports:

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NodaTime;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -12,9 +13,10 @@ using Repos;
 namespace Repos.Migrations
 {
     [DbContext(typeof(PassiDbContext))]
-    partial class PassiDbContextModelSnapshot : ModelSnapshot
+    [Migration("20221207184259_protectionKeys")]
+    partial class protectionKeys
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -40,20 +42,6 @@ namespace Repos.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("DataProtectionKeys");
-                });
-
-            modelBuilder.Entity("Models.AdminDb", b =>
-                {
-                    b.Property<string>("Email")
-                        .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
-
-                    b.HasKey("Email");
-
-                    b.HasIndex("Email")
-                        .IsUnique();
-
-                    b.ToTable("Admins");
                 });
 
             modelBuilder.Entity("Models.CertificateDb", b =>

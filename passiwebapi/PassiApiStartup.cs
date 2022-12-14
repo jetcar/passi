@@ -19,6 +19,10 @@ using Microsoft.AspNetCore.Http.Features.Authentication;
 using System.Threading.Tasks;
 using System.Security.Claims;
 using OpenIdLib.OpenId;
+using System.Linq;
+using Models;
+using AutoMapper;
+using passi_webapi.Dto;
 
 namespace passi_webapi
 {
@@ -34,9 +38,19 @@ namespace passi_webapi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+            var config = new MapperConfiguration(cfg =>
+            {
+                cfg.CreateMap<UserDb, UserDto>();
+                cfg.CreateMap<DeviceDb, DeviceDto>();
+                cfg.CreateMap<CertificateDb, CertificateDto>();
+                cfg.CreateMap<UserInvitationDb, UserInvitationDto>();
+                cfg.CreateMap<SessionDb, SessionDto>();
+            });
+            var mapper = config.CreateMapper();
+
             services.AddControllers();
             services.AddSingleton<AppSetting>();
+            services.AddSingleton(mapper);
             services.AddSingleton<IEmailSender, EmailSender>();
             services.AddSingleton<IRandomGenerator, RandomGenerator>();
             services.AddSingleton<IFireBaseClient, FireBaseClient>();
@@ -95,6 +109,7 @@ namespace passi_webapi
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            InitializeDatabase(app);
             app.Map(new PathString("/passiapi"), (applicationBuilder) =>
             {
                 if (env.IsDevelopment())
@@ -112,7 +127,6 @@ namespace passi_webapi
                     {
                         Secure = CookieSecurePolicy.Always
                     });
-                applicationBuilder.UseMiddleware<MyAuthenticationMiddleware>();
                 applicationBuilder.UseSerilogRequestLogging(options =>
                 {
                     // Customize the message template
@@ -138,108 +152,19 @@ namespace passi_webapi
                 applicationBuilder.UseSwaggerUI(c => { c.SwaggerEndpoint("v1/swagger.json", "My API V1"); });
             });
         }
-    }
 
-    public class MyAuthenticationMiddleware
-
-    {
-        private readonly RequestDelegate _next;
-
-        /// <summary>
-        /// Initializes a new instance of <see cref="AuthenticationMiddleware"/>.
-        /// </summary>
-        /// <param name="next">The next item in the middleware pipeline.</param>
-        /// <param name="schemes">The <see cref="IAuthenticationSchemeProvider"/>.</param>
-        public MyAuthenticationMiddleware(RequestDelegate next, IAuthenticationSchemeProvider schemes)
+        private void InitializeDatabase(IApplicationBuilder app)
         {
-            if (next == null)
+            using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
             {
-                throw new ArgumentNullException(nameof(next));
-            }
-            if (schemes == null)
-            {
-                throw new ArgumentNullException(nameof(schemes));
-            }
+                var appsettings = serviceScope.ServiceProvider.GetRequiredService<AppSetting>();
+                var context = serviceScope.ServiceProvider.GetRequiredService<PassiDbContext>();
 
-            _next = next;
-            Schemes = schemes;
-        }
-
-        /// <summary>
-        /// Gets or sets the <see cref="IAuthenticationSchemeProvider"/>.
-        /// </summary>
-        public IAuthenticationSchemeProvider Schemes { get; set; }
-
-        /// <summary>
-        /// Invokes the middleware performing authentication.
-        /// </summary>
-        /// <param name="context">The <see cref="HttpContext"/>.</param>
-        public async Task Invoke(HttpContext context)
-        {
-            context.Features.Set<IAuthenticationFeature>(new AuthenticationFeature
-            {
-                OriginalPath = context.Request.Path,
-                OriginalPathBase = context.Request.PathBase
-            });
-
-            // Give any IAuthenticationRequestHandler schemes a chance to handle the request
-            var handlers = context.RequestServices.GetRequiredService<IAuthenticationHandlerProvider>();
-            foreach (var scheme in await Schemes.GetRequestHandlerSchemesAsync())
-            {
-                var handler = await handlers.GetHandlerAsync(context, scheme.Name) as IAuthenticationRequestHandler;
-                if (handler != null && await handler.HandleRequestAsync())
+                if (!context.Admins.Any(x => x.Email == "admin@passi.cloud"))
                 {
-                    return;
+                    context.Admins.Add(new AdminDb() { Email = "admin@passi.cloud" });
+                    context.SaveChanges();
                 }
-            }
-
-            var defaultAuthenticate = await Schemes.GetDefaultAuthenticateSchemeAsync();
-            if (defaultAuthenticate != null)
-            {
-                var result = await context.AuthenticateAsync(defaultAuthenticate.Name);
-                if (result?.Principal != null)
-                {
-                    context.User = result.Principal;
-                }
-                if (result?.Succeeded ?? false)
-                {
-                    var authFeatures = new AuthenticationFeatures(result);
-                    context.Features.Set<IHttpAuthenticationFeature>(authFeatures);
-                    context.Features.Set<IAuthenticateResultFeature>(authFeatures);
-                }
-            }
-
-            await _next(context);
-        }
-    }
-
-    internal class AuthenticationFeatures : IAuthenticateResultFeature, IHttpAuthenticationFeature
-    {
-        private ClaimsPrincipal? _user;
-        private AuthenticateResult? _result;
-
-        public AuthenticationFeatures(AuthenticateResult result)
-        {
-            AuthenticateResult = result;
-        }
-
-        public AuthenticateResult? AuthenticateResult
-        {
-            get => _result;
-            set
-            {
-                _result = value;
-                _user = _result?.Principal;
-            }
-        }
-
-        public ClaimsPrincipal? User
-        {
-            get => _user;
-            set
-            {
-                _user = value;
-                _result = null;
             }
         }
     }

@@ -59,6 +59,7 @@ namespace Repos
         public DbSet<DeviceDb> Devices { get; set; }
         public DbSet<UserInvitationDb> Invitations { get; set; }
         public DbSet<SessionDb> Sessions { get; set; }
+        public DbSet<AdminDb> Admins { get; set; }
 
         public override int SaveChanges()
         {
@@ -258,6 +259,14 @@ namespace Repos
                     .HasForeignKey(d => d.ModifiedById)
                     .OnDelete(DeleteBehavior.Restrict);
             });
+
+            modelBuilder.Entity<AdminDb>(entity =>
+            {
+                entity.Property(e => e.Email).HasMaxLength(256);
+                entity.HasKey(x => x.Email);
+                entity.HasIndex(x => x.Email).IsUnique();
+            }
+            );
 
             base.OnModelCreating(modelBuilder);
         }

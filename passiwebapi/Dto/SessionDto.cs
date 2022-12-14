@@ -1,10 +1,10 @@
-﻿using NodaTime;
+﻿using Models;
 using System;
-using System.ComponentModel.DataAnnotations;
+using NodaTime;
 
-namespace Models
+namespace passi_webapi.Dto
 {
-    public class SessionDb : BaseModel
+    public class SessionDto
     {
         public Guid Guid { get; set; }
         public long UserId { get; set; }
@@ -17,14 +17,5 @@ namespace Models
         public string ReturnUrl { get; set; }
         public Instant ExpirationTime { get; set; }
         public string ErrorMessage { get; set; }
-
-        public virtual UserDb User { get; set; }
-    }
-
-    public enum SessionStatus
-    {
-        Canceled = 1,
-        Confirmed,
-        Error
     }
 }

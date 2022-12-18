@@ -2,9 +2,6 @@
   "profiles": {
     "WebApp": {
       "commandName": "Project",
-      "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      },
       "applicationUrl": "https://localhost"
     },
     "Docker": {
@@ -18,7 +15,6 @@
       "commandName": "WSL2",
       "launchUrl": "https://localhost",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development",
         "ASPNETCORE_URLS": "https://localhost"
       },
       "distributionName": ""

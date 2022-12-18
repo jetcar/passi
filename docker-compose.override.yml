@@ -7,19 +7,12 @@ services:
       - ../passi_config/nginx/conf:/etc/nginx:ro
       - /logs:/logs
 
-  webapp:
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
 
 
   identityserver:
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
       - SessionLength=1000
 
 
-  passiwebapi:
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
 
 

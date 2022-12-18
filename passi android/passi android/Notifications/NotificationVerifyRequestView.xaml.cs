@@ -258,69 +258,7 @@ namespace passi_android.Notifications
         {
             if (Color1 == GetColor(Message.ConfirmationColor))
             {
-                if (Account.pinLength == 0)
-                {
-                    Navigation.PushModalSinglePage(new LoadingPage(() =>
-                        {
-                            CertHelper.Sign(Message.AccountGuid, null, Message.RandomString).ContinueWith(signedGuid =>
-                            {
-                                if (signedGuid.IsFaulted)
-                                {
-                                    MainThread.BeginInvokeOnMainThread(() =>
-                                    {
-                                        Navigation.PopModal().ContinueWith((task =>
-                                        {
-                                            ResponseError = "Certificate Error:" + signedGuid.Exception.Message;
-                                        }));
-                                    });
-
-                                    return;
-                                }
-
-                                var authorizeDto = new AuthorizeDto
-                                {
-                                    SignedHash = signedGuid.Result,
-                                    PublicCertThumbprint = SecureRepository.GetAccount(Message.AccountGuid).Thumbprint,
-                                    SessionId = Message.SessionId
-                                };
-                                RestService.ExecutePostAsync(ConfigSettings.Authorize, authorizeDto).ContinueWith((response) =>
-                                {
-                                    if (response.Result.IsSuccessful)
-                                    {
-                                        MainThread.BeginInvokeOnMainThread(() =>
-                                        {
-                                            App.CloseApp.Invoke();
-                                        });
-                                    }
-                                    else if (!response.Result.IsSuccessful && response.Result.StatusCode == HttpStatusCode.BadRequest)
-                                    {
-                                        MainThread.BeginInvokeOnMainThread(() =>
-                                        {
-                                            Navigation.PopModal().ContinueWith((task =>
-                                            {
-                                                ResponseError = JsonConvert
-                                                    .DeserializeObject<ApiResponseDto<string>>(response.Result.Content).Message;
-                                            }));
-                                        });
-                                    }
-                                    else
-                                    {
-                                        MainThread.BeginInvokeOnMainThread(() =>
-                                        {
-                                            Navigation.PopModal().ContinueWith((s) =>
-                                            {
-                                                ResponseError = "Network error. Try again";
-                                            });
-                                        });
-                                    }
-                                });
-                            });
-                        }));
-                }
-                else
-                {
-                    Navigation.PushModalSinglePage(new ConfirmByPinView() { Message = Message });
-                }
+                Process();
             }
             else
             {
@@ -330,72 +268,77 @@ namespace passi_android.Notifications
             }
         }
 
-        private void ImageButton2_OnClicked(object sender, EventArgs e)
+        private void Process()
         {
-            if (Color2 == GetColor(Message.ConfirmationColor))
-                if (Account.pinLength == 0)
-                {
-                    Navigation.PushModalSinglePage(new LoadingPage(() =>
+            if (Account.pinLength == 0)
+            {
+                Navigation.PushModalSinglePage(new LoadingPage(() =>
+                    {
+                        CertHelper.Sign(Message.AccountGuid, null, Message.RandomString).ContinueWith(signedGuid =>
                         {
-                            CertHelper.Sign(Message.AccountGuid, null, Message.RandomString).ContinueWith(signedGuid =>
+                            if (signedGuid.IsFaulted)
                             {
-                                if (signedGuid.IsFaulted)
+                                MainThread.BeginInvokeOnMainThread(() =>
+                                {
+                                    Navigation.PopModal().ContinueWith((task =>
+                                    {
+                                        ResponseError = "Certificate Error:" + signedGuid.Exception.Message;
+                                    }));
+                                });
+
+                                return;
+                            }
+
+                            var authorizeDto = new AuthorizeDto
+                            {
+                                SignedHash = signedGuid.Result,
+                                PublicCertThumbprint = SecureRepository.GetAccount(Message.AccountGuid).Thumbprint,
+                                SessionId = Message.SessionId
+                            };
+                            RestService.ExecutePostAsync(ConfigSettings.Authorize, authorizeDto).ContinueWith((response) =>
+                            {
+                                if (response.Result.IsSuccessful)
+                                {
+                                    MainThread.BeginInvokeOnMainThread(() =>
+                                    {
+                                        App.CloseApp.Invoke();
+                                    });
+                                }
+                                else if (!response.Result.IsSuccessful && response.Result.StatusCode == HttpStatusCode.BadRequest)
                                 {
                                     MainThread.BeginInvokeOnMainThread(() =>
                                     {
                                         Navigation.PopModal().ContinueWith((task =>
                                         {
-                                            ResponseError = "Certificate Error:" + signedGuid.Exception.Message;
+                                            ResponseError = JsonConvert
+                                                .DeserializeObject<ApiResponseDto<string>>(response.Result.Content).Message;
                                         }));
                                     });
-
-                                    return;
                                 }
-
-                                var authorizeDto = new AuthorizeDto
+                                else
                                 {
-                                    SignedHash = signedGuid.Result,
-                                    PublicCertThumbprint = SecureRepository.GetAccount(Message.AccountGuid).Thumbprint,
-                                    SessionId = Message.SessionId
-                                };
-                                RestService.ExecutePostAsync(ConfigSettings.Authorize, authorizeDto).ContinueWith((response) =>
-                                {
-                                    if (response.Result.IsSuccessful)
+                                    MainThread.BeginInvokeOnMainThread(() =>
                                     {
-                                        MainThread.BeginInvokeOnMainThread(() =>
+                                        Navigation.PopModal().ContinueWith((s) =>
                                         {
-                                            App.CloseApp.Invoke();
+                                            ResponseError = "Network error. Try again";
                                         });
-                                    }
-                                    else if (!response.Result.IsSuccessful && response.Result.StatusCode == HttpStatusCode.BadRequest)
-                                    {
-                                        MainThread.BeginInvokeOnMainThread(() =>
-                                        {
-                                            Navigation.PopModal().ContinueWith((task =>
-                                            {
-                                                ResponseError = JsonConvert
-                                                    .DeserializeObject<ApiResponseDto<string>>(response.Result.Content).Message;
-                                            }));
-                                        });
-                                    }
-                                    else
-                                    {
-                                        MainThread.BeginInvokeOnMainThread(() =>
-                                        {
-                                            Navigation.PopModal().ContinueWith((s) =>
-                                            {
-                                                ResponseError = "Network error. Try again";
-                                            });
-                                        });
-                                    }
-                                });
+                                    });
+                                }
                             });
-                        }));
-                }
-                else
-                {
-                    Navigation.PushModalSinglePage(new ConfirmByPinView() { Message = Message });
-                }
+                        });
+                    }));
+            }
+            else
+            {
+                Navigation.PushModalSinglePage(new ConfirmByPinView() { Message = Message });
+            }
+        }
+
+        private void ImageButton2_OnClicked(object sender, EventArgs e)
+        {
+            if (Color2 == GetColor(Message.ConfirmationColor))
+                Process();
             else
             {
                 IsButtonEnabled = false;
@@ -407,69 +350,7 @@ namespace passi_android.Notifications
         private void ImageButton3_OnClicked(object sender, EventArgs e)
         {
             if (Color3 == GetColor(Message.ConfirmationColor))
-                if (Account.pinLength == 0)
-                {
-                    Navigation.PushModalSinglePage(new LoadingPage(() =>
-                        {
-                            CertHelper.Sign(Message.AccountGuid, null, Message.RandomString).ContinueWith(signedGuid =>
-                            {
-                                if (signedGuid.IsFaulted)
-                                {
-                                    MainThread.BeginInvokeOnMainThread(() =>
-                                    {
-                                        Navigation.PopModal().ContinueWith((task =>
-                                        {
-                                            ResponseError = "Certificate Error:" + signedGuid.Exception.Message;
-                                        }));
-                                    });
-
-                                    return;
-                                }
-
-                                var authorizeDto = new AuthorizeDto
-                                {
-                                    SignedHash = signedGuid.Result,
-                                    PublicCertThumbprint = SecureRepository.GetAccount(Message.AccountGuid).Thumbprint,
-                                    SessionId = Message.SessionId
-                                };
-                                RestService.ExecutePostAsync(ConfigSettings.Authorize, authorizeDto).ContinueWith((response) =>
-                                {
-                                    if (response.Result.IsSuccessful)
-                                    {
-                                        MainThread.BeginInvokeOnMainThread(() =>
-                                        {
-                                            App.CloseApp.Invoke();
-                                        });
-                                    }
-                                    else if (!response.Result.IsSuccessful && response.Result.StatusCode == HttpStatusCode.BadRequest)
-                                    {
-                                        MainThread.BeginInvokeOnMainThread(() =>
-                                        {
-                                            Navigation.PopModal().ContinueWith((task =>
-                                            {
-                                                ResponseError = JsonConvert
-                                                    .DeserializeObject<ApiResponseDto<string>>(response.Result.Content).Message;
-                                            }));
-                                        });
-                                    }
-                                    else
-                                    {
-                                        MainThread.BeginInvokeOnMainThread(() =>
-                                        {
-                                            Navigation.PopModal().ContinueWith((s) =>
-                                            {
-                                                ResponseError = "Network error. Try again";
-                                            });
-                                        });
-                                    }
-                                });
-                            });
-                        }));
-                }
-                else
-                {
-                    Navigation.PushModalSinglePage(new ConfirmByPinView() { Message = Message });
-                }
+                Process();
             else
             {
                 IsButtonEnabled = false;

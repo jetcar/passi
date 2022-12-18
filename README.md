@@ -22,6 +22,8 @@ Sample
 <b>
 ClientId=SampleApp<br>
 ClientSecret=secret<br>
+PassiClientId=PassiClient<br>
+PassiSecret=PassiSecret<br>
 IdentityUrl=https://internalIP/identity<br>
 IdentityUrlBase=https://internalIP<br>
 PassiUrl=https://internalIP/passiapi<br>

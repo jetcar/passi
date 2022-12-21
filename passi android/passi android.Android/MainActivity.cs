@@ -23,6 +23,7 @@ using WebApiDto;
 using WebApiDto.Auth;
 using Xamarin.Essentials;
 using Android.Gms.Extensions;
+using Xamarin.Forms;
 
 namespace passi_android.Droid
 {
@@ -38,7 +39,9 @@ namespace passi_android.Droid
         protected override void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
-
+            var context = Android.App.Application.Context;
+            var appinfo = context.PackageManager.GetPackageInfo(context.PackageName, 0);
+            App.Version = appinfo.VersionName;
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
             global::Xamarin.Forms.Forms.Init(this, savedInstanceState);
 

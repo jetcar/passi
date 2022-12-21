@@ -8,6 +8,7 @@ using passi_android.utils;
 using RestSharp;
 using Xamarin.Essentials;
 using Xamarin.Forms;
+using Xamarin.Forms.PlatformConfiguration;
 using Xamarin.Forms.Xaml;
 
 namespace passi_android
@@ -17,6 +18,7 @@ namespace passi_android
     {
         private ObservableCollection<Account> _accounts = new ObservableCollection<Account>();
         private bool _isDeleteVisible;
+        private string version = "1";
 
         public ObservableCollection<Account> Accounts
         {
@@ -31,10 +33,22 @@ namespace passi_android
             }
         }
 
+        public string Version
+        {
+            get => version;
+            set
+            {
+                version = value;
+                OnPropertyChanged();
+            }
+        }
+
         public MainPage()
         {
             InitializeComponent();
             BindingContext = this;
+
+            this.Version = App.Version;
         }
 
         protected override void OnAppearing()
@@ -48,7 +62,6 @@ namespace passi_android
             });
             base.OnAppearing();
             App.PollNotifications.Invoke();
-
         }
 
         private void AccountSyncCallback()

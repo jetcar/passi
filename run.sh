@@ -1,5 +1,6 @@
 cd /home/passi
 
+sudo apt-get clean
 git clean -fdx
 git checkout .
 git fetch

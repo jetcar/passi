@@ -21,6 +21,7 @@ services:
     volumes:
       - ../passi_cert:/etc/cert:ro
       - ./nginx/conf:/etc/nginx:ro
+      - ./logs:/logs
     ports:
       - "80:80"
       - "443:443"

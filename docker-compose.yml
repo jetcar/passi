@@ -21,7 +21,6 @@ services:
     volumes:
       - ../passi_cert:/etc/cert:ro
       - ./nginx/conf:/etc/nginx:ro
-      - /logs:/logs
     ports:
       - "80:80"
       - "443:443"
@@ -78,7 +77,7 @@ services:
     env_file:
     - ../passi_config/dev.env
     volumes:
-    - /home/creds/:/home/creds/
+    - ../creds:/home/creds
 
     depends_on:
     - database    

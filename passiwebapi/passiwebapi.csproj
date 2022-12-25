@@ -14,7 +14,7 @@
 
 
 	<ItemGroup>
-		<None Include="/home/google-services.json">
+		<None Include="/home/creds/google-services.json">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
 	</ItemGroup>

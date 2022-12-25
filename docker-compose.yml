@@ -78,7 +78,7 @@ services:
     env_file:
     - ../passi_config/dev.env
     volumes:
-    - /home/:/home/
+    - /home/creds/:/home/creds/
 
     depends_on:
     - database    

@@ -27,7 +27,7 @@ namespace Repos
         public CertificateDb GetUserCertificate(string username, string thumbprint)
         {
             return _dbContext.Certificates
-                .FirstOrDefault(x => x.Thumbprint == thumbprint && x.User.EmailHash == username.ToSha512());
+                .FirstOrDefault(x => x.Thumbprint == thumbprint && x.User.EmailHash == username);
         }
 
         public CertificateDb AddCertificate(string certificateThumbprint, string PublicCert,

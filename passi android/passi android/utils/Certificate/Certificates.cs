@@ -24,7 +24,7 @@ namespace passi_android.utils.Certificate
             var serialNumber = BigIntegers.CreateRandomInRange(BigInteger.One, BigInteger.ValueOf(Int64.MaxValue), random);
             certificateGenerator.SetSerialNumber(serialNumber);
 
-            var sha512 = subject.ToSha512();
+            var sha512 = subject;
             certificateGenerator.SetIssuerDN(new X509Name($"C=NL, O=Passi, CN={sha512}"));
             certificateGenerator.SetSubjectDN(new X509Name($"C=NL, O=Passi, CN={sha512}"));
             certificateGenerator.SetNotBefore(DateTime.UtcNow.Date);

@@ -31,7 +31,7 @@ namespace Repos
 
         public SessionDb BeginSession(string username, string clientId, string randomString, string color, string returnUrl)
         {
-            var user = _dbContext.Users.First(x => x.EmailHash == username.ToSha512());
+            var user = _dbContext.Users.First(x => x.EmailHash == username);
             var sessionDb = new SessionDb()
             {
                 UserId = user.Id,

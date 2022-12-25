@@ -19,7 +19,7 @@ namespace Repos
 
         public bool IsUsernameTaken(string username)
         {
-            return _dbContext.Users.Any(x => x.EmailHash == username.ToSha512());
+            return _dbContext.Users.Any(x => x.EmailHash == username);
         }
 
         public IDbContextTransaction BeginTransaction()
@@ -42,12 +42,12 @@ namespace Repos
 
         public bool ValidateConfirmationCode(string email, string code)
         {
-            return _dbContext.Invitations.Any(x => x.User.EmailHash == email.ToSha512() && x.Code == code && x.IsConfirmed == false);
+            return _dbContext.Invitations.Any(x => x.User.EmailHash == email && x.Code == code && x.IsConfirmed == false);
         }
 
         public void ConfirmInvitation(string email, string publicCert, string guid, string code, string deviceId)
         {
-            var userInvitationDb = _dbContext.Invitations.Include(x => x.User).FirstOrDefault(x => x.User.EmailHash == email.ToSha512() && x.Code == code);
+            var userInvitationDb = _dbContext.Invitations.Include(x => x.User).FirstOrDefault(x => x.User.EmailHash == email && x.Code == code);
 
             var device = _dbContext.Devices.FirstOrDefault(x => x.DeviceId == deviceId);
             if (device == null)
@@ -97,12 +97,12 @@ namespace Repos
 
         public bool IsUserFinished(string username)
         {
-            return _dbContext.Users.Any(x => x.EmailHash == username.ToSha512() && x.Invitations.Any(a => a.IsConfirmed));
+            return _dbContext.Users.Any(x => x.EmailHash == username && x.Invitations.Any(a => a.IsConfirmed));
         }
 
         public UserDb GetUser(string username)
         {
-            return _dbContext.Users.Include(x => x.Device).First(x => x.EmailHash == username.ToSha512());
+            return _dbContext.Users.Include(x => x.Device).First(x => x.EmailHash == username);
         }
 
         public void AddInvitation(UserInvitationDb userInvitationDb)
@@ -113,7 +113,6 @@ namespace Repos
 
         public void DeleteAccount(Guid accountGuid, string thumbprint)
         {
-
             var exinstingUser = _dbContext.Users
                 .Where(x => x.Certificates.Any(a => a.Thumbprint == thumbprint) && x.Guid == accountGuid).AsNoTracking()
                 .FirstOrDefault();
@@ -146,6 +145,7 @@ namespace Repos
         UserDb GetUser(string username);
 
         void AddInvitation(UserInvitationDb userInvitationDb);
+
         void DeleteAccount(Guid accountGuid, string thumbprint);
     }
 }

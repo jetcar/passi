@@ -27,7 +27,7 @@ namespace Services
             };
             var user = new UserDb()
             {
-                EmailHash = signupDto.Email.ToSha512(),
+                EmailHash = signupDto.Email,
 
                 Guid = signupDto.UserGuid.Value,
                 Device = new DeviceDb()

@@ -5,9 +5,9 @@ git checkout .
 git fetch
 git pull
 
-dotnet publish WebApp/WebApp.csproj -c Release -o WebApp/publish
-dotnet publish passiwebapi/passiwebapi.csproj -c Release -o passiwebapi/publish
-dotnet publish IdentityServer/IdentityServer.csproj -c Release -o IdentityServer/publish
+#dotnet publish WebApp/WebApp.csproj -c Release -o WebApp/publish
+#dotnet publish passiwebapi/passiwebapi.csproj -c Release -o passiwebapi/publish
+#dotnet publish IdentityServer/IdentityServer.csproj -c Release -o IdentityServer/publish
 
 
 sudo docker image prune -f

@@ -16,6 +16,7 @@ COPY ["Models/Models.csproj", "Models/"]
 COPY ["Repos/Repos.csproj", "Repos/"]
 COPY ["WebApiDto/WebApiDto.csproj", "WebApiDto/"]
 RUN dotnet restore "passiwebapi/passiwebapi.csproj"
+RUN dotnet ef dbcontext optimize
 COPY . .
 WORKDIR "/src/passiwebapi"
 RUN dotnet build "passiwebapi.csproj" -c Release -o /app/build

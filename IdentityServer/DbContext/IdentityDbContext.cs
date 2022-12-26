@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using ConfigurationManager;
+using IdentityServer.CompiledModel;
 using IdentityServer4.EntityFramework.Entities;
 using IdentityServer4.EntityFramework.Interfaces;
 using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
@@ -43,6 +44,7 @@ namespace IdentityServer.DbContext
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
+            optionsBuilder.UseModel(IdentityDbContextModel.Instance);
             _logger.Debug("dbhost=" + _appSetting["DbHost"]);
             var trustMode = _appSetting["DbSslMode"] == "Require" ? "Trust Server Certificate=true;" : "";
             //optionsBuilder.AddInterceptors(new TaggedQueryCommandInterceptor(_logger));

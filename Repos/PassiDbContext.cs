@@ -16,6 +16,8 @@ using Serilog;
 using Serilog.Core;
 using NodaTime;
 using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
+using Repos.CompiledModels;
+using static NodaTime.TimeZones.ZoneEqualityComparer;
 
 namespace Repos
 {
@@ -83,6 +85,7 @@ namespace Repos
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
+            optionsBuilder.UseModel(PassiDbContextModel.Instance);
             var trustMode = _appSetting["DbSslMode"] == "Require" ? "Trust Server Certificate=true;" : "";
             //optionsBuilder.AddInterceptors(new TaggedQueryCommandInterceptor(_logger));
             _connectionString = $"host={_appSetting["DbHost"]};database={_appSetting["DbName"]};user id={_appSetting["DbUser"]};password={_appSetting["DbPassword"]};Ssl Mode={_appSetting["DbSslMode"]};{trustMode}";

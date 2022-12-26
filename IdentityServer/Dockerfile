@@ -10,6 +10,7 @@ COPY ["IdentityServer/IdentityServer.csproj", "IdentityServer/"]
 COPY ["ConfigurationManager/ConfigurationManager.csproj", "ConfigurationManager/"]
 COPY ["WebApiDto/WebApiDto.csproj", "WebApiDto/"]
 RUN dotnet restore "IdentityServer/IdentityServer.csproj"
+RUN dotnet ef dbcontext optimize --output-dir CompiledModel
 COPY . .
 WORKDIR "/src/IdentityServer"
 RUN dotnet build "IdentityServer.csproj" -c Release -o /app/build

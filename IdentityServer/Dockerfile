@@ -13,7 +13,7 @@ RUN dotnet restore "IdentityServer/IdentityServer.csproj"
 COPY . .
 
 WORKDIR "/src/IdentityServer"
-RUN dotnet ef dbcontext optimize --output-dir CompiledModel
+#RUN dotnet ef dbcontext optimize --output-dir CompiledModel
 
 RUN dotnet build "IdentityServer.csproj" -c Release -o /app/build
 

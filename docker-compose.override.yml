@@ -4,7 +4,7 @@ services:
   nginx:
     volumes:
       - ../passi_cert:/etc/cert:ro
-      - ../passi_config/nginx/conf:/etc/nginx:ro
+      - ./nginx/conf:/etc/nginx:ro
       - /logs:/logs
 
 

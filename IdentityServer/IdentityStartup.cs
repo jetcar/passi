@@ -122,8 +122,7 @@ namespace IdentityServer
             {
                 var appsettings = serviceScope.ServiceProvider.GetRequiredService<AppSetting>();
                 var context = serviceScope.ServiceProvider.GetRequiredService<IdentityDbContext>();
-                if (context.Clients.Any(x => x.ClientId == appsettings["ClientId"]))
-                {
+                
                     context.Clients.RemoveRange(context.Clients.Where(x => x.ClientId == appsettings["ClientId"])
                         .Include(x => x.RedirectUris).Include(x => x.PostLogoutRedirectUris)
                         .Include(x => x.AllowedScopes)
@@ -137,7 +136,14 @@ namespace IdentityServer
                         .Include(x => x.ClientSecrets));
                     context.UserClients.RemoveRange(
                         context.UserClients.Where(x => x.Client.ClientId == appsettings["PassiClientId"]));
-                }
+
+                    context.Clients.RemoveRange(context.Clients.Where(x => x.ClientId == appsettings["PgAdminClientId"])
+                        .Include(x => x.RedirectUris).Include(x => x.PostLogoutRedirectUris)
+                        .Include(x => x.AllowedScopes)
+                        .Include(x => x.ClientSecrets));
+                    context.UserClients.RemoveRange(
+                        context.UserClients.Where(x => x.Client.ClientId == appsettings["PgAdminClientId"]));
+                
 
                 var client = new Client()
                 {
@@ -167,6 +173,21 @@ namespace IdentityServer
                     AlwaysSendClientClaims = true,
                 }.ToEntity();
                 context.Clients.Add(client2);
+
+                var client3 = new Client()
+                {
+                    ClientId = appsettings["PgAdminClientId"],
+                    ClientSecrets = new List<IdentityServer4.Models.Secret>() { new IdentityServer4.Models.Secret() { Value = appsettings["PgAdminSecret"].ToSha256() } },
+                    RedirectUris = new List<string>() { "https://localhost/pgadmin/oauth/callback", "https://127.0.0.1:5004/pgadmin/oauth/callback", "https://localhost:5004/pgadmin/oauth/callback", "https://192.168.0.208/pgadmin/oauth/callback", "https://passi.cloud/pgadmin/oauth/callback", "https://192.168.0.208:5004/pgadmin/oauth/callback" },
+                    PostLogoutRedirectUris = new List<string>() { "https://localhost", "https://passi.cloud" },
+                    RequirePkce = false,
+                    AllowedGrantTypes = GrantTypes.CodeAndClientCredentials,
+                    AllowedScopes = new List<string>() { "openid","email" },
+                    AlwaysIncludeUserClaimsInIdToken = true,
+                    ClientUri = "https://passi.cloud/pgadmin",
+                    AlwaysSendClientClaims = true,
+                }.ToEntity();
+                context.Clients.Add(client3);
 
                 if (!context.IdentityResources.Any())
                     context.IdentityResources.AddRange(new List<IdentityResource>()

@@ -22,6 +22,7 @@ namespace IdentityServer.services
             context.LogProfileRequest(Logger);
             context.AddRequestedClaims(context.Subject.Claims);
 
+            context.IssuedClaims.Add(new Claim("email", context.Subject.FindFirstValue("sub")));
             context.IssuedClaims.Add(new Claim("Thumbprint", context.Subject.FindFirstValue("Thumbprint")));
             context.IssuedClaims.Add(new Claim("SignedHash", context.Subject.FindFirstValue("SignedHash")));
 

@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using IdentityModel;
 
 namespace WebApp.Models
 {
@@ -20,8 +21,12 @@ namespace WebApp.Models
                 ValidTo = identity.FindFirst("ValidTo")?.Value,
                 PublicCert = identity.FindFirst("PublicCert")?.Value,
                 SignedHash = identity.FindFirst("SignedHash")?.Value,
+                Identity = identity
             };
         }
+
+        public ClaimsIdentity Identity { get; set; }
+
         public string PublicCert { get; set; }
     }
 }

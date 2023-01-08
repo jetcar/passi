@@ -182,7 +182,7 @@ namespace IdentityServer
                 {
                     ClientId = appsettings["PgAdminClientId"],
                     ClientSecrets = new List<IdentityServer4.Models.Secret>() { new IdentityServer4.Models.Secret() { Value = appsettings["PgAdminSecret"].ToSha256() } },
-                    RedirectUris = new List<string>() { "http://localhost/pgadmin4/oauth2/authorize", "https://passi.cloud/pgadmin4/oauth2/authorize" },
+                    RedirectUris = new List<string>() { "http://localhost/pgadmin4/oauth2/authorize", "https://localhost/pgadmin4/oauth2/authorize", "http://passi.cloud/pgadmin4/oauth2/authorize", "https://passi.cloud/pgadmin4/oauth2/authorize" },
                     PostLogoutRedirectUris = new List<string>() { "https://localhost", "https://passi.cloud" },
                     RequirePkce = false,
                     AllowedGrantTypes = GrantTypes.CodeAndClientCredentials,

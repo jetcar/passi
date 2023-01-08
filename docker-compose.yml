@@ -28,8 +28,8 @@ services:
     depends_on:
     - database
     volumes:
-    - ../passi_config/pgadmin/:/etc/pgadmin/
-    - ../pgadmin/:/var/lib/pgadmin/
+    - ../passi_config/pgadmin/:/etc/pgadmin/:ro
+    - ../pgadmin/:/var/lib/pgadmin/:rw
 
 
 

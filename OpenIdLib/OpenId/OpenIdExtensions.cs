@@ -29,7 +29,7 @@ namespace OpenIdLib.OpenId
                 options.ClientId = clientId;
                 options.ClientSecret = clientSecret;
                 options.Scope.Clear();
-                options.Scope.Add("openid");
+                options.Scope.Add("openid email");
                 options.ResponseType = "code";
                 // options.CorrelationCookie = new CookieBuilder() {SecurePolicy = CookieSecurePolicy.None};
                 //options.NonceCookie = new CookieBuilder() {SecurePolicy = CookieSecurePolicy.None};

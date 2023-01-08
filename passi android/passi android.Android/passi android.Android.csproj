@@ -39,7 +39,7 @@
     <BundleAssemblies>true</BundleAssemblies>
     <MandroidI18n />
     <AndroidKeyStore>true</AndroidKeyStore>
-    <AndroidSigningKeyStore>C:\repo\passi.keystore</AndroidSigningKeyStore>
+    <AndroidSigningKeyStore>D:\repo\passi.keystore</AndroidSigningKeyStore>
     <AndroidSigningStorePass>Curev3st1</AndroidSigningStorePass>
     <AndroidSigningKeyAlias>passi</AndroidSigningKeyAlias>
     <AndroidSigningKeyPass>Curev3st1</AndroidSigningKeyPass>

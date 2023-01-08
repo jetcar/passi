@@ -12,6 +12,7 @@ using IdentityModel;
 using IdentityServer.DbContext;
 using IdentityServer.services;
 using IdentityServer4.Configuration;
+using IdentityServer4.EntityFramework.Entities;
 using IdentityServer4.EntityFramework.Mappers;
 using IdentityServer4.Models;
 using IdentityServer4.Validation;
@@ -22,6 +23,8 @@ using Microsoft.EntityFrameworkCore;
 using AuthenticationOptions = IdentityServer4.Configuration.AuthenticationOptions;
 using IdentityResource = IdentityServer4.EntityFramework.Entities.IdentityResource;
 using Microsoft.AspNetCore.Identity;
+using ApiScope = IdentityServer4.EntityFramework.Entities.ApiScope;
+using Client = IdentityServer4.Models.Client;
 
 namespace IdentityServer
 {
@@ -122,28 +125,29 @@ namespace IdentityServer
             {
                 var appsettings = serviceScope.ServiceProvider.GetRequiredService<AppSetting>();
                 var context = serviceScope.ServiceProvider.GetRequiredService<IdentityDbContext>();
-                
-                    context.Clients.RemoveRange(context.Clients.Where(x => x.ClientId == appsettings["ClientId"])
-                        .Include(x => x.RedirectUris).Include(x => x.PostLogoutRedirectUris)
-                        .Include(x => x.AllowedScopes)
-                        .Include(x => x.ClientSecrets));
-                    context.UserClients.RemoveRange(
-                        context.UserClients.Where(x => x.Client.ClientId == appsettings["ClientId"]));
 
-                    context.Clients.RemoveRange(context.Clients.Where(x => x.ClientId == appsettings["PassiClientId"])
-                        .Include(x => x.RedirectUris).Include(x => x.PostLogoutRedirectUris)
-                        .Include(x => x.AllowedScopes)
-                        .Include(x => x.ClientSecrets));
-                    context.UserClients.RemoveRange(
-                        context.UserClients.Where(x => x.Client.ClientId == appsettings["PassiClientId"]));
+                context.Clients.RemoveRange(context.Clients.Where(x => x.ClientId == appsettings["ClientId"])
+                    .Include(x => x.RedirectUris).Include(x => x.PostLogoutRedirectUris)
+                    .Include(x => x.AllowedScopes)
+                    .Include(x => x.ClientSecrets));
+                context.UserClients.RemoveRange(
+                    context.UserClients.Where(x => x.Client.ClientId == appsettings["ClientId"]));
 
-                    context.Clients.RemoveRange(context.Clients.Where(x => x.ClientId == appsettings["PgAdminClientId"])
-                        .Include(x => x.RedirectUris).Include(x => x.PostLogoutRedirectUris)
-                        .Include(x => x.AllowedScopes)
-                        .Include(x => x.ClientSecrets));
-                    context.UserClients.RemoveRange(
-                        context.UserClients.Where(x => x.Client.ClientId == appsettings["PgAdminClientId"]));
-                
+                context.Clients.RemoveRange(context.Clients.Where(x => x.ClientId == appsettings["PassiClientId"])
+                    .Include(x => x.RedirectUris).Include(x => x.PostLogoutRedirectUris)
+                    .Include(x => x.AllowedScopes)
+                    .Include(x => x.ClientSecrets));
+                context.UserClients.RemoveRange(
+                    context.UserClients.Where(x => x.Client.ClientId == appsettings["PassiClientId"]));
+
+                var includableQueryable = context.Clients.Where(x => x.ClientId == appsettings["PgAdminClientId"])
+                    .Include(x => x.RedirectUris).Include(x => x.PostLogoutRedirectUris)
+                    .Include(x => x.AllowedScopes)
+                    .Include(x => x.ClientSecrets).ToList();
+                context.Clients.RemoveRange(includableQueryable);
+                context.UserClients.RemoveRange(
+                    context.UserClients.Where(x => x.Client.ClientId == appsettings["PgAdminClientId"]));
+
 
                 var client = new Client()
                 {
@@ -178,13 +182,13 @@ namespace IdentityServer
                 {
                     ClientId = appsettings["PgAdminClientId"],
                     ClientSecrets = new List<IdentityServer4.Models.Secret>() { new IdentityServer4.Models.Secret() { Value = appsettings["PgAdminSecret"].ToSha256() } },
-                    RedirectUris = new List<string>() { "https://localhost/pgadmin/oauth/callback", "https://127.0.0.1:5004/pgadmin/oauth/callback", "https://localhost:5004/pgadmin/oauth/callback", "https://192.168.0.208/pgadmin/oauth/callback", "https://passi.cloud/pgadmin/oauth/callback", "https://192.168.0.208:5004/pgadmin/oauth/callback" },
+                    RedirectUris = new List<string>() { "http://localhost/pgadmin4/oauth2/authorize", "https://passi.cloud/pgadmin4/oauth2/authorize" },
                     PostLogoutRedirectUris = new List<string>() { "https://localhost", "https://passi.cloud" },
                     RequirePkce = false,
                     AllowedGrantTypes = GrantTypes.CodeAndClientCredentials,
-                    AllowedScopes = new List<string>() { "openid","email" },
+                    AllowedScopes = new List<string>() { "openid", "email", "profile" },
                     AlwaysIncludeUserClaimsInIdToken = true,
-                    ClientUri = "https://passi.cloud/pgadmin",
+                    ClientUri = "https://passi.cloud/pgadmin4",
                     AlwaysSendClientClaims = true,
                 }.ToEntity();
                 context.Clients.Add(client3);
@@ -195,6 +199,13 @@ namespace IdentityServer
                     new IdentityResources.OpenId().ToEntity(),
                 });
                 context.UserClients.Add(new UserClient() { Client = client, UserId = "your@email.com" });
+
+                var scope = context.ApiScopes.FirstOrDefault(x => x.Name == "email");
+                if (scope == null)
+                    context.ApiScopes.Add(new ApiScope() { Name = "email", Enabled = true, DisplayName = "email" });
+                var profileScope = context.ApiScopes.FirstOrDefault(x => x.Name == "profile");
+                if (profileScope != null)
+                    context.ApiScopes.Remove(profileScope);
 
                 context.SaveChanges();
             }

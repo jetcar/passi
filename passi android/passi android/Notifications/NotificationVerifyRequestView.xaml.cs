@@ -289,13 +289,14 @@ namespace passi_android.Notifications
                                 return;
                             }
 
+                            var accountDb = SecureRepository.GetAccount(Message.AccountGuid);
                             var authorizeDto = new AuthorizeDto
                             {
                                 SignedHash = signedGuid.Result,
-                                PublicCertThumbprint = SecureRepository.GetAccount(Message.AccountGuid).Thumbprint,
+                                PublicCertThumbprint = accountDb.Thumbprint,
                                 SessionId = Message.SessionId
                             };
-                            RestService.ExecutePostAsync(ConfigSettings.Authorize, authorizeDto).ContinueWith((response) =>
+                            RestService.ExecutePostAsync(accountDb.Provider, accountDb.Provider.Authorize, authorizeDto).ContinueWith((response) =>
                             {
                                 if (response.Result.IsSuccessful)
                                 {
@@ -361,7 +362,8 @@ namespace passi_android.Notifications
 
         private void Cancel_OnClicked(object sender, EventArgs e)
         {
-            RestService.ExecuteAsync(ConfigSettings.CancelCheck + "?SessionId=" + Message.SessionId);
+            var accountDb = SecureRepository.GetAccount(Message.AccountGuid);
+            RestService.ExecuteAsync(accountDb.Provider, accountDb.Provider.CancelCheck + "?SessionId=" + Message.SessionId);
             Navigation.NavigateTop();
         }
     }

@@ -40,6 +40,7 @@
                 <Button  Background="White" CornerRadius="100" Text="NotificationVerifyRequestView" Clicked="NotificationConfirmationView"></Button>
                 <Button Background="White" CornerRadius="100"  Text="ConfirmByPinView" Clicked="ConfirmByPinView"></Button>
                 <Button  Background="White" CornerRadius="100" Text="FinishConfirmation" Clicked="FinishConfirmation"></Button>
+                <Button  Background="White" CornerRadius="100" Text="ClearProvider" Clicked="ClearProvider"></Button>
                 <Button  Background="White" CornerRadius="100" Text="LoadingPage" Clicked="LoadingPage"></Button>
             </StackLayout>
         </ScrollView>

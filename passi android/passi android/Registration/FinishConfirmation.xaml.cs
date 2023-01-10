@@ -114,7 +114,7 @@ namespace passi_android.Registration
                         DeviceId = SecureRepository.GetDeviceId()
                     };
 
-                    RestService.ExecutePostAsync(ConfigSettings.SignupConfirmation, signupConfirmationDto).ContinueWith((response) =>
+                    RestService.ExecutePostAsync(Account.Provider, Account.Provider.SignupConfirmation, signupConfirmationDto).ContinueWith((response) =>
                     {
                         if (response.Result.IsSuccessful)
                         {

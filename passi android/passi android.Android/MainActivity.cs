@@ -24,6 +24,7 @@ using WebApiDto.Auth;
 using Xamarin.Essentials;
 using Android.Gms.Extensions;
 using Xamarin.Forms;
+using Java.Security;
 
 namespace passi_android.Droid
 {
@@ -54,6 +55,9 @@ namespace passi_android.Droid
             App = new App();
             //DateTimeService.Init();
             LoadApplication(App);
+            var accounts = new ObservableCollection<Account>();
+            MainPage.Providers = SecureRepository.LoadProvidersIntoList(accounts);
+
             Plugin.CurrentActivity.CrossCurrentActivity.Current.Init(this, savedInstanceState);
             Task.Run(() =>
             {
@@ -80,7 +84,7 @@ namespace passi_android.Droid
                 App.FingerprintManager.HasEnrolledFingerprints = fingerprintManagerCompat.HasEnrolledFingerprints;
                 App.FingerprintManager.IsHardwareDetected = fingerprintManagerCompat.IsHardwareDetected;
                 App.IsKeyguardSecure = ((KeyguardManager)GetSystemService(KeyguardService)).IsKeyguardSecure;
-                App.StartFingerPrintReading = FingerPrintAuthenticationExample;
+                App.StartFingerPrintReading = FingerPrintAuthentication;
             });
 
             App.CancelNotifications = () =>
@@ -105,7 +109,7 @@ namespace passi_android.Droid
             base.OnPostResume();
         }
 
-        protected void FingerPrintAuthenticationExample()
+        protected void FingerPrintAuthentication()
         {
             const int flags = 0; /* always zero (0) */
 
@@ -132,12 +136,15 @@ namespace passi_android.Droid
         {
             lock (locker)
             {
-                if (PollingTask == null)
+                PollingTask ??= Task.Run(() =>
                 {
-                    PollingTask = Task.Run(() =>
+                    var accounts = new ObservableCollection<Account>();
+                    SecureRepository.LoadAccountIntoList(accounts);
+                    SecureRepository.LoadProvidersIntoList(accounts);
+                    var groupedAccounts = accounts.GroupBy(x => x.ProviderName);
+                    foreach (var groupedAccount in groupedAccounts)
                     {
-                        var accounts = new ObservableCollection<Account>();
-                        SecureRepository.LoadAccountIntoList(accounts);
+                        var provider = groupedAccount.ToList().First().Provider ?? MainPage.Providers.First(x=>x.IsDefault);
 
                         var getAllSessionDto = new GetAllSessionDto()
                         {
@@ -145,7 +152,7 @@ namespace passi_android.Droid
                         };
 
                         var guids = accounts.Select(x => x.Guid.ToString()).ToList();
-                        RestService.ExecutePostAsync(ConfigSettings.SyncAccounts, new SyncAccountsDto()
+                        RestService.ExecutePostAsync(provider, provider.SyncAccounts, new SyncAccountsDto()
                         {
                             DeviceId = SecureRepository.GetDeviceId(),
                             Guids = guids
@@ -171,12 +178,14 @@ namespace passi_android.Droid
                                         }
                                     }
 
-                                    if (App.AccountSyncCallback != null) App.AccountSyncCallback.Invoke();
+                                    if (App.AccountSyncCallback != null)
+                                        App.AccountSyncCallback.Invoke();
                                 }
                             });
 
+
                         var response = RestService
-                            .ExecutePostAsync(ConfigSettings.CheckForStartedSessions, getAllSessionDto).Result;
+                            .ExecutePostAsync(provider, provider.CheckForStartedSessions, getAllSessionDto).Result;
                         if (response.IsSuccessful)
                         {
                             var msg = JsonConvert.DeserializeObject<NotificationDto>(response.Content);
@@ -191,10 +200,10 @@ namespace passi_android.Droid
                                     });
                             }
                         }
+                    }
 
-                        PollingTask = null;
-                    });
-                }
+                    PollingTask = null;
+                });
             }
         }
 

@@ -164,5 +164,12 @@ namespace passi_android.Admin
                 Navigation.PopModal();
             })));
         }
+
+        private void ClearProvider(object sender, EventArgs e)
+        {
+            Account.Provider = null;
+            Account.ProviderName = null;
+            SecureRepository.UpdateAccount(Account);
+        }
     }
 }

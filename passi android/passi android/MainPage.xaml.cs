@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using AppCommon;
 using AppConfig;
+using passi_android.Menu;
 using passi_android.Registration;
 using passi_android.utils;
 using RestSharp;
@@ -59,10 +61,15 @@ namespace passi_android
             Task.Run(() =>
             {
                 SecureRepository.LoadAccountIntoList(Accounts);
+            }).ContinueWith((x) =>
+            {
+                MainPage.Providers = SecureRepository.LoadProvidersIntoList(Accounts);
             });
             base.OnAppearing();
             App.PollNotifications.Invoke();
         }
+
+        public static List<Provider> Providers { get; set; }
 
         private void AccountSyncCallback()
         {
@@ -84,11 +91,11 @@ namespace passi_android
         private void Button_DeleteAccount(object sender, EventArgs e)
         {
             var account = (Account)((Button)sender).BindingContext;
-            SecureRepository.DeleteAccount(account.Guid, () =>
+            SecureRepository.DeleteAccount(account, () =>
             {
                 Accounts.Clear();
                 SecureRepository.LoadAccountIntoList(Accounts);
-                RestService.ExecuteAsync(ConfigSettings.DeleteAccount + $"?accountGuid{account.Guid}&thumbprint={account.Thumbprint}", Method.DELETE);
+                RestService.ExecuteAsync(account.Provider, account.Provider.DeleteAccount + $"?accountGuid{account.Guid}&thumbprint={account.Thumbprint}", Method.DELETE);
             });
         }
 
@@ -144,6 +151,12 @@ namespace passi_android
                 _isDeleteVisible = value;
                 OnPropertyChanged();
             }
+        }
+
+        private void Menu_button(object sender, EventArgs e)
+        {
+            Navigation.PushModalSinglePage(new Menu.Menu());
+
         }
     }
 }

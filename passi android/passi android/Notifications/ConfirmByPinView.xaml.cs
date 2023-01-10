@@ -119,7 +119,7 @@ namespace passi_android.Notifications
                                     SessionId = Message.SessionId
                                 };
 
-                                RestService.ExecutePostAsync(ConfigSettings.Authorize, authorizeDto).ContinueWith((response) =>
+                                RestService.ExecutePostAsync(_accountDb.Provider, _accountDb.Provider.Authorize, authorizeDto).ContinueWith((response) =>
                                 {
                                     if (response.Result.IsSuccessful)
                                     {
@@ -267,7 +267,7 @@ namespace passi_android.Notifications
                         PublicCertThumbprint = SecureRepository.GetAccount(Message.AccountGuid).Thumbprint,
                         SessionId = Message.SessionId
                     };
-                    RestService.ExecutePostAsync(ConfigSettings.Authorize, authorizeDto).ContinueWith((response) =>
+                    RestService.ExecutePostAsync(_accountDb.Provider, _accountDb.Provider.Authorize, authorizeDto).ContinueWith((response) =>
                     {
                         if (response.Result.IsSuccessful)
                         {
@@ -318,7 +318,7 @@ namespace passi_android.Notifications
             var element = sender as VisualElement;
             element.IsEnabled = false;
 
-            RestService.ExecuteAsync(ConfigSettings.CancelCheck + "?SessionId=" + Message.SessionId);
+            RestService.ExecuteAsync(_accountDb.Provider, _accountDb.Provider.CancelCheck + "?SessionId=" + Message.SessionId);
 
             Navigation.NavigateTop();
             element.IsEnabled = true;

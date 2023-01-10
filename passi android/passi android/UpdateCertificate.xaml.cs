@@ -129,7 +129,7 @@ namespace passi_android
                 {
                     if (certDto != null)
                     {
-                        RestService.ExecutePostAsync(ConfigSettings.UpdateCertificate, certDto.Result).ContinueWith((response) =>
+                        RestService.ExecutePostAsync(Account.Provider,Account.Provider.UpdateCertificate, certDto.Result).ContinueWith((response) =>
                         {
                             if (response.Result.IsSuccessful)
                             {

@@ -16,6 +16,8 @@
             <Label HorizontalOptions="Center" Text="{Binding Path=ValidFrom}" />
             <Label HorizontalOptions="Center" Text="Certificate valid to:" />
             <Label HorizontalOptions="Center" Text="{Binding Path=ValidTo}" />
+            <Label HorizontalOptions="Center" Text="Identity provider:" />
+            <Label HorizontalOptions="Center" Text="{Binding Path=ProviderName}" />
         </StackLayout>
 
         <Button Background="White" CornerRadius="100"  Text="Update Certificate" Clicked="Button_OnClicked"></Button>

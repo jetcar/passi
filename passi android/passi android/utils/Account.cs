@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using Newtonsoft.Json;
+using passi_android.Menu;
 
 namespace passi_android.utils
 {
@@ -16,7 +17,9 @@ namespace passi_android.utils
         private DateTime _validTo;
         private bool _isDeleteVisible;
         private bool _inactive;
-
+        [JsonIgnore]
+        public Provider Provider { get; set; }
+        public string ProviderName { get; set; }
         public Guid Guid
         {
             get => _guid;

@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Mail;
 using AppCommon;
 using AppConfig;
 using Newtonsoft.Json;
+using passi_android.Menu;
 using passi_android.Registration;
 using passi_android.Tools;
 using passi_android.utils;
@@ -22,6 +25,7 @@ namespace passi_android
         private string _emailText = "";
         private ValidationError _emailError;
         private string _responseError;
+        private Provider _currentProvider;
 
         public string EmailText
         {
@@ -32,6 +36,7 @@ namespace passi_android
             set
             {
                 _emailText = value;
+                OnPropertyChanged();
                 ResponseError = "";
             }
         }
@@ -43,6 +48,7 @@ namespace passi_android
             {
                 _emailError = value;
                 OnPropertyChanged();
+                OnPropertyChanged();
             }
         }
 
@@ -53,6 +59,26 @@ namespace passi_android
             {
                 _responseError = value;
                 OnPropertyChanged();
+                OnPropertyChanged();
+            }
+        }
+
+        public List<Provider> Providers
+        {
+            get
+            {
+                return MainPage.Providers;
+            }
+        }
+
+        public Provider CurrentProvider
+        {
+            get => _currentProvider;
+            set
+            {
+                if (Equals(value, _currentProvider)) return;
+                _currentProvider = value;
+                OnPropertyChanged();
             }
         }
 
@@ -60,6 +86,7 @@ namespace passi_android
         {
             InitializeComponent();
             BindingContext = this;
+            CurrentProvider = Providers.First(x => x.IsDefault);
         }
 
         public void Button_OnClicked(object sender, EventArgs e)
@@ -83,7 +110,7 @@ namespace passi_android
 
             Navigation.PushModalSinglePage(new LoadingPage(new Action(() =>
             {
-                RestService.ExecutePostAsync(ConfigSettings.SignupPath, signupDto).ContinueWith((response) =>
+                RestService.ExecutePostAsync(CurrentProvider, CurrentProvider.SignupPath, signupDto).ContinueWith((response) =>
                 {
                     if (!response.Result.IsSuccessful && response.Result.StatusCode == HttpStatusCode.BadRequest)
                     {
@@ -98,11 +125,12 @@ namespace passi_android
                     }
                     else if (response.Result.IsSuccessful)
                     {
+                        account.Provider = CurrentProvider;
                         SecureRepository.AddAccount(account);
                         MainThread.BeginInvokeOnMainThread(() =>
                         {
                             Navigation.PushModalSinglePage(new NavigationPage(new RegistrationConfirmation()
-                            { Account = account }));
+                            { Account = account, CurrentProvider = CurrentProvider }));
                         });
                     }
                     else
@@ -142,6 +170,12 @@ namespace passi_android
         private void CancelButton_OnClicked(object sender, EventArgs e)
         {
             Navigation.NavigateTop();
+        }
+
+        private void Picker_OnSelectedIndexChanged(object sender, EventArgs e)
+        {
+            var selectedIndex = ((Picker)sender).SelectedIndex;
+            CurrentProvider = Providers[selectedIndex];
         }
     }
 }

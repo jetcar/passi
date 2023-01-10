@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using passi_android.utils;
 using RestSharp;
 using System.Net;
+using passi_android.Menu;
 using WebApiDto;
 using WebApiDto.SignUp;
 using Xamarin.Essentials;
@@ -64,6 +65,7 @@ namespace passi_android.Registration
         }
 
         public AccountDb Account { get; set; }
+        public Provider CurrentProvider { get; set; }
 
         private void NumbersPad_OnNumberClicked(string value)
         {
@@ -94,11 +96,12 @@ namespace passi_android.Registration
                 Email = Email,
                 DeviceId = SecureRepository.GetDeviceId()
             };
-            RestService.ExecutePostAsync(ConfigSettings.SignupCheck, signupConfirmationDto).ContinueWith((response) =>
+            RestService.ExecutePostAsync(CurrentProvider, CurrentProvider.SignupCheck, signupConfirmationDto).ContinueWith((response) =>
             {
                 if (response.Result.IsSuccessful)
                 {
                     Account.IsConfirmed = true;
+                    Account.Provider = CurrentProvider;
                     SecureRepository.UpdateAccount(Account);
                     MainThread.BeginInvokeOnMainThread(() => { Navigation.PushModalSinglePage(new FinishConfirmation() { Code = Code, Account = Account }); });
                 }

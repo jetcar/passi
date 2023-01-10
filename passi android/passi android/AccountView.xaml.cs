@@ -14,6 +14,7 @@ namespace passi_android
         private string _thumbprint;
         private string _validFrom;
         private string _validTo;
+        private string _providerName;
 
         public AccountView(AccountDb accountDb)
         {
@@ -29,10 +30,22 @@ namespace passi_android
                 ValidTo = AccountDb.ValidTo.ToShortDateString();
                 Email = accountDb.Email;
                 Thumbprint = AccountDb.Thumbprint;
+                ProviderName = AccountDb.ProviderName;
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
+            }
+        }
+
+        public string ProviderName
+        {
+            get => _providerName;
+            set
+            {
+                if (value == _providerName) return;
+                _providerName = value;
+                OnPropertyChanged();
             }
         }
 

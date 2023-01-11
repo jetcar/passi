@@ -25,7 +25,7 @@ namespace passi_android
         private string _emailText = "";
         private ValidationError _emailError;
         private string _responseError;
-        private Provider _currentProvider;
+        private ProviderDb _currentProvider;
 
         public string EmailText
         {
@@ -63,7 +63,7 @@ namespace passi_android
             }
         }
 
-        public List<Provider> Providers
+        public List<ProviderDb> Providers
         {
             get
             {
@@ -71,7 +71,7 @@ namespace passi_android
             }
         }
 
-        public Provider CurrentProvider
+        public ProviderDb CurrentProvider
         {
             get => _currentProvider;
             set

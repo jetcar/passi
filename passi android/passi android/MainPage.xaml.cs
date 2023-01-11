@@ -69,7 +69,7 @@ namespace passi_android
             App.PollNotifications.Invoke();
         }
 
-        public static List<Provider> Providers { get; set; }
+        public static List<ProviderDb> Providers { get; set; }
 
         private void AccountSyncCallback()
         {

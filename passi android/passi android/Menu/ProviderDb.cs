@@ -6,12 +6,12 @@ using Newtonsoft.Json;
 
 namespace passi_android.Menu
 {
-    public class Provider: INotifyPropertyChanged
+    public class ProviderDb: INotifyPropertyChanged
     {
         private bool _isDeleteVisible;
         private string _name;
 
-        public Provider()
+        public ProviderDb()
         {
             this.Guid = Guid.NewGuid();
         }

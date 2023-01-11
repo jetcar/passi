@@ -65,7 +65,7 @@ namespace passi_android.Registration
         }
 
         public AccountDb Account { get; set; }
-        public Provider CurrentProvider { get; set; }
+        public ProviderDb CurrentProvider { get; set; }
 
         private void NumbersPad_OnNumberClicked(string value)
         {

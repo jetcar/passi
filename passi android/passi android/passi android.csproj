@@ -35,6 +35,9 @@
     <Compile Update="FingerPrint\FingerPrintConfirmByPinView.xaml.cs">
       <DependentUpon>FingerPrintConfirmByPinView.xaml</DependentUpon>
     </Compile>
+    <Compile Update="Menu\EditProviderView.xaml.cs">
+      <DependentUpon>EditProviderView.xaml</DependentUpon>
+    </Compile>
     <Compile Update="UpdateCertificate.xaml.cs">
       <DependentUpon>UpdateCertificate.xaml</DependentUpon>
     </Compile>

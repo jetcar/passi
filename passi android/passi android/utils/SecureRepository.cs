@@ -180,12 +180,12 @@ namespace passi_android.utils
             return deviceId;
         }
 
-        public static List<Provider> LoadProvidersIntoList(ObservableCollection<Account> accounts)
+        public static List<ProviderDb> LoadProvidersIntoList(ObservableCollection<Account> accounts)
         {
             var providersjson = SecureStorage.GetAsync(ProvidersKey).Result ?? "";
-            var providers = JsonConvert.DeserializeObject<List<Provider>>(providersjson) ?? new List<Provider>();
+            var providers = JsonConvert.DeserializeObject<List<ProviderDb>>(providersjson) ?? new List<ProviderDb>();
             if (providers.All(x => x.WebApiUrl != ConfigSettings.WebApiUrl))
-                providers.Add(new Provider()
+                providers.Add(new ProviderDb()
                 {
                     Authorize = ConfigSettings.Authorize,
                     CancelCheck = ConfigSettings.CancelCheck,
@@ -205,7 +205,7 @@ namespace passi_android.utils
 
                 });
             if (Debugger.IsAttached && providers.All(x => x.WebApiUrl != ConfigSettings.WebApiUrlLocal))
-                providers.Add(new Provider()
+                providers.Add(new ProviderDb()
                 {
                     Authorize = ConfigSettings.Authorize,
                     CancelCheck = ConfigSettings.CancelCheck,
@@ -239,10 +239,10 @@ namespace passi_android.utils
             return providers;
         }
 
-        public static void DeleteProvider(Provider provider)
+        public static void DeleteProvider(ProviderDb provider)
         {
             var providersjson = SecureStorage.GetAsync(ProvidersKey).Result ?? "";
-            var providers = JsonConvert.DeserializeObject<List<Provider>>(providersjson) ?? new List<Provider>();
+            var providers = JsonConvert.DeserializeObject<List<ProviderDb>>(providersjson) ?? new List<ProviderDb>();
             providers.Remove(providers.First(x => x.Guid == provider.Guid));
             SecureStorage.SetAsync(ProvidersKey, JsonConvert.SerializeObject(providers)).GetAwaiter().GetResult();
 

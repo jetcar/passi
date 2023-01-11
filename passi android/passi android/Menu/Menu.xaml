@@ -4,7 +4,9 @@
              xmlns:passiAndroid="clr-namespace:passi_android;assembly=passi android"
              xmlns:menu="clr-namespace:passi_android.Menu;assembly=passi android"
              x:Name="list"
-             x:Class="passi_android.Menu.Menu">
+             x:Class="passi_android.Menu.Menu"
+             x:DataType="menu:Menu"
+             >
     <ContentPage.Content>
         <StackLayout>
             <StackLayout Padding="0" Margin="0"  Orientation="Vertical" BackgroundColor="#2196f3">
@@ -14,7 +16,7 @@
             </StackLayout>
             <ListView  ItemsSource="{Binding Path=Providers}">
                 <ListView.ItemTemplate>
-                    <DataTemplate x:DataType="menu:Provider">
+                    <DataTemplate x:DataType="menu:ProviderDb">
                         <ViewCell Tapped="Cell_OnTapped">
                             <Grid>
                                 <Grid.ColumnDefinitions>

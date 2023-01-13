@@ -1,5 +1,5 @@
 # Passi
-Passwordless 2FA solution, server and android app
+Passwordless OAUTH2 2FA solution, server and android app
 
 
 try using

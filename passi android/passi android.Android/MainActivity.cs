@@ -55,8 +55,6 @@ namespace passi_android.Droid
             App = new App();
             //DateTimeService.Init();
             LoadApplication(App);
-            var accounts = new ObservableCollection<Account>();
-            MainPage.Providers = SecureRepository.LoadProvidersIntoList(accounts);
 
             Plugin.CurrentActivity.CrossCurrentActivity.Current.Init(this, savedInstanceState);
             Task.Run(() =>
@@ -138,14 +136,14 @@ namespace passi_android.Droid
             {
                 PollingTask ??= Task.Run(() =>
                 {
-                    var accounts = new ObservableCollection<Account>();
+                    var accounts = new ObservableCollection<utils.AccountView>();
                     SecureRepository.LoadAccountIntoList(accounts);
-                    SecureRepository.LoadProvidersIntoList(accounts);
-                    var groupedAccounts = accounts.GroupBy(x => x.ProviderName);
+                    var providers = SecureRepository.LoadProviders();
+                    var groupedAccounts = accounts.GroupBy(x => x.ProviderGuid);
                     foreach (var groupedAccount in groupedAccounts)
                     {
-                        var provider = groupedAccount.ToList().First().Provider ?? MainPage.Providers.First(x=>x.IsDefault);
-
+                        var providerGuid = groupedAccount.ToList().First().ProviderGuid ?? providers.First(x=>x.IsDefault).Guid;
+                        var provider = SecureRepository.LoadProviders().First(x => x.Guid == providerGuid);
                         var getAllSessionDto = new GetAllSessionDto()
                         {
                             DeviceId = SecureRepository.GetDeviceId()

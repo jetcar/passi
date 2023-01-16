@@ -6,7 +6,7 @@
              xmlns:admin="clr-namespace:passi_android.Admin;assembly=passi android"
              x:DataType="menu:ProviderView"
              x:Class="passi_android.Menu.ProviderView">
-    <StackLayout VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand">
+    <StackLayout HorizontalOptions="FillAndExpand">
             <StackLayout Padding="0" Margin="0"  Orientation="Vertical" BackgroundColor="#2196f3">
                 <StackLayout  Margin="0"  Orientation="Horizontal" BackgroundColor="#2196f3">
                     <ImageButton Margin="10,60,10,10" BackgroundColor="#2196f3" HorizontalOptions="Start" Source="baseline_keyboard_arrow_left_black_24.png" Clicked="Button_Back"></ImageButton>

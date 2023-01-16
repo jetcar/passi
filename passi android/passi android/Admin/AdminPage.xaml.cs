@@ -12,6 +12,7 @@ using Xamarin.Forms.Xaml;
 using Color = WebApiDto.Auth.Color;
 
 using AppCommon;
+using passi_android.Menu;
 
 namespace passi_android.Admin
 {
@@ -124,12 +125,14 @@ namespace passi_android.Admin
 
         private void RegistrationConfirmation(object sender, EventArgs e)
         {
-            Navigation.PushModalSinglePage((new RegistrationConfirmation() { Account = Account, Email = "your@email.com" }));
+            ProviderDb provider = SecureRepository.GetProvider(Account.ProviderGuid);
+            Account.Provider = provider;
+            Navigation.PushModalSinglePage(new RegistrationConfirmation(Account));
         }
 
         private void EmptyView(object sender, EventArgs e)
         {
-            Navigation.PushModalSinglePage((new AccountView(Account)));
+            Navigation.PushModalSinglePage(new AccountView(Account));
         }
 
         private void NotificationConfirmationView(object sender, EventArgs e)
@@ -168,7 +171,7 @@ namespace passi_android.Admin
         private void ClearProvider(object sender, EventArgs e)
         {
             Account.Provider = null;
-            Account.ProviderName = null;
+            Account.ProviderGuid = null;
             SecureRepository.UpdateAccount(Account);
         }
     }

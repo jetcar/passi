@@ -1,6 +1,6 @@
 ﻿namespace passi_android.utils
 {
-    public class AccountDb : Account
+    public class AccountDb : AccountView
     {
         public string Password { get; set; }
         public string PrivateCertBinary { get; set; }

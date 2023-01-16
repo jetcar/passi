@@ -15,7 +15,7 @@
             <StackLayout VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand">
                 <ListView  ItemsSource="{Binding Path=Accounts}">
                     <ListView.ItemTemplate>
-                        <DataTemplate x:DataType="utils:Account">
+                        <DataTemplate x:DataType="utils:AccountView">
                             <ViewCell Tapped="Cell_OnTapped">
                                 <Grid>
                                     <Grid.ColumnDefinitions>

@@ -21,8 +21,9 @@ namespace passi_android.Registration
         private string _responseError;
         private string _email;
 
-        public RegistrationConfirmation()
+        public RegistrationConfirmation(AccountDb account)
         {
+            Account = account;
             InitializeComponent();
             BindingContext = this;
         }
@@ -65,7 +66,6 @@ namespace passi_android.Registration
         }
 
         public AccountDb Account { get; set; }
-        public ProviderDb CurrentProvider { get; set; }
 
         private void NumbersPad_OnNumberClicked(string value)
         {
@@ -96,12 +96,12 @@ namespace passi_android.Registration
                 Email = Email,
                 DeviceId = SecureRepository.GetDeviceId()
             };
-            RestService.ExecutePostAsync(CurrentProvider, CurrentProvider.SignupCheck, signupConfirmationDto).ContinueWith((response) =>
+            RestService.ExecutePostAsync(Account.Provider, Account.Provider.SignupCheck, signupConfirmationDto).ContinueWith((response) =>
             {
                 if (response.Result.IsSuccessful)
                 {
                     Account.IsConfirmed = true;
-                    Account.Provider = CurrentProvider;
+                    Account.Provider = Account.Provider;
                     SecureRepository.UpdateAccount(Account);
                     MainThread.BeginInvokeOnMainThread(() => { Navigation.PushModalSinglePage(new FinishConfirmation() { Code = Code, Account = Account }); });
                 }

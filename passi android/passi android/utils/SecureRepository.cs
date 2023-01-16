@@ -10,29 +10,30 @@ using AppConfig;
 using Newtonsoft.Json;
 using passi_android.Menu;
 using Xamarin.Essentials;
+using Xamarin.Forms.Internals;
 using CertHelper = passi_android.utils.Certificate.CertHelper;
 
 namespace passi_android.utils
 {
     public static class SecureRepository
     {
-        private const string ProvidersKey = "providers";
         private static object _locker = new object();
+        public static List<ProviderDb> Providers { get; set; }
+        public static List<AccountDb> Accounts { get; set; }
 
         public static void AddAccount(AccountDb account)
         {
             lock (_locker)
             {
-                SecureStorage.GetAsync(StorageKeys.AllAccounts).ContinueWith(
-                    (result) =>
-                    {
-                        var resultResult = result.Result;
-                        var allAccounts = resultResult == null ? new List<Account>() : JsonConvert.DeserializeObject<List<Account>>(resultResult);
-                        allAccounts.Add(account);
-                        account.ProviderName = account.Provider.Name;
-                        SecureStorage.SetAsync(StorageKeys.AllAccounts, JsonConvert.SerializeObject(allAccounts)).GetAwaiter().GetResult();
-                        SecureStorage.SetAsync(account.Guid.ToString(), JsonConvert.SerializeObject(account)).GetAwaiter().GetResult();
-                    });
+                if (Accounts == null)
+                {
+                    var providersjson = SecureStorage.GetAsync(StorageKeys.AllAccounts).Result ?? "";
+                    Accounts = JsonConvert.DeserializeObject<List<AccountDb>>(providersjson) ?? new List<AccountDb>();
+                }
+
+                Accounts.Add(account);
+                account.ProviderGuid = account.Provider.Guid;
+                SecureStorage.SetAsync(StorageKeys.AllAccounts, JsonConvert.SerializeObject(Accounts)).GetAwaiter().GetResult();
             }
         }
 
@@ -40,8 +41,12 @@ namespace passi_android.utils
         {
             lock (_locker)
             {
-                var result = SecureStorage.GetAsync(accountGuid.ToString()).Result;
-                var accountDb = JsonConvert.DeserializeObject<AccountDb>(result);
+                if (Accounts == null)
+                {
+                    var providersjson = SecureStorage.GetAsync(StorageKeys.AllAccounts).Result ?? "";
+                    Accounts = JsonConvert.DeserializeObject<List<AccountDb>>(providersjson) ?? new List<AccountDb>();
+                }
+                var accountDb = Accounts.FirstOrDefault(x => x.Guid == accountGuid);
                 return accountDb;
             }
         }
@@ -50,72 +55,58 @@ namespace passi_android.utils
         {
             lock (_locker)
             {
-                SecureStorage.GetAsync(StorageKeys.AllAccounts).ContinueWith(
-                    (result) =>
-                    {
-                        if (account.Guid == Guid.Empty)
-                            throw new ArgumentNullException("Guid");
-                        var resultResult = result.Result;
-                        var allAccounts = resultResult == null ? new List<Account>() : JsonConvert.DeserializeObject<List<Account>>(resultResult);
-                        var existingAccount = allAccounts.FirstOrDefault(x => x.Guid == account.Guid);
-                        if (existingAccount != null)
-                        {
-                            existingAccount.DeviceId = account.DeviceId;
-                            existingAccount.IsConfirmed = account.IsConfirmed;
-                            existingAccount.Thumbprint = account.Thumbprint;
-                            existingAccount.ValidFrom = account.ValidFrom;
-                            existingAccount.ValidTo = account.ValidTo;
-                            existingAccount.Inactive = account.Inactive;
-                            existingAccount.ProviderName = account.Provider?.Name ?? account.ProviderName;
-                        }
-                        SecureStorage.SetAsync(StorageKeys.AllAccounts, JsonConvert.SerializeObject(allAccounts)).GetAwaiter().GetResult();
-                        SecureStorage.SetAsync(account.Guid.ToString(), JsonConvert.SerializeObject(account)).GetAwaiter().GetResult();
-                    });
+                if (Accounts == null)
+                {
+                    var providersjson = SecureStorage.GetAsync(StorageKeys.AllAccounts).Result ?? "";
+                    Accounts = JsonConvert.DeserializeObject<List<AccountDb>>(providersjson) ?? new List<AccountDb>();
+                }
+
+                if (account.Guid == Guid.Empty)
+                    throw new ArgumentNullException("Guid");
+                var existingAccount = Accounts.FirstOrDefault(x => x.Guid == account.Guid);
+                if (existingAccount != null)
+                {
+                    CopyAll(account, existingAccount);
+                    existingAccount.ProviderGuid = account.Provider?.Guid ?? account.ProviderGuid;
+                }
+                SecureStorage.SetAsync(StorageKeys.AllAccounts, JsonConvert.SerializeObject(Accounts)).GetAwaiter().GetResult();
+
             }
         }
 
-        public static void LoadAccountIntoList(ObservableCollection<Account> accounts)
+        public static void LoadAccountIntoList(ObservableCollection<AccountView> accounts)
         {
             lock (_locker)
             {
-                var result = SecureStorage.GetAsync(StorageKeys.AllAccounts).Result;
-                if (string.IsNullOrEmpty(result))
-                    return;
-                var resultResult = result;
-                var allAccounts = resultResult == null ? new List<AccountDb>() : JsonConvert.DeserializeObject<List<AccountDb>>(resultResult);
-                foreach (var allAccount in allAccounts)
+                if (Accounts == null)
                 {
-                    accounts.Add(new Account()
-                    {
-                        Email = allAccount.Email,
-                        Guid = allAccount.Guid,
-                        ValidTo = allAccount.ValidTo,
-                        ValidFrom = allAccount.ValidFrom,
-                        IsConfirmed = allAccount.IsConfirmed,
-                        DeviceId = allAccount.DeviceId,
-                        Thumbprint = allAccount.Thumbprint,
-                        Inactive = allAccount.Inactive,
-                        ProviderName = allAccount.ProviderName
-                    });
+                    var providersjson = SecureStorage.GetAsync(StorageKeys.AllAccounts).Result ?? "";
+                    Accounts = JsonConvert.DeserializeObject<List<AccountDb>>(providersjson) ?? new List<AccountDb>();
+                }
+                foreach (var accountDb in Accounts)
+                {
+                    var accountView = new AccountView();
+                    CopyAll(accountDb, accountView);
+                    accounts.Add(accountView);
                 }
             }
         }
 
-        public static void DeleteAccount(Account account, Action callback)
+        public static void DeleteAccount(AccountView account, Action callback)
         {
             lock (_locker)
             {
-                SecureStorage.GetAsync(StorageKeys.AllAccounts).ContinueWith((result) =>
+                if (Accounts == null)
                 {
-                    if (string.IsNullOrEmpty(result.Result))
-                        return;
-                    var resultResult = result.Result;
-                    var allAccounts = resultResult == null ? new List<AccountDb>() : JsonConvert.DeserializeObject<List<AccountDb>>(resultResult);
-                    var oldAccount = allAccounts.FirstOrDefault(x => x.Guid == account.Guid);
-                    allAccounts.Remove(oldAccount);
-                    var serializeObject = JsonConvert.SerializeObject(allAccounts);
-                    SecureStorage.SetAsync(StorageKeys.AllAccounts, serializeObject).GetAwaiter().GetResult();
-                    SecureStorage.Remove(account.Guid.ToString());
+                    var providersjson = SecureStorage.GetAsync(StorageKeys.AllAccounts).Result ?? "";
+                    Accounts = JsonConvert.DeserializeObject<List<AccountDb>>(providersjson) ?? new List<AccountDb>();
+                }
+
+                var oldAccount = Accounts.FirstOrDefault(x => x.Guid == account.Guid);
+                Accounts.Remove(oldAccount);
+                var serializeObject = JsonConvert.SerializeObject(Accounts);
+                SecureStorage.SetAsync(StorageKeys.AllAccounts, serializeObject).ContinueWith((result) =>
+                {
                     if (callback != null)
                         callback.Invoke();
                 });
@@ -180,12 +171,16 @@ namespace passi_android.utils
             return deviceId;
         }
 
-        public static List<ProviderDb> LoadProvidersIntoList(ObservableCollection<Account> accounts)
+        public static List<ProviderDb> LoadProviders()
         {
-            var providersjson = SecureStorage.GetAsync(ProvidersKey).Result ?? "";
-            var providers = JsonConvert.DeserializeObject<List<ProviderDb>>(providersjson) ?? new List<ProviderDb>();
-            if (providers.All(x => x.WebApiUrl != ConfigSettings.WebApiUrl))
-                providers.Add(new ProviderDb()
+            if (Providers == null)
+            {
+                var providersjson = SecureStorage.GetAsync(StorageKeys.ProvidersKey).Result ?? "";
+                Providers = JsonConvert.DeserializeObject<List<ProviderDb>>(providersjson) ?? new List<ProviderDb>();
+            }
+
+            if (Providers.All(x => x.WebApiUrl != ConfigSettings.WebApiUrl))
+                Providers.Add(new ProviderDb()
                 {
                     Authorize = ConfigSettings.Authorize,
                     CancelCheck = ConfigSettings.CancelCheck,
@@ -204,8 +199,8 @@ namespace passi_android.utils
 
 
                 });
-            if (Debugger.IsAttached && providers.All(x => x.WebApiUrl != ConfigSettings.WebApiUrlLocal))
-                providers.Add(new ProviderDb()
+            if (Debugger.IsAttached && Providers.All(x => x.WebApiUrl != ConfigSettings.WebApiUrlLocal))
+                Providers.Add(new ProviderDb()
                 {
                     Authorize = ConfigSettings.Authorize,
                     CancelCheck = ConfigSettings.CancelCheck,
@@ -221,30 +216,86 @@ namespace passi_android.utils
                     TokenUpdate = ConfigSettings.TokenUpdate,
                     UpdateCertificate = ConfigSettings.UpdateCertificate,
                 });
-            SecureStorage.SetAsync(ProvidersKey, JsonConvert.SerializeObject(providers)).GetAwaiter().GetResult();
-            foreach (var account in accounts)
-            {
-                var provider = providers.FirstOrDefault(x => x.Name == account.ProviderName);
-                if (provider == null)
-                {
-                    provider = providers.FirstOrDefault(x => x.IsDefault);
-                    var tempAccount = GetAccount(account.Guid);
-                    tempAccount.Provider = provider;
-                    tempAccount.ProviderName = provider.Name;
-                    UpdateAccount(tempAccount);
-                }
-                account.Provider = provider;
-                account.ProviderName = provider.Name;
-            }
-            return providers;
+            SecureStorage.SetAsync(StorageKeys.ProvidersKey, JsonConvert.SerializeObject(Providers)).GetAwaiter().GetResult();
+
+            return Providers;
         }
+
 
         public static void DeleteProvider(ProviderDb provider)
         {
-            var providersjson = SecureStorage.GetAsync(ProvidersKey).Result ?? "";
-            var providers = JsonConvert.DeserializeObject<List<ProviderDb>>(providersjson) ?? new List<ProviderDb>();
-            providers.Remove(providers.First(x => x.Guid == provider.Guid));
-            SecureStorage.SetAsync(ProvidersKey, JsonConvert.SerializeObject(providers)).GetAwaiter().GetResult();
+            if (Providers == null)
+            {
+                var providersjson = SecureStorage.GetAsync(StorageKeys.ProvidersKey).Result ?? "";
+                Providers = JsonConvert.DeserializeObject<List<ProviderDb>>(providersjson) ?? new List<ProviderDb>();
+            }
+
+            Providers.Remove(Providers.First(x => x.Guid == provider.Guid));
+            SecureStorage.SetAsync(StorageKeys.ProvidersKey, JsonConvert.SerializeObject(Providers)).GetAwaiter().GetResult();
+
+        }
+
+        public static void UpdateProvider(ProviderDb provider)
+        {
+            if (Providers == null)
+            {
+                var providersjson = SecureStorage.GetAsync(StorageKeys.ProvidersKey).Result ?? "";
+                Providers = JsonConvert.DeserializeObject<List<ProviderDb>>(providersjson) ?? new List<ProviderDb>();
+            }
+
+            var existingProvider = Providers.First(x => x.Guid == provider.Guid);
+            CopyAll(provider, existingProvider);
+
+            SecureStorage.SetAsync(StorageKeys.ProvidersKey, JsonConvert.SerializeObject(Providers)).GetAwaiter().GetResult();
+
+        }
+
+        public static void CopyAll<T, R>(T source, R destination)
+        {
+            var sourceType = typeof(T);
+            var destType = typeof(R);
+            foreach (var destProperty in destType.GetProperties())
+            {
+                if(!destProperty.CanWrite)
+                    continue;
+                var sourceProperty = sourceType.GetProperty(destProperty.Name);
+                if (sourceProperty != null)
+                {
+                    var value = sourceProperty.GetValue(source, null);
+                    if (value != null)
+                        destProperty.SetValue(destination, destProperty.GetValue(source, null), null);
+                }
+            }
+            foreach (var sourceField in sourceType.GetFields())
+            {
+                var targetField = sourceType.GetField(sourceField.Name);
+                targetField.SetValue(destination, sourceField.GetValue(source));
+            }
+        }
+
+        public static void AddProvider(ProviderDb provider)
+        {
+            if (Providers == null)
+            {
+                var providersjson = SecureStorage.GetAsync(StorageKeys.ProvidersKey).Result ?? "";
+                Providers = JsonConvert.DeserializeObject<List<ProviderDb>>(providersjson) ?? new List<ProviderDb>();
+            }
+
+            Providers.Add(provider);
+
+            SecureStorage.SetAsync(StorageKeys.ProvidersKey, JsonConvert.SerializeObject(Providers)).GetAwaiter().GetResult();
+
+        }
+
+        public static ProviderDb GetProvider(Guid? guid)
+        {
+            if (Providers == null)
+            {
+                var providersjson = SecureStorage.GetAsync(StorageKeys.ProvidersKey).Result ?? "";
+                Providers = JsonConvert.DeserializeObject<List<ProviderDb>>(providersjson) ?? new List<ProviderDb>();
+            }
+
+            return Providers.First(x => x.Guid == guid);
 
         }
     }

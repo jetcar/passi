@@ -67,7 +67,7 @@ namespace passi_android
         {
             get
             {
-                return MainPage.Providers;
+                return SecureRepository.LoadProviders();
             }
         }
 
@@ -129,8 +129,8 @@ namespace passi_android
                         SecureRepository.AddAccount(account);
                         MainThread.BeginInvokeOnMainThread(() =>
                         {
-                            Navigation.PushModalSinglePage(new NavigationPage(new RegistrationConfirmation()
-                            { Account = account, CurrentProvider = CurrentProvider }));
+                            Navigation.PushModalSinglePage(new NavigationPage(new RegistrationConfirmation(account)
+                            ));
                         });
                     }
                     else

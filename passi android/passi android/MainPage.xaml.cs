@@ -18,13 +18,13 @@ namespace passi_android
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class MainPage : ContentPage
     {
-        private ObservableCollection<Account> _accounts = new ObservableCollection<Account>();
+        private ObservableCollection<utils.AccountView> _accounts = new ObservableCollection<utils.AccountView>();
         private bool _isDeleteVisible;
         private string version = "1";
 
-        public ObservableCollection<Account> Accounts
+        public ObservableCollection<utils.AccountView> Accounts
         {
-            get { return _accounts ?? (_accounts = new ObservableCollection<Account>()); }
+            get { return _accounts ?? (_accounts = new ObservableCollection<utils.AccountView>()); }
             set
             {
                 if (_accounts != value)
@@ -57,25 +57,21 @@ namespace passi_android
         {
             App.AccountSyncCallback = AccountSyncCallback;
             IsDeleteVisible = false;
-            Accounts = new ObservableCollection<Account>();
+            Accounts = new ObservableCollection<utils.AccountView>();
             Task.Run(() =>
             {
                 SecureRepository.LoadAccountIntoList(Accounts);
-            }).ContinueWith((x) =>
-            {
-                MainPage.Providers = SecureRepository.LoadProvidersIntoList(Accounts);
             });
             base.OnAppearing();
             App.PollNotifications.Invoke();
         }
 
-        public static List<ProviderDb> Providers { get; set; }
 
         private void AccountSyncCallback()
         {
             MainThread.BeginInvokeOnMainThread(() =>
             {
-                Accounts = new ObservableCollection<Account>();
+                Accounts = new ObservableCollection<utils.AccountView>();
                 Task.Run(() =>
                 {
                     SecureRepository.LoadAccountIntoList(Accounts);
@@ -90,7 +86,7 @@ namespace passi_android
 
         private void Button_DeleteAccount(object sender, EventArgs e)
         {
-            var account = (Account)((Button)sender).BindingContext;
+            var account = (utils.AccountView)((Button)sender).BindingContext;
             SecureRepository.DeleteAccount(account, () =>
             {
                 Accounts.Clear();
@@ -101,7 +97,7 @@ namespace passi_android
 
         private void Button_PreDeleteAccount(object sender, EventArgs e)
         {
-            var account = (Account)((ImageButton)sender).BindingContext;
+            var account = (utils.AccountView)((ImageButton)sender).BindingContext;
             account.IsDeleteVisible = !account.IsDeleteVisible;
         }
 
@@ -110,11 +106,13 @@ namespace passi_android
             var cell = sender as ViewCell;
             cell.IsEnabled = false;
 
-            var account = (Account)((ViewCell)sender).BindingContext;
+            var account = (utils.AccountView)((ViewCell)sender).BindingContext;
             var accountDb = SecureRepository.GetAccount(account.Guid);
+            var provider = SecureRepository.GetProvider(accountDb.ProviderGuid);
+            accountDb.Provider = provider;
             if (!accountDb.IsConfirmed || accountDb.PublicCertBinary == null)
             {
-                Navigation.PushModalSinglePage(new RegistrationConfirmation() { Account = accountDb });
+                Navigation.PushModalSinglePage(new RegistrationConfirmation(accountDb));
             }
             else
             {

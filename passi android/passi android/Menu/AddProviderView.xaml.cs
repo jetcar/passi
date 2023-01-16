@@ -1,5 +1,5 @@
 ﻿using System;
-using Newtonsoft.Json;
+using System.Linq;
 using passi_android.utils;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
@@ -7,13 +7,19 @@ using Xamarin.Forms.Xaml;
 namespace passi_android.Menu
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class EditProviderView : ContentPage
+    public partial class AddProviderView : ContentPage
     {
         public ProviderDb Provider { get; set; }
 
-        public EditProviderView(ProviderDb provider)
+        public AddProviderView()
         {
-            Provider = JsonConvert.DeserializeObject<ProviderDb>(JsonConvert.SerializeObject(provider));
+            Provider = new ProviderDb();
+            var defaultProfider = SecureRepository.LoadProviders().First(x => x.IsDefault);
+            SecureRepository.CopyAll(defaultProfider,Provider);
+            Provider.IsDefault = false;
+            Provider.Guid = Guid.NewGuid();
+            Provider.Name = "";
+            Provider.WebApiUrl = "https://";
             InitializeComponent();
             BindingContext = this;
 
@@ -23,16 +29,18 @@ namespace passi_android.Menu
         {
             var button = sender as VisualElement;
             button.IsEnabled = false;
-            SecureRepository.UpdateProvider(Provider);
+            SecureRepository.AddProvider(Provider);
+
             //save
             button.IsEnabled = true;
             Navigation.PopModal();
+
         }
         private void Button_Back(object sender, EventArgs e)
         {
             Navigation.PopModal();
         }
 
-
+     
     }
 }

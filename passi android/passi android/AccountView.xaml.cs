@@ -30,7 +30,7 @@ namespace passi_android
                 ValidTo = AccountDb.ValidTo.ToShortDateString();
                 Email = accountDb.Email;
                 Thumbprint = AccountDb.Thumbprint;
-                ProviderName = AccountDb.ProviderName;
+                ProviderName = AccountDb.Provider?.Name;
             }
             catch (Exception e)
             {
@@ -105,6 +105,11 @@ namespace passi_android
 
             Navigation.PushModalSinglePage(new FingerPrint.FingerPrintView(AccountDb));
             button.IsEnabled = true;
+        }
+
+        private void Button_Back(object sender, EventArgs e)
+        {
+            Navigation.PopModal();
         }
     }
 }

@@ -26,7 +26,7 @@ namespace passi_android.Droid.Notifications
         public static void SendRegistrationToServer(string token)
         {
             var deviceTokenUpdateDto = new DeviceTokenUpdateDto() { DeviceId = SecureRepository.GetDeviceId(), Token = token, Platform = Plugin.DeviceInfo.CrossDeviceInfo.Current.Platform.ToString() };
-            foreach (var provider in MainPage.Providers)
+            foreach (var provider in SecureRepository.LoadProviders())
             {
                 var result = RestService.ExecutePostAsync(provider, provider.TokenUpdate, deviceTokenUpdateDto);
                 if (!result.Result.IsSuccessful)

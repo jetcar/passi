@@ -6,7 +6,7 @@ using passi_android.Menu;
 
 namespace passi_android.utils
 {
-    public class Account : INotifyPropertyChanged
+    public class AccountView : INotifyPropertyChanged
     {
         private Guid _guid;
         private bool _isConfirmed;
@@ -19,7 +19,7 @@ namespace passi_android.utils
         private bool _inactive;
         [JsonIgnore]
         public ProviderDb Provider { get; set; }
-        public string ProviderName { get; set; }
+        public Guid? ProviderGuid { get; set; }
         public Guid Guid
         {
             get => _guid;

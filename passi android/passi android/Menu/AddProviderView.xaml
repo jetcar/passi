@@ -4,8 +4,8 @@
              xmlns:passiAndroid="clr-namespace:passi_android"
              xmlns:menu="clr-namespace:passi_android.Menu;assembly=passi android"
              xmlns:admin="clr-namespace:passi_android.Admin;assembly=passi android"
-             x:DataType="menu:EditProviderView"
-             x:Class="passi_android.Menu.EditProviderView">
+             x:DataType="menu:AddProviderView"
+             x:Class="passi_android.Menu.AddProviderView">
     <StackLayout VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand">
         <StackLayout Padding="0" Margin="0"  Orientation="Vertical" BackgroundColor="#2196f3">
             <StackLayout  Margin="0"  Orientation="Horizontal" BackgroundColor="#2196f3">

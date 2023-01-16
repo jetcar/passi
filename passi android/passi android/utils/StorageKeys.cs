@@ -2,8 +2,10 @@
 {
     public static class StorageKeys
     {
-        public static string NotificationToken = "NotificationToken";
-        public static string AllAccounts = "allAccounts";
+        public const string NotificationToken = "NotificationToken";
+        public const string AllAccounts = "allAccounts";
+        public const string ProvidersKey = "providers";
+
     }
     public static class StringExt
     {

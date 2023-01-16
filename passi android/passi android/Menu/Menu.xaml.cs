@@ -18,7 +18,7 @@ namespace passi_android.Menu
         {
             InitializeComponent();
             BindingContext = this;
-            Providers = new ObservableCollection<ProviderDb>(MainPage.Providers);
+            Providers = new ObservableCollection<ProviderDb>(SecureRepository.LoadProviders());
 
         }
 
@@ -46,9 +46,9 @@ namespace passi_android.Menu
             var provider = (ProviderDb)((Button)sender).BindingContext;
             if (provider.IsDefault && Providers.Count(x => x.IsDefault) == 1)
                 return;
-            Providers.Remove(provider);
-            MainPage.Providers = Providers.ToList();
             SecureRepository.DeleteProvider(provider);
+            Providers.Remove(provider);
+
         }
 
         private void Cell_OnTapped(object sender, EventArgs e)
@@ -64,7 +64,7 @@ namespace passi_android.Menu
 
         private void Button_Add(object sender, EventArgs e)
         {
-
+            Navigation.PushModalSinglePage(new AddProviderView());
         }
 
         private void Button_ShowDelete(object sender, EventArgs e)

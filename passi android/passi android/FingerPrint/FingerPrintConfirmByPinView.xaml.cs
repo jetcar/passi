@@ -64,7 +64,14 @@ namespace passi_android.FingerPrint
         {
             if (value == "confirm")
             {
-                SignRequestAndSendResponce();
+                SignRequestAndSendResponce(_accountDb, Pin1, Navigation, (error) =>
+                {
+                    if (error != null)
+                    {
+                        Pin1Error.HasError = true;
+                        Pin1Error.Text = error;
+                    }
+                });
                 return;
             }
             if (value == "del")
@@ -76,20 +83,28 @@ namespace passi_android.FingerPrint
             Pin1 += value;
             if (Pin1.Length == _pinLength)
             {
-                SignRequestAndSendResponce();
+                SignRequestAndSendResponce(_accountDb, Pin1, Navigation, (error) =>
+                {
+                    if (error != null)
+                    {
+                        Pin1Error.HasError = true;
+                        Pin1Error.Text = error;
+                    }
+                });
+
             }
         }
 
-        private void SignRequestAndSendResponce()
+        public static void SignRequestAndSendResponce(AccountDb _accountDb, string Pin1, INavigation Navigation, Action<string> callback)
         {
+
             Navigation.PushModalSinglePage(new LoadingPage(() =>
             {
                 SecureRepository.AddfingerPrintKey(_accountDb.Guid, Pin1).ContinueWith((result) =>
                 {
                     if (result.IsFaulted)
                     {
-                        Pin1Error.HasError = true;
-                        Pin1Error.Text = "Invalid Pin";
+                        callback.Invoke("Invalid Pin");
                         return;
                     }
 
@@ -97,9 +112,11 @@ namespace passi_android.FingerPrint
                     {
                         Application.Current.MainPage.DisplayAlert("Fingerprint", "Fingerprint key added", "Ok");
                         Navigation.NavigateTop();
+
                     });
                 });
             }));
+
         }
 
         private void Cancel_OnClicked(object sender, EventArgs e)

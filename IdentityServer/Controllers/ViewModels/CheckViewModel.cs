@@ -18,5 +18,6 @@ namespace IdentityServer.Controllers.ViewModels
             set => _needRefresh = value;
         }
 
+        public string RandomString { get; set; }
     }
 }

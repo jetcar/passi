@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Net;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using AppCommon;
 using AppConfig;
@@ -121,25 +122,30 @@ namespace passi_android
             }
         }
 
-        private void Confirm(string pinNew, string pinOld)
+        public static void StartCertGeneration(string pinNew, string pinOld, AccountDb Account, INavigation Navigation, Action<string> action)
         {
             Navigation.PushModalSinglePage(new LoadingPage(() =>
             {
-                GenerateCert(pinNew, pinOld).ContinueWith(certDto =>
+                GenerateCert(pinNew, pinOld, Account, action).ContinueWith(certDto =>
                 {
-                    if (certDto != null)
+                    if (certDto?.Result != null)
                     {
-                        RestService.ExecutePostAsync(Account.Provider,Account.Provider.UpdateCertificate, certDto.Result).ContinueWith((response) =>
+                        var provider = SecureRepository.GetProvider(Account.ProviderGuid);
+                        RestService.ExecutePostAsync(provider, provider.UpdateCertificate, certDto.Result).ContinueWith((response) =>
                         {
                             if (response.Result.IsSuccessful)
                             {
-                                Account.Password = NewAccount.Password;
-                                Account.PrivateCertBinary = NewAccount.PrivateCertBinary;
-                                Account.pinLength = NewAccount.pinLength;
-                                Account.Thumbprint = NewAccount.Thumbprint;
-                                Account.ValidFrom = NewAccount.ValidFrom;
-                                Account.ValidTo = NewAccount.ValidTo;
-                                Account.PublicCertBinary = NewAccount.PublicCertBinary;
+                                var certificateBase64 = Convert.ToBase64String(certDto?.Result.Item3); //importable certificate
+
+                                var publicCertHelper = CertHelper.ConvertToPublicCertificate(certDto.Result.Item2);
+
+                                Account.Password = pinNew;
+                                Account.PrivateCertBinary = certificateBase64;
+                                Account.pinLength = pinNew?.Length ?? 0;
+                                Account.Thumbprint = certDto.Result.Item2.Thumbprint;
+                                Account.ValidFrom = certDto.Result.Item2.NotBefore;
+                                Account.ValidTo = certDto.Result.Item2.NotAfter;
+                                Account.PublicCertBinary = publicCertHelper.BinaryData;
 
                                 SecureRepository.UpdateAccount(Account);
                                 SecureRepository.AddfingerPrintKey(Account.Guid, pinNew).GetAwaiter().GetResult();
@@ -150,15 +156,14 @@ namespace passi_android
                             {
                                 Navigation.PopModal().ContinueWith((task) =>
                                 {
-                                    ResponseError = JsonConvert
-                                        .DeserializeObject<ApiResponseDto<string>>(response.Result.Content).Message;
+                                    action.Invoke(JsonConvert.DeserializeObject<ApiResponseDto<string>>(response.Result.Content).Message);
                                 });
                             }
                             else
                             {
                                 Navigation.PopModal().ContinueWith((task) =>
                                 {
-                                    ResponseError = "Network error. Try again";
+                                    action.Invoke("Network error. Try again");
                                 });
                             }
                         });
@@ -167,13 +172,12 @@ namespace passi_android
             }));
         }
 
-        private async Task<CertificateDto> GenerateCert(string pinNew, string pinOld)
+        public static async Task<Tuple<CertificateDto, X509Certificate2, byte[]>> GenerateCert(string pinNew, string pinOld, AccountDb Account, Action<string> callback)
         {
             var cert = new CertificateDto();
             cert.ParentCertThumbprint = Account.Thumbprint;
             return await Certificates.GenerateCertificate(Account.Email, pinNew).ContinueWith(certificate =>
             {
-                var certificateBase64 = Convert.ToBase64String(certificate.Result.Item3); //importable certificate
                 var publicCertHelper = CertHelper.ConvertToPublicCertificate(certificate.Result.Item1);
 
                 try
@@ -182,26 +186,16 @@ namespace passi_android
                 }
                 catch (Exception e)
                 {
-                    PinOldError.HasError = true;
-                    PinOldError.Text = "Invalid old pin";
-                    SetTextBox(0);
+                    callback.Invoke("Invalid old pin");
+
                     return null;
                 }
                 cert.PublicCert = publicCertHelper.BinaryData;
-                cert.DeviceId = SecureRepository.GetDeviceId();
-                NewAccount.Password = certificate.Result.Item2;
-                NewAccount.PrivateCertBinary = certificateBase64;
-                NewAccount.pinLength = Pin1.Length;
-                NewAccount.Thumbprint = publicCertHelper.Thumbprint;
-                NewAccount.ValidFrom = publicCertHelper.NotBefore.Value;
-                NewAccount.ValidTo = publicCertHelper.NotAfter.Value;
-                NewAccount.PublicCertBinary = publicCertHelper.BinaryData;
-                return cert;
+                return new Tuple<CertificateDto, X509Certificate2, byte[]>(cert, certificate.Result.Item1, certificate.Result.Item3);
             });
         }
 
         private int currentfieldIndex = 0;
-        private AccountDb _newAccount = new AccountDb();
 
         public void SetTextBox(int i)
         {
@@ -286,11 +280,7 @@ namespace passi_android
 
         public AccountDb Account { get; set; }
 
-        public AccountDb NewAccount
-        {
-            get => _newAccount;
-            set => _newAccount = value;
-        }
+
 
         private void NumbersPad_OnNumberClicked(string value)
         {
@@ -323,7 +313,20 @@ namespace passi_android
                         return;
                     }
 
-                    Confirm(Pin1, PinOld);
+                    StartCertGeneration(Pin1, PinOld, Account, Navigation, (error) =>
+                    {
+                        if (error == "Invalid old pin")
+                        {
+                            PinOldError.HasError = true;
+                            PinOldError.Text = "Invalid old pin";
+
+                            SetTextBox(0);
+                        }
+                        else
+                        {
+                            ResponseError = error;
+                        }
+                    });
                     return;
                 }
                 if (currentfieldIndex == 0)
@@ -357,6 +360,8 @@ namespace passi_android
             if (currentfieldIndex == 2)
                 Pin2 += value;
         }
+
+
 
         private void ClearPin1_OnClicked(object sender, EventArgs e)
         {

@@ -10,7 +10,6 @@ namespace IdentityServer.Controllers.ViewInputs
         public string ReturnUrl { get; set; }
         public string CheckColor { get; set; }
         public Guid SessionId { get; set; }
-
-
+        public string RandomString { get; set; }
     }
 }

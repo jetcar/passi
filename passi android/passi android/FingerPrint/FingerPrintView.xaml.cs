@@ -58,10 +58,20 @@ namespace passi_android.FingerPrint
                 {
                     if (result.ErrorMessage == null)
                     {
-                        MainThread.BeginInvokeOnMainThread(() =>
-                        {
-                            Navigation.PushModalSinglePage(new FingerPrintConfirmByPinView(_accountDb));
-                        });
+                        if (_accountDb.pinLength > 0)
+                            MainThread.BeginInvokeOnMainThread(() =>
+                            {
+                                Navigation.PushModalSinglePage(new FingerPrintConfirmByPinView(_accountDb));
+                            });
+                        else
+                            MainThread.BeginInvokeOnMainThread(() =>
+                            {
+                                FingerPrintConfirmByPinView.SignRequestAndSendResponce(_accountDb, null, Navigation,
+                                    (error) =>
+                                    {
+                                        Message = error;
+                                    });
+                            });
                     }
                     else
                     {

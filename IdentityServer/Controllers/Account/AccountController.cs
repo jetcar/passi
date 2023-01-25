@@ -24,9 +24,12 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using Repos.Migrations;
 using RestSharp;
+using Services;
 using WebApiDto;
 using WebApiDto.Auth;
+using WebApiDto.Certificate;
 
 namespace IdentityServer.Controllers.Account
 {
@@ -170,14 +173,15 @@ namespace IdentityServer.Controllers.Account
         }
 
         [HttpGet]
-        public async Task<IActionResult> Check(Guid sessionId, string returnUrl, string username, string color)
+        public async Task<IActionResult> Check(Guid sessionId, string returnUrl, string username, string color, string randomString)
         {
             var vm = await BuildLoginViewModelAsync(new CheckViewModel()
             {
                 CheckColor = color,
                 ReturnUrl = returnUrl,
                 SessionId = sessionId,
-                Username = username
+                Username = username,
+                RandomString = randomString
             });
             return View(vm);
         }
@@ -197,17 +201,57 @@ namespace IdentityServer.Controllers.Account
             if (result.IsSuccessful)
             {
                 var checkResponceDto = JsonConvert.DeserializeObject<CheckResponceDto>(result.Content);
-                await _events.RaiseAsync(new UserLoginSuccessEvent(model.Username, model.Username, model.Username, clientId: context?.Client.ClientId));
+                await _events.RaiseAsync(new UserLoginSuccessEvent(model.Username, model.Username, model.Username,
+                    clientId: context?.Client.ClientId));
                 var isuser = new IdentityServerUser(model.Username)
                 {
                     DisplayName = model.Username,
                 };
+                if (checkResponceDto.PublicCertThumbprint != null)
+                {
+                    var request2 =
+                        new RestRequest($"api/Certificate/Public?thumbprint={checkResponceDto.PublicCertThumbprint}&username={checkResponceDto.Username}",
+                            Method.GET);
+                    var result2 = client.ExecuteAsync(request2).Result;
+                    if (result2.IsSuccessful)
+                    {
+                        var cert = JsonConvert.DeserializeObject<CertificateDto>(result2.Content);
+                        var publicCertificate = new X509Certificate2(Convert.FromBase64String(cert.PublicCert));
+                        if (publicCertificate.NotAfter < DateTime.UtcNow && publicCertificate.NotBefore > DateTime.UtcNow)
+                        {
+                            ModelState.AddModelError("Error", "Invalid Certificate");
 
-                isuser.AdditionalClaims.Add(new Claim("Thumbprint", checkResponceDto.PublicCertThumbprint));
-                isuser.AdditionalClaims.Add(new Claim("SignedHash", checkResponceDto.SignedHash));
-                await AuthenticationManagerExtensions.SignInAsync(HttpContext, isuser, new AuthenticationProperties() { IsPersistent = true, AllowRefresh = true, ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(Convert.ToDouble(_appSetting["SessionLength"])) });
-                return RedirectPermanent(model.ReturnUrl);
+                        }
+                        var nonce = model.RandomString;
+
+                        // ComputeHash - returns byte array
+                        var isValid = CertHelper.VerifyData(nonce, checkResponceDto.SignedHash, cert.PublicCert);
+                        if (isValid)
+                        {
+                            isuser.AdditionalClaims.Add(new Claim("Thumbprint", checkResponceDto.PublicCertThumbprint));
+                            isuser.AdditionalClaims.Add(new Claim("SignedHash", checkResponceDto.SignedHash));
+                            await AuthenticationManagerExtensions.SignInAsync(HttpContext, isuser,
+                                new AuthenticationProperties()
+                                {
+                                    IsPersistent = true,
+                                    AllowRefresh = true,
+                                    ExpiresUtc =
+                                        DateTimeOffset.UtcNow.AddMinutes(Convert.ToDouble(_appSetting["SessionLength"]))
+                                });
+                            return RedirectPermanent(model.ReturnUrl);
+                        }
+                        else
+                        {
+                            ModelState.AddModelError("Error", "Invalid Signature");
+                        }
+                    }
+                    else
+                    {
+                        ModelState.AddModelError("Error", result2.Content  + " " + result2.ErrorMessage);
+                    }
+                }
             }
+
             if (!result.Content.Contains("Waiting for response"))
             {
                 var errorResult = JsonConvert.DeserializeObject<ApiResponseDto<string>>(result.Content);

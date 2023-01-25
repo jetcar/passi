@@ -101,7 +101,7 @@ namespace passi_android.Droid.Notifications
                 LockscreenVisibility = NotificationVisibility.Public,
                 Importance = NotificationImportance.High
             };
-            channel.SetAllowBubbles(true);
+            //channel.SetAllowBubbles(true);
             var notificationManager = (NotificationManager)GetSystemService(global::Android.Content.Context.NotificationService);
             notificationManager.CreateNotificationChannel(channel);
         }

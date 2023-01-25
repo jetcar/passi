@@ -70,6 +70,7 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\ConfigurationManager\ConfigurationManager.csproj" />
+	  <ProjectReference Include="..\Services\Services.csproj" />
 	  <ProjectReference Include="..\WebApiDto\WebApiDto.csproj" />
 	</ItemGroup>
 

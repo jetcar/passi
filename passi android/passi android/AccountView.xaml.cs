@@ -89,12 +89,19 @@ namespace passi_android
             }
         }
 
-        private void Button_OnClicked(object sender, EventArgs e)
+        private void UpdateCertificate_OnClicked(object sender, EventArgs e)
         {
             var button = sender as VisualElement;
             button.IsEnabled = false;
+            if (AccountDb.pinLength > 0)
+                Navigation.PushModalSinglePage(new UpdateCertificate() { Account = AccountDb });
+            else
+            {
+                UpdateCertificate.StartCertGeneration(null, null, AccountDb, Navigation, (error) =>
+                {
 
-            Navigation.PushModalSinglePage(new UpdateCertificate() { Account = AccountDb });
+                });
+            }
             button.IsEnabled = true;
         }
 

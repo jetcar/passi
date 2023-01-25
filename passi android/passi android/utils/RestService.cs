@@ -36,6 +36,8 @@ namespace passi_android.utils
         public static Task<IRestResponse> ExecutePostAsync<T>(ProviderDb provider, string requestUri, T item)
         {
             var client = GetClient(provider);
+            client.Timeout = 3000;
+            client.ReadWriteTimeout = 3000;
             var request = new RestRequest(requestUri, Method.POST);
             request.AddJsonBody(item);
             return client.ExecuteAsync(request);

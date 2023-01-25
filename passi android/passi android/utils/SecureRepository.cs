@@ -166,7 +166,7 @@ namespace passi_android.utils
             if (deviceId == null)
             {
                 deviceId = Guid.NewGuid().ToString();
-                SecureStorage.SetAsync("deviceId", deviceId).RunSynchronously();
+                SecureStorage.SetAsync("deviceId", deviceId).GetAwaiter().GetResult();
             }
             return deviceId;
         }

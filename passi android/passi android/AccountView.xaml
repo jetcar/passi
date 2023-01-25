@@ -25,7 +25,7 @@
             <Label HorizontalOptions="Center" Text="{Binding Path=ProviderName}" />
         </StackLayout>
 
-        <Button Background="White" CornerRadius="100"  Text="Update Certificate" Clicked="Button_OnClicked"></Button>
+        <Button Background="White" CornerRadius="100"  Text="Update Certificate" Clicked="UpdateCertificate_OnClicked"></Button>
         <Button Background="White" CornerRadius="100"  Text="Add Fingerprint" Clicked="AddBiometric_Button_OnClicked" ></Button>
     </StackLayout>
 </ContentPage>

@@ -107,6 +107,7 @@ namespace Repos
 
         public void AddInvitation(UserInvitationDb userInvitationDb)
         {
+            _dbContext.RemoveRange(_dbContext.Invitations.Where(x=>x.UserId == userInvitationDb.UserId));
             _dbContext.Invitations.Add(userInvitationDb);
             _dbContext.SaveChanges();
         }

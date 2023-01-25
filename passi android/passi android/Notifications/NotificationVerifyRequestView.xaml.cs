@@ -290,6 +290,7 @@ namespace passi_android.Notifications
                             }
 
                             var accountDb = SecureRepository.GetAccount(Message.AccountGuid);
+                            accountDb.Provider = SecureRepository.GetProvider(accountDb.ProviderGuid);
                             var authorizeDto = new AuthorizeDto
                             {
                                 SignedHash = signedGuid.Result,

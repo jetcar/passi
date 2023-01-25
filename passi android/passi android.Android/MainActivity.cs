@@ -142,7 +142,7 @@ namespace passi_android.Droid
                     var groupedAccounts = accounts.GroupBy(x => x.ProviderGuid);
                     foreach (var groupedAccount in groupedAccounts)
                     {
-                        var providerGuid = groupedAccount.ToList().First().ProviderGuid ?? providers.First(x=>x.IsDefault).Guid;
+                        var providerGuid = groupedAccount.ToList().First().ProviderGuid ?? providers.First(x => x.IsDefault).Guid;
                         var provider = SecureRepository.LoadProviders().First(x => x.Guid == providerGuid);
                         var getAllSessionDto = new GetAllSessionDto()
                         {
@@ -163,7 +163,7 @@ namespace passi_android.Droid
                                 {
                                     var serverAccounts =
                                         JsonConvert.DeserializeObject<List<AccountMinDto>>(task.Result.Content);
-                                    foreach (var account in accounts)
+                                    foreach (var account in groupedAccount)
                                     {
                                         if (serverAccounts.All(x => x.UserGuid != account.Guid))
                                         {
@@ -183,21 +183,27 @@ namespace passi_android.Droid
 
 
                         var response = RestService
-                            .ExecutePostAsync(provider, provider.CheckForStartedSessions, getAllSessionDto).Result;
-                        if (response.IsSuccessful)
-                        {
-                            var msg = JsonConvert.DeserializeObject<NotificationDto>(response.Content);
-                            if (msg != null)
-                            {
-                                if (SecureRepository.AddSessionKey(msg.SessionId))
-                                    MainThread.BeginInvokeOnMainThread(() =>
+                            .ExecutePostAsync(provider, provider.CheckForStartedSessions, getAllSessionDto)
+                            .ContinueWith(
+                                task =>
+                                {
+                                    var response = task.Result;
+                                    if (response.IsSuccessful)
                                     {
-                                        NotificationVerifyRequestView.Instance.Message = msg;
-                                        App.MainPage.Navigation.PushModalSinglePage(NotificationVerifyRequestView
-                                            .Instance);
-                                    });
-                            }
-                        }
+                                        var msg = JsonConvert.DeserializeObject<NotificationDto>(response.Content);
+                                        if (msg != null)
+                                        {
+                                            if (SecureRepository.AddSessionKey(msg.SessionId))
+                                                MainThread.BeginInvokeOnMainThread(() =>
+                                                {
+                                                    NotificationVerifyRequestView.Instance.Message = msg;
+                                                    App.MainPage.Navigation.PushModalSinglePage(
+                                                        NotificationVerifyRequestView
+                                                            .Instance);
+                                                });
+                                        }
+                                    }
+                                });
                     }
 
                     PollingTask = null;
@@ -229,7 +235,7 @@ namespace passi_android.Droid
                 LockscreenVisibility = NotificationVisibility.Public,
                 Importance = NotificationImportance.High
             };
-            channel.SetAllowBubbles(true);
+            //channel.SetAllowBubbles(true);
             var notificationManager = (NotificationManager)GetSystemService(global::Android.Content.Context.NotificationService);
             notificationManager.CreateNotificationChannel(channel);
         }

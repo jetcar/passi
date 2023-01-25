@@ -91,7 +91,8 @@ namespace passi_android
             {
                 Accounts.Clear();
                 SecureRepository.LoadAccountIntoList(Accounts);
-                RestService.ExecuteAsync(account.Provider, account.Provider.DeleteAccount + $"?accountGuid{account.Guid}&thumbprint={account.Thumbprint}", Method.DELETE);
+                var provider = SecureRepository.GetProvider(account.ProviderGuid);
+                RestService.ExecuteAsync(provider, provider.DeleteAccount + $"?accountGuid{account.Guid}&thumbprint={account.Thumbprint}", Method.DELETE);
             });
         }
 

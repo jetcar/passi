@@ -1,0 +1,26 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build the WebApp Docker image
+      run: docker build . --file WebApp/Dockerfile --tag samplewebapp:$(date +%s)
+    - uses: actions/checkout@v3
+    - name: Build the Idenetity Docker image
+      run: docker build . --file IdentityServer/Dockerfile --tag identityserver:$(date +%s)
+    - uses: actions/checkout@v3
+    - name: Build the PassiWebApi Docker image
+      run: docker build . --file passiwebapi/Dockerfile --tag passi:$(date +%s)
+
+

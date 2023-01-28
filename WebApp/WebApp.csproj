@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
 	<PropertyGroup>
-		<TargetFramework>net6.0</TargetFramework>
+		<TargetFramework>net7.0</TargetFramework>
 		<RootNamespace>WebApp</RootNamespace>
 		<UserSecretsId>c3342539-178d-4bad-a1b1-1e405be0fb21</UserSecretsId>
 		<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>

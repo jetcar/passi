@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageId>IdentityServer4.EntityFramework.Storage</PackageId>
+      <TargetFramework>net7.0</TargetFramework>
+    
+    <Description>EntityFramework persistence layer for IdentityServer4</Description>
+    <Authors>Brock Allen;Dominick Baier;Scott Brady</Authors>
+    <PackageTags>OAuth2;OAuth 2.0;OpenID Connect;Security;Identity;IdentityServer;EntityFramework</PackageTags>
+    <PackageIcon>icon.jpg</PackageIcon>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+	  <OutputPath>publish</OutputPath>
+	  <BaseOutputPath>publish</BaseOutputPath>
+
+  </PropertyGroup>
+
+  <ItemGroup>
+    
+    <PackageReference Include="AutoMapper" Version="12.0.1" />
+
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="7.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\IdentityServer4.Storage\IdentityServer4.Storage.csproj" />
+  </ItemGroup>
+  
+
+</Project>

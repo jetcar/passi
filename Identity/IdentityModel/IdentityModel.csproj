@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Authors>Dominick Baier;Brock Allen</Authors>
+    <Description>OpenID Connect &amp; OAuth 2.0 client library</Description>
+    <PackageId>IdentityModel</PackageId>
+    <PackageTags>OAuth2;OAuth 2.0;OpenID Connect;Security;Identity;IdentityServer</PackageTags>
+    <PackageIcon>icon.jpg</PackageIcon>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+	  <TargetFramework>net7.0</TargetFramework>
+	  <OutputPath>publish</OutputPath>
+	  <BaseOutputPath>publish</BaseOutputPath>
+
+  </PropertyGroup>
+
+  
+
+</Project>

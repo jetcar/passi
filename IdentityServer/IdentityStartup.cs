@@ -23,6 +23,7 @@ using Microsoft.EntityFrameworkCore;
 using AuthenticationOptions = IdentityServer4.Configuration.AuthenticationOptions;
 using IdentityResource = IdentityServer4.EntityFramework.Entities.IdentityResource;
 using Microsoft.AspNetCore.Identity;
+using Services;
 using ApiScope = IdentityServer4.EntityFramework.Entities.ApiScope;
 using Client = IdentityServer4.Models.Client;
 
@@ -44,8 +45,12 @@ namespace IdentityServer
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var passiUrl = Environment.GetEnvironmentVariable("PassiUrl") ?? Configuration.GetValue<string>("AppSetting:PassiUrl");
             services.AddControllersWithViews();
             services.AddSingleton<AppSetting>();
+            var myRestClient = new MyRestClient(passiUrl);
+            services.AddSingleton<IMyRestClient>(myRestClient);
+
             services.AddScoped<IdentityDbContext>();
             services.AddScoped<IIdentityClientsRepository, IdentityClientsRepository>();
             services.AddSingleton<IStartupFilter, MigrationStartupFilter<IdentityDbContext>>();

@@ -50,9 +50,19 @@ namespace passi_webapi
             });
             var mapper = config.CreateMapper();
 
+            var identityUrl = Environment.GetEnvironmentVariable("IdentityUrl") ?? Configuration.GetValue<string>("AppSetting:IdentityUrl");
+            var returnUrl = Environment.GetEnvironmentVariable("returnUrl") ?? Configuration.GetValue<string>("AppSetting:returnUrl");
+            var passiUrl = Environment.GetEnvironmentVariable("PassiUrl") ?? Configuration.GetValue<string>("AppSetting:PassiUrl");
+            var clientId = Environment.GetEnvironmentVariable("PassiClientId") ?? Configuration.GetValue<string>("AppSetting:PassiClientId");
+            var secret = Environment.GetEnvironmentVariable("PassiSecret") ?? Configuration.GetValue<string>("AppSetting:PassiSecret");
+
+
             services.AddControllers();
             services.AddSingleton<AppSetting>();
             services.AddSingleton(mapper);
+            var myRestClient = new MyRestClient(passiUrl);
+            services.AddSingleton<IMyRestClient>(myRestClient);
+
             services.AddSingleton<IEmailSender, EmailSender>();
             services.AddSingleton<IRandomGenerator, RandomGenerator>();
             services.AddSingleton<IFireBaseClient, FireBaseClient>();
@@ -77,11 +87,6 @@ namespace passi_webapi
                 })
                 .PersistKeysToDbContext<PassiDbContext>();
 
-            var identityUrl = Environment.GetEnvironmentVariable("IdentityUrl") ?? Configuration.GetValue<string>("AppSetting:IdentityUrl");
-            var returnUrl = Environment.GetEnvironmentVariable("returnUrl") ?? Configuration.GetValue<string>("AppSetting:returnUrl");
-            var passiUrl = Environment.GetEnvironmentVariable("PassiUrl") ?? Configuration.GetValue<string>("AppSetting:PassiUrl");
-            var clientId = Environment.GetEnvironmentVariable("PassiClientId") ?? Configuration.GetValue<string>("AppSetting:PassiClientId");
-            var secret = Environment.GetEnvironmentVariable("PassiSecret") ?? Configuration.GetValue<string>("AppSetting:PassiSecret");
 
             services.AddAuthentication(options =>
             {
@@ -94,7 +99,7 @@ namespace passi_webapi
                     options.SlidingExpiration = true;
                     options.ExpireTimeSpan = System.TimeSpan.FromDays(30);
                 })
-            .AddOpenIdAuthentication(identityUrl, returnUrl, passiUrl, clientId, secret)
+            .AddOpenIdAuthentication(identityUrl, returnUrl, passiUrl, clientId, secret,myRestClient)
             .AddOpenIdTokenManagement(x =>
             {
                 x.RevokeRefreshTokenOnSignout = true;

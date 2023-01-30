@@ -102,7 +102,7 @@ namespace IdentityServer4.Models
             };
         }
 
-        internal static ICollection<string> FindMatchingSigningAlgorithms(this IEnumerable<ApiResource> apiResources)
+        public static ICollection<string> FindMatchingSigningAlgorithms(this IEnumerable<ApiResource> apiResources)
         {
             var apis = apiResources.ToList();
 

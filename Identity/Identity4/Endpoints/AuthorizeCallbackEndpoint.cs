@@ -18,7 +18,7 @@ using Microsoft.Extensions.Logging;
 
 namespace IdentityServer4.Endpoints
 {
-    internal class AuthorizeCallbackEndpoint : AuthorizeEndpointBase
+    public class AuthorizeCallbackEndpoint : AuthorizeEndpointBase
     {
         private readonly IConsentMessageStore _consentResponseStore;
         private readonly IAuthorizationParametersMessageStore _authorizationParametersMessageStore;

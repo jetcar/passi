@@ -6,7 +6,7 @@ using System.Text.Json;
 
 namespace IdentityServer4
 {
-    internal static class ObjectSerializer
+    public static class ObjectSerializer
     {
         private static readonly JsonSerializerOptions Options = new JsonSerializerOptions
         {

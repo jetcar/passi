@@ -156,7 +156,7 @@ namespace passi_android.Droid
                             Guids = guids
                         }
                         ).ContinueWith(
-                            task =>
+                            (task) =>
                             {
                                 task.GetAwaiter().GetResult();
                                 if (task.Result.IsSuccessful)
@@ -182,10 +182,9 @@ namespace passi_android.Droid
                             });
 
 
-                        var response = RestService
+                        RestService
                             .ExecutePostAsync(provider, provider.CheckForStartedSessions, getAllSessionDto)
-                            .ContinueWith(
-                                task =>
+                            .ContinueWith((task) =>
                                 {
                                     var response = task.Result;
                                     if (response.IsSuccessful)

@@ -16,7 +16,7 @@ namespace IdentityServer4.Models
         /// Should only be used from unit tests
         /// </summary>
         /// <param name="data"></param>
-        internal Message(TModel data) : this(data, DateTime.UtcNow)
+        public Message(TModel data) : this(data, DateTime.UtcNow)
         {
         }
 

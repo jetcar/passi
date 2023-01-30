@@ -34,7 +34,7 @@ namespace IdentityServer4.Endpoints.Results
             _result = result ?? throw new ArgumentNullException(nameof(result));
         }
 
-        internal EndSessionResult(
+        public EndSessionResult(
             EndSessionValidationResult result,
             IdentityServerOptions options,
             ISystemClock clock,

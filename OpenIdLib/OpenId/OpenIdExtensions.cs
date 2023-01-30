@@ -16,12 +16,13 @@ namespace OpenIdLib.OpenId
 {
     public static class OpenIdExtensions
     {
+        private static MyRestClient _restClient;
+
         public static AuthenticationBuilder AddOpenIdAuthentication(this AuthenticationBuilder builder,
-            string identityUrl, string returnUrl, string passiUrl, string clientId, string clientSecret)
+            string identityUrl, string returnUrl, string passiUrl, string clientId, string clientSecret,
+            MyRestClient myRestClient)
         {
-            ServicePointManager
-                    .ServerCertificateValidationCallback +=
-                (sender, cert, chain, sslPolicyErrors) => true;
+            _restClient = myRestClient;
 
             return builder.AddOpenIdConnect(OpenIdConnectDefaults.AuthenticationScheme, options =>
             {
@@ -62,40 +63,14 @@ namespace OpenIdLib.OpenId
                         context.ProtocolMessage.SetParameter("audience", options.ClientId);
                         return Task.FromResult(0);
                     },
-                    OnAuthorizationCodeReceived = context =>
-                    {
-                        Console.WriteLine(context);
-                        return Task.FromResult(0);
-                    },
-                    OnUserInformationReceived = context =>
-                    {
-                        return Task.FromResult(0);
-                    },
-                    OnMessageReceived = context =>
-                    {
-                        return Task.FromResult(0);
-                    },
-                    OnTicketReceived = context =>
-                    {
-                        return Task.FromResult(0);
-                    },
-                    OnTokenResponseReceived = context =>
-                    {
-                        var Idtoken = context.TokenEndpointResponse.IdToken;
-                        return Task.FromResult(0);
-                    },
-                    OnRedirectToIdentityProviderForSignOut = context =>
-                    {
-                        return Task.FromResult(0);
-                    },
-                    OnRemoteSignOut = context =>
-                    {
-                        return Task.FromResult(0);
-                    },
-                    OnSignedOutCallbackRedirect = context =>
-                    {
-                        return Task.FromResult(0);
-                    }
+                    OnAuthorizationCodeReceived = _ => Task.FromResult(0),
+                    OnUserInformationReceived = _ => Task.FromResult(0),
+                    OnMessageReceived = _ => Task.FromResult(0),
+                    OnTicketReceived = _ => Task.FromResult(0),
+                    OnTokenResponseReceived = _ => Task.FromResult(0),
+                    OnRedirectToIdentityProviderForSignOut = _ => Task.FromResult(0),
+                    OnRemoteSignOut = _ => Task.FromResult(0),
+                    OnSignedOutCallbackRedirect = _ => Task.FromResult(0)
                 };
             });
         }
@@ -123,19 +98,18 @@ namespace OpenIdLib.OpenId
             // var resourceAccess = JObject.Parse(context.Principal.FindFirst("resource_access").Value);
             // var clientResource = resourceAccess[context.Options.ClientId];
             // var clientRoles = clientResource["roles"];
-            var claimsIdentity = context.Principal.Identity as ClaimsIdentity;
+            var claimsIdentity = context.Principal?.Identity as ClaimsIdentity;
             if (claimsIdentity == null)
             {
                 return;
             }
-            var thumbprint = claimsIdentity.FindFirst("Thumbprint").Value;
-            var signedHash = claimsIdentity.FindFirst("SignedHash").Value;
+            var thumbprint = claimsIdentity.FindFirst("Thumbprint")?.Value;
+            var signedHash = claimsIdentity.FindFirst("SignedHash")?.Value;
             var username = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (thumbprint != null)
             {
-                var client = new RestClient(passiUrl);
-                var request = new RestRequest($"api/Certificate/Public?thumbprint={thumbprint}&username={username}", Method.GET);
-                var result = client.ExecuteAsync(request).Result;
+                var request = new RestRequest($"api/Certificate/Public?thumbprint={thumbprint}&username={username}", Method.Get);
+                var result = _restClient.ExecuteAsync(request).Result;
                 if (result.IsSuccessful)
                 {
                     var cert = JsonConvert.DeserializeObject<CertificateDto>(result.Content);

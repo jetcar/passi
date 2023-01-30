@@ -47,25 +47,23 @@ namespace IdentityServer.Controllers.Account
         private readonly IAuthenticationSchemeProvider _schemeProvider;
         private readonly IEventService _events;
         private AppSetting _appSetting;
-
+        private IMyRestClient _myRestClient;
         public AccountController(
             IIdentityServerInteractionService interaction,
             IClientStore clientStore,
             IAuthenticationSchemeProvider schemeProvider,
-            IEventService events, AppSetting appSetting)
+            IEventService events, AppSetting appSetting, IMyRestClient myRestClient)
         {
             // if the TestUserStore is not in DI, then we'll just use the global users collection
             // this is where you would plug in your own custom identity management library (e.g. ASP.NET Identity)
 
-            ServicePointManager
-                    .ServerCertificateValidationCallback +=
-                (sender, cert, chain, sslPolicyErrors) => true;
 
             _interaction = interaction;
             _clientStore = clientStore;
             _schemeProvider = schemeProvider;
             _events = events;
             _appSetting = appSetting;
+            _myRestClient = myRestClient;
         }
 
         /// <summary>
@@ -115,9 +113,8 @@ namespace IdentityServer.Controllers.Account
             ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
 
             var context = await _interaction.GetAuthorizationContextAsync(model.ReturnUrl);
-
-            RestClient client = new RestClient(_appSetting["PassiUrl"]);
-            var request = new RestRequest(_appSetting["startRequest"], Method.POST);
+            
+            var request = new RestRequest(_appSetting["startRequest"], Method.Post);
             var possibleCodes = new List<Color>()
             {
                 Color.blue,
@@ -143,8 +140,7 @@ namespace IdentityServer.Controllers.Account
                 RandomString = model.Nonce
             };
             request.AddJsonBody(startLoginDto);
-
-            var result = client.ExecuteAsync(request).Result;
+            var result = _myRestClient.ExecuteAsync(request).Result;
             if (result.IsSuccessful)
             {
                 var loginResponceDto = JsonConvert.DeserializeObject<LoginResponceDto>(result.Content);
@@ -194,9 +190,8 @@ namespace IdentityServer.Controllers.Account
             var context = await _interaction.GetAuthorizationContextAsync(model.ReturnUrl);
             bool needRefresh = true;
 
-            RestClient client = new RestClient(_appSetting["PassiUrl"]);
-            var request = new RestRequest(_appSetting["checkRequest"] + "?sessionId=" + model.SessionId, Method.GET);
-            var result = client.ExecuteAsync(request).Result;
+            var request = new RestRequest(_appSetting["checkRequest"] + "?sessionId=" + model.SessionId, Method.Get);
+            var result = _myRestClient.ExecuteAsync(request).Result;
 
             if (result.IsSuccessful)
             {
@@ -211,8 +206,8 @@ namespace IdentityServer.Controllers.Account
                 {
                     var request2 =
                         new RestRequest($"api/Certificate/Public?thumbprint={checkResponceDto.PublicCertThumbprint}&username={checkResponceDto.Username}",
-                            Method.GET);
-                    var result2 = client.ExecuteAsync(request2).Result;
+                            Method.Get);
+                    var result2 = _myRestClient.ExecuteAsync(request2).Result;
                     if (result2.IsSuccessful)
                     {
                         var cert = JsonConvert.DeserializeObject<CertificateDto>(result2.Content);

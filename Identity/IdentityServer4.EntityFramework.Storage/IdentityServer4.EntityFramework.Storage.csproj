@@ -11,6 +11,7 @@
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
 	  <OutputPath>publish</OutputPath>
 	  <BaseOutputPath>publish</BaseOutputPath>
+	  <AnalysisLevel>6.0-all</AnalysisLevel>
 
   </PropertyGroup>
 

@@ -12,33 +12,36 @@ namespace passi_android.utils
     {
 
 
-        public static Task<IRestResponse> ExecuteGetAsync(ProviderDb provider, string requestUri)
+        public static Task<RestResponse> ExecuteGetAsync(ProviderDb provider, string requestUri)
         {
             var client = GetClient(provider);
-            var request = new RestRequest(requestUri, Method.GET);
+            var request = new RestRequest(requestUri, Method.Get);
+            request.Timeout = 100000;
             return client.ExecuteAsync(request);
         }
 
-        public static Task<IRestResponse> ExecuteAsync(ProviderDb provider, string requestUri)
+        public static Task<RestResponse> ExecuteAsync(ProviderDb provider, string requestUri)
         {
             var client = GetClient(provider);
-            var request = new RestRequest(requestUri, Method.GET);
+            var request = new RestRequest(requestUri, Method.Get);
+            request.Timeout = 100000;
             return client.ExecuteAsync(request);
         }
 
-        public static Task<IRestResponse> ExecuteAsync(ProviderDb provider, string requestUri, Method method)
+        public static Task<RestResponse> ExecuteAsync(ProviderDb provider, string requestUri, Method method)
         {
             var client = GetClient(provider);
             var request = new RestRequest(requestUri, method);
+            request.Timeout = 100000;
             return client.ExecuteAsync(request);
         }
 
-        public static Task<IRestResponse> ExecutePostAsync<T>(ProviderDb provider, string requestUri, T item)
+        public static Task<RestResponse> ExecutePostAsync<T>(ProviderDb provider, string requestUri, T item) where T : class
         {
             var client = GetClient(provider);
-            client.Timeout = 3000;
-            client.ReadWriteTimeout = 3000;
-            var request = new RestRequest(requestUri, Method.POST);
+            var request = new RestRequest(requestUri, Method.Post);
+            request.Timeout = 3000;
+
             request.AddJsonBody(item);
             return client.ExecuteAsync(request);
         }
@@ -46,8 +49,6 @@ namespace passi_android.utils
         private static RestClient GetClient(ProviderDb provider)
         {
             var client = new RestClient(provider.WebApiUrl);
-            client.ReadWriteTimeout = 100000;
-            client.Timeout = 100000;
             return client;
         }
     }

@@ -9,7 +9,7 @@ namespace IdentityServer4.Validation
     /// <summary>
     /// Default custom request validator
     /// </summary>
-    internal class DefaultCustomTokenRequestValidator : ICustomTokenRequestValidator
+    public class DefaultCustomTokenRequestValidator : ICustomTokenRequestValidator
     {
         /// <summary>
         /// Custom validation logic for a token request.

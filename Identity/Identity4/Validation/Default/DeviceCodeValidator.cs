@@ -16,7 +16,7 @@ namespace IdentityServer4.Validation
     /// <summary>
     /// Validates an incoming token request using the device flow
     /// </summary>
-    internal class DeviceCodeValidator : IDeviceCodeValidator
+    public class DeviceCodeValidator : IDeviceCodeValidator
     {
         private readonly IDeviceFlowCodeService _devices;
         private readonly IProfileService _profile;

@@ -13,7 +13,7 @@ using System.Text.Encodings.Web;
 
 namespace IdentityServer4.Extensions
 {
-    internal static class StringExtensions
+    public static class StringExtensions
     {
         [DebuggerStepThrough]
         public static string ToSpaceSeparatedString(this IEnumerable<string> list)

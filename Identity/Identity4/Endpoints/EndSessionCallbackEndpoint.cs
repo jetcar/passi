@@ -12,7 +12,7 @@ using Microsoft.Extensions.Logging;
 
 namespace IdentityServer4.Endpoints
 {
-    internal class EndSessionCallbackEndpoint : IEndpointHandler
+    public class EndSessionCallbackEndpoint : IEndpointHandler
     {
         private readonly IEndSessionRequestValidator _endSessionRequestValidator;
         private readonly ILogger _logger;

@@ -15,7 +15,7 @@ using IdentityServer4.Extensions;
 
 namespace IdentityServer4.Hosting
 {
-    internal class CorsPolicyProvider : ICorsPolicyProvider
+    public class CorsPolicyProvider : ICorsPolicyProvider
     {
         private readonly ILogger _logger;
         private readonly ICorsPolicyProvider _inner;

@@ -21,7 +21,7 @@ using Microsoft.Extensions.Logging;
 
 namespace IdentityServer4.Endpoints
 {
-    internal abstract class AuthorizeEndpointBase : IEndpointHandler
+    public abstract class AuthorizeEndpointBase : IEndpointHandler
     {
         private readonly IAuthorizeResponseGenerator _authorizeResponseGenerator;
 
@@ -56,7 +56,7 @@ namespace IdentityServer4.Endpoints
 
         public abstract Task<IEndpointResult> ProcessAsync(HttpContext context);
 
-        internal async Task<IEndpointResult> ProcessAuthorizeRequestAsync(NameValueCollection parameters, ClaimsPrincipal user, ConsentResponse consent)
+        public async Task<IEndpointResult> ProcessAuthorizeRequestAsync(NameValueCollection parameters, ClaimsPrincipal user, ConsentResponse consent)
         {
             if (user != null)
             {

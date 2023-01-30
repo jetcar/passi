@@ -118,7 +118,7 @@ namespace IdentityServer4.ResponseHandling
         /// </summary>
         /// <param name="request">The request.</param>
         /// <returns></returns>
-        protected internal virtual async Task<InteractionResponse> ProcessLoginAsync(ValidatedAuthorizeRequest request)
+        public virtual async Task<InteractionResponse> ProcessLoginAsync(ValidatedAuthorizeRequest request)
         {
             if (request.PromptModes.Contains(OidcConstants.PromptModes.Login) ||
                 request.PromptModes.Contains(OidcConstants.PromptModes.SelectAccount))
@@ -229,7 +229,7 @@ namespace IdentityServer4.ResponseHandling
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="ArgumentException">Invalid PromptMode</exception>
-        protected internal virtual async Task<InteractionResponse> ProcessConsentAsync(ValidatedAuthorizeRequest request, ConsentResponse consent = null)
+        public virtual async Task<InteractionResponse> ProcessConsentAsync(ValidatedAuthorizeRequest request, ConsentResponse consent = null)
         {
             if (request == null) throw new ArgumentNullException(nameof(request));
 

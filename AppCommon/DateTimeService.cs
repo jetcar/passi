@@ -16,7 +16,7 @@ namespace AppCommon
             new Thread(() =>
             {
                 RestClient client = new RestClient(ConfigSettings.WebApiUrl);
-                var request = new RestRequest(ConfigSettings.Time, Method.GET);
+                var request = new RestRequest(ConfigSettings.Time, Method.Get);
 
                 while (true)
                 {
@@ -30,6 +30,7 @@ namespace AppCommon
                                                requestDelay;
                         return;
                     }
+                    Thread.Sleep(1);
                 }
             }).Start();
             

@@ -5,11 +5,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Diagnostics;
 using ConfigurationManager;
 using Microsoft.AspNetCore.DataProtection;
 using OpenIdLib.OpenId;
 using Serilog;
 using Serilog.Events;
+using Services;
 
 namespace WebApp
 {
@@ -25,10 +27,17 @@ namespace WebApp
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var passiUrl = Environment.GetEnvironmentVariable("PassiUrl") ?? Configuration.GetValue<string>("AppSetting:PassiUrl");
+            var identityUrl = Environment.GetEnvironmentVariable("IdentityUrl") ?? Configuration.GetValue<string>("AppSetting:IdentityUrl");
+            var returnUrl = Environment.GetEnvironmentVariable("returnUrl") ?? Configuration.GetValue<string>("AppSetting:returnUrl");
+            var clientId = Environment.GetEnvironmentVariable("ClientId") ?? Configuration.GetValue<string>("AppSetting:ClientId");
+            var secret = Environment.GetEnvironmentVariable("ClientSecret") ?? Configuration.GetValue<string>("AppSetting:ClientSecret");
+
             services.AddSingleton<AppSetting>();
             services.AddScoped<WebAppDbContext>();
             services.AddSingleton<IStartupFilter, MigrationStartupFilter<WebAppDbContext>>();
-
+            var myRestClient = new MyRestClient(passiUrl);
+            services.AddSingleton<IMyRestClient>(myRestClient);
             services.AddDataProtection()
                 .SetApplicationName("WebApp")
                 .AddKeyManagementOptions(options =>
@@ -38,11 +47,6 @@ namespace WebApp
                 })
                 .PersistKeysToDbContext<WebAppDbContext>();
 
-            var identityUrl = Environment.GetEnvironmentVariable("IdentityUrl") ?? Configuration.GetValue<string>("AppSetting:IdentityUrl");
-            var returnUrl = Environment.GetEnvironmentVariable("returnUrl") ?? Configuration.GetValue<string>("AppSetting:returnUrl");
-            var passiUrl = Environment.GetEnvironmentVariable("PassiUrl") ?? Configuration.GetValue<string>("AppSetting:PassiUrl");
-            var clientId = Environment.GetEnvironmentVariable("ClientId") ?? Configuration.GetValue<string>("AppSetting:ClientId");
-            var secret = Environment.GetEnvironmentVariable("ClientSecret") ?? Configuration.GetValue<string>("AppSetting:ClientSecret");
             services.AddAuthentication(options =>
                 {
                     options.DefaultAuthenticateScheme = "Cookies";
@@ -54,7 +58,7 @@ namespace WebApp
                         options.SlidingExpiration = true;
                         options.ExpireTimeSpan = System.TimeSpan.FromDays(30);
                     })
-                .AddOpenIdAuthentication(identityUrl, returnUrl, passiUrl, clientId, secret)
+                .AddOpenIdAuthentication(identityUrl, returnUrl, passiUrl, clientId, secret,myRestClient)
                 .AddOpenIdTokenManagement(x =>
                 {
                     x.RevokeRefreshTokenOnSignout = true;
@@ -62,18 +66,15 @@ namespace WebApp
 
             services.AddHttpClient();
             services.AddHealthChecks();
-            services.AddMvc(x =>
-           {
-               x.EnableEndpointRouting = false;
-           }).SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.AddMvc(x => { x.EnableEndpointRouting = false; });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app)
         {
             app.Map(new PathString(""), (applicationBuilder) =>
             {
-                if (env.IsDevelopment())
+                if (Debugger.IsAttached)
                 {
                     applicationBuilder.UseDeveloperExceptionPage();
                 }

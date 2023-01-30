@@ -16,7 +16,7 @@ using System.Text.Encodings.Web;
 
 namespace IdentityServer4.Endpoints.Results
 {
-    internal class EndSessionCallbackResult : IEndpointResult
+    public class EndSessionCallbackResult : IEndpointResult
     {
         private readonly EndSessionCallbackValidationResult _result;
 
@@ -25,7 +25,7 @@ namespace IdentityServer4.Endpoints.Results
             _result = result ?? throw new ArgumentNullException(nameof(result));
         }
 
-        internal EndSessionCallbackResult(
+        public EndSessionCallbackResult(
             EndSessionCallbackValidationResult result,
             IdentityServerOptions options)
             : this(result)

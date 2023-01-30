@@ -15,7 +15,7 @@ using Microsoft.AspNetCore.Authentication;
 
 namespace IdentityServer4.Services
 {
-    internal class DefaultIdentityServerInteractionService : IIdentityServerInteractionService
+    public class DefaultIdentityServerInteractionService : IIdentityServerInteractionService
     {
         private readonly ISystemClock _clock;
         private readonly IHttpContextAccessor _context;

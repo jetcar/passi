@@ -10,7 +10,7 @@ using IdentityServer4.Extensions;
 namespace IdentityServer4.Stores
 {
     // internal just for testing
-    internal class QueryStringAuthorizationParametersMessageStore : IAuthorizationParametersMessageStore
+    public class QueryStringAuthorizationParametersMessageStore : IAuthorizationParametersMessageStore
     {
         public Task<string> WriteAsync(Message<IDictionary<string, string[]>> message)
         {

@@ -14,7 +14,7 @@ namespace IdentityServer4.Validation
     /// <summary>
     /// Validates a request that uses a bearer token for authentication
     /// </summary>
-    internal class BearerTokenUsageValidator
+    public class BearerTokenUsageValidator
     {
         private readonly ILogger _logger;
 

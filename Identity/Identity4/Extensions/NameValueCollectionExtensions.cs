@@ -11,7 +11,7 @@ using System.Text.Encodings.Web;
 
 namespace IdentityServer4.Extensions
 {
-    internal static class NameValueCollectionExtensions
+    public static class NameValueCollectionExtensions
     {
         public static IDictionary<string, string[]> ToFullDictionary(this NameValueCollection source)
         {

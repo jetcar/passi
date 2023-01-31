@@ -19,6 +19,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="IdentityModelCore" Version="1.0.1" />
+		<PackageReference Include="IdentityServer4Core" Version="1.0.2" />
+		<PackageReference Include="IdentityServer4Core.EntityFramework" Version="1.0.0" />
 		<PackageReference Include="Microsoft.AspNetCore.DataProtection.EntityFrameworkCore" Version="7.0.2" />
 
 
@@ -68,11 +71,6 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\ConfigurationManager\ConfigurationManager.csproj" />
-	  <ProjectReference Include="..\Identity\Identity4\IdentityServer4.csproj" />
-	  <ProjectReference Include="..\Identity\IdentityModel\IdentityModel.csproj" />
-	  <ProjectReference Include="..\Identity\IdentityServer4.EntityFramework.Storage\IdentityServer4.EntityFramework.Storage.csproj" />
-	  <ProjectReference Include="..\Identity\IdentityServer4.EntityFramework\IdentityServer4.EntityFramework.csproj" />
-	  <ProjectReference Include="..\Identity\IdentityServer4.Storage\IdentityServer4.Storage.csproj" />
 	  <ProjectReference Include="..\Services\Services.csproj" />
 	  <ProjectReference Include="..\WebApiDto\WebApiDto.csproj" />
 	</ItemGroup>

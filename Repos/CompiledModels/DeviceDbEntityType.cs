@@ -80,16 +80,16 @@ namespace Repos.CompiledModels
                 new[] { id });
             runtimeEntityType.SetPrimaryKey(key);
 
-            var iX_Devices_DeviceId_Platform = runtimeEntityType.AddIndex(
+            var iXDevicesDeviceIdPlatform = runtimeEntityType.AddIndex(
                 new[] { deviceId, platform },
                 name: "IX_Devices_DeviceId_Platform",
                 unique: true);
 
-            var iX_Devices_ModifiedById = runtimeEntityType.AddIndex(
+            var iXDevicesModifiedById = runtimeEntityType.AddIndex(
                 new[] { modifiedById },
                 name: "IX_Devices_ModifiedById");
 
-            var iX_Devices_NotificationToken = runtimeEntityType.AddIndex(
+            var iXDevicesNotificationToken = runtimeEntityType.AddIndex(
                 new[] { notificationToken },
                 name: "IX_Devices_NotificationToken",
                 unique: true);

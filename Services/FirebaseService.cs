@@ -16,12 +16,14 @@ namespace Services
         private AppSetting _appSetting;
         private CurrentContext _currentContext;
         private IFireBaseClient _fireBaseClient;
+        private IRedisService _redisService;
 
-        public FirebaseService(AppSetting appSetting, CurrentContext currentContext, IFireBaseClient fireBaseClient)
+        public FirebaseService(AppSetting appSetting, CurrentContext currentContext, IFireBaseClient fireBaseClient, IRedisService redisService)
         {
             _appSetting = appSetting;
             _currentContext = currentContext;
             _fireBaseClient = fireBaseClient;
+            _redisService = redisService;
         }
 
         public virtual string SendNotification(string clientToken, string title, string body, string notification, Guid sessionId)
@@ -53,7 +55,7 @@ namespace Services
                 }
                 catch (Exception e)
                 {
-                    var sessionrepo = new SessionsRepository(new PassiDbContext(appsetting, currentContext, Logger.None), appsetting);
+                    var sessionrepo = new SessionsRepository(new PassiDbContext(appsetting, currentContext, Logger.None), appsetting, _redisService);
                     using (var transaction = sessionrepo.BeginTransaction())
                     {
                         var session = sessionrepo.GetSessionById(sessionId);

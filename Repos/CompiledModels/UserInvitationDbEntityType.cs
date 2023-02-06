@@ -77,11 +77,11 @@ namespace Repos.CompiledModels
                 new[] { id });
             runtimeEntityType.SetPrimaryKey(key);
 
-            var iX_Invitations_ModifiedById = runtimeEntityType.AddIndex(
+            var iXInvitationsModifiedById = runtimeEntityType.AddIndex(
                 new[] { modifiedById },
                 name: "IX_Invitations_ModifiedById");
 
-            var iX_Invitations_UserId = runtimeEntityType.AddIndex(
+            var iXInvitationsUserId = runtimeEntityType.AddIndex(
                 new[] { userId },
                 name: "IX_Invitations_UserId");
 

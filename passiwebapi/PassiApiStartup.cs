@@ -45,7 +45,7 @@ namespace passi_webapi
                 cfg.CreateMap<DeviceDb, DeviceDto>();
                 cfg.CreateMap<CertificateDb, CertificateDto>();
                 cfg.CreateMap<UserInvitationDb, UserInvitationDto>();
-                cfg.CreateMap<SessionDb, SessionDto>();
+                cfg.CreateMap<SessionTempRecord, SessionDto>();
                 cfg.CreateMap<Instant, DateTime>().ConvertUsing(s => s.ToDateTimeUtc());
             });
             var mapper = config.CreateMapper();
@@ -63,6 +63,7 @@ namespace passi_webapi
             var myRestClient = new MyRestClient(passiUrl);
             services.AddSingleton<IMyRestClient>(myRestClient);
 
+            services.AddSingleton<IRedisService, RedisService>();
             services.AddSingleton<IEmailSender, EmailSender>();
             services.AddSingleton<IRandomGenerator, RandomGenerator>();
             services.AddSingleton<IFireBaseClient, FireBaseClient>();

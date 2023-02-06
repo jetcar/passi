@@ -7,8 +7,6 @@ services:
     container_name: postgres
     networks:
     - dock_net
-    ports:
-      - 5432:5432
     env_file:
     - ../passi_config/dev.env
     volumes:
@@ -20,8 +18,6 @@ services:
     container_name: pgadmin
     networks:
     - dock_net
-    ports:
-      - 8080:8080
     env_file:
     - ../passi_config/dev.env
     restart: always
@@ -31,6 +27,16 @@ services:
     - ../passi_config/pgadmin/:/etc/pgadmin/:ro
     - ../pgadmin/:/var/lib/pgadmin/:rw
 
+  redis:
+    image: 'redis/redis-stack-server:7.0.6-RC5'
+    container_name: redis
+    networks:
+    - dock_net
+    env_file:
+    - ../passi_config/dev.env
+    restart: always
+    volumes:
+    - ../redis_data/:/data
 
 
   nginx:
@@ -45,8 +51,6 @@ services:
       - "443:443"
     depends_on:
     - webapp
-    - identityserver
-    - passiwebapi
     networks:
       - dock_net
 
@@ -81,7 +85,8 @@ services:
     env_file:
     - ../passi_config/dev.env
     depends_on:
-    - database    
+    - database   
+    - passiwebapi
     restart: always
 
   passiwebapi:
@@ -93,13 +98,13 @@ services:
       - dock_net
     ports:
     - "5004:5004"
+    depends_on:
+    - database   
+    - redis
     env_file:
     - ../passi_config/dev.env
     volumes:
     - ../creds:/home/creds
-
-    depends_on:
-    - database    
     restart: always
     
 

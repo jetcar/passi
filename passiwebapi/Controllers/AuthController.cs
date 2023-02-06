@@ -102,7 +102,7 @@ namespace passi_webapi.Controllers
                     throw new BadRequestException("Session not found");
                 if (sessionDb.Status == SessionStatus.Canceled)
                     throw new BadRequestException("User canceled");
-                var universalTime = sessionDb.ExpirationTime.ToDateTimeUtc();
+                var universalTime = sessionDb.ExpirationTime;
                 if (DateTime.UtcNow > universalTime)
                     throw new BadRequestException("Request Expired");
                 if (sessionDb.Status == SessionStatus.Error)
@@ -113,7 +113,7 @@ namespace passi_webapi.Controllers
                 //sessionDb.PublicCertThumbprint = "s";
                 //sessionDb.SignedHash = "s";
 
-                return new CheckResponceDto() { SignedHash = sessionDb.SignedHash, PublicCertThumbprint = sessionDb.PublicCertThumbprint, Username = sessionDb.User.EmailHash };
+                return new CheckResponceDto() { SignedHash = sessionDb.SignedHash, PublicCertThumbprint = sessionDb.PublicCertThumbprint, Username = sessionDb.Email };
             }
         }
 
@@ -133,9 +133,9 @@ namespace passi_webapi.Controllers
                     ReturnHost = new Uri(sessionDb.ReturnUrl).Host,
                     ConfirmationColor = Enum.Parse<Color>(sessionDb.CheckColor),
                     SessionId = sessionDb.Guid,
-                    ExpirationTime = sessionDb.ExpirationTime.ToDateTimeUtc(),
+                    ExpirationTime = sessionDb.ExpirationTime,
                     RandomString = sessionDb.RandomString,
-                    AccountGuid = sessionDb.User.Guid
+                    AccountGuid = sessionDb.UserGuid
                 });
             }
         }

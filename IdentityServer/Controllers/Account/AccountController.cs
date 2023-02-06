@@ -66,6 +66,41 @@ namespace IdentityServer.Controllers.Account
             _myRestClient = myRestClient;
         }
 
+
+        [HttpGet]
+        public async Task<LoginViewModel> ApiLogin([FromQuery] string returnUrl)
+        {
+            // build a model so we know what to show on the login page
+            LoginViewModel vm = new LoginViewModel()
+            {
+                Username = ""
+            };
+
+            var context = await _interaction.GetAuthorizationContextAsync(returnUrl);
+            if (context?.IdP != null && await _schemeProvider.GetSchemeAsync(context.IdP) != null)
+            {
+                // this is meant to short circuit the UI and only trigger the one external IdP
+                vm.ReturnUrl = returnUrl;
+            }
+
+            if (context?.Client.ClientId == null)
+            {
+                ModelState.TryAddModelError("invalid client", "invalid client");
+            }
+            else
+            {
+                vm.Nonce = context.Parameters["nonce"];
+
+                var client = await _clientStore.FindEnabledClientByIdAsync(context.Client.ClientId);
+                if (client == null)
+                {
+                    ModelState.TryAddModelError("invalid client", "invalid client");
+                }
+            }
+
+            return vm;
+        }
+
         /// <summary>
         /// Entry point into the login workflow
         /// </summary>

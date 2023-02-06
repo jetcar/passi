@@ -12,38 +12,22 @@ using NodaTime;
 
 namespace Repos.CompiledModels
 {
-    internal partial class SessionDbEntityType
+    internal partial class SimpleSessionDbEntityType
     {
         public static RuntimeEntityType Create(RuntimeModel model, RuntimeEntityType baseEntityType = null)
         {
             var runtimeEntityType = model.AddEntityType(
-                "Models.SessionDb",
-                typeof(SessionDb),
+                "Models.SimpleSessionDb",
+                typeof(SimpleSessionDb),
                 baseEntityType);
 
             var guid = runtimeEntityType.AddProperty(
                 "Guid",
                 typeof(Guid),
-                propertyInfo: typeof(SessionDb).GetProperty("Guid", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
-                fieldInfo: typeof(SessionDb).GetField("<Guid>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly),
+                propertyInfo: typeof(SimpleSessionDb).GetProperty("Guid", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
+                fieldInfo: typeof(SimpleSessionDb).GetField("<Guid>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly),
                 valueGenerated: ValueGenerated.OnAdd,
                 afterSaveBehavior: PropertySaveBehavior.Throw);
-
-            var checkColor = runtimeEntityType.AddProperty(
-                "CheckColor",
-                typeof(string),
-                propertyInfo: typeof(SessionDb).GetProperty("CheckColor", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
-                fieldInfo: typeof(SessionDb).GetField("<CheckColor>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly),
-                nullable: true,
-                maxLength: 16);
-
-            var clientId = runtimeEntityType.AddProperty(
-                "ClientId",
-                typeof(string),
-                propertyInfo: typeof(SessionDb).GetProperty("ClientId", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
-                fieldInfo: typeof(SessionDb).GetField("<ClientId>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly),
-                nullable: true,
-                maxLength: 50);
 
             var creationTime = runtimeEntityType.AddProperty(
                 "CreationTime",
@@ -52,18 +36,11 @@ namespace Repos.CompiledModels
                 fieldInfo: typeof(BaseModel).GetField("<CreationTime>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly));
             creationTime.AddAnnotation("Relational:ColumnType", "timestamp without time zone");
 
-            var errorMessage = runtimeEntityType.AddProperty(
-                "ErrorMessage",
-                typeof(string),
-                propertyInfo: typeof(SessionDb).GetProperty("ErrorMessage", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
-                fieldInfo: typeof(SessionDb).GetField("<ErrorMessage>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly),
-                nullable: true);
-
             var expirationTime = runtimeEntityType.AddProperty(
                 "ExpirationTime",
                 typeof(Instant),
-                propertyInfo: typeof(SessionDb).GetProperty("ExpirationTime", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
-                fieldInfo: typeof(SessionDb).GetField("<ExpirationTime>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly));
+                propertyInfo: typeof(SimpleSessionDb).GetProperty("ExpirationTime", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
+                fieldInfo: typeof(SimpleSessionDb).GetField("<ExpirationTime>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly));
             expirationTime.AddAnnotation("Relational:ColumnType", "timestamp without time zone");
 
             var modifiedById = runtimeEntityType.AddProperty(
@@ -81,67 +58,36 @@ namespace Repos.CompiledModels
                 nullable: true);
             modifiedTime.AddAnnotation("Relational:ColumnType", "timestamp without time zone");
 
-            var publicCertThumbprint = runtimeEntityType.AddProperty(
-                "PublicCertThumbprint",
-                typeof(string),
-                propertyInfo: typeof(SessionDb).GetProperty("PublicCertThumbprint", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
-                fieldInfo: typeof(SessionDb).GetField("<PublicCertThumbprint>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly),
-                nullable: true,
-                maxLength: 256);
-
-            var randomString = runtimeEntityType.AddProperty(
-                "RandomString",
-                typeof(string),
-                propertyInfo: typeof(SessionDb).GetProperty("RandomString", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
-                fieldInfo: typeof(SessionDb).GetField("<RandomString>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly),
-                maxLength: 256);
-
-            var returnUrl = runtimeEntityType.AddProperty(
-                "ReturnUrl",
-                typeof(string),
-                propertyInfo: typeof(SessionDb).GetProperty("ReturnUrl", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
-                fieldInfo: typeof(SessionDb).GetField("<ReturnUrl>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly),
-                nullable: true,
-                maxLength: 256);
-
-            var signedHash = runtimeEntityType.AddProperty(
-                "SignedHash",
-                typeof(string),
-                propertyInfo: typeof(SessionDb).GetProperty("SignedHash", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
-                fieldInfo: typeof(SessionDb).GetField("<SignedHash>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly),
-                nullable: true,
-                maxLength: 1024);
-
             var status = runtimeEntityType.AddProperty(
                 "Status",
                 typeof(SessionStatus?),
-                propertyInfo: typeof(SessionDb).GetProperty("Status", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
-                fieldInfo: typeof(SessionDb).GetField("<Status>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly),
+                propertyInfo: typeof(SimpleSessionDb).GetProperty("Status", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
+                fieldInfo: typeof(SimpleSessionDb).GetField("<Status>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly),
                 nullable: true);
 
             var userId = runtimeEntityType.AddProperty(
                 "UserId",
                 typeof(long),
-                propertyInfo: typeof(SessionDb).GetProperty("UserId", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
-                fieldInfo: typeof(SessionDb).GetField("<UserId>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly));
+                propertyInfo: typeof(SimpleSessionDb).GetProperty("UserId", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
+                fieldInfo: typeof(SimpleSessionDb).GetField("<UserId>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly));
 
             var key = runtimeEntityType.AddKey(
                 new[] { guid });
             runtimeEntityType.SetPrimaryKey(key);
 
-            var iX_Sessions_CreationTime = runtimeEntityType.AddIndex(
+            var iXSessionsCreationTime = runtimeEntityType.AddIndex(
                 new[] { creationTime },
                 name: "IX_Sessions_CreationTime");
 
-            var iX_Sessions_ModifiedById = runtimeEntityType.AddIndex(
+            var iXSessionsModifiedById = runtimeEntityType.AddIndex(
                 new[] { modifiedById },
                 name: "IX_Sessions_ModifiedById");
 
-            var iX_Sessions_Status = runtimeEntityType.AddIndex(
+            var iXSessionsStatus = runtimeEntityType.AddIndex(
                 new[] { status },
                 name: "IX_Sessions_Status");
 
-            var iX_Sessions_UserId = runtimeEntityType.AddIndex(
+            var iXSessionsUserId = runtimeEntityType.AddIndex(
                 new[] { userId },
                 name: "IX_Sessions_UserId");
 
@@ -165,7 +111,7 @@ namespace Repos.CompiledModels
             var sessionModifiedBies = principalEntityType.AddNavigation("SessionModifiedBies",
                 runtimeForeignKey,
                 onDependent: false,
-                typeof(ICollection<SessionDb>),
+                typeof(ICollection<SimpleSessionDb>),
                 propertyInfo: typeof(UserDb).GetProperty("SessionModifiedBies", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
                 fieldInfo: typeof(UserDb).GetField("<SessionModifiedBies>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly));
 
@@ -184,13 +130,13 @@ namespace Repos.CompiledModels
                 runtimeForeignKey,
                 onDependent: true,
                 typeof(UserDb),
-                propertyInfo: typeof(SessionDb).GetProperty("User", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
-                fieldInfo: typeof(SessionDb).GetField("<User>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly));
+                propertyInfo: typeof(SimpleSessionDb).GetProperty("User", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
+                fieldInfo: typeof(SimpleSessionDb).GetField("<User>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly));
 
             var sessionUsers = principalEntityType.AddNavigation("SessionUsers",
                 runtimeForeignKey,
                 onDependent: false,
-                typeof(ICollection<SessionDb>),
+                typeof(ICollection<SimpleSessionDb>),
                 propertyInfo: typeof(UserDb).GetProperty("SessionUsers", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
                 fieldInfo: typeof(UserDb).GetField("<SessionUsers>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly));
 

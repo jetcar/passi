@@ -17,7 +17,7 @@ namespace Repos.CompiledModels
             var adminDb = AdminDbEntityType.Create(this);
             var certificateDb = CertificateDbEntityType.Create(this);
             var deviceDb = DeviceDbEntityType.Create(this);
-            var sessionDb = SessionDbEntityType.Create(this);
+            var simpleSessionDb = SimpleSessionDbEntityType.Create(this);
             var userDb = UserDbEntityType.Create(this);
             var userInvitationDb = UserInvitationDbEntityType.Create(this);
 
@@ -25,8 +25,8 @@ namespace Repos.CompiledModels
             CertificateDbEntityType.CreateForeignKey2(certificateDb, certificateDb);
             CertificateDbEntityType.CreateForeignKey3(certificateDb, userDb);
             DeviceDbEntityType.CreateForeignKey1(deviceDb, userDb);
-            SessionDbEntityType.CreateForeignKey1(sessionDb, userDb);
-            SessionDbEntityType.CreateForeignKey2(sessionDb, userDb);
+            SimpleSessionDbEntityType.CreateForeignKey1(simpleSessionDb, userDb);
+            SimpleSessionDbEntityType.CreateForeignKey2(simpleSessionDb, userDb);
             UserDbEntityType.CreateForeignKey1(userDb, deviceDb);
             UserDbEntityType.CreateForeignKey2(userDb, userDb);
             UserInvitationDbEntityType.CreateForeignKey1(userInvitationDb, userDb);
@@ -36,12 +36,12 @@ namespace Repos.CompiledModels
             AdminDbEntityType.CreateAnnotations(adminDb);
             CertificateDbEntityType.CreateAnnotations(certificateDb);
             DeviceDbEntityType.CreateAnnotations(deviceDb);
-            SessionDbEntityType.CreateAnnotations(sessionDb);
+            SimpleSessionDbEntityType.CreateAnnotations(simpleSessionDb);
             UserDbEntityType.CreateAnnotations(userDb);
             UserInvitationDbEntityType.CreateAnnotations(userInvitationDb);
 
             AddAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
-            AddAnnotation("ProductVersion", "6.0.10");
+            AddAnnotation("ProductVersion", "7.0.2");
             AddAnnotation("Relational:MaxIdentifierLength", 63);
         }
     }

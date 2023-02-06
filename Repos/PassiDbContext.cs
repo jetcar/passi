@@ -60,7 +60,6 @@ namespace Repos
         public DbSet<UserDb> Users { get; set; }
         public DbSet<DeviceDb> Devices { get; set; }
         public DbSet<UserInvitationDb> Invitations { get; set; }
-        public DbSet<SessionDb> Sessions { get; set; }
         public DbSet<AdminDb> Admins { get; set; }
 
         public override int SaveChanges()
@@ -189,7 +188,7 @@ namespace Repos
                     .HasForeignKey(d => d.UserId);
             });
 
-            modelBuilder.Entity<SessionDb>(entity =>
+            modelBuilder.Entity<SimpleSessionDb>(entity =>
             {
                 entity.HasKey(e => e.Guid);
 
@@ -201,10 +200,6 @@ namespace Repos
 
                 entity.HasIndex(e => e.UserId, "IX_Sessions_UserId");
 
-                entity.Property(e => e.CheckColor).HasMaxLength(16);
-
-                entity.Property(e => e.ClientId).HasMaxLength(50);
-
                 entity.Property(e => e.CreationTime).HasColumnType("timestamp without time zone");
 
                 entity.Property(e => e.ExpirationTime)
@@ -212,15 +207,6 @@ namespace Repos
 
                 entity.Property(e => e.ModifiedTime).HasColumnType("timestamp without time zone");
 
-                entity.Property(e => e.PublicCertThumbprint).HasMaxLength(256);
-
-                entity.Property(e => e.RandomString)
-                    .IsRequired()
-                    .HasMaxLength(256);
-
-                entity.Property(e => e.ReturnUrl).HasMaxLength(256);
-
-                entity.Property(e => e.SignedHash).HasMaxLength(1024);
 
                 entity.HasOne(d => d.ModifiedBy)
                     .WithMany(p => p.SessionModifiedBies)
@@ -275,5 +261,6 @@ namespace Repos
         }
 
         public DbSet<DataProtectionKey> DataProtectionKeys { get; set; }
+        public DbSet<SimpleSessionDb> Sessions { get; set; }
     }
 }

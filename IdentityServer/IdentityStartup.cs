@@ -23,9 +23,11 @@ using Microsoft.EntityFrameworkCore;
 using AuthenticationOptions = IdentityServer4.Configuration.AuthenticationOptions;
 using IdentityResource = IdentityServer4.EntityFramework.Entities.IdentityResource;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.StaticFiles.Infrastructure;
 using Services;
 using ApiScope = IdentityServer4.EntityFramework.Entities.ApiScope;
 using Client = IdentityServer4.Models.Client;
+using Microsoft.OpenApi.Models;
 
 namespace IdentityServer
 {
@@ -76,6 +78,10 @@ namespace IdentityServer
                     options.NewKeyLifetime = TimeSpan.FromDays(7);
                 })
                 .PersistKeysToDbContext<IdentityDbContext>();
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -114,13 +120,18 @@ namespace IdentityServer
                 applicationBuilder.UseIdentityServer();
                 applicationBuilder.UseAuthorization();
                 applicationBuilder.UseCookiePolicy();
-
+                applicationBuilder.UseStaticFiles();
+                applicationBuilder.UseDefaultFiles();
                 applicationBuilder.UseEndpoints(endpoints =>
                 {
                     endpoints.MapControllerRoute(
                         name: "default",
                         pattern: "{controller=Home}/{action=Index}/{id?}");
                 });
+                applicationBuilder.UseSwagger();
+                applicationBuilder.UseSwaggerUI(c => { c.SwaggerEndpoint("v1/swagger.json", "My API V1"); });
+
+
             });
         }
 

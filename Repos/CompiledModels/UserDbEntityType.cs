@@ -80,21 +80,21 @@ namespace Repos.CompiledModels
                 new[] { id });
             runtimeEntityType.SetPrimaryKey(key);
 
-            var iX_Users_DeviceId = runtimeEntityType.AddIndex(
+            var iXUsersDeviceId = runtimeEntityType.AddIndex(
                 new[] { deviceId },
                 name: "IX_Users_DeviceId");
 
-            var iX_Users_EmailHash = runtimeEntityType.AddIndex(
+            var iXUsersEmailHash = runtimeEntityType.AddIndex(
                 new[] { emailHash },
                 name: "IX_Users_EmailHash",
                 unique: true);
 
-            var iX_Users_Guid = runtimeEntityType.AddIndex(
+            var iXUsersGuid = runtimeEntityType.AddIndex(
                 new[] { guid },
                 name: "IX_Users_Guid",
                 unique: true);
 
-            var iX_Users_ModifiedById = runtimeEntityType.AddIndex(
+            var iXUsersModifiedById = runtimeEntityType.AddIndex(
                 new[] { modifiedById },
                 name: "IX_Users_ModifiedById");
 

@@ -74,7 +74,12 @@ namespace Repos
             var session = _redisService.Get(guid);
             if (session != null)
             {
-                session.SignedHash = signedHash;
+                var sessionDb = _dbContext.Sessions.FirstOrDefault(x => x.Guid == guid);
+                if(sessionDb != null)
+                {
+                    sessionDb.SignedHashNew = signedHash;
+                    _dbContext.SaveChanges();
+                }
                 session.PublicCertThumbprint = publicCertThumbprint;
                 session.Status = SessionStatus.Confirmed;
                 _redisService.Add(session);
@@ -83,7 +88,7 @@ namespace Repos
 
         public SessionTempRecord GetActiveSession(string deviceId, Instant expirationTime)
         {
-            var sessionDbs = _dbContext.Sessions.Include(x => x.User).Where(x => x.User.Device.DeviceId == deviceId).FirstOrDefault(x => x.Status != SessionStatus.Canceled && x.Status != SessionStatus.Confirmed && x.ExpirationTime >= expirationTime);
+            var sessionDbs = _dbContext.Sessions.Include(x => x.User).Where(x => x.User.Device.DeviceId == deviceId).OrderByDescending(x=>x.CreationTime).FirstOrDefault(x => x.Status != SessionStatus.Canceled && x.Status != SessionStatus.Confirmed && x.ExpirationTime >= expirationTime);
             if (sessionDbs != null)
                 return _redisService.Get(sessionDbs.Guid);
             return null;
@@ -111,6 +116,16 @@ namespace Repos
         {
             _redisService.Add(session);
         }
+
+        public SimpleSessionDb GetAuthorizedSession(Guid sessionId, string thunbprint, string username)
+        {
+            var certificate = _dbContext.Certificates.Include(x => x.User).FirstOrDefault(x => x.Thumbprint == thunbprint && x.User.EmailHash == username);
+            var sessionDb = _dbContext.Sessions.FirstOrDefault(x => x.Guid == sessionId);
+            if (certificate != null)
+                return sessionDb;
+            return null;
+
+        }
     }
 
     public interface ISessionsRepository
@@ -128,5 +143,6 @@ namespace Repos
         SessionTempRecord GetActiveSession(string deviceId, Instant expirationTime);
 
         List<UserDb> SyncAccounts(List<string> guilds, string deviceId);
+        SimpleSessionDb GetAuthorizedSession(Guid sessionId, string thunbprint, string username);
     }
 }

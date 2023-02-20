@@ -8,8 +8,10 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using OpenIdLib.AutomaticTokenManagement;
+using passi_webapi.Dto;
 using RestSharp;
 using Services;
+using WebApiDto.Auth;
 using WebApiDto.Certificate;
 
 namespace OpenIdLib.OpenId
@@ -104,20 +106,20 @@ namespace OpenIdLib.OpenId
                 return;
             }
             var thumbprint = claimsIdentity.FindFirst("Thumbprint")?.Value;
-            var signedHash = claimsIdentity.FindFirst("SignedHash")?.Value;
+            var sessionId = claimsIdentity.FindFirst("SessionId")?.Value;
             var username = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (thumbprint != null)
             {
-                var request = new RestRequest($"api/Certificate/Public?thumbprint={thumbprint}&username={username}", Method.Get);
+                var request = new RestRequest($"api/Auth/session?sessionId={sessionId}&thumbprint={thumbprint}&username={username}", Method.Get);
                 var result = _restClient.ExecuteAsync(request).Result;
                 if (result.IsSuccessful)
                 {
-                    var cert = JsonConvert.DeserializeObject<CertificateDto>(result.Content);
+                    var cert = JsonConvert.DeserializeObject<SessionMinDto>(result.Content);
                     var publicCertificate = new X509Certificate2(Convert.FromBase64String(cert.PublicCert));
                     var nonce = context.Nonce;
 
                     // ComputeHash - returns byte array
-                    var isValid = CertHelper.VerifyData(nonce, signedHash, cert.PublicCert);
+                    var isValid = CertHelper.VerifyData(nonce, cert.SignedHash, cert.PublicCert);
 
                     if (!isValid)
                         throw new UnauthorizedAccessException("Invalid signature");

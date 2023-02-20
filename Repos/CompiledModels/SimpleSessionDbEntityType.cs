@@ -58,6 +58,14 @@ namespace Repos.CompiledModels
                 nullable: true);
             modifiedTime.AddAnnotation("Relational:ColumnType", "timestamp without time zone");
 
+            var signedHashNew = runtimeEntityType.AddProperty(
+                "SignedHashNew",
+                typeof(string),
+                propertyInfo: typeof(SimpleSessionDb).GetProperty("SignedHashNew", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
+                fieldInfo: typeof(SimpleSessionDb).GetField("<SignedHashNew>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly),
+                nullable: true,
+                maxLength: 1024);
+
             var status = runtimeEntityType.AddProperty(
                 "Status",
                 typeof(SessionStatus?),

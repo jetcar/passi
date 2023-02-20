@@ -24,7 +24,7 @@ namespace IdentityServer.services
 
             context.IssuedClaims.Add(new Claim("email", context.Subject.FindFirstValue("sub")));
             context.IssuedClaims.Add(new Claim("Thumbprint", context.Subject.FindFirstValue("Thumbprint")));
-            context.IssuedClaims.Add(new Claim("SignedHash", context.Subject.FindFirstValue("SignedHash")));
+            context.IssuedClaims.Add(new Claim("sessionId", context.Subject.FindFirstValue("sessionId")));
 
             context.LogIssuedClaims(Logger);
             await Task.FromResult("");

@@ -23,7 +23,7 @@ namespace Services
                 throw new BadRequestException("Certificate Email do not match");
         }
 
-        public void ValidateCertificate(CertificateDto newPublicCertDto, CertificateDb oldPublicCertDb)
+        public void ValidateCertificate(CertificateUpdateDto newPublicCertDto, CertificateDb oldPublicCertDb)
         {
             var fromBase64String = Convert.FromBase64String(newPublicCertDto.PublicCert);
             var newPublicCert = new X509Certificate2(fromBase64String);
@@ -42,7 +42,7 @@ namespace Services
                 throw new BadRequestException("Certificate Email do not match");
         }
 
-        public void ValidateCertificateChain(CertificateDto newCertificate, CertificateDb oldCertificate)
+        public void ValidateCertificateChain(CertificateUpdateDto newCertificate, CertificateDb oldCertificate)
         {
             var verify = CertHelper.VerifyData(newCertificate.PublicCert, newCertificate.ParentCertHashSignature,
                 oldCertificate.PublicCert);
@@ -58,8 +58,8 @@ namespace Services
     {
         void ValidateCertificate(string publicCertBase64, string email);
 
-        void ValidateCertificate(CertificateDto newPublicCertDto, CertificateDb oldPublicCertDb);
+        void ValidateCertificate(CertificateUpdateDto newPublicCertDto, CertificateDb oldPublicCertDb);
 
-        void ValidateCertificateChain(CertificateDto newCertificate, CertificateDb oldCertificate);
+        void ValidateCertificateChain(CertificateUpdateDto newCertificate, CertificateDb oldCertificate);
     }
 }

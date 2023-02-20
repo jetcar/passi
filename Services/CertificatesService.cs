@@ -19,7 +19,7 @@ namespace Services
             _certificateRepository = certificateRepository;
         }
 
-        public CertificateDb UpdateCertificate(CertificateDto newCertificate)
+        public CertificateDb UpdateCertificate(CertificateUpdateDto newCertificate)
         {
             var certificate = new X509Certificate2(Convert.FromBase64String(newCertificate.PublicCert));
             return _certificateRepository.AddCertificate(certificate.Thumbprint, newCertificate.PublicCert,
@@ -29,6 +29,6 @@ namespace Services
 
     public interface ICertificatesService
     {
-        CertificateDb UpdateCertificate(CertificateDto newCertificate);
+        CertificateDb UpdateCertificate(CertificateUpdateDto newCertificate);
     }
 }

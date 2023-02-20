@@ -130,6 +130,7 @@ namespace passi_android.Notifications
 
             base.OnAppearing();
             App.CancelNotifications.Invoke();
+            SecureRepository.ReleaseSessionKey(Message.SessionId);
         }
 
         public AccountDb Account { get; set; }
@@ -364,6 +365,8 @@ namespace passi_android.Notifications
         private void Cancel_OnClicked(object sender, EventArgs e)
         {
             var accountDb = SecureRepository.GetAccount(Message.AccountGuid);
+            if (accountDb != null)
+                accountDb.Provider = SecureRepository.GetProvider(accountDb.ProviderGuid);
             RestService.ExecuteAsync(accountDb.Provider, accountDb.Provider.CancelCheck + "?SessionId=" + Message.SessionId);
             Navigation.NavigateTop();
         }

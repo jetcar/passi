@@ -5,7 +5,7 @@ using System.Text;
 
 namespace WebApiDto.Certificate
 {
-    public class CertificateDto
+    public class CertificateUpdateDto
     {
         [Required]
         public string PublicCert { get; set; }

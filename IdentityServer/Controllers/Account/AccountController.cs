@@ -24,6 +24,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using passi_webapi.Dto;
 using Repos.Migrations;
 using RestSharp;
 using Services;
@@ -148,7 +149,7 @@ namespace IdentityServer.Controllers.Account
             ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
 
             var context = await _interaction.GetAuthorizationContextAsync(model.ReturnUrl);
-            
+
             var request = new RestRequest(_appSetting["startRequest"], Method.Post);
             var possibleCodes = new List<Color>()
             {
@@ -250,34 +251,40 @@ namespace IdentityServer.Controllers.Account
                         if (publicCertificate.NotAfter < DateTime.UtcNow && publicCertificate.NotBefore > DateTime.UtcNow)
                         {
                             ModelState.AddModelError("Error", "Invalid Certificate");
-
                         }
                         var nonce = model.RandomString;
 
-                        // ComputeHash - returns byte array
-                        var isValid = CertHelper.VerifyData(nonce, checkResponceDto.SignedHash, cert.PublicCert);
-                        if (isValid)
+                        var requestCurrentSessionReq = new RestRequest($"api/Auth/session?sessionId={model.SessionId}&thumbprint={checkResponceDto.PublicCertThumbprint}&username={checkResponceDto.Username}", Method.Get);
+                        var requestCurrentSessionResult = _myRestClient.ExecuteAsync(requestCurrentSessionReq).Result;
+                        if (requestCurrentSessionResult.IsSuccessful)
                         {
-                            isuser.AdditionalClaims.Add(new Claim("Thumbprint", checkResponceDto.PublicCertThumbprint));
-                            isuser.AdditionalClaims.Add(new Claim("SignedHash", checkResponceDto.SignedHash));
-                            await AuthenticationManagerExtensions.SignInAsync(HttpContext, isuser,
-                                new AuthenticationProperties()
-                                {
-                                    IsPersistent = true,
-                                    AllowRefresh = true,
-                                    ExpiresUtc =
-                                        DateTimeOffset.UtcNow.AddMinutes(Convert.ToDouble(_appSetting["SessionLength"]))
-                                });
-                            return RedirectPermanent(model.ReturnUrl);
-                        }
-                        else
-                        {
-                            ModelState.AddModelError("Error", "Invalid Signature");
+                            var session = JsonConvert.DeserializeObject<SessionMinDto>(requestCurrentSessionResult.Content);
+
+                            // ComputeHash - returns byte array
+                            var isValid = CertHelper.VerifyData(nonce, session.SignedHash, cert.PublicCert);
+                            if (isValid)
+                            {
+                                isuser.AdditionalClaims.Add(new Claim("Thumbprint", checkResponceDto.PublicCertThumbprint));
+                                isuser.AdditionalClaims.Add(new Claim("sessionId", model.SessionId.ToString()));
+                                await AuthenticationManagerExtensions.SignInAsync(HttpContext, isuser,
+                                    new AuthenticationProperties()
+                                    {
+                                        IsPersistent = true,
+                                        AllowRefresh = true,
+                                        ExpiresUtc =
+                                            DateTimeOffset.UtcNow.AddMinutes(Convert.ToDouble(_appSetting["SessionLength"]))
+                                    });
+                                return RedirectPermanent(model.ReturnUrl);
+                            }
+                            else
+                            {
+                                ModelState.AddModelError("Error", "Invalid Signature");
+                            }
                         }
                     }
                     else
                     {
-                        ModelState.AddModelError("Error", result2.Content  + " " + result2.ErrorMessage);
+                        ModelState.AddModelError("Error", result2.Content + " " + result2.ErrorMessage);
                     }
                 }
             }

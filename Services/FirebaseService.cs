@@ -48,7 +48,7 @@ namespace Services
             var currentContext = _currentContext;
             new Thread(() =>
             {
-                Thread.Sleep(5000);
+                Thread.Sleep(3000);
                 try
                 {
                     var response = _fireBaseClient.Send(message);

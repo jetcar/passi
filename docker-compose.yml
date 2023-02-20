@@ -5,6 +5,8 @@ services:
   database:
     image: 'postgres:13.8'
     container_name: postgres
+    ports:
+      - "5432:5432"
     networks:
     - dock_net
     env_file:
@@ -65,6 +67,8 @@ services:
     - "5002:5002"
     env_file:
     - ../passi_config/dev.env
+    volumes:
+    - ../creds:/home/creds
     depends_on:
     - database
     restart: always
@@ -84,6 +88,8 @@ services:
     - "5003:5003"
     env_file:
     - ../passi_config/dev.env
+    volumes:
+    - ../creds:/home/creds
     depends_on:
     - database   
     - passiwebapi

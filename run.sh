@@ -6,13 +6,11 @@ git checkout .
 git fetch
 git pull
 
-#dotnet publish WebApp/WebApp.csproj -c Release -o WebApp/publish
-#dotnet publish passiwebapi/passiwebapi.csproj -c Release -o passiwebapi/publish
-#dotnet publish IdentityServer/IdentityServer.csproj -c Release -o IdentityServer/publish
-
-
 sudo docker image prune -f
 sudo docker volume prune -f
+
+sudo docker pull mcr.microsoft.com/dotnet/sdk:7.0
+sudo docker pull mcr.microsoft.com/dotnet/aspnet:7.0
 
 sudo docker-compose down
 sudo docker-compose -f docker-compose.yml up --force-recreate --build

@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading;
 using System.Threading.Tasks;
 using AppCommon;
 using AppConfig;
@@ -146,17 +147,38 @@ namespace passi_android.utils
             return null;
         }
 
+        private static bool locked = false;
         private static object locker = new object();
+        private static DateTime lockerTime;
 
-        public static bool AddSessionKey(Guid msgSessionId)
+        public static bool CheckSessionKey(Guid msgSessionId)
+        {
+
+            lock (locker)
+            {
+                if (locked)
+                    if (lockerTime.AddMinutes(1) < DateTime.Now)
+                        locked = false;
+                    else
+                        return false;
+
+                locked = true;
+                lockerTime = DateTime.Now;
+                var result = SecureStorage.GetAsync(msgSessionId.ToString()).Result;
+                if (result != null)
+                {
+                    locked = false;
+                    return false;
+                }
+                return true;
+            }
+        }
+        public static void ReleaseSessionKey(Guid msgSessionId)
         {
             lock (locker)
             {
-                var result = SecureStorage.GetAsync(msgSessionId.ToString()).Result;
-                if (result != null)
-                    return false;
                 SecureStorage.SetAsync(msgSessionId.ToString(), "").GetAwaiter().GetResult();
-                return true;
+                locked = false;
             }
         }
 
@@ -256,7 +278,7 @@ namespace passi_android.utils
             var destType = typeof(R);
             foreach (var destProperty in destType.GetProperties())
             {
-                if(!destProperty.CanWrite)
+                if (!destProperty.CanWrite)
                     continue;
                 var sourceProperty = sourceType.GetProperty(destProperty.Name);
                 if (sourceProperty != null)

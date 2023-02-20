@@ -4,6 +4,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using Microsoft.AspNetCore.Mvc;
 using Models;
+using passi_webapi.Dto;
 using Repos;
 using Services;
 using WebApiDto;
@@ -35,14 +36,13 @@ namespace passi_webapi.Controllers
                 return new CertificateDto()
                 {
                     PublicCert = certificateDb?.PublicCert,
-                    ParentCertThumbprint = certificateDb?.ParentCertId
                 };
             }
 
         }
 
         [HttpPost, Route("UpdatePublicCert")]
-        public CertificateDto UpdatePublicCert([FromBody] CertificateDto newCertificate)
+        public CertificateUpdateDto UpdatePublicCert([FromBody] CertificateUpdateDto newCertificate)
         {
             using (var transaction = _certificateRepository.BeginTransaction())
             {
@@ -53,7 +53,7 @@ namespace passi_webapi.Controllers
 
                 var certificateDb = _certificatesService.UpdateCertificate(newCertificate);
                 transaction.Commit();
-                return new CertificateDto()
+                return new CertificateUpdateDto()
                 {
                     PublicCert = certificateDb?.PublicCert
                 };

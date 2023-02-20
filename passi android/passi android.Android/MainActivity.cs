@@ -132,10 +132,11 @@ namespace passi_android.Droid
 
         public static void PollNotifications()
         {
-            lock (locker)
+            PollingTask ??= Task.Run(() =>
             {
-                PollingTask ??= Task.Run(() =>
+                lock (locker)
                 {
+
                     var accounts = new ObservableCollection<utils.AccountView>();
                     SecureRepository.LoadAccountIntoList(accounts);
                     var providers = SecureRepository.LoadProviders();
@@ -150,64 +151,62 @@ namespace passi_android.Droid
                         };
 
                         var guids = accounts.Select(x => x.Guid.ToString()).ToList();
-                        RestService.ExecutePostAsync(provider, provider.SyncAccounts, new SyncAccountsDto()
+                        var task = RestService.ExecutePostAsync(provider, provider.SyncAccounts, new SyncAccountsDto()
                         {
                             DeviceId = SecureRepository.GetDeviceId(),
                             Guids = guids
-                        }
-                        ).ContinueWith(
-                            (task) =>
+                        });
+
+                        var restResponse = task.Result;
+                        if (restResponse.IsSuccessful)
+                        {
+                            var serverAccounts = JsonConvert.DeserializeObject<List<AccountMinDto>>(restResponse.Content);
+                            foreach (var account in groupedAccount)
                             {
-                                task.GetAwaiter().GetResult();
-                                if (task.Result.IsSuccessful)
+                                if (serverAccounts.All(x => x.UserGuid != account.Guid))
                                 {
-                                    var serverAccounts =
-                                        JsonConvert.DeserializeObject<List<AccountMinDto>>(task.Result.Content);
-                                    foreach (var account in groupedAccount)
+                                    var loadedAccount = SecureRepository.GetAccount(account.Guid);
+                                    if (loadedAccount != null && loadedAccount.IsConfirmed)
                                     {
-                                        if (serverAccounts.All(x => x.UserGuid != account.Guid))
-                                        {
-                                            var loadedAccount = SecureRepository.GetAccount(account.Guid);
-                                            if (loadedAccount != null && loadedAccount.IsConfirmed)
-                                            {
-                                                loadedAccount.Inactive = true;
-                                                SecureRepository.UpdateAccount(loadedAccount);
-                                            }
-                                        }
+                                        loadedAccount.Inactive = true;
+                                        SecureRepository.UpdateAccount(loadedAccount);
                                     }
-
-                                    if (App.AccountSyncCallback != null)
-                                        App.AccountSyncCallback.Invoke();
                                 }
-                            });
+                            }
+
+                            if (App.AccountSyncCallback != null)
+                                App.AccountSyncCallback.Invoke();
+                        }
 
 
-                        RestService
-                            .ExecutePostAsync(provider, provider.CheckForStartedSessions, getAllSessionDto)
-                            .ContinueWith((task) =>
+
+                        var task2 = RestService.ExecutePostAsync(provider, provider.CheckForStartedSessions, getAllSessionDto);
+
+                        var response = task2.Result;
+                        if (response.IsSuccessful)
+                        {
+                            var msg = JsonConvert.DeserializeObject<NotificationDto>(response.Content);
+                            if (msg != null)
+                            {
+                                if (SecureRepository.CheckSessionKey(msg.SessionId))
                                 {
-                                    var response = task.Result;
-                                    if (response.IsSuccessful)
+                                    MainThread.BeginInvokeOnMainThread(() =>
                                     {
-                                        var msg = JsonConvert.DeserializeObject<NotificationDto>(response.Content);
-                                        if (msg != null)
-                                        {
-                                            if (SecureRepository.AddSessionKey(msg.SessionId))
-                                                MainThread.BeginInvokeOnMainThread(() =>
-                                                {
-                                                    NotificationVerifyRequestView.Instance.Message = msg;
-                                                    App.MainPage.Navigation.PushModalSinglePage(
-                                                        NotificationVerifyRequestView
-                                                            .Instance);
-                                                });
-                                        }
-                                    }
-                                });
+                                        NotificationVerifyRequestView.Instance.Message = msg;
+                                        App.MainPage.Navigation.PushModalSinglePage(
+                                            NotificationVerifyRequestView
+                                                .Instance);
+                                    });
+                                }
+                            }
+                        }
+
                     }
 
                     PollingTask = null;
-                });
-            }
+                }
+
+            });
         }
 
         public static Task PollingTask { get; set; }

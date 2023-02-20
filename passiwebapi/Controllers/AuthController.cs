@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Models;
 using Newtonsoft.Json;
 using NodaTime;
+using passi_webapi.Dto;
 using Repos;
 using Services;
 using WebApiDto;
@@ -113,9 +114,24 @@ namespace passi_webapi.Controllers
                 //sessionDb.PublicCertThumbprint = "s";
                 //sessionDb.SignedHash = "s";
 
-                return new CheckResponceDto() { SignedHash = sessionDb.SignedHash, PublicCertThumbprint = sessionDb.PublicCertThumbprint, Username = sessionDb.Email };
+                return new CheckResponceDto() { PublicCertThumbprint = sessionDb.PublicCertThumbprint, Username = sessionDb.Email };
             }
         }
+
+        
+        [HttpGet, Route("session")]
+        public SessionMinDto Session([FromQuery] Guid sessionId, string thumbprint, string username)
+        {
+            using (var transaction = _sessionsRepository.BeginTransaction())
+            {
+                var sessionDb = _sessionsRepository.GetAuthorizedSession(sessionId, thumbprint, username);
+                if (sessionDb == null)
+                    throw new BadRequestException("Session not found");
+
+                return new SessionMinDto() { SignedHash = sessionDb.SignedHashNew, PublicCert = sessionDb.User.Certificates.FirstOrDefault(x=>x.Thumbprint == thumbprint)?.PublicCert };
+            }
+        }
+
 
         [HttpPost, Route("GetActiveSession")]
         public IActionResult GetActiveSession([FromBody] GetAllSessionDto getSessionDto)

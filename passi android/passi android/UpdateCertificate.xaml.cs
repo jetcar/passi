@@ -172,9 +172,9 @@ namespace passi_android
             }));
         }
 
-        public static async Task<Tuple<CertificateDto, X509Certificate2, byte[]>> GenerateCert(string pinNew, string pinOld, AccountDb Account, Action<string> callback)
+        public static async Task<Tuple<CertificateUpdateDto, X509Certificate2, byte[]>> GenerateCert(string pinNew, string pinOld, AccountDb Account, Action<string> callback)
         {
-            var cert = new CertificateDto();
+            var cert = new CertificateUpdateDto();
             cert.ParentCertThumbprint = Account.Thumbprint;
             return await Certificates.GenerateCertificate(Account.Email, pinNew).ContinueWith(certificate =>
             {
@@ -191,7 +191,7 @@ namespace passi_android
                     return null;
                 }
                 cert.PublicCert = publicCertHelper.BinaryData;
-                return new Tuple<CertificateDto, X509Certificate2, byte[]>(cert, certificate.Result.Item1, certificate.Result.Item3);
+                return new Tuple<CertificateUpdateDto, X509Certificate2, byte[]>(cert, certificate.Result.Item1, certificate.Result.Item3);
             });
         }
 

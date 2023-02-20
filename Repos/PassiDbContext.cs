@@ -61,6 +61,8 @@ namespace Repos
         public DbSet<DeviceDb> Devices { get; set; }
         public DbSet<UserInvitationDb> Invitations { get; set; }
         public DbSet<AdminDb> Admins { get; set; }
+        public DbSet<DataProtectionKey> DataProtectionKeys { get; set; }
+        public DbSet<SimpleSessionDb> Sessions { get; set; }
 
         public override int SaveChanges()
         {
@@ -199,6 +201,7 @@ namespace Repos
                 entity.HasIndex(e => e.Status, "IX_Sessions_Status");
 
                 entity.HasIndex(e => e.UserId, "IX_Sessions_UserId");
+                entity.Property(e => e.SignedHashNew).HasMaxLength(1024);
 
                 entity.Property(e => e.CreationTime).HasColumnType("timestamp without time zone");
 
@@ -260,7 +263,5 @@ namespace Repos
             base.OnModelCreating(modelBuilder);
         }
 
-        public DbSet<DataProtectionKey> DataProtectionKeys { get; set; }
-        public DbSet<SimpleSessionDb> Sessions { get; set; }
     }
 }

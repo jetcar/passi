@@ -5,8 +5,6 @@ services:
   database:
     image: 'postgres:13.8'
     container_name: postgres
-    ports:
-      - "5432:5432"
     networks:
     - dock_net
     env_file:
@@ -63,8 +61,6 @@ services:
       dockerfile: WebApp/Dockerfile
     networks:
       - dock_net
-    ports:
-    - "5002:5002"
     env_file:
     - ../passi_config/dev.env
     volumes:
@@ -84,8 +80,6 @@ services:
     networks:
       - dock_net
     container_name: identityserver   
-    ports:
-    - "5003:5003"
     env_file:
     - ../passi_config/dev.env
     volumes:
@@ -102,8 +96,6 @@ services:
       dockerfile: passiwebapi/Dockerfile
     networks:
       - dock_net
-    ports:
-    - "5004:5004"
     depends_on:
     - database   
     - redis

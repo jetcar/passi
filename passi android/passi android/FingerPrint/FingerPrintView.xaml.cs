@@ -36,15 +36,15 @@ namespace passi_android.FingerPrint
 
         protected override void OnAppearing()
         {
-            if (!App.FingerprintManager.IsHardwareDetected)
+            if (!App.FingerprintManager.IsHardwareDetected())
             {
                 Message = "FingerPrint scanner not found";
             }
-            else if (!App.FingerprintManager.HasEnrolledFingerprints)
+            else if (!App.FingerprintManager.HasEnrolledFingerprints())
             {
                 Message = "FingerPrints not found.";
             }
-            else if (!App.IsKeyguardSecure)
+            else if (!App.IsKeyguardSecure())
             {
                 Message =
                     "Secure lock screen hasn\'t been set up. Goto Settings &gt; Security to set up a keyguard.";

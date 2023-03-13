@@ -22,7 +22,7 @@ namespace passi_android
         public static Action CancelNotifications { get; set; }
         public static Action PollNotifications { get; set; }
         public static Action CloseApp { get; set; }
-        public static bool IsKeyguardSecure { get; set; }
+        public static Func<bool> IsKeyguardSecure { get; set; }
         public static Action AccountSyncCallback { get; set; }
         public static string Version { get; set; }
 
@@ -46,7 +46,7 @@ namespace passi_android
 
     public class FingerPrintWrapper
     {
-        public bool HasEnrolledFingerprints { get; set; }
-        public bool IsHardwareDetected { get; set; }
+        public Func<bool> HasEnrolledFingerprints { get; set; }
+        public Func<bool> IsHardwareDetected { get; set; }
     }
 }

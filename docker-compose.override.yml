@@ -1,15 +1,21 @@
 version: '3.4'
 
 services:
-  nginx:
-    volumes:
-      - ../passi_cert:/etc/cert:ro
-      - ./nginx/conf:/etc/nginx:ro
-      - /logs:/logs
+  passiwebapi:
+    ports:
+    - "5004:5004"
 
+  webapp:
+    ports:
+    - "5002:5002"
 
+  database:
+    ports:
+    - "5432:5432"
 
   identityserver:
+    ports:
+    - "5003:5003"
     environment:
       - SessionLength=1000
 

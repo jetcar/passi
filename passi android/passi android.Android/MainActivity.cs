@@ -79,9 +79,18 @@ namespace passi_android.Droid
             {
                 var fingerprintManagerCompat = FingerprintManagerCompat.From(this);
 
-                App.FingerprintManager.HasEnrolledFingerprints = fingerprintManagerCompat.HasEnrolledFingerprints;
-                App.FingerprintManager.IsHardwareDetected = fingerprintManagerCompat.IsHardwareDetected;
-                App.IsKeyguardSecure = ((KeyguardManager)GetSystemService(KeyguardService)).IsKeyguardSecure;
+                App.FingerprintManager.HasEnrolledFingerprints = ()=>
+                {
+                    return fingerprintManagerCompat.HasEnrolledFingerprints;
+                };
+                App.FingerprintManager.IsHardwareDetected = ()=>
+                {
+                    return fingerprintManagerCompat.IsHardwareDetected;
+                };
+                App.IsKeyguardSecure = ()=>
+                {
+                    return ((KeyguardManager)GetSystemService(KeyguardService)).IsKeyguardSecure;
+                };
                 App.StartFingerPrintReading = FingerPrintAuthentication;
             });
 

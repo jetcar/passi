@@ -65,15 +65,23 @@ namespace passi_webapi.Controllers
                     throw new BadRequestException("user not verified");
                 var user = _userRepository.GetUser(startLoginDto.Username);
                 var sessionDb = _sessionsRepository.BeginSession(startLoginDto.Username, startLoginDto.ClientId, startLoginDto.RandomString, startLoginDto.CheckColor.ToString(), startLoginDto.ReturnUrl);
+                var host = startLoginDto.ReturnUrl;
+                try
+                {
+                    host = new Uri(startLoginDto.ReturnUrl).Host;
+                }
+                catch (Exception e)
+                {
+                }
                 _firebaseService.SendNotification(user.Device.NotificationToken, "Passi login", JsonConvert.SerializeObject(
                         new FirebaseNotificationDto()
                         {
                             Sender = startLoginDto.ClientId,
-                            ReturnHost = new Uri(startLoginDto.ReturnUrl).Host,
+                            ReturnHost = host,
                             SessionId = sessionDb.Guid,
                             AccountGuid = user.Guid
                         }),
-                    new Uri(startLoginDto.ReturnUrl).Host, sessionDb.Guid);
+                    host, sessionDb.Guid);
                 transaction.Commit();
 
                 return new LoginResponceDto() { SessionId = sessionDb.Guid };
@@ -142,11 +150,18 @@ namespace passi_webapi.Controllers
                 var sessionDb = _sessionsRepository.GetActiveSession(getSessionDto.DeviceId, expirationTime);
                 if (sessionDb == null)
                     return Ok();
-
+                var host = sessionDb.ReturnUrl;
+                try
+                {
+                    host = new Uri(sessionDb.ReturnUrl).Host;
+                }
+                catch (Exception e)
+                {
+                }
                 return Ok(new NotificationDto()
                 {
                     Sender = sessionDb.ClientId,
-                    ReturnHost = new Uri(sessionDb.ReturnUrl).Host,
+                    ReturnHost = host,
                     ConfirmationColor = Enum.Parse<Color>(sessionDb.CheckColor),
                     SessionId = sessionDb.Guid,
                     ExpirationTime = sessionDb.ExpirationTime,

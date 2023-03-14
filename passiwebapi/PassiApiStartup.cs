@@ -124,7 +124,6 @@ namespace passi_webapi
                 //applicationBuilder.UseMiddleware<MyAuthenticationMiddleware>();
                 applicationBuilder.UseMiddleware<ErrorHandlerMiddleware>();
                 applicationBuilder.UseForwardedHeaders();
-                applicationBuilder.UseHttpsRedirection();
                 applicationBuilder.UseAuthentication();
                 applicationBuilder.UseAuthorization();
                 applicationBuilder.UseCookiePolicy(

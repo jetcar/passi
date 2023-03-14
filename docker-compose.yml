@@ -70,8 +70,6 @@ services:
     restart: always
 
 
-
-
   identityserver:
     image: identityserver:1
     build:

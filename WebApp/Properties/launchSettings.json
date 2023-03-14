@@ -6,18 +6,10 @@
     },
     "Docker": {
       "commandName": "Docker",
-      "launchBrowser": true,
+      "launchBrowser": false,
       "launchUrl": "https://localhost",
       "publishAllPorts": false,
       "useSSL": true
-    },
-    "WSL": {
-      "commandName": "WSL2",
-      "launchUrl": "https://localhost",
-      "environmentVariables": {
-        "ASPNETCORE_URLS": "https://localhost"
-      },
-      "distributionName": ""
     }
   }
 }

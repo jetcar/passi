@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ConfigurationManager;
 using Models;
 using Newtonsoft.Json;
 
@@ -13,10 +14,11 @@ namespace Repos
     {
         private readonly ConnectionMultiplexer _redis;
         private readonly IDatabase _database;
-
-        public RedisService()
+        private AppSetting _appSetting;
+        public RedisService(AppSetting appSetting)
         {
-            _redis = ConnectionMultiplexer.Connect("redis");
+            _appSetting = appSetting;
+            _redis = ConnectionMultiplexer.Connect(_appSetting["redis"]);
             _database = _redis.GetDatabase();
         }
 

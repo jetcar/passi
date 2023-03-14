@@ -49,11 +49,12 @@ namespace IdentityServer.Controllers.Account
         private readonly IEventService _events;
         private AppSetting _appSetting;
         private IMyRestClient _myRestClient;
+        private IRandomGenerator _randomGenerator;
         public AccountController(
             IIdentityServerInteractionService interaction,
             IClientStore clientStore,
             IAuthenticationSchemeProvider schemeProvider,
-            IEventService events, AppSetting appSetting, IMyRestClient myRestClient)
+            IEventService events, AppSetting appSetting, IMyRestClient myRestClient, IRandomGenerator randomGenerator)
         {
             // if the TestUserStore is not in DI, then we'll just use the global users collection
             // this is where you would plug in your own custom identity management library (e.g. ASP.NET Identity)
@@ -65,6 +66,7 @@ namespace IdentityServer.Controllers.Account
             _events = events;
             _appSetting = appSetting;
             _myRestClient = myRestClient;
+            _randomGenerator = randomGenerator;
         }
 
 
@@ -113,7 +115,7 @@ namespace IdentityServer.Controllers.Account
             {
                 Username = ""
             };
-
+            
             var context = await _interaction.GetAuthorizationContextAsync(returnUrl);
             if (context?.IdP != null && await _schemeProvider.GetSchemeAsync(context.IdP) != null)
             {
@@ -121,20 +123,20 @@ namespace IdentityServer.Controllers.Account
                 vm.ReturnUrl = returnUrl;
             }
 
-            if (context?.Client.ClientId == null)
-            {
-                ModelState.TryAddModelError("invalid client", "invalid client");
-            }
-            else
-            {
-                vm.Nonce = context.Parameters["nonce"];
+            //if (context?.Client.ClientId == null)
+            //{
+            //    ModelState.TryAddModelError("invalid client", "invalid client");
+            //}
+            //else
+            //{
+            //    vm.Nonce = context.Parameters["nonce"];
 
-                var client = await _clientStore.FindEnabledClientByIdAsync(context.Client.ClientId);
-                if (client == null)
-                {
-                    ModelState.TryAddModelError("invalid client", "invalid client");
-                }
-            }
+            //    var client = await _clientStore.FindEnabledClientByIdAsync(context.Client.ClientId);
+            //    if (client == null)
+            //    {
+            //        ModelState.TryAddModelError("invalid client", "invalid client");
+            //    }
+            //}
 
             return View(vm);
         }
@@ -170,10 +172,10 @@ namespace IdentityServer.Controllers.Account
             var startLoginDto = new StartLoginDto()
             {
                 Username = model.Username,
-                ClientId = context?.Client.ClientId,
+                ClientId = context?.Client.ClientId ?? "IdentityServer",
                 ReturnUrl = redirect_uri,
                 CheckColor = possibleCodes[index],
-                RandomString = model.Nonce
+                RandomString = model.Nonce ?? _randomGenerator.GetNumbersString(10)
             };
             request.AddJsonBody(startLoginDto);
             var result = _myRestClient.ExecuteAsync(request).Result;
@@ -312,7 +314,7 @@ namespace IdentityServer.Controllers.Account
         [HttpPost]
         public IActionResult CancelLogin(LoginInputModel model)
         {
-            if (model.ReturnUrl == "/diagnostics")
+            if (model.ReturnUrl.EndsWith("/diagnostics"))
             {
                 return RedirectPermanent("/");
             }
@@ -429,11 +431,7 @@ namespace IdentityServer.Controllers.Account
         private async Task<CheckViewModel> BuildLoginViewModelAsync(CheckViewModel model)
         {
             var context = await _interaction.GetAuthorizationContextAsync(model.ReturnUrl);
-
-            if (context?.Client.ClientId == null)
-            {
-                ModelState.AddModelError("Client not found", "Client not found");
-            }
+            
             if (context?.Client.ClientId != null)
             {
                 var client = await _clientStore.FindEnabledClientByIdAsync(context.Client.ClientId);
@@ -441,9 +439,8 @@ namespace IdentityServer.Controllers.Account
                 {
                     ModelState.AddModelError("Client not found", "Client not found");
                 }
+                model.Username = context?.LoginHint;
             }
-
-            model.Username = context?.LoginHint;
 
             return model;
         }
@@ -486,7 +483,7 @@ namespace IdentityServer.Controllers.Account
                 LogoutId = logoutId
             };
 
-            if (User?.Identity.IsAuthenticated == true)
+            if (User?.Identity?.IsAuthenticated == true)
             {
                 var idp = User.FindFirst(JwtClaimTypes.IdentityProvider)?.Value;
                 if (idp != null && idp != IdentityServer4.IdentityServerConstants.LocalIdentityProvider)

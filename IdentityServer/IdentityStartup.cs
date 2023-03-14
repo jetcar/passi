@@ -51,6 +51,7 @@ namespace IdentityServer
             services.AddScoped<IdentityDbContext>();
             services.AddScoped<IIdentityClientsRepository, IdentityClientsRepository>();
             services.AddSingleton<IStartupFilter, MigrationStartupFilter<IdentityDbContext>>();
+            services.AddSingleton<IRandomGenerator, RandomGenerator>();
 
             services.AddIdentityServer(options =>
                 {

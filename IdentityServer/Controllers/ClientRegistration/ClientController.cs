@@ -44,6 +44,11 @@ namespace IdentityServer.Controllers.ClientRegistration
             return View(view);
         }
 
+        public IActionResult Authorize([FromRoute] string route)
+        {
+            return RedirectToAction("Index");
+        }
+
         public IActionResult Details(int id)
         {
             var client = _clients.GetUserRegisteredClientsById(id, User.GetSubjectId());

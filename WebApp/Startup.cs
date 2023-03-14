@@ -85,7 +85,6 @@ namespace WebApp
                     //applicationBuilder.UseHsts();
                 }
                 applicationBuilder.UseForwardedHeaders();
-                applicationBuilder.UseHttpsRedirection();
                 applicationBuilder.UseCookiePolicy(
                             new CookiePolicyOptions
                             {

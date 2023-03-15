@@ -1,7 +1,7 @@
 cd /home/passi
 sudo cp /home/passi/run.sh ./run.sh
 sudo apt-get clean
-git clean -fdx
+sudo git clean -fdx
 git checkout .
 git fetch
 git pull

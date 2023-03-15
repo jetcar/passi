@@ -115,7 +115,7 @@ namespace IdentityServer.Controllers.Account
             {
                 Username = ""
             };
-            
+
             var context = await _interaction.GetAuthorizationContextAsync(returnUrl);
             if (context?.IdP != null && await _schemeProvider.GetSchemeAsync(context.IdP) != null)
             {
@@ -123,20 +123,7 @@ namespace IdentityServer.Controllers.Account
                 vm.ReturnUrl = returnUrl;
             }
 
-            //if (context?.Client.ClientId == null)
-            //{
-            //    ModelState.TryAddModelError("invalid client", "invalid client");
-            //}
-            //else
-            //{
-            //    vm.Nonce = context.Parameters["nonce"];
-
-            //    var client = await _clientStore.FindEnabledClientByIdAsync(context.Client.ClientId);
-            //    if (client == null)
-            //    {
-            //        ModelState.TryAddModelError("invalid client", "invalid client");
-            //    }
-            //}
+            vm.Nonce = context?.Parameters["nonce"];
 
             return View(vm);
         }
@@ -431,7 +418,7 @@ namespace IdentityServer.Controllers.Account
         private async Task<CheckViewModel> BuildLoginViewModelAsync(CheckViewModel model)
         {
             var context = await _interaction.GetAuthorizationContextAsync(model.ReturnUrl);
-            
+
             if (context?.Client.ClientId != null)
             {
                 var client = await _clientStore.FindEnabledClientByIdAsync(context.Client.ClientId);

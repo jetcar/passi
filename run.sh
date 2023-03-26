@@ -16,4 +16,6 @@ sudo docker build . -f WebApp/Dockerfile -t webapp:1.0.4
 sudo docker build . -f IdentityServer/Dockerfile -t identityserver:1.0.4
 sudo docker build . -f passiwebapi/Dockerfile -t passiwebapi:1.0.4
 
+
+sudo docker-compose down
 sudo docker-compose -f docker-compose.yml up

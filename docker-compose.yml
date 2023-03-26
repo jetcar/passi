@@ -55,10 +55,7 @@ services:
       - dock_net
 
   webapp:
-    image: webapp:1
-    build:
-      context: .
-      dockerfile: WebApp/Dockerfile
+    image: webapp:1.0.3
     networks:
       - dock_net
     env_file:
@@ -71,10 +68,7 @@ services:
 
 
   identityserver:
-    image: identityserver:1
-    build:
-      context: .
-      dockerfile: IdentityServer/Dockerfile
+    image: identityserver:1.0.3
     networks:
       - dock_net
     container_name: identityserver   
@@ -88,10 +82,7 @@ services:
     restart: always
 
   passiwebapi:
-    image: passiwebapi:1
-    build:
-      context: .
-      dockerfile: passiwebapi/Dockerfile
+    image: passiwebapi:1.0.3
     networks:
       - dock_net
     depends_on:

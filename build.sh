@@ -1,5 +1,3 @@
-
-dotnet publish SampleApp/WebApp/WebApp.csproj -c Release -o SampleApp/WebApp/publish
-dotnet publish passiwebapi/passiwebapi.csproj -c Release -o passiwebapi/publish
-dotnet publish IdentityServer/IdentityServer.csproj -c Release -o IdentityServer/publish
-
+docker build . -f WebApp/Dockerfile -t webapp:1.0.3
+docker build . -f IdentityServer/Dockerfile -t identityserver:1.0.3
+docker build . -f passiwebapi/Dockerfile -t passiwebapi:1.0.3

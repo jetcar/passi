@@ -55,7 +55,7 @@ services:
       - dock_net
 
   webapp:
-    image: webapp:1.0.3
+    image: webapp:1.0.4
     networks:
       - dock_net
     env_file:
@@ -68,7 +68,7 @@ services:
 
 
   identityserver:
-    image: identityserver:1.0.3
+    image: identityserver:1.0.4
     networks:
       - dock_net
     container_name: identityserver   
@@ -82,7 +82,7 @@ services:
     restart: always
 
   passiwebapi:
-    image: passiwebapi:1.0.3
+    image: passiwebapi:1.0.4
     networks:
       - dock_net
     depends_on:

@@ -128,6 +128,11 @@ namespace IdentityServer.services
                 }
             }
         }
+
+        public List<Client> GetAllClients()
+        {
+            return _dbContext.Clients.ToList();
+        }
     }
 
     public interface IIdentityClientsRepository
@@ -145,5 +150,6 @@ namespace IdentityServer.services
         bool Exists(int id, string userId);
 
         void Update(int id, string userId, string clientSecret, string returnUrls, string url);
+        List<Client> GetAllClients();
     }
 }

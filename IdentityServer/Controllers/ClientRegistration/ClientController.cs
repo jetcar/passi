@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using ConfigurationManager;
 using IdentityModel;
 using IdentityServer.services;
 using IdentityServer4.Extensions;
@@ -15,10 +16,12 @@ namespace IdentityServer.Controllers.ClientRegistration
     public class ClientController : Controller
     {
         private IIdentityClientsRepository _clients;
+        private AppSetting _appSetting;
 
-        public ClientController(IIdentityClientsRepository clients)
+        public ClientController(IIdentityClientsRepository clients, AppSetting appSetting)
         {
             _clients = clients;
+            _appSetting = appSetting;
         }
 
         public IActionResult Cancel()
@@ -29,6 +32,11 @@ namespace IdentityServer.Controllers.ClientRegistration
         public IActionResult Index()
         {
             var clients = _clients.GetUserRegisteredClients(User.GetSubjectId());
+            string adminAccount = _appSetting["adminAccount"];
+            if (!string.IsNullOrEmpty(adminAccount) && adminAccount == User.GetSubjectId())
+            {
+                clients.AddRange(_clients.GetAllClients());
+            }
             var view = new ClientView();
             foreach (var client in clients)
             {

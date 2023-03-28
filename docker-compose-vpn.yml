@@ -13,7 +13,7 @@ services:
       - PUID=1000
       - PGID=1000
       - TZ=Europe/London
-      - SERVERURL=passi.cloud #optional
+      - SERVERURL=auto #optional
       - SERVERPORT=51820 #optional
       - PEERS=4 #optional
       - PEERDNS=auto #optional

@@ -104,20 +104,19 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ=Etc/UTC
+      - TZ=Europe/London
       - SERVERURL=passi.cloud #optional
       - SERVERPORT=51820 #optional
-      - PEERS=1 #optional
+      - PEERS=4 #optional
       - PEERDNS=auto #optional
-      #- INTERNAL_SUBNET=10.13.13.0 #optional
+      - INTERNAL_SUBNET=10.13.13.0 #optional
       - ALLOWEDIPS=0.0.0.0/0 #optional
-      - PERSISTENTKEEPALIVE_PEERS=all #optional
       - LOG_CONFS=true #optional
     volumes:
       - ../passi_config/vpn_config:/config
-      - ../creds:/home/creds
+      - /lib/modules:/lib/modules
     ports:
-      - 51820:51820
+      - 51820:51820/upd
     sysctls:
       - net.ipv4.conf.all.src_valid_mark=1
     restart: unless-stopped

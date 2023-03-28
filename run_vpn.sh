@@ -1,5 +1,3 @@
-cd /home/passi
-sudo cp /home/passi/run.sh ./run.sh
 sudo apt-get clean
 sudo git clean -fdx
 git checkout .

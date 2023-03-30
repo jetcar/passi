@@ -54,11 +54,7 @@ publish
 .vs
 
 
-
-/publish/sample
-/publish/build.bat.bak
-*.bak
-
 /identityserver.txt
 /passi.txt
 /webapp.txt
+google-services.json

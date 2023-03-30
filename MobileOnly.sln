@@ -3,17 +3,19 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.32112.339
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "passi android.Android", ".\passi android\passi android.Android\passi android.Android.csproj", "{AFB33B0E-6AA0-43BE-B819-6C57123220AA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "passi android.Android", "passi android\passi android.Android\passi android.Android.csproj", "{AFB33B0E-6AA0-43BE-B819-6C57123220AA}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "passi android", ".\passi android\passi android\passi android.csproj", "{2E2AB11B-ECFF-42DA-88C1-A5CD5F3BEA59}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "passi android", "passi android\passi android\passi android.csproj", "{2E2AB11B-ECFF-42DA-88C1-A5CD5F3BEA59}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppCommon", ".\AppCommon\AppCommon.csproj", "{E8F47493-81EB-4B97-93F3-0758DA689449}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppCommon", "AppCommon\AppCommon.csproj", "{E8F47493-81EB-4B97-93F3-0758DA689449}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppConfig", ".\AppConfig\AppConfig.csproj", "{52288B53-36D3-494D-86E4-B7C57C6B6625}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppConfig", "AppConfig\AppConfig.csproj", "{52288B53-36D3-494D-86E4-B7C57C6B6625}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppDto", ".\AppDto\AppDto.csproj", "{A1E20EEC-8D7D-4CA1-B1EE-B9D96C6AA27A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppDto", "AppDto\AppDto.csproj", "{A1E20EEC-8D7D-4CA1-B1EE-B9D96C6AA27A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApiDto", ".\WebApiDto\WebApiDto.csproj", "{9546F060-C10C-4937-96B2-CCA6BF5F8C5A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApiDto", "WebApiDto\WebApiDto.csproj", "{9546F060-C10C-4937-96B2-CCA6BF5F8C5A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "passi maui", "passi maui\passi maui.csproj", "{CFFC447D-890F-404F-9206-03835E981E1D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -103,6 +105,24 @@ Global
 		{9546F060-C10C-4937-96B2-CCA6BF5F8C5A}.Release|iPhone.Build.0 = Release|Any CPU
 		{9546F060-C10C-4937-96B2-CCA6BF5F8C5A}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
 		{9546F060-C10C-4937-96B2-CCA6BF5F8C5A}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
+		{CFFC447D-890F-404F-9206-03835E981E1D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CFFC447D-890F-404F-9206-03835E981E1D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CFFC447D-890F-404F-9206-03835E981E1D}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{CFFC447D-890F-404F-9206-03835E981E1D}.Debug|iPhone.ActiveCfg = Debug|Any CPU
+		{CFFC447D-890F-404F-9206-03835E981E1D}.Debug|iPhone.Build.0 = Debug|Any CPU
+		{CFFC447D-890F-404F-9206-03835E981E1D}.Debug|iPhone.Deploy.0 = Debug|Any CPU
+		{CFFC447D-890F-404F-9206-03835E981E1D}.Debug|iPhoneSimulator.ActiveCfg = Debug|Any CPU
+		{CFFC447D-890F-404F-9206-03835E981E1D}.Debug|iPhoneSimulator.Build.0 = Debug|Any CPU
+		{CFFC447D-890F-404F-9206-03835E981E1D}.Debug|iPhoneSimulator.Deploy.0 = Debug|Any CPU
+		{CFFC447D-890F-404F-9206-03835E981E1D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CFFC447D-890F-404F-9206-03835E981E1D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CFFC447D-890F-404F-9206-03835E981E1D}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{CFFC447D-890F-404F-9206-03835E981E1D}.Release|iPhone.ActiveCfg = Release|Any CPU
+		{CFFC447D-890F-404F-9206-03835E981E1D}.Release|iPhone.Build.0 = Release|Any CPU
+		{CFFC447D-890F-404F-9206-03835E981E1D}.Release|iPhone.Deploy.0 = Release|Any CPU
+		{CFFC447D-890F-404F-9206-03835E981E1D}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
+		{CFFC447D-890F-404F-9206-03835E981E1D}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
+		{CFFC447D-890F-404F-9206-03835E981E1D}.Release|iPhoneSimulator.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

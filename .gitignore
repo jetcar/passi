@@ -58,3 +58,4 @@ publish
 /passi.txt
 /webapp.txt
 google-services.json
+*.keystore

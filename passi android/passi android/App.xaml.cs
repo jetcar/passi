@@ -43,10 +43,4 @@ namespace passi_android
             if (CancelfingerPrint != null) CancelfingerPrint.Invoke();
         }
     }
-
-    public class FingerPrintWrapper
-    {
-        public Func<bool> HasEnrolledFingerprints { get; set; }
-        public Func<bool> IsHardwareDetected { get; set; }
-    }
 }

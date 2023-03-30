@@ -1,6 +1,7 @@
 ﻿using passi_maui.utils;
 using RestSharp;
 using System.Collections.ObjectModel;
+using passi_maui.Registration;
 
 namespace passi_maui
 {
@@ -64,18 +65,18 @@ namespace passi_maui
             accountDb.Provider = provider;
             if (!accountDb.IsConfirmed || accountDb.PublicCertBinary == null)
             {
-                // Navigation.PushModalSinglePage(new RegistrationConfirmation(accountDb));
+                 Navigation.PushModalSinglePage(new RegistrationConfirmation(accountDb));
             }
             else
             {
-                //Navigation.PushModalSinglePage(new AccountView(accountDb));
+                Navigation.PushModalSinglePage(new AccountView(accountDb));
             }
             cell.IsEnabled = true;
         }
 
         private void Menu_button(object sender, EventArgs e)
         {
-            //Navigation.PushModalSinglePage(new Menu.Menu());
+            Navigation.PushModalSinglePage(new Menu.Menu());
         }
 
         private void Button_PreDeleteAccount(object sender, EventArgs e)
@@ -98,7 +99,7 @@ namespace passi_maui
 
         private void Button_AddAccount(object sender, EventArgs e)
         {
-            //Navigation.PushModalSinglePage(new TermsAgreements());
+            Navigation.PushModalSinglePage(new TermsAgreements());
         }
 
         private void Button_ShowDeleteAccount(object sender, EventArgs e)

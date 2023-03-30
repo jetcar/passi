@@ -7,7 +7,8 @@
              x:Class="passi_maui.MainPage">
 
    <ContentPage.Content>
-        <StackLayout VerticalOptions="Fill" HorizontalOptions="Fill">
+       
+       <StackLayout VerticalOptions="Fill" HorizontalOptions="Fill">
             <StackLayout VerticalOptions="Start" BackgroundColor="#2196f3" HorizontalOptions="FillAndExpand">
                 <ImageButton  Margin="10,0,10,10" BackgroundColor="#2196f3" HorizontalOptions="End" Source="baseline_list_black_24.png" Clicked="Menu_button"></ImageButton>
             </StackLayout>

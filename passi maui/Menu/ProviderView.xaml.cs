@@ -1,0 +1,32 @@
+﻿using passi_maui.utils;
+
+namespace passi_maui.Menu
+{
+    public partial class ProviderView : ContentPage
+    {
+        public ProviderDb Provider { get; set; }
+
+        public ProviderView(ProviderDb provider)
+        {
+            Provider = provider;
+            InitializeComponent();
+            BindingContext = this;
+
+        }
+
+        private void EditButton_OnClicked(object sender, EventArgs e)
+        {
+            var button = sender as VisualElement;
+            button.IsEnabled = false;
+
+            Navigation.PushModalSinglePage(new EditProviderView(Provider));
+            button.IsEnabled = true;
+        }
+
+
+        private void Button_Back(object sender, EventArgs e)
+        {
+            Navigation.PopModal();
+        }
+    }
+}

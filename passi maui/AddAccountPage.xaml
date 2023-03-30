@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:passiMaui="clr-namespace:passi_maui"
+             x:DataType="passiMaui:AddAccountPage"
+             x:Class="passi_maui.AddAccountPage">
+    <StackLayout VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand">
+        <StackLayout VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand">
+            <Picker HorizontalOptions="FillAndExpand" Title="IdentityProvider" HorizontalTextAlignment="Center" ItemsSource="{Binding Path=Providers}"  SelectedIndexChanged="Picker_OnSelectedIndexChanged" SelectedItem="{Binding CurrentProvider}" ItemDisplayBinding="{Binding Name}"></Picker>
+            <Label HorizontalOptions="Center" Text="{ Binding Path=ResponseError}" />
+            <Label HorizontalOptions="Center" Text="{ Binding Path=EmailError.Text}" />
+            <Label HorizontalOptions="Center" Text="Email" />
+            <Entry HorizontalOptions="FillAndExpand" Margin="5" Text="{Binding Path=EmailText}">
+                <Entry.Triggers>
+                    <DataTrigger  Binding="{Binding Path=EmailError.HasError}" TargetType="Entry" Value="true">
+                        <Setter Property="Editor.BackgroundColor"
+                            Value="Red" />
+                    </DataTrigger>
+                </Entry.Triggers>
+            </Entry>
+            <Button Background="{StaticResource Black}" Margin="1" CornerRadius="100"  Clicked="Button_OnClicked" Text="Register"></Button>
+            <Button Background="{StaticResource Black}" CornerRadius="100"  Clicked="CancelButton_OnClicked" Text="Cancel"></Button>
+        </StackLayout>
+    </StackLayout>
+</ContentPage>

@@ -1,7 +1,7 @@
 ﻿using Android.App;
 using Android.Runtime;
 
-namespace passi_maui
+namespace passi_maui.Platforms.Android
 {
     [Application]
     public class MainApplication : MauiApplication

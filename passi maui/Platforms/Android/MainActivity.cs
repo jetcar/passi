@@ -1,17 +1,13 @@
 ﻿using Android.App;
 using Android.Content.PM;
 using Android.Gms.Common;
-using Android.Gms.Extensions;
 using Android.OS;
-using Firebase;
-using Firebase.Messaging;
-using passi_maui.Platforms.Android;
 using passi_maui.utils;
 using Plugin.Firebase.CloudMessaging;
 
-namespace passi_maui
+namespace passi_maui.Platforms.Android
 {
-    [Activity(Label = "Passi", MainLauncher = true,Theme = "@style/MainTheme", DirectBootAware = true, Exported = true, LaunchMode = LaunchMode.SingleTop, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation | ConfigChanges.UiMode | ConfigChanges.ScreenLayout | ConfigChanges.SmallestScreenSize)]
+    [Activity(Label = "Passi", MainLauncher = true, Theme = "@style/MainTheme", DirectBootAware = true, Exported = true, LaunchMode = LaunchMode.SingleTop, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation | ConfigChanges.UiMode | ConfigChanges.ScreenLayout | ConfigChanges.SmallestScreenSize)]
     public class MainActivity : MauiAppCompatActivity
     {
         private string msgText = "";
@@ -25,11 +21,10 @@ namespace passi_maui
             Task.Run(() =>
             {
                 SecureRepository.GetDeviceId();
-                //var task = FirebaseMessaging.Instance.GetToken().GetAwaiter().GetResult();
 
-               //var token = task.ToString();
+                //var token = CrossFirebaseCloudMessaging.Current.GetTokenAsync().Result;
 
-               // MyFirebaseService.SendRegistrationToServer(token);
+                //MyFirebaseService.SendRegistrationToServer(token);
             });
 
         }

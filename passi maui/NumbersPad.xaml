@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="passi_maui.NumbersPad">
+    <ContentView.Resources>
+        <ResourceDictionary>
+            <Style TargetType="Button">
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="Background" Value="Black" />
+                <Setter Property="CornerRadius" Value="100" />
+                <Setter Property="FontSize" Value="15" />
+                <Setter Property="Margin" Value="10" />
+            </Style>
+        </ResourceDictionary>
+    </ContentView.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Button  Grid.Row="0" Grid.Column="0" CommandParameter="1"  Clicked="ImageButton_OnClicked" Text="1"   ></Button>
+        <Button  Grid.Row="0" Grid.Column="1" CommandParameter="2"  Clicked="ImageButton_OnClicked" Text="2"   ></Button>
+        <Button  Grid.Row="0" Grid.Column="2" CommandParameter="3"  Clicked="ImageButton_OnClicked" Text="3"   ></Button>
+
+        <Button  Grid.Row="1" Grid.Column="0" CommandParameter="4"  Clicked="ImageButton_OnClicked" Text="4"   ></Button>
+        <Button  Grid.Row="1" Grid.Column="1" CommandParameter="5"  Clicked="ImageButton_OnClicked" Text="5"   ></Button>
+        <Button  Grid.Row="1" Grid.Column="2" CommandParameter="6"  Clicked="ImageButton_OnClicked" Text="6"   ></Button>
+
+        <Button  Grid.Row="2" Grid.Column="0" CommandParameter="7"  Clicked="ImageButton_OnClicked" Text="7"   ></Button>
+        <Button  Grid.Row="2" Grid.Column="1" CommandParameter="8"  Clicked="ImageButton_OnClicked" Text="8"   ></Button>
+        <Button  Grid.Row="2" Grid.Column="2" CommandParameter="9"  Clicked="ImageButton_OnClicked" Text="9"   ></Button>
+
+        <ImageButton Padding="30"  Grid.Row="3" Grid.Column="0" CommandParameter="del" BackgroundColor="Black" CornerRadius="100"  Clicked="ImageButton_OnClicked"
+                       Source="baseline_backspace_black_24.png" HorizontalOptions="Center" VerticalOptions="Center" ></ImageButton>
+        <Button  Grid.Row="3" Grid.Column="1" CommandParameter="0" Clicked="ImageButton_OnClicked" Text="0"  ></Button>
+        <ImageButton Padding="30" Grid.Row="3" Grid.Column="2" CommandParameter="confirm" BackgroundColor="Black" CornerRadius="100"    Clicked="ImageButton_OnClicked" Source="baseline_keyboard_arrow_right_black_24.png" HorizontalOptions="Center" VerticalOptions="Center"  ></ImageButton>
+    </Grid>
+</ContentView>

@@ -9,7 +9,7 @@
 				<category android:name="${applicationId}" />
 			</intent-filter>
 		</receiver>
-		<service android:name="crc647f588127cf92f80b.MyFirebaseMessagingService" android:enabled="true" android:exported="true">
+		<service android:name="crc64d2dcc2805d51c0a8.MyFirebaseMessagingService" android:enabled="true" android:exported="true">
 			<intent-filter>
 				<action android:name="com.google.firebase.MESSAGING_EVENT" />
 			</intent-filter>

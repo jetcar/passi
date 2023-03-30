@@ -2,7 +2,7 @@
 {
     public class ConfigSettings
     {
-        public static string WebApiUrlLocal = "http://192.168.0.208:5004/passiapi";
+        public static string WebApiUrlLocal = "http://192.168.0.208/passiapi";
         public static string WebApiUrl = "https://passi.cloud/passiapi";
 
         public static string SignupPath = "/api/SignUp/signup";

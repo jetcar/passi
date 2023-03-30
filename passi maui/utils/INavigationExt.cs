@@ -1,10 +1,10 @@
 ﻿namespace passi_maui.utils
 {
-    public static class INavigationExt
+    public static class NavigationExt
     {
         public static void NavigateTop(this INavigation navigator)
         {
-            var modalStackCount = navigator.ModalStack.Count;
+            var modalStackCount = navigator.ModalStack.Count-1;
             for (int i = 0; i < modalStackCount; i++)
             {
                 navigator.PopModal();

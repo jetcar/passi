@@ -18,8 +18,8 @@
                     </DataTrigger>
                 </Entry.Triggers>
             </Entry>
-            <Button Background="{StaticResource Black}" Margin="1" CornerRadius="100"  Clicked="Button_OnClicked" Text="Register"></Button>
-            <Button Background="{StaticResource Black}" CornerRadius="100"  Clicked="CancelButton_OnClicked" Text="Cancel"></Button>
+            <Button BackgroundColor="#2196f3" TextColor="White" Margin="1" CornerRadius="100"  Clicked="Button_OnClicked" Text="Register"></Button>
+            <Button BackgroundColor="#2196f3" TextColor="White" CornerRadius="100"  Clicked="CancelButton_OnClicked" Text="Cancel"></Button>
         </StackLayout>
     </StackLayout>
 </ContentPage>

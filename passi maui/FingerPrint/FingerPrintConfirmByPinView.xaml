@@ -1,7 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage  xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-              xmlns:passiAndroid="clr-namespace:passi_android"
               xmlns:passiMaui="clr-namespace:passi_maui"
               xmlns:fingerPrint="clr-namespace:passi_maui.FingerPrint"
               x:DataType="fingerPrint:FingerPrintConfirmByPinView"
@@ -26,7 +25,7 @@
             </Label>
             <passiMaui:NumbersPad  NumberClicked="NumbersPad_OnNumberClicked" VerticalOptions="FillAndExpand"></passiMaui:NumbersPad>
 
-            <Button  Background="White" CornerRadius="100" Text="Cancel" Margin="10" Clicked="Cancel_OnClicked"></Button>
+            <Button  BackgroundColor="#2196f3" TextColor="White" CornerRadius="100" Text="Cancel" Margin="10" Clicked="Cancel_OnClicked"></Button>
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>

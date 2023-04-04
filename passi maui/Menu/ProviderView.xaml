@@ -32,6 +32,6 @@
             <Label HorizontalOptions="Center" Text="SignupConfirmation:" />
             <Label HorizontalOptions="Center" Text="{Binding Path=Provider.SignupConfirmation}" />
         </StackLayout>
-        <Button Background="White" CornerRadius="100"  Text="Edit" Clicked="EditButton_OnClicked"></Button>
+        <Button BackgroundColor="#2196f3" TextColor="White" CornerRadius="100"  Text="Edit" Clicked="EditButton_OnClicked"></Button>
     </StackLayout>
 </ContentPage>

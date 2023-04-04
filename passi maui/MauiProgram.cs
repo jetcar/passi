@@ -3,6 +3,7 @@ using Microsoft.Maui.LifecycleEvents;
 using Plugin.Firebase.Auth;
 using Plugin.Firebase.Core.Platforms.Android;
 
+
 namespace passi_maui
 {
     public static class MauiProgram
@@ -35,8 +36,16 @@ namespace passi_maui
                 return false;
             }));
 #else
-                events.AddAndroid(android => android.OnCreate((activity, state) =>
-                    CrossFirebase.Initialize(activity)));
+                events.AddAndroid(android =>
+                {
+
+                    android.OnCreate((activity, state) =>
+                    {
+                        CrossFirebase.Initialize(activity);
+
+                    });
+                    
+                });
 #endif
             });
 

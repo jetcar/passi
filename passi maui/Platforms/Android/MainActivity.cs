@@ -21,10 +21,15 @@ namespace passi_maui.Platforms.Android
             Task.Run(() =>
             {
                 SecureRepository.GetDeviceId();
+                CrossFirebaseCloudMessaging.Current.CheckIfValidAsync().ContinueWith((a) =>
+                {
+                    CrossFirebaseCloudMessaging.Current.GetTokenAsync().ContinueWith((token) =>
+                    {
+                        MyFirebaseService.SendRegistrationToServer(token.Result);
+                    });
+                });
+               
 
-                //var token = CrossFirebaseCloudMessaging.Current.GetTokenAsync().Result;
-
-                //MyFirebaseService.SendRegistrationToServer(token);
             });
 
         }

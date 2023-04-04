@@ -34,14 +34,14 @@
                     <Button Padding="0" Margin="0" HorizontalOptions="End" Text="V" Clicked="SaveNotificationToken"></Button>
                 </StackLayout>
 
-                <Button Background="White" CornerRadius="100"  Text="Main" Clicked="MainPageclicked"></Button>
-                <Button  Background="White" CornerRadius="100" Text="RegistrationConfirmation" Clicked="RegistrationConfirmation"></Button>
-                <Button  Background="White" CornerRadius="100" Text="EmptyView" Clicked="EmptyView"></Button>
-                <Button  Background="White" CornerRadius="100" Text="NotificationVerifyRequestView" Clicked="NotificationConfirmationView"></Button>
-                <Button Background="White" CornerRadius="100"  Text="ConfirmByPinView" Clicked="ConfirmByPinView"></Button>
-                <Button  Background="White" CornerRadius="100" Text="FinishConfirmation" Clicked="FinishConfirmation"></Button>
-                <Button  Background="White" CornerRadius="100" Text="ClearProvider" Clicked="ClearProvider"></Button>
-                <Button  Background="White" CornerRadius="100" Text="LoadingPage" Clicked="LoadingPage"></Button>
+                <Button BackgroundColor="#2196f3" TextColor="White" CornerRadius="100"  Text="Main" Clicked="MainPageclicked"></Button>
+                <Button  BackgroundColor="#2196f3" TextColor="White" CornerRadius="100" Text="RegistrationConfirmation" Clicked="RegistrationConfirmation"></Button>
+                <Button  BackgroundColor="#2196f3" TextColor="White" CornerRadius="100" Text="EmptyView" Clicked="EmptyView"></Button>
+                <Button BackgroundColor="#2196f3" TextColor="White" CornerRadius="100" Text="NotificationVerifyRequestView" Clicked="NotificationConfirmationView"></Button>
+                <Button BackgroundColor="#2196f3" TextColor="White" CornerRadius="100"  Text="ConfirmByPinView" Clicked="ConfirmByPinView"></Button>
+                <Button  BackgroundColor="#2196f3" TextColor="White" CornerRadius="100" Text="FinishConfirmation" Clicked="FinishConfirmation"></Button>
+                <Button  BackgroundColor="#2196f3" TextColor="White" CornerRadius="100" Text="ClearProvider" Clicked="ClearProvider"></Button>
+                <Button  BackgroundColor="#2196f3" TextColor="White" CornerRadius="100" Text="LoadingPage" Clicked="LoadingPage"></Button>
             </StackLayout>
         </ScrollView>
     </ContentPage.Content>

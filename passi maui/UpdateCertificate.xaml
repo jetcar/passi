@@ -52,7 +52,7 @@
                 </StackLayout>
 
                 <passiMaui:NumbersPad  NumberClicked="NumbersPad_OnNumberClicked"></passiMaui:NumbersPad>
-                <Button Background="White" CornerRadius="100"  Text="Cancel" Clicked="Button_Cancel"></Button>
+                <Button BackgroundColor="#2196f3" TextColor="White" CornerRadius="100"  Text="Cancel" Clicked="Button_Cancel"></Button>
             </StackLayout>
         </ScrollView>
     </ContentPage.Content>

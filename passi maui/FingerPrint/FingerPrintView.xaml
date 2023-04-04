@@ -8,7 +8,7 @@
         <StackLayout HorizontalOptions="Center" VerticalOptions="Center" Orientation="Vertical">
             <Label HorizontalTextAlignment="Center" TextColor="Black" Margin="10" Text="{Binding Path=Message}"></Label>
             <Image Source="baseline_fingerprint_black_24.png"></Image>
-            <Button Background="White" CornerRadius="100"  Text="Cancel" Clicked="CancelButton_OnClicked"></Button>
+            <Button BackgroundColor="#2196f3" TextColor="White" CornerRadius="100"  Text="Cancel" Clicked="CancelButton_OnClicked"></Button>
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>

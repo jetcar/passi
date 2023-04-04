@@ -32,6 +32,6 @@
                 <Entry HorizontalOptions="FillAndExpand" Text="{Binding Path=Provider.SignupConfirmation}" />
             </StackLayout>
         </ScrollView>
-        <Button Background="White" CornerRadius="100"  Text="Save" Clicked="SaveButton_OnClicked"></Button>
+        <Button  CornerRadius="100" BackgroundColor="#2196f3" TextColor="White"  Text="Save" Clicked="SaveButton_OnClicked"></Button>
     </StackLayout>
 </ContentPage>

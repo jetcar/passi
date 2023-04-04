@@ -4,7 +4,7 @@
     {
         public static void NavigateTop(this INavigation navigator)
         {
-            var modalStackCount = navigator.ModalStack.Count-1;
+            var modalStackCount = navigator.ModalStack.Count();
             for (int i = 0; i < modalStackCount; i++)
             {
                 navigator.PopModal();

@@ -38,9 +38,9 @@
         <Button  Grid.Row="2" Grid.Column="1" CommandParameter="8"  Clicked="ImageButton_OnClicked" Text="8"   ></Button>
         <Button  Grid.Row="2" Grid.Column="2" CommandParameter="9"  Clicked="ImageButton_OnClicked" Text="9"   ></Button>
 
-        <ImageButton Padding="30"  Grid.Row="3" Grid.Column="0" CommandParameter="del" BackgroundColor="Black" CornerRadius="100"  Clicked="ImageButton_OnClicked"
+        <ImageButton Padding="30"  Grid.Row="3" Grid.Column="0" CommandParameter="del" BackgroundColor="#2196f3" CornerRadius="100"  Clicked="ImageButton_OnClicked"
                        Source="baseline_backspace_black_24.png" HorizontalOptions="Center" VerticalOptions="Center" ></ImageButton>
         <Button  Grid.Row="3" Grid.Column="1" CommandParameter="0" Clicked="ImageButton_OnClicked" Text="0"  ></Button>
-        <ImageButton Padding="30" Grid.Row="3" Grid.Column="2" CommandParameter="confirm" BackgroundColor="Black" CornerRadius="100"    Clicked="ImageButton_OnClicked" Source="baseline_keyboard_arrow_right_black_24.png" HorizontalOptions="Center" VerticalOptions="Center"  ></ImageButton>
+        <ImageButton Padding="30" Grid.Row="3" Grid.Column="2" CommandParameter="confirm" BackgroundColor="#2196f3" CornerRadius="100"    Clicked="ImageButton_OnClicked" Source="baseline_keyboard_arrow_right_black_24.png" HorizontalOptions="Center" VerticalOptions="Center"  ></ImageButton>
     </Grid>
 </ContentView>

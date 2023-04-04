@@ -24,6 +24,6 @@
             <ImageButton CornerRadius="100"  WidthRequest="60" HeightRequest="60" IsEnabled="{Binding Path=IsButtonEnabled}" Margin="10" BackgroundColor="{Binding Path=Color2}" Clicked="ImageButton2_OnClicked"></ImageButton>
             <ImageButton CornerRadius="100"  WidthRequest="60" HeightRequest="60" IsEnabled="{Binding Path=IsButtonEnabled}" Margin="10" BackgroundColor="{Binding Path=Color3}" Clicked="ImageButton3_OnClicked"></ImageButton>
         </StackLayout>
-        <Button Background="White" CornerRadius="100"  Text="Cancel" Clicked="Cancel_OnClicked"></Button>
+        <Button BackgroundColor="#2196f3" TextColor="White" CornerRadius="100"  Text="Cancel" Clicked="Cancel_OnClicked"></Button>
     </StackLayout>
 </ContentPage>

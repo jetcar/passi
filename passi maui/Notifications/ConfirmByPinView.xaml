@@ -33,7 +33,7 @@
             </Label>
             <passiMaui:NumbersPad  NumberClicked="NumbersPad_OnNumberClicked" VerticalOptions="FillAndExpand"></passiMaui:NumbersPad>
 
-            <Button Background="White" CornerRadius="100"  Text="Cancel" Margin="10"  Clicked="Cancel_OnClicked"></Button>
+            <Button BackgroundColor="#2196f3" TextColor="White" CornerRadius="100"  Text="Cancel" Margin="10"  Clicked="Cancel_OnClicked"></Button>
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>

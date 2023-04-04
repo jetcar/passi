@@ -13,6 +13,6 @@
         <Label HorizontalOptions="Center" Text="Confirmation Code" />
         <Label HorizontalTextAlignment="Center" Margin="5" TextColor="Black" FontAttributes="Bold" HorizontalOptions="Fill" Text="{Binding Path=Code}"></Label>
         <passiMaui:NumbersPad  NumberClicked="NumbersPad_OnNumberClicked"></passiMaui:NumbersPad>
-        <Button Background="{StaticResource Black}" CornerRadius="100"  Clicked="CancelButton_OnClicked" Text="Cancel"></Button>
+        <Button BackgroundColor="#2196f3" TextColor="White" CornerRadius="100"  Clicked="CancelButton_OnClicked" Text="Cancel"></Button>
     </StackLayout>
 </ContentPage>

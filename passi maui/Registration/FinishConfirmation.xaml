@@ -53,7 +53,7 @@
             </Grid>
 
             <passiMaui:NumbersPad  NumberClicked="NumbersPad_OnNumberClicked"></passiMaui:NumbersPad>
-            <Button Background="White" CornerRadius="100"  Clicked="SkipButton_OnClicked" Text="Skip"></Button>
+            <Button BackgroundColor="#2196f3" TextColor="White" CornerRadius="100"  Clicked="SkipButton_OnClicked" Text="Skip"></Button>
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>

@@ -25,7 +25,8 @@ namespace passi_maui.Platforms.Android
                 {
                     CrossFirebaseCloudMessaging.Current.GetTokenAsync().ContinueWith((token) =>
                     {
-                        MyFirebaseService.SendRegistrationToServer(token.Result);
+                        var tokenres = token.Result;
+                        MyFirebaseService.SendRegistrationToServer(tokenres);
                     });
                 });
                

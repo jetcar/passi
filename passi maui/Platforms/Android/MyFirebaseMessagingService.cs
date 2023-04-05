@@ -31,7 +31,7 @@ public class MyFirebaseMessagingService : FirebaseMessagingService
     {
         CreateNotificationChannel();
 
-        Intent launchIntent = PackageManager.GetLaunchIntentForPackage("com.passi.cloud.passi_android");
+        Intent launchIntent = PackageManager.GetLaunchIntentForPackage("com.passi.cloud.passi_maui");
         //Intent launchIntent = PackageManager.GetLaunchIntentForPackage("com.google.android.youtube");
         if (launchIntent != null)
         {

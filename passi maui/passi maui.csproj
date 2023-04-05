@@ -14,34 +14,17 @@
 		<ApplicationTitle>passi maui</ApplicationTitle>
 
 		<!-- App Identifier -->
-		<ApplicationId>com.companyname.passi_maui</ApplicationId>
-		<ApplicationIdGuid>359264f1-1a56-437c-9cc2-6eb539273e31</ApplicationIdGuid>
+		<ApplicationId>com.passi.cloud.passi_maui</ApplicationId>
 
 		<!-- Versions -->
 		<ApplicationDisplayVersion>1.33</ApplicationDisplayVersion>
 		<ApplicationVersion>33</ApplicationVersion>
 
-		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">16.0</SupportedOSPlatformVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
-		<AndroidSigningKeyStore>passi.keystore</AndroidSigningKeyStore>
 	</PropertyGroup>
 
 
-
-
-
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net7.0-ios16.0|AnyCPU'">
-	  <ApplicationDisplayVersion>1.33</ApplicationDisplayVersion>
-	  <ApplicationVersion>33</ApplicationVersion>
-	  <ApplicationId>com.passi.cloud.passi_maui</ApplicationId>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net7.0-ios16.0|AnyCPU'">
-	  <ApplicationDisplayVersion>1.33</ApplicationDisplayVersion>
-	  <ApplicationVersion>33</ApplicationVersion>
-	  <ApplicationId>com.passi.cloud.passi_maui</ApplicationId>
-	</PropertyGroup>
-
+	
 	<ItemGroup>
 		<!-- App Icon -->
 		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appicon.svg" />
@@ -51,10 +34,7 @@
 
 		<!-- Images -->
 		<MauiImage Include="Resources\Images\*" />
-		<MauiImage Update="Resources\Images\baseline_keyboard_arrow_left_black_24.png">
-		  <SubType>Designer</SubType>
-		  <Generator></Generator>
-		</MauiImage>
+		
 		<MauiImage Update="Resources\Images\dotnet_bot.svg" BaseSize="168,208" />
 
 		<!-- Custom Fonts -->
@@ -64,16 +44,29 @@
 		<MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
 	</ItemGroup>
 
+
+	
 	<ItemGroup>
-	  <None Remove="Resources\Images\baseline_keyboard_arrow_left_black_24.png" />
+	  <None Remove="Resources\AppIcon\xamagonblue.png" />
 	</ItemGroup>
 
 
+	
 
+	
 	<ItemGroup>
-	  <GoogleServicesJson Include="Platforms\Android\google-services.json" />
+	  <GoogleServicesJson Include="Platforms\Android\google-services.json">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </GoogleServicesJson>
 	</ItemGroup>
 
+
+	
+
+	
+	<ItemGroup>
+	  <MauiImage Include="Resources\AppIcon\xamagonblue.png" />
+	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="7.0.0" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
@@ -81,6 +74,7 @@
 		<PackageReference Include="Portable.BouncyCastle" Version="1.9.0" />
 		<PackageReference Include="RestSharp" Version="108.0.3" />
 	</ItemGroup>
+
 
 	<ItemGroup>
 	  <ProjectReference Include="..\AppCommon\AppCommon.csproj" />

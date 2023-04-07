@@ -93,6 +93,8 @@ namespace passi_maui.Registration
             {
                 GenerateCert(email, pin).ContinueWith(x =>
                 {
+                    if(x.Result == null)
+                        return;
                     var signupConfirmationDto = new SignupConfirmationDto()
                     {
                         Code = code,
@@ -142,16 +144,26 @@ namespace passi_maui.Registration
         {
             return await Certificates.GenerateCertificate(email, pin).ContinueWith(certificate =>
              {
-                 Account.Password = certificate.Result.Item2;
-                 var certificateBytes = Convert.ToBase64String(certificate.Result.Item3); //importable certificate
-                 Account.PrivateCertBinary = certificateBytes;
-                 Account.pinLength = pin?.Length ?? 0;
-                 var publicCertHelper = CertHelper.ConvertToPublicCertificate(certificate.Result.Item1);
-                 Account.Thumbprint = publicCertHelper.Thumbprint;
-                 Account.ValidFrom = publicCertHelper.NotBefore.Value;
-                 Account.ValidTo = publicCertHelper.NotAfter.Value;
-                 Account.PublicCertBinary = publicCertHelper.BinaryData;
-                 return Account;
+                 if (certificate.Exception != null)
+                 {
+                     ResponseError = certificate.Exception.Message;
+                     return null;
+                 }
+                 else
+                 {
+
+
+                     Account.Password = certificate.Result.Item2;
+                     var certificateBytes = Convert.ToBase64String(certificate.Result.Item3); //importable certificate
+                     Account.PrivateCertBinary = certificateBytes;
+                     Account.pinLength = pin?.Length ?? 0;
+                     var publicCertHelper = CertHelper.ConvertToPublicCertificate(certificate.Result.Item1);
+                     Account.Thumbprint = publicCertHelper.Thumbprint;
+                     Account.ValidFrom = publicCertHelper.NotBefore.Value;
+                     Account.ValidTo = publicCertHelper.NotAfter.Value;
+                     Account.PublicCertBinary = publicCertHelper.BinaryData;
+                     return Account;
+                 }
              });
         }
 

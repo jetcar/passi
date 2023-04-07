@@ -13,7 +13,7 @@ namespace passi_maui
         {
             InitializeComponent();
             BindingContext = this;
-
+            AppShell.MainPage = this;
             this.Version = App.Version;
         }
         private ObservableCollection<utils.AccountView> _accounts = new ObservableCollection<utils.AccountView>();
@@ -52,6 +52,29 @@ namespace passi_maui
                 version = value;
                 OnPropertyChanged();
             }
+        }
+        protected override void OnAppearing()
+        {
+            App.AccountSyncCallback = AccountSyncCallback;
+            IsDeleteVisible = false;
+            Accounts = new ObservableCollection<utils.AccountView>();
+            Task.Run(() =>
+            {
+                SecureRepository.LoadAccountIntoList(Accounts);
+            });
+            base.OnAppearing();
+            App.PollNotifications.Invoke();
+        }
+        private void AccountSyncCallback()
+        {
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                Accounts = new ObservableCollection<utils.AccountView>();
+                Task.Run(() =>
+                {
+                    SecureRepository.LoadAccountIntoList(Accounts);
+                });
+            });
         }
 
         private void Cell_OnTapped(object sender, EventArgs e)

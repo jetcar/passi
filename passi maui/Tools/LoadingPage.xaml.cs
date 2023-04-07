@@ -1,4 +1,5 @@
 ﻿using System.Timers;
+using Microsoft.Maui.LifecycleEvents;
 using passi_maui.utils;
 using Timer = System.Timers.Timer;
 
@@ -35,10 +36,15 @@ namespace passi_maui.Tools
             this._task = Task.Run(() =>
             {
                 _callBack.Invoke();
+                _task.Dispose();
+                _timer.Elapsed -= _timer_Elapsed;
+                _timer.Stop();
+                _timer.Dispose();
+
             });
             base.OnAppearing();
         }
-
+        
         protected override void OnDisappearing()
         {
             _task.Dispose();

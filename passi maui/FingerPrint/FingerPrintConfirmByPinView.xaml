@@ -3,6 +3,7 @@
               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
               xmlns:passiMaui="clr-namespace:passi_maui"
               xmlns:fingerPrint="clr-namespace:passi_maui.FingerPrint"
+    BackgroundColor="#FAFAFA"
               x:DataType="fingerPrint:FingerPrintConfirmByPinView"
               x:Class="passi_maui.FingerPrint.FingerPrintConfirmByPinView">
 
@@ -25,7 +26,7 @@
             </Label>
             <passiMaui:NumbersPad  NumberClicked="NumbersPad_OnNumberClicked" VerticalOptions="FillAndExpand"></passiMaui:NumbersPad>
 
-            <Button  BackgroundColor="#2196f3" TextColor="White" CornerRadius="100" Text="Cancel" Margin="10" Clicked="Cancel_OnClicked"></Button>
+            <Button  BackgroundColor="White" TextColor="Black" CornerRadius="100" Text="Cancel" Margin="10" Clicked="Cancel_OnClicked"></Button>
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>

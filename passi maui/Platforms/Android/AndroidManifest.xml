@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionName="1.33" package="com.passi.cloud.passi_maui" android:usesCleartextTraffic="true" android:installLocation="internalOnly" android:versionCode="33">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionName="1.33" package="com.passi.cloud.passi_maui" android:installLocation="internalOnly" android:versionCode="33">
 	<uses-sdk android:minSdkVersion="21" android:targetSdkVersion="31" />
-	<application android:allowBackup="false" android:label="passi_maui">
+	<application android:allowBackup="false" android:label="passi_maui" android:usesCleartextTraffic="true" >
 		<receiver android:name="com.google.firebase.iid.FirebaseInstanceIdInternalReceiver" android:exported="false" />
 		<receiver android:name="com.google.firebase.iid.FirebaseInstanceIdReceiver" android:exported="true" android:permission="com.google.android.c2dm.permission.SEND">
 			<intent-filter>

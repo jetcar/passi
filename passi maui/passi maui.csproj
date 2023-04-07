@@ -47,26 +47,13 @@
 
 	
 	<ItemGroup>
-	  <None Remove="Resources\AppIcon\xamagonblue.png" />
-	</ItemGroup>
-
-
-	
-
-	
-	<ItemGroup>
 	  <GoogleServicesJson Include="Platforms\Android\google-services.json">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </GoogleServicesJson>
 	</ItemGroup>
 
-
 	
 
-	
-	<ItemGroup>
-	  <MauiImage Include="Resources\AppIcon\xamagonblue.png" />
-	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="7.0.0" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.2" />

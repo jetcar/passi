@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:registration1="clr-namespace:passi_maui.Registration"
              xmlns:passiMaui="clr-namespace:passi_maui"
+             BackgroundColor="#FAFAFA"
              x:Class="passi_maui.Registration.FinishConfirmation"
              x:DataType="registration1:FinishConfirmation"
 >
@@ -21,7 +22,7 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"></ColumnDefinition>
                 </Grid.ColumnDefinitions>
-                <Label  Text="{Binding Path=Pin1Masked}" FontSize="15" VerticalTextAlignment="Center" HorizontalTextAlignment="Center" HorizontalOptions="FillAndExpand" FontAttributes="Bold" TextColor="Black" BackgroundColor="{Binding Path=Pin1Color}">
+                <Label  Text="{Binding Path=Pin1Masked}" FontSize="15" VerticalTextAlignment="Center" HorizontalTextAlignment="Center" HorizontalOptions="Center" FontAttributes="Bold" TextColor="Black" BackgroundColor="{Binding Path=Pin1Color}">
                     <Label.Triggers>
                         <DataTrigger  Binding="{Binding Path=Pin1Error.HasError}" TargetType="Label" Value="true">
                             <Setter Property="Label.BackgroundColor"
@@ -41,7 +42,7 @@
                     <ColumnDefinition Width="*"></ColumnDefinition>
                 </Grid.ColumnDefinitions>
                 <Label Text="{Binding Path=Pin2Masked}" FontSize="15" VerticalTextAlignment="Center" HorizontalTextAlignment="Center"
-                                                                HorizontalOptions="FillAndExpand" FontAttributes="Bold" TextColor="Black" BackgroundColor="{Binding Path=Pin2Color}">
+                                                                HorizontalOptions="Center" FontAttributes="Bold" TextColor="Black" BackgroundColor="{Binding Path=Pin2Color}">
                     <Label.Triggers>
                         <DataTrigger  Binding="{Binding Path=Pin2Error.HasError}" TargetType="Label" Value="true">
                             <Setter Property="Label.BackgroundColor"
@@ -53,7 +54,7 @@
             </Grid>
 
             <passiMaui:NumbersPad  NumberClicked="NumbersPad_OnNumberClicked"></passiMaui:NumbersPad>
-            <Button BackgroundColor="#2196f3" TextColor="White" CornerRadius="100"  Clicked="SkipButton_OnClicked" Text="Skip"></Button>
+            <Button BackgroundColor="White" TextColor="Black" CornerRadius="100"  Clicked="SkipButton_OnClicked" Text="Skip"></Button>
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>

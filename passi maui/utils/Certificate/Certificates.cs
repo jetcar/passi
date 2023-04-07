@@ -21,9 +21,9 @@ namespace passi_maui.utils.Certificate
             var serialNumber = BigIntegers.CreateRandomInRange(BigInteger.One, BigInteger.ValueOf(Int64.MaxValue), random);
             certificateGenerator.SetSerialNumber(serialNumber);
 
-            var sha512 = subject;
-            certificateGenerator.SetIssuerDN(new X509Name($"C=NL, O=Passi, CN={sha512}"));
-            certificateGenerator.SetSubjectDN(new X509Name($"C=NL, O=Passi, CN={sha512}"));
+            var username = subject;
+            certificateGenerator.SetIssuerDN(new X509Name($"C=NL, O=Passi, CN={username}"));
+            certificateGenerator.SetSubjectDN(new X509Name($"C=NL, O=Passi, CN={username}"));
             certificateGenerator.SetNotBefore(DateTime.UtcNow.Date);
             certificateGenerator.SetNotAfter(DateTime.UtcNow.Date.AddYears(1));
 
@@ -41,10 +41,9 @@ namespace passi_maui.utils.Certificate
             var bouncyCert = certificateGenerator.Generate(signatureFactory);
 
             // Lets convert it to X509Certificate2
-            X509Certificate2 certificate;
 
             Pkcs12Store store = new Pkcs12StoreBuilder().Build();
-            store.SetKeyEntry($"{sha512}_key", new AsymmetricKeyEntry(subjectKeyPair.Private), new[] { new X509CertificateEntry(bouncyCert) });
+            store.SetKeyEntry($"{username}_key", new AsymmetricKeyEntry(subjectKeyPair.Private), new[] { new X509CertificateEntry(bouncyCert) });
             var password = Guid.NewGuid().ToString();
             string fullPassword = password + pin;
 
@@ -52,7 +51,7 @@ namespace passi_maui.utils.Certificate
             {
                 store.Save(ms, fullPassword.ToCharArray(), random);
                 var rawBytes = ms.ToArray();
-                certificate = new X509Certificate2(rawBytes, fullPassword, X509KeyStorageFlags.Exportable);
+                var certificate = new X509Certificate2(rawBytes, fullPassword, X509KeyStorageFlags.Exportable);
                 var result = new Tuple<X509Certificate2, string, byte[]>(certificate, password, rawBytes);
                 return result;
             }

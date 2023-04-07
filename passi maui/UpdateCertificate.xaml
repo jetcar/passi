@@ -2,6 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:passiMaui="clr-namespace:passi_maui"
+    BackgroundColor="#FAFAFA"
              x:Class="passi_maui.UpdateCertificate"
              x:DataType="passiMaui:UpdateCertificate"
 >
@@ -52,7 +53,7 @@
                 </StackLayout>
 
                 <passiMaui:NumbersPad  NumberClicked="NumbersPad_OnNumberClicked"></passiMaui:NumbersPad>
-                <Button BackgroundColor="#2196f3" TextColor="White" CornerRadius="100"  Text="Cancel" Clicked="Button_Cancel"></Button>
+                <Button BackgroundColor="White" TextColor="Black" CornerRadius="100"  Text="Cancel" Clicked="Button_Cancel"></Button>
             </StackLayout>
         </ScrollView>
     </ContentPage.Content>

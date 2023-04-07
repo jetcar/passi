@@ -7,6 +7,7 @@
             <Style TargetType="Button">
                 <Setter Property="Padding" Value="0" />
                 <Setter Property="Background" Value="White" />
+                <Setter Property="TextColor" Value="Black" />
                 <Setter Property="CornerRadius" Value="100" />
                 <Setter Property="FontSize" Value="15" />
                 <Setter Property="Margin" Value="10" />

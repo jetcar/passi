@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using System.Security;
 using Newtonsoft.Json;
 using passi_maui.Tools;
 using passi_maui.utils;
@@ -8,6 +9,9 @@ using WebApiDto.SignUp;
 
 namespace passi_maui.Registration
 {
+    [QueryProperty("Code", "Code")]
+    [QueryProperty("Account", "Account")]
+    [QueryProperty("EmailText", "EmailText")]
     public partial class FinishConfirmation : ContentPage
     {
         private string _pin1Masked;
@@ -22,6 +26,7 @@ namespace passi_maui.Registration
         private ValidationError _pin2Error = new ValidationError();
 
         private readonly int MinPinLenght = 4;
+        private AccountDb _account;
 
         public FinishConfirmation()
         {
@@ -89,7 +94,7 @@ namespace passi_maui.Registration
 
         private void Confirm(string code, string email, string pin)
         {
-            Navigation.PushModalSinglePage(new LoadingPage(() =>
+            Navigation.PushModalSinglePage(new LoadingPage(),new Dictionary<string, object>() { {"Action",() =>
             {
                 GenerateCert(email, pin).ContinueWith(x =>
                 {
@@ -109,7 +114,10 @@ namespace passi_maui.Registration
                         if (response.Result.IsSuccessful)
                         {
                             SecureRepository.UpdateAccount(x.Result);
-                            MainThread.BeginInvokeOnMainThread(() => { Navigation.NavigateTop(); });
+                            MainThread.BeginInvokeOnMainThread(() =>
+                            {
+                                Navigation.NavigateTop();
+                            });
                         }
                         else if (!response.Result.IsSuccessful && response.Result.StatusCode == HttpStatusCode.BadRequest)
                         {
@@ -134,7 +142,7 @@ namespace passi_maui.Registration
                         }
                     });
                 });
-            }));
+            }}});
         }
 
         public string Code { get; set; }
@@ -151,8 +159,6 @@ namespace passi_maui.Registration
                  }
                  else
                  {
-
-
                      Account.Password = certificate.Result.Item2;
                      var certificateBytes = Convert.ToBase64String(certificate.Result.Item3); //importable certificate
                      Account.PrivateCertBinary = certificateBytes;
@@ -228,7 +234,16 @@ namespace passi_maui.Registration
             set => _pin2Error = value;
         }
 
-        public AccountDb Account { get; set; }
+        public AccountDb Account
+        {
+            get => _account;
+            set
+            {
+                if (Equals(value, _account)) return;
+                _account = value;
+                OnPropertyChanged();
+            }
+        }
 
         private void NumbersPad_OnNumberClicked(string value)
         {

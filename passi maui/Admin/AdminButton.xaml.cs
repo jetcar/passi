@@ -15,7 +15,7 @@ namespace passi_maui.Admin
         {
             var button = ((Button)sender);
             var account = (AccountDb)button.BindingContext;
-            Navigation.PushModalSinglePage((new AdminPage(account) { }));
+            Navigation.PushModalSinglePage(new AdminPage(),new Dictionary<string, object>() { {"Account",account}});
         }
     }
 }

@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AppCommon\AppCommon.csproj" />
+    <ProjectReference Include="..\passi android\passi android\passi android.csproj" />
   </ItemGroup>
 
 </Project>

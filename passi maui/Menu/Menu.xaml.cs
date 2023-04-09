@@ -52,7 +52,7 @@ namespace passi_maui.Menu
 
             var provider = (ProviderDb)((ViewCell)sender).BindingContext;
 
-            Navigation.PushModalSinglePage(new ProviderView(provider));
+            Navigation.PushModalSinglePage(new ProviderView(),new Dictionary<string, object>() { {"Provider",provider}});
             cell.IsEnabled = true;
         }
 

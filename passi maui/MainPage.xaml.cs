@@ -88,11 +88,11 @@ namespace passi_maui
             accountDb.Provider = provider;
             if (!accountDb.IsConfirmed || accountDb.PublicCertBinary == null)
             {
-                 Navigation.PushModalSinglePage(new RegistrationConfirmation(accountDb));
+                 Navigation.PushModalSinglePage(new RegistrationConfirmation(),new Dictionary<string, object>() { {"Account",accountDb}});
             }
             else
             {
-                Navigation.PushModalSinglePage(new AccountView(accountDb));
+                Navigation.PushModalSinglePage(new AccountView(),new Dictionary<string, object>() { {"Account",accountDb}});
             }
             cell.IsEnabled = true;
         }

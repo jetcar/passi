@@ -9,6 +9,7 @@ using WebApiDto.Certificate;
 
 namespace passi_maui
 {
+    [QueryProperty("Account", "Account")]
     public partial class UpdateCertificate : ContentPage
     {
         private string _pin1Masked;
@@ -112,7 +113,7 @@ namespace passi_maui
 
         public static void StartCertGeneration(string pinNew, string pinOld, AccountDb Account, INavigation Navigation, Action<string> action)
         {
-            Navigation.PushModalSinglePage(new LoadingPage(() =>
+            Navigation.PushModalSinglePage(new LoadingPage(),new Dictionary<string, object>() { {"Action",() =>
             {
                 GenerateCert(pinNew, pinOld, Account, action).ContinueWith(certDto =>
                 {
@@ -157,7 +158,7 @@ namespace passi_maui
                         });
                     }
                 });
-            }));
+            }}});
         }
 
         public static async Task<Tuple<CertificateUpdateDto, X509Certificate2, byte[]>> GenerateCert(string pinNew, string pinOld, AccountDb Account, Action<string> callback)
@@ -184,6 +185,7 @@ namespace passi_maui
         }
 
         private int currentfieldIndex = 0;
+        private AccountDb _account;
 
         public void SetTextBox(int i)
         {
@@ -266,8 +268,16 @@ namespace passi_maui
             set => _pinOldError = value;
         }
 
-        public AccountDb Account { get; set; }
-
+        public AccountDb Account
+        {
+            get => _account;
+            set
+            {
+                if (Equals(value, _account)) return;
+                _account = value;
+                OnPropertyChanged();
+            }
+        }
 
 
         private void NumbersPad_OnNumberClicked(string value)

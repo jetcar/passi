@@ -5,15 +5,15 @@ using Timer = System.Timers.Timer;
 
 namespace passi_maui.Tools
 {
+    [QueryProperty("Action", "Action")]
     public partial class LoadingPage : ContentPage
     {
-        private readonly Action _callBack;
+        public Action Action { get; set; }
         private Task _task;
         private readonly Timer _timer;
 
-        public LoadingPage(Action callBack)
+        public LoadingPage()
         {
-            _callBack = callBack;
             InitializeComponent();
             _timer = new Timer();
             _timer.Enabled = true;
@@ -26,8 +26,14 @@ namespace passi_maui.Tools
         {
             MainThread.BeginInvokeOnMainThread(() =>
             {
+                if (_task != null)
+                    _task.Dispose();
+                _timer.Elapsed -= _timer_Elapsed;
+                _timer.Stop();
+                _timer.Dispose();
                 DisplayAlert("Something went wrong", "Something went wrong, redirecting to first page.", "Ok");
                 Navigation.NavigateTop();
+
             });
         }
 
@@ -35,16 +41,12 @@ namespace passi_maui.Tools
         {
             this._task = Task.Run(() =>
             {
-                _callBack.Invoke();
-                _task.Dispose();
-                _timer.Elapsed -= _timer_Elapsed;
-                _timer.Stop();
-                _timer.Dispose();
+                Action.Invoke();
 
             });
             base.OnAppearing();
         }
-        
+
         protected override void OnDisappearing()
         {
             _task.Dispose();

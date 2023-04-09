@@ -1,4 +1,7 @@
 ﻿using System.Net;
+using Android.Content;
+using Android.Views.InputMethods;
+using Microsoft.Maui.Controls.Compatibility;
 using Newtonsoft.Json;
 using passi_maui.utils;
 using WebApiDto;
@@ -6,15 +9,16 @@ using WebApiDto.SignUp;
 
 namespace passi_maui.Registration
 {
+    [QueryProperty("Account", "Account")]
     public partial class RegistrationConfirmation : ContentPage
     {
         private string _code = "";
         private string _responseError;
         private string _email;
+        private AccountDb _account;
 
-        public RegistrationConfirmation(AccountDb account)
+        public RegistrationConfirmation()
         {
-            Account = account;
             InitializeComponent();
             BindingContext = this;
         }
@@ -56,7 +60,16 @@ namespace passi_maui.Registration
             }
         }
 
-        public AccountDb Account { get; set; }
+        public AccountDb Account
+        {
+            get => _account;
+            set
+            {
+                if (Equals(value, _account)) return;
+                _account = value;
+                OnPropertyChanged();
+            }
+        }
 
         private void NumbersPad_OnNumberClicked(string value)
         {
@@ -94,7 +107,7 @@ namespace passi_maui.Registration
                     Account.IsConfirmed = true;
                     Account.Provider = Account.Provider;
                     SecureRepository.UpdateAccount(Account);
-                    MainThread.BeginInvokeOnMainThread(() => { Navigation.PushModalSinglePage(new FinishConfirmation() { Code = Code, Account = Account }); });
+                    MainThread.BeginInvokeOnMainThread(() => { Navigation.PushModalSinglePage(new FinishConfirmation(),new Dictionary<string, object>() { {"Code", Code},{"Account", Account} }); });
                 }
                 else if (!response.Result.IsSuccessful && response.Result.StatusCode == HttpStatusCode.BadRequest)
                 {

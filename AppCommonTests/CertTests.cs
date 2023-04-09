@@ -2,8 +2,8 @@ using System;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
-using AppCommon.Certificate;
 using NUnit.Framework;
+using passi_android.utils.Certificate;
 
 namespace AppCommonTests
 {

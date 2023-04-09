@@ -2,14 +2,25 @@
 
 namespace passi_maui.FingerPrint
 {
+    [QueryProperty("Account", "Account")]
     public partial class FingerPrintView : ContentPage
     {
-        private readonly AccountDb _accountDb;
-        private string _message = "Reading FingerPrint";
-
-        public FingerPrintView(AccountDb accountDb)
+        public AccountDb Account
         {
-            _accountDb = accountDb;
+            get => _account;
+            set
+            {
+                if (Equals(value, _account)) return;
+                _account = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private string _message = "Reading FingerPrint";
+        private AccountDb _account;
+
+        public FingerPrintView()
+        {
             InitializeComponent();
             BindingContext = this;
         }
@@ -51,15 +62,15 @@ namespace passi_maui.FingerPrint
                 {
                     if (result.ErrorMessage == null)
                     {
-                        if (_accountDb.pinLength > 0)
+                        if (Account.pinLength > 0)
                             MainThread.BeginInvokeOnMainThread(() =>
                             {
-                                Navigation.PushModalSinglePage(new FingerPrintConfirmByPinView(_accountDb));
+                                Navigation.PushModalSinglePage(new FingerPrintConfirmByPinView(Account));
                             });
                         else
                             MainThread.BeginInvokeOnMainThread(() =>
                             {
-                                FingerPrintConfirmByPinView.SignRequestAndSendResponce(_accountDb, null, Navigation,
+                                FingerPrintConfirmByPinView.SignRequestAndSendResponce(Account, null, Navigation,
                                     (error) =>
                                     {
                                         Message = error;

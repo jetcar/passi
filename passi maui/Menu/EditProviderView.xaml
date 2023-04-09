@@ -5,7 +5,7 @@
              x:DataType="menu1:EditProviderView"
     BackgroundColor="#FAFAFA"
              x:Class="passi_maui.Menu.EditProviderView">
-    <StackLayout VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand">
+    <StackLayout VerticalOptions="Fill" HorizontalOptions="Fill">
         <StackLayout Padding="0" Margin="0"  Orientation="Vertical" BackgroundColor="#2196f3">
             <StackLayout  Margin="0"  Orientation="Horizontal" BackgroundColor="#2196f3">
                 <ImageButton Margin="10,60,10,10" BackgroundColor="#2196f3" HorizontalOptions="Start" Source="baseline_keyboard_arrow_left_black_24.png" Clicked="Button_Back"></ImageButton>

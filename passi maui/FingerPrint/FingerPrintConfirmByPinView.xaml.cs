@@ -91,7 +91,7 @@ namespace passi_maui.FingerPrint
         public static void SignRequestAndSendResponce(AccountDb _accountDb, string Pin1, INavigation Navigation, Action<string> callback)
         {
 
-            Navigation.PushModalSinglePage(new LoadingPage(() =>
+            Navigation.PushModalSinglePage(new LoadingPage(),new Dictionary<string, object>() { {"Action",() =>
             {
                 SecureRepository.AddfingerPrintKey(_accountDb.Guid, Pin1).ContinueWith((result) =>
                 {
@@ -108,7 +108,7 @@ namespace passi_maui.FingerPrint
 
                     });
                 });
-            }));
+            }}});
 
         }
 

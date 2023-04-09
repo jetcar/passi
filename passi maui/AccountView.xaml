@@ -12,7 +12,7 @@
                 <ImageButton Margin="10,60,10,10" BackgroundColor="#2196f3" HorizontalOptions="Start" Source="baseline_keyboard_arrow_left_black_24.png" Clicked="Button_Back"></ImageButton>
             </StackLayout>
         </StackLayout>
-        <admin:AdminButton BindingContext="{Binding Path=AccountDb}"></admin:AdminButton>
+        <admin:AdminButton BindingContext="{Binding Path=Account}"></admin:AdminButton>
         <StackLayout VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand">
             <Label HorizontalOptions="Center" Text="Current user:" />
             <Label HorizontalOptions="Center" Text="{Binding Path=Email}" />

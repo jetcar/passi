@@ -2,13 +2,24 @@
 
 namespace passi_maui.Menu
 {
+    [QueryProperty("Provider", "Provider")]
     public partial class ProviderView : ContentPage
     {
-        public ProviderDb Provider { get; set; }
+        private ProviderDb _provider;
 
-        public ProviderView(ProviderDb provider)
+        public ProviderDb Provider
         {
-            Provider = provider;
+            get => _provider;
+            set
+            {
+                if (Equals(value, _provider)) return;
+                _provider = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public ProviderView()
+        {
             InitializeComponent();
             BindingContext = this;
 
@@ -19,7 +30,7 @@ namespace passi_maui.Menu
             var button = sender as VisualElement;
             button.IsEnabled = false;
 
-            Navigation.PushModalSinglePage(new EditProviderView(Provider));
+            Navigation.PushModalSinglePage(new EditProviderView(),new Dictionary<string, object>() { {"Provider",Provider}});
             button.IsEnabled = true;
         }
 

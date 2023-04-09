@@ -11,6 +11,7 @@ using Timer = System.Timers.Timer;
 
 namespace passi_maui.Notifications
 {
+    [QueryProperty("Message", "Message")]
     public partial class ConfirmByPinView : ContentPage, IConfirmationView
     {
         private string _requesterName;
@@ -91,7 +92,7 @@ namespace passi_maui.Notifications
                 {
                     if (fingerPrintResult.ErrorMessage == null)
                     {
-                        Navigation.PushModalSinglePage(new LoadingPage(() =>
+                        Navigation.PushModalSinglePage(new LoadingPage(),new Dictionary<string, object>() { {"Action",() =>
                         {
                             CertHelper.SignByFingerPrint(Message.AccountGuid, Message.RandomString).ContinueWith(signedGuid =>
                             {
@@ -142,7 +143,7 @@ namespace passi_maui.Notifications
                                     }
                                 });
                             });
-                        }));
+                        }}});
                     }
                     else
                     {
@@ -236,7 +237,7 @@ namespace passi_maui.Notifications
         private void SignRequestAndSendResponce()
         {
             App.CancelfingerPrint();
-            Navigation.PushModalSinglePage(new LoadingPage(() =>
+            Navigation.PushModalSinglePage(new LoadingPage(),new Dictionary<string, object>() { {"Action",() =>
             {
                 CertHelper.Sign(Message.AccountGuid, Pin1, Message.RandomString).ContinueWith(signedGuid =>
                 {
@@ -293,7 +294,7 @@ namespace passi_maui.Notifications
                         }
                     });
                 });
-            }));
+            }}});
         }
 
         public string ResponseError

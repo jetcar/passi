@@ -8,6 +8,7 @@ using Color = WebApiDto.Auth.Color;
 
 namespace passi_maui.Admin
 {
+    [QueryProperty("Account", "Account")]
     public partial class AdminPage : ContentPage
     {
         private string _cert64;
@@ -16,17 +17,26 @@ namespace passi_maui.Admin
         private string _isFinished;
         private string _notificationToken;
         private string _deviceId;
+        private AccountDb _account;
 
-        public AdminPage(AccountDb account)
+        public AdminPage()
         {
-            this.Account = account;
             InitializeComponent();
             BindingContext = this;
 
             NotificationToken = SecureStorage.GetAsync(StorageKeys.NotificationToken).Result;
         }
 
-        public AccountDb Account { get; set; }
+        public AccountDb Account
+        {
+            get => _account;
+            set
+            {
+                if (Equals(value, _account)) return;
+                _account = value;
+                OnPropertyChanged();
+            }
+        }
 
         protected override void OnAppearing()
         {
@@ -118,12 +128,12 @@ namespace passi_maui.Admin
         {
             ProviderDb provider = SecureRepository.GetProvider(Account.ProviderGuid);
             Account.Provider = provider;
-            Navigation.PushModalSinglePage(new RegistrationConfirmation(Account));
+            Navigation.PushModalSinglePage(new RegistrationConfirmation(), new Dictionary<string, object>() { { "Account", Account } });
         }
 
         private void EmptyView(object sender, EventArgs e)
         {
-            Navigation.PushModalSinglePage(new AccountView(Account));
+            Navigation.PushModalSinglePage(new AccountView(), new Dictionary<string, object>() { { "Account", Account } });
         }
 
         private void NotificationConfirmationView(object sender, EventArgs e)
@@ -142,21 +152,28 @@ namespace passi_maui.Admin
 
         private void ConfirmByPinView(object sender, EventArgs e)
         {
-            Navigation.PushModalSinglePage(new ConfirmByPinView() { Message = new NotificationDto() { Sender = "sender", ConfirmationColor = Color.green, RandomString = System.Guid.NewGuid().ToString(), SessionId = System.Guid.NewGuid(), AccountGuid = Account.Guid, ExpirationTime = DateTime.UtcNow.AddSeconds(90), ReturnHost = "https://localhost" } });
+            Navigation.PushModalSinglePage(new ConfirmByPinView(), new Dictionary<string, object>() { {"Message", new NotificationDto()
+            {
+                Sender = "sender", ConfirmationColor = Color.green, RandomString = System.Guid.NewGuid().ToString(), SessionId = System.Guid.NewGuid(), AccountGuid = Account.Guid, ExpirationTime = DateTime.UtcNow.AddSeconds(90), ReturnHost = "https://localhost"
+            }}});
         }
 
         private void FinishConfirmation(object sender, EventArgs e)
         {
-            Navigation.PushModalSinglePage(new FinishConfirmation() { Code = "5", Account = Account, EmailText = "your@email.com" });
+            Navigation.PushModalSinglePage(new FinishConfirmation(), new Dictionary<string, object>() { { "Code", "5" }, { "Account", Account }, { "EmailText", "your@email.com" } });
         }
 
         private void LoadingPage(object sender, EventArgs e)
         {
-            Navigation.PushModalSinglePage(new LoadingPage(new Action(() =>
+            Navigation.PushModalSinglePage(new LoadingPage(), new Dictionary<string, object>()
             {
-                Thread.Sleep(10000);
-                Navigation.PopModal();
-            })));
+                { "Action", new Action(() =>
+                {
+                    Thread.Sleep(10000);
+                    Navigation.PopModal();
+                })
+            }
+        });
         }
 
         private void ClearProvider(object sender, EventArgs e)

@@ -1,4 +1,6 @@
-﻿using System.Security.Cryptography.X509Certificates;
+﻿using System;
+using System.Security;
+using System.Security.Cryptography.X509Certificates;
 using Org.BouncyCastle.Asn1.X509;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Generators;
@@ -44,14 +46,18 @@ namespace passi_maui.utils.Certificate
 
             Pkcs12Store store = new Pkcs12StoreBuilder().Build();
             store.SetKeyEntry($"{username}_key", new AsymmetricKeyEntry(subjectKeyPair.Private), new[] { new X509CertificateEntry(bouncyCert) });
+
             var password = Guid.NewGuid().ToString();
-            string fullPassword = password + pin;
+            var charArray = (password + pin).ToCharArray();
+            var fullPassword = (charArray);
 
             using (var ms = new System.IO.MemoryStream())
             {
-                store.Save(ms, fullPassword.ToCharArray(), random);
-                var rawBytes = ms.ToArray();
-                var certificate = new X509Certificate2(rawBytes, fullPassword, X509KeyStorageFlags.Exportable);
+                //store.Save(ms, fullPassword.ToArray(), random);
+                var cert = store.GetCertificate($"{username}_key");
+                var rawBytes = cert.Certificate.GetEncoded();
+                var certificate = new X509Certificate2(cert.Certificate.GetEncoded(), fullPassword, X509KeyStorageFlags.Exportable);
+
                 var result = new Tuple<X509Certificate2, string, byte[]>(certificate, password, rawBytes);
                 return result;
             }

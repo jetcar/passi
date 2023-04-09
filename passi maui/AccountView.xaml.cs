@@ -2,35 +2,33 @@
 
 namespace passi_maui
 {
+    [QueryProperty("Account", "Account")]
     public partial class AccountView : ContentPage
     {
-        public AccountDb AccountDb { get; set; }
+        public AccountDb Account
+        {
+            get => _account;
+            set
+            {
+                if (Equals(value, _account)) return;
+                _account = value;
+                OnPropertyChanged();
+            }
+        }
+
         private string _email;
         private string _thumbprint;
         private string _validFrom;
         private string _validTo;
         private string _providerName;
+        private AccountDb _account;
 
-        public AccountView(AccountDb accountDb)
+        public AccountView()
         {
-            AccountDb = accountDb;
             InitializeComponent();
             BindingContext = this;
 
-            try
-            {
-                Email = AccountDb.Email;
-                Thumbprint = AccountDb.Thumbprint;
-                ValidFrom = AccountDb.ValidFrom.ToShortDateString();
-                ValidTo = AccountDb.ValidTo.ToShortDateString();
-                Email = accountDb.Email;
-                Thumbprint = AccountDb.Thumbprint;
-                ProviderName = AccountDb.Provider?.Name;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-            }
+           
         }
 
         public string ProviderName
@@ -84,15 +82,34 @@ namespace passi_maui
             }
         }
 
+        protected override void OnAppearing()
+        {
+            try
+            {
+                Email = Account.Email;
+                Thumbprint = Account.Thumbprint;
+                ValidFrom = Account.ValidFrom.ToShortDateString();
+                ValidTo = Account.ValidTo.ToShortDateString();
+                Email = Account.Email;
+                Thumbprint = Account.Thumbprint;
+                ProviderName = Account.Provider?.Name;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+            base.OnAppearing();
+        }
+
         private void UpdateCertificate_OnClicked(object sender, EventArgs e)
         {
             var button = sender as VisualElement;
             button.IsEnabled = false;
-            if (AccountDb.pinLength > 0)
-                Navigation.PushModalSinglePage(new UpdateCertificate() { Account = AccountDb });
+            if (Account.pinLength > 0)
+                Navigation.PushModalSinglePage(new UpdateCertificate(),new Dictionary<string, object>() { {"Account", Account} });
             else
             {
-                UpdateCertificate.StartCertGeneration(null, null, AccountDb, Navigation, (error) =>
+                UpdateCertificate.StartCertGeneration(null, null, Account, Navigation, (error) =>
                 {
 
                 });
@@ -105,7 +122,7 @@ namespace passi_maui
             var button = sender as VisualElement;
             button.IsEnabled = false;
 
-            Navigation.PushModalSinglePage(new FingerPrint.FingerPrintView(AccountDb));
+            Navigation.PushModalSinglePage(new FingerPrint.FingerPrintView(),new Dictionary<string, object>() { {"Account",Account}});
             button.IsEnabled = true;
         }
 

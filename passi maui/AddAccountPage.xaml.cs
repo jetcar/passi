@@ -1,5 +1,7 @@
 ﻿using System.Net;
 using System.Net.Mail;
+using Android.Content;
+using Android.Views.InputMethods;
 using Newtonsoft.Json;
 using passi_maui.Registration;
 using passi_maui.Tools;
@@ -80,6 +82,16 @@ namespace passi_maui
 
         public void Button_OnClicked(object sender, EventArgs e)
         {
+            var context = Platform.AppContext;
+            var inputMethodManager = context.GetSystemService(Context.InputMethodService) as InputMethodManager;
+            if (inputMethodManager != null)
+            {
+                var activity = Platform.CurrentActivity;
+                var token = activity.CurrentFocus?.WindowToken;
+                inputMethodManager.HideSoftInputFromWindow(token, HideSoftInputFlags.None);
+                activity.Window.DecorView.ClearFocus();
+            }
+
             var button = sender as VisualElement;
             button.IsEnabled = false;
 
@@ -97,7 +109,7 @@ namespace passi_maui
                 DeviceId = SecureRepository.GetDeviceId()
             };
 
-            Navigation.PushModalSinglePage(new LoadingPage(new Action(() =>
+            Navigation.PushModalSinglePage(new LoadingPage(),new Dictionary<string, object>() { {"Action",new Action(() =>
             {
                 RestService.ExecutePostAsync(CurrentProvider, CurrentProvider.SignupPath, signupDto).ContinueWith((response) =>
                 {
@@ -118,8 +130,7 @@ namespace passi_maui
                         SecureRepository.AddAccount(account);
                         MainThread.BeginInvokeOnMainThread(() =>
                         {
-                            Navigation.PushModalSinglePage(new NavigationPage(new RegistrationConfirmation(account)
-                            ));
+                            Navigation.PushModalSinglePage(new RegistrationConfirmation(),new Dictionary<string, object>() { {"Account",account}});
                         });
                     }
                     else
@@ -133,7 +144,7 @@ namespace passi_maui
                         });
                     }
                 });
-            })));
+            })}});
             button.IsEnabled = true;
         }
 

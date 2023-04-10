@@ -52,7 +52,7 @@ obj
 *.bak
 publish
 .vs
-
+*.user
 
 /identityserver.txt
 /passi.txt

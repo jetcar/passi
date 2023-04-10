@@ -8,13 +8,16 @@
             var modalStackCount = ModalStack.Count();
             for (int i = 0; i < modalStackCount; i++)
             {
+
+                var lastOrDefault = ModalStack.LastOrDefault();
+                ModalStack.Remove(lastOrDefault);
                 Shell.Current.GoToAsync("..");
 
             }
         }
 
         public static Task PopModal(this INavigation navigator)
-        { 
+        {
             var lastOrDefault = ModalStack.LastOrDefault();
 
             ModalStack.Remove(lastOrDefault);

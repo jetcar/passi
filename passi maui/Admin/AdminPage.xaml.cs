@@ -138,7 +138,7 @@ namespace passi_maui.Admin
 
         private void NotificationConfirmationView(object sender, EventArgs e)
         {
-            NotificationVerifyRequestView.Instance.Message = new NotificationDto()
+            Navigation.PushModalSinglePage(new NotificationVerifyRequestView(),new Dictionary<string, object>(){{"Message",new NotificationDto()
             {
                 Sender = "sender",
                 ConfirmationColor = Color.green,
@@ -146,8 +146,7 @@ namespace passi_maui.Admin
                 SessionId = System.Guid.NewGuid(),
                 ExpirationTime = DateTime.UtcNow.AddSeconds(90),
                 ReturnHost = "https://localhost"
-            };
-            Navigation.PushModalSinglePage(NotificationVerifyRequestView.Instance);
+            }}});
         }
 
         private void ConfirmByPinView(object sender, EventArgs e)

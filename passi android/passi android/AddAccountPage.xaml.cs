@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Mail;
@@ -48,7 +49,6 @@ namespace passi_android
             {
                 _emailError = value;
                 OnPropertyChanged();
-                OnPropertyChanged();
             }
         }
 
@@ -58,7 +58,6 @@ namespace passi_android
             set
             {
                 _responseError = value;
-                OnPropertyChanged();
                 OnPropertyChanged();
             }
         }

@@ -38,7 +38,7 @@ namespace passi_maui.utils.Certificate
             certificateGenerator.SetPublicKey(subjectKeyPair.Public);
 
             var issuerKeyPair = subjectKeyPair;
-            const string signatureAlgorithm = "SHA256WithRSA";
+            const string signatureAlgorithm = "SHA512WithRSA";
             var signatureFactory = new Asn1SignatureFactory(signatureAlgorithm, issuerKeyPair.Private);
             var bouncyCert = certificateGenerator.Generate(signatureFactory);
 
@@ -53,12 +53,12 @@ namespace passi_maui.utils.Certificate
 
             using (var ms = new System.IO.MemoryStream())
             {
-                //store.Save(ms, fullPassword.ToArray(), random);
-                var cert = store.GetCertificate($"{username}_key");
-                var rawBytes = cert.Certificate.GetEncoded();
-                var certificate = new X509Certificate2(cert.Certificate.GetEncoded(), fullPassword, X509KeyStorageFlags.Exportable);
-
-                var result = new Tuple<X509Certificate2, string, byte[]>(certificate, password, rawBytes);
+                store.Save(ms, fullPassword.ToArray(), random);
+                var bytes = ms.ToArray();
+                var base64 = Convert.ToBase64String(bytes);
+                var certificate = new X509Certificate2(bytes, fullPassword, X509KeyStorageFlags.DefaultKeySet);
+                //certificate.CopyWithPrivateKey(key)
+                var result = new Tuple<X509Certificate2, string, byte[]>(certificate, password, bytes);
                 return result;
             }
         }

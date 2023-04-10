@@ -11,6 +11,16 @@ using passi_maui.FingerPrint;
 using passi_maui.Notifications;
 using WebApiDto;
 using WebApiDto.Auth;
+using Org.BouncyCastle.Asn1.X509;
+using Org.BouncyCastle.Crypto.Generators;
+using Org.BouncyCastle.Crypto.Operators;
+using Org.BouncyCastle.Crypto;
+using Org.BouncyCastle.Pkcs;
+using Org.BouncyCastle.Utilities;
+using Org.BouncyCastle.X509;
+using System.Security.Cryptography.X509Certificates;
+using Org.BouncyCastle.Math;
+using Org.BouncyCastle.Security;
 
 namespace passi_maui.Platforms.Android
 {
@@ -37,31 +47,40 @@ namespace passi_maui.Platforms.Android
                         MyFirebaseService.SendRegistrationToServer(tokenres);
                     });
                 });
-               
+
 
             });
             App.CloseApp = () =>
             {
                 this.FinishAffinity();
             };
-            Task.Run(() =>
+            App.CreateCertificate = () =>
             {
-                var fingerprintManagerCompat = FingerprintManagerCompat.From(this);
+                return GenerateCertificate("test", "test").Result;
+                
+            };
 
-                App.FingerprintManager.HasEnrolledFingerprints = ()=>
-                {
-                    return fingerprintManagerCompat.HasEnrolledFingerprints;
-                };
-                App.FingerprintManager.IsHardwareDetected = ()=>
-                {
-                    return fingerprintManagerCompat.IsHardwareDetected;
-                };
-                App.IsKeyguardSecure = ()=>
-                {
-                    return ((KeyguardManager)GetSystemService(KeyguardService)).IsKeyguardSecure;
-                };
-                App.StartFingerPrintReading = FingerPrintAuthentication;
-            });
+
+            App.CreateCertificate.Invoke();
+
+            //Task.Run(() =>
+            //{
+            //    var fingerprintManagerCompat = FingerprintManagerCompat.From(this);
+
+            //    App.FingerprintManager.HasEnrolledFingerprints = () =>
+            //    {
+            //        return fingerprintManagerCompat.HasEnrolledFingerprints;
+            //    };
+            //    App.FingerprintManager.IsHardwareDetected = () =>
+            //    {
+            //        return fingerprintManagerCompat.IsHardwareDetected;
+            //    };
+            //    App.IsKeyguardSecure = () =>
+            //    {
+            //        return ((KeyguardManager)GetSystemService(KeyguardService)).IsKeyguardSecure;
+            //    };
+            //    App.StartFingerPrintReading = FingerPrintAuthentication;
+            //});
 
             App.CancelNotifications = () =>
             {
@@ -72,12 +91,61 @@ namespace passi_maui.Platforms.Android
 
         }
 
-         protected override void OnPostResume()
+        protected override void OnPostResume()
         {
             PollNotifications();
 
             base.OnPostResume();
         }
+
+
+        public static async Task<Tuple<X509Certificate2, string, byte[]>> GenerateCertificate(string subject, string pin)
+        {
+            var random = new SecureRandom();
+            var certificateGenerator = new X509V3CertificateGenerator();
+
+            var serialNumber = BigIntegers.CreateRandomInRange(BigInteger.One, BigInteger.ValueOf(Int64.MaxValue), random);
+            certificateGenerator.SetSerialNumber(serialNumber);
+
+            var username = subject;
+            certificateGenerator.SetIssuerDN(new X509Name($"C=NL, O=Passi, CN={username}"));
+            certificateGenerator.SetSubjectDN(new X509Name($"C=NL, O=Passi, CN={username}"));
+            certificateGenerator.SetNotBefore(DateTime.UtcNow.Date);
+            certificateGenerator.SetNotAfter(DateTime.UtcNow.Date.AddYears(1));
+
+            const int strength = 2048;
+            var keyGenerationParameters = new KeyGenerationParameters(random, strength);
+            var keyPairGenerator = new RsaKeyPairGenerator();
+            keyPairGenerator.Init(keyGenerationParameters);
+
+            var subjectKeyPair = keyPairGenerator.GenerateKeyPair();
+            certificateGenerator.SetPublicKey(subjectKeyPair.Public);
+
+            var issuerKeyPair = subjectKeyPair;
+            const string signatureAlgorithm = "SHA512WithRSA";
+            var signatureFactory = new Asn1SignatureFactory(signatureAlgorithm, issuerKeyPair.Private);
+            var bouncyCert = certificateGenerator.Generate(signatureFactory);
+
+            // Lets convert it to X509Certificate2
+
+            Pkcs12Store store = new Pkcs12StoreBuilder().Build();
+            store.SetKeyEntry($"{username}_key", new AsymmetricKeyEntry(subjectKeyPair.Private), new[] { new X509CertificateEntry(bouncyCert) });
+
+            var password = Guid.NewGuid().ToString();
+            var charArray = (password + pin).ToCharArray();
+            var fullPassword = (charArray);
+
+            using (var ms = new System.IO.MemoryStream())
+            {
+                store.Save(ms, fullPassword.ToArray(), random);
+                var bytes = ms.ToArray();
+                var certificate = new X509Certificate2(bytes, fullPassword, X509KeyStorageFlags.DefaultKeySet);
+                var result = new Tuple<X509Certificate2, string, byte[]>(certificate, password, bytes);
+                return result;
+            }
+        }
+
+
 
         protected void FingerPrintAuthentication()
         {
@@ -164,10 +232,7 @@ namespace passi_maui.Platforms.Android
                                 {
                                     MainThread.BeginInvokeOnMainThread(() =>
                                     {
-                                        NotificationVerifyRequestView.Instance.Message = msg;
-                                        AppShell.MainPage.Navigation.PushModalSinglePage(
-                                            NotificationVerifyRequestView
-                                                .Instance);
+                                        AppShell.MainPage.Navigation.PushModalSinglePage(new NotificationVerifyRequestView(), new Dictionary<string, object>() { { "Message", msg } });
                                     });
                                 }
                             }

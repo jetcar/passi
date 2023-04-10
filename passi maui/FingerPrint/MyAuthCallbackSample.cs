@@ -34,7 +34,7 @@ namespace passi_maui.FingerPrint
                 }
                 catch (IllegalBlockSizeException ibse)
                 {
-                    App.FingerPrintReadingResult.Invoke(new FingerPrintResult() { ErrorMessage = "Error" });
+                   App.FingerPrintReadingResult.Invoke(new FingerPrintResult() { ErrorMessage = "Error" });
                 }
             }
             else

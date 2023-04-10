@@ -1,4 +1,5 @@
-﻿using System.Timers;
+﻿using System.Diagnostics;
+using System.Timers;
 using Microsoft.Maui.LifecycleEvents;
 using passi_maui.utils;
 using Timer = System.Timers.Timer;
@@ -18,6 +19,9 @@ namespace passi_maui.Tools
             _timer = new Timer();
             _timer.Enabled = true;
             _timer.Interval = 30000;
+            if(Debugger.IsAttached)
+                _timer.Interval = 300000;
+
             _timer.Elapsed += _timer_Elapsed;
             _timer.Start();
         }

@@ -12,6 +12,7 @@ using Timer = System.Timers.Timer;
 
 namespace passi_maui.Notifications
 {
+    [QueryProperty("Message", "Message")]
     public partial class NotificationVerifyRequestView : ContentPage, IConfirmationView
     {
         private List<Color> possibleCodes = null;
@@ -26,23 +27,10 @@ namespace passi_maui.Notifications
         private bool _isButtonEnabled = true;
         private string _responseError;
         private AccountDb _account;
-        private static object locker = new object();
-        private static NotificationVerifyRequestView _instance;
+        private NotificationDto _message;
 
-        public static NotificationVerifyRequestView Instance
-        {
-            get
-            {
-                lock (locker)
-                {
-                    if (_instance == null)
-                        _instance = new NotificationVerifyRequestView();
-                    return _instance;
-                }
-            }
-        }
 
-        private NotificationVerifyRequestView()
+        public NotificationVerifyRequestView()
         {
             InitializeComponent();
             BindingContext = this;
@@ -60,10 +48,6 @@ namespace passi_maui.Notifications
             _timer.Stop();
             _timer.Dispose();
             base.OnDisappearing();
-            lock (locker)
-            {
-                _instance = null;
-            }
         }
 
         private void _timer_Elapsed(object sender, ElapsedEventArgs e)
@@ -227,7 +211,16 @@ namespace passi_maui.Notifications
             }
         }
 
-        public NotificationDto Message { get; set; }
+        public NotificationDto Message
+        {
+            get => _message;
+            set
+            {
+                if (Equals(value, _message)) return;
+                _message = value;
+                OnPropertyChanged();
+            }
+        }
 
         public ValidationError ColorError
         {

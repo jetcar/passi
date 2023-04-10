@@ -98,8 +98,14 @@ namespace passi_maui.Registration
             {
                 GenerateCert(email, pin).ContinueWith(x =>
                 {
-                    if(x.Result == null)
+                    if (x.Result == null)
+                    {
+                        MainThread.BeginInvokeOnMainThread(() =>
+                        {
+                            Navigation.PopModal();
+                        });
                         return;
+                    }
                     var signupConfirmationDto = new SignupConfirmationDto()
                     {
                         Code = code,

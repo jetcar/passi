@@ -2,6 +2,7 @@
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:admin="clr-namespace:passi_android.Admin;assembly=passi android"
+             BackgroundColor="#FAFAFA"
              x:DataType="admin:AdminPage"
              x:Class="passi_android.Admin.AdminPage">
     <ContentPage.Content>
@@ -34,14 +35,14 @@
                     <Button Padding="0" Margin="0" HorizontalOptions="End" Text="V" Clicked="SaveNotificationToken"></Button>
                 </StackLayout>
 
-                <Button Background="White" CornerRadius="100"  Text="Main" Clicked="MainPageclicked"></Button>
-                <Button  Background="White" CornerRadius="100" Text="RegistrationConfirmation" Clicked="RegistrationConfirmation"></Button>
-                <Button  Background="White" CornerRadius="100" Text="EmptyView" Clicked="EmptyView"></Button>
-                <Button  Background="White" CornerRadius="100" Text="NotificationVerifyRequestView" Clicked="NotificationConfirmationView"></Button>
-                <Button Background="White" CornerRadius="100"  Text="ConfirmByPinView" Clicked="ConfirmByPinView"></Button>
-                <Button  Background="White" CornerRadius="100" Text="FinishConfirmation" Clicked="FinishConfirmation"></Button>
-                <Button  Background="White" CornerRadius="100" Text="ClearProvider" Clicked="ClearProvider"></Button>
-                <Button  Background="White" CornerRadius="100" Text="LoadingPage" Clicked="LoadingPage"></Button>
+                <Button BackgroundColor="White" TextColor="Black" CornerRadius="100"  Text="Main" Clicked="MainPageclicked"></Button>
+                <Button BackgroundColor="White" TextColor="Black" CornerRadius="100" Text="RegistrationConfirmation" Clicked="RegistrationConfirmation"></Button>
+                <Button BackgroundColor="White" TextColor="Black" CornerRadius="100" Text="EmptyView" Clicked="EmptyView"></Button>
+                <Button BackgroundColor="White" TextColor="Black" CornerRadius="100" Text="NotificationVerifyRequestView" Clicked="NotificationConfirmationView"></Button>
+                <Button BackgroundColor="White" TextColor="Black" CornerRadius="100"  Text="ConfirmByPinView" Clicked="ConfirmByPinView"></Button>
+                <Button BackgroundColor="White" TextColor="Black" CornerRadius="100" Text="FinishConfirmation" Clicked="FinishConfirmation"></Button>
+                <Button BackgroundColor="White" TextColor="Black" CornerRadius="100" Text="ClearProvider" Clicked="ClearProvider"></Button>
+                <Button BackgroundColor="White" TextColor="Black" CornerRadius="100" Text="LoadingPage" Clicked="LoadingPage"></Button>
             </StackLayout>
         </ScrollView>
     </ContentPage.Content>

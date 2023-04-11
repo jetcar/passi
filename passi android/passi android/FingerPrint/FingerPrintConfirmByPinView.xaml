@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:fingerPrint="clr-namespace:passi_android.FingerPrint"
              xmlns:passiAndroid="clr-namespace:passi_android"
+             BackgroundColor="#FAFAFA"
              x:DataType="fingerPrint:FingerPrintConfirmByPinView"
              x:Class="passi_android.FingerPrint.FingerPrintConfirmByPinView">
 
@@ -25,7 +26,7 @@
             </Label>
             <passiAndroid:NumbersPad  NumberClicked="NumbersPad_OnNumberClicked" VerticalOptions="FillAndExpand"></passiAndroid:NumbersPad>
 
-            <Button  Background="White" CornerRadius="100" Text="Cancel" Margin="10" Clicked="Cancel_OnClicked"></Button>
+            <Button BackgroundColor="White" TextColor="Black" CornerRadius="100" Text="Cancel" Margin="10" Clicked="Cancel_OnClicked"></Button>
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>

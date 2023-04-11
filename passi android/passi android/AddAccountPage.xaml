@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:admin="clr-namespace:passi_android.Admin"
+             BackgroundColor="#FAFAFA"
              xmlns:passiAndroid="clr-namespace:passi_android;assembly=passi android"
              x:DataType="passiAndroid:AddAccountPage"
              x:Class="passi_android.AddAccountPage">
@@ -19,8 +19,8 @@
                     </DataTrigger>
                 </Entry.Triggers>
             </Entry>
-            <Button Background="White" CornerRadius="100"  Clicked="Button_OnClicked" Text="Register"></Button>
-            <Button Background="White" CornerRadius="100"  Clicked="CancelButton_OnClicked" Text="Cancel"></Button>
+            <Button BackgroundColor="White" TextColor="Black" CornerRadius="100"  Clicked="Button_OnClicked" Text="Register"></Button>
+            <Button BackgroundColor="White" TextColor="Black" CornerRadius="100"  Clicked="CancelButton_OnClicked" Text="Cancel"></Button>
         </StackLayout>
     </StackLayout>
 </ContentPage>

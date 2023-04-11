@@ -4,6 +4,7 @@
              xmlns:passiAndroid="clr-namespace:passi_android"
              xmlns:menu="clr-namespace:passi_android.Menu;assembly=passi android"
              xmlns:admin="clr-namespace:passi_android.Admin;assembly=passi android"
+             BackgroundColor="#FAFAFA"
              x:DataType="menu:AddProviderView"
              x:Class="passi_android.Menu.AddProviderView">
     <StackLayout VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand">
@@ -34,6 +35,6 @@
                 <Entry HorizontalOptions="FillAndExpand" Text="{Binding Path=Provider.SignupConfirmation}" />
             </StackLayout>
         </ScrollView>
-        <Button Background="White" CornerRadius="100"  Text="Save" Clicked="SaveButton_OnClicked"></Button>
+        <Button BackgroundColor="White" TextColor="Black" CornerRadius="100"  Text="Save" Clicked="SaveButton_OnClicked"></Button>
     </StackLayout>
 </ContentPage>

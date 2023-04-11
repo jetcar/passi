@@ -1,9 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:passi_android="clr-namespace:passi_android"
-             xmlns:admin="clr-namespace:passi_android.Admin"
-             xmlns:appCommon="clr-namespace:AppCommon;assembly=AppCommon"
+             BackgroundColor="#FAFAFA"
              xmlns:utils="clr-namespace:passi_android.utils;assembly=passi android"
              x:Name="list"
              x:Class="passi_android.MainPage">

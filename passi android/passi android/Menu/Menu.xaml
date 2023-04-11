@@ -4,6 +4,7 @@
              xmlns:passiAndroid="clr-namespace:passi_android;assembly=passi android"
              xmlns:menu="clr-namespace:passi_android.Menu;assembly=passi android"
              x:Name="list"
+             BackgroundColor="#FAFAFA"
              x:Class="passi_android.Menu.Menu"
              x:DataType="menu:Menu"
              >

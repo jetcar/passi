@@ -4,7 +4,7 @@
              x:Class="passi_android.Admin.AdminButton">
   <ContentView.Content>
       <StackLayout>
-          <Button Background="White" CornerRadius="100"  Text="Admin" Clicked="AdminButton_OnClicked"></Button>
+          <Button BackgroundColor="White" TextColor="Black" CornerRadius="100"  Text="Admin" Clicked="AdminButton_OnClicked"></Button>
       </StackLayout>
   </ContentView.Content>
 </ContentView>

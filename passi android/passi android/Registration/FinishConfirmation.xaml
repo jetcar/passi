@@ -10,11 +10,11 @@
     <ContentPage.Content>
 
         <StackLayout VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand">
-            <Label HorizontalOptions="Center" Text="{ Binding Path=ResponseError}" />
-            <Label HorizontalOptions="Center" Text="Secure account by pin." />
+            <Label TextColor="Black" HorizontalOptions="Center" Text="{ Binding Path=ResponseError}" />
+            <Label TextColor="Black" HorizontalOptions="Center" Text="Secure account by pin." />
 
-            <Label Text="{Binding Path=Pin1Error.Text}" HorizontalTextAlignment="Center"></Label>
-            <Label Text="Pin" HorizontalTextAlignment="Center"></Label>
+            <Label TextColor="Black" Text="{Binding Path=Pin1Error.Text}" HorizontalTextAlignment="Center"></Label>
+            <Label TextColor="Black" Text="Pin" HorizontalTextAlignment="Center"></Label>
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"></RowDefinition>
@@ -22,7 +22,7 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"></ColumnDefinition>
                 </Grid.ColumnDefinitions>
-                <Label  Text="{Binding Path=Pin1Masked}" FontSize="15" VerticalTextAlignment="Center" HorizontalTextAlignment="Center" HorizontalOptions="FillAndExpand" FontAttributes="Bold" TextColor="Black" BackgroundColor="{Binding Path=Pin1Color}">
+                <Label Text="{Binding Path=Pin1Masked}" FontSize="15" VerticalTextAlignment="Center" HorizontalTextAlignment="Center" HorizontalOptions="FillAndExpand" FontAttributes="Bold" TextColor="Black" BackgroundColor="{Binding Path=Pin1Color}">
                     <Label.Triggers>
                         <DataTrigger  Binding="{Binding Path=Pin1Error.HasError}" TargetType="Label" Value="true">
                             <Setter Property="Label.BackgroundColor"
@@ -32,8 +32,8 @@
                 </Label>
                 <Button Background="transparent" CornerRadius="100"  Text="X" Padding="0" Margin="0" HorizontalOptions="End" Clicked="ClearPin1_OnClicked"></Button>
             </Grid>
-            <Label Text="{Binding Path=Pin2Error.Text}" HorizontalTextAlignment="Center"></Label>
-            <Label Text="Pin confirmation" HorizontalTextAlignment="Center" ></Label>
+            <Label TextColor="Black" Text="{Binding Path=Pin2Error.Text}" HorizontalTextAlignment="Center"></Label>
+            <Label TextColor="Black" Text="Pin confirmation" HorizontalTextAlignment="Center" ></Label>
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"></RowDefinition>

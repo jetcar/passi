@@ -40,9 +40,9 @@
     <MandroidI18n />
     <AndroidKeyStore>true</AndroidKeyStore>
     <AndroidSigningKeyStore>D:\repo\passi.keystore</AndroidSigningKeyStore>
-    <AndroidSigningStorePass>Curev3st1</AndroidSigningStorePass>
+    <AndroidSigningStorePass>Curev3st2</AndroidSigningStorePass>
     <AndroidSigningKeyAlias>passi</AndroidSigningKeyAlias>
-    <AndroidSigningKeyPass>Curev3st1</AndroidSigningKeyPass>
+    <AndroidSigningKeyPass>Curev3st2</AndroidSigningKeyPass>
     <AndroidCreatePackagePerAbi>false</AndroidCreatePackagePerAbi>
     <EmbedAssembliesIntoApk>false</EmbedAssembliesIntoApk>
     <AndroidPackageFormat>apk</AndroidPackageFormat>

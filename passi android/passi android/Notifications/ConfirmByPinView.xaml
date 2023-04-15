@@ -13,17 +13,17 @@
             <StackLayout Padding="10" Orientation="Vertical" HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand" BackgroundColor="#2196f3">
                 <Label HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand" TextColor="White" Text="{Binding Path=Email}" FontAttributes="Bold" />
             </StackLayout>
-            <Label Text="{Binding Path=TimeLeft}"
+            <Label TextColor="Black" Text="{Binding Path=TimeLeft}"
                    HorizontalOptions="CenterAndExpand" />
 
-            <Label Text="{Binding Path=RequesterName}"
+            <Label TextColor="Black" Text="{Binding Path=RequesterName}"
                    HorizontalOptions="CenterAndExpand" />
-            <Label Text="{Binding Path=ReturnHost}"
+            <Label TextColor="Black" Text="{Binding Path=ReturnHost}"
                    HorizontalOptions="CenterAndExpand" />
-            <Label HorizontalOptions="Center" Text="{ Binding Path=ResponseError}" />
+            <Label TextColor="Black" HorizontalOptions="Center" Text="{ Binding Path=ResponseError}" />
 
-            <Label Text="{Binding Path=Pin1Error.Text}" HorizontalTextAlignment="Center"></Label>
-            <Label Text="Pin" FontSize="15" HorizontalTextAlignment="Center"></Label>
+            <Label TextColor="Black" Text="{Binding Path=Pin1Error.Text}" HorizontalTextAlignment="Center"></Label>
+            <Label TextColor="Black" Text="Pin" FontSize="15" HorizontalTextAlignment="Center"></Label>
             <Label Text="{Binding Path=Pin1Masked}" HorizontalTextAlignment="Center" FontAttributes="Bold" TextColor="Black" BackgroundColor="Aquamarine">
                 <Label.Triggers>
                     <DataTrigger  Binding="{Binding Path=Pin1Error.HasError}" TargetType="Label" Value="true">

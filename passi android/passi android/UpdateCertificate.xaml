@@ -9,9 +9,9 @@
     <ContentPage.Content>
         <ScrollView>
             <StackLayout VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand">
-                <Label HorizontalOptions="Center" Text="{ Binding Path=ResponseError}" />
-                <Label Text="{Binding Path=PinOldError.Text}" HorizontalTextAlignment="Center"></Label>
-                <Label Text="Old Pin" HorizontalTextAlignment="Center"></Label>
+                <Label TextColor="Black" HorizontalOptions="Center" Text="{ Binding Path=ResponseError}" />
+                <Label TextColor="Black" Text="{Binding Path=PinOldError.Text}" HorizontalTextAlignment="Center"></Label>
+                <Label TextColor="Black" Text="Old Pin" HorizontalTextAlignment="Center"></Label>
                 <StackLayout Orientation="Horizontal">
                     <Label Text="{Binding Path=PinOldMasked}" FontSize="15" VerticalTextAlignment="Center" HorizontalTextAlignment="Center" HorizontalOptions="FillAndExpand" FontAttributes="Bold" TextColor="Black" BackgroundColor="{Binding Path=PinOldColor}">
                         <Label.Triggers>
@@ -24,8 +24,8 @@
                     <Button BackgroundColor="White" TextColor="Black" CornerRadius="100"  Text="X" Padding="0" Margin="0" HorizontalOptions="End" Clicked="ClearPinOld_OnClicked"></Button>
                 </StackLayout>
 
-                <Label Text="{Binding Path=Pin1Error.Text}" HorizontalTextAlignment="Center"></Label>
-                <Label Text="Pin" HorizontalTextAlignment="Center"></Label>
+                <Label TextColor="Black"  Text="{Binding Path=Pin1Error.Text}" HorizontalTextAlignment="Center"></Label>
+                <Label TextColor="Black" Text="Pin" HorizontalTextAlignment="Center"></Label>
                 <StackLayout Orientation="Horizontal">
                     <Label Text="{Binding Path=Pin1Masked}" FontSize="15" VerticalTextAlignment="Center" HorizontalTextAlignment="Center" HorizontalOptions="FillAndExpand" FontAttributes="Bold" TextColor="Black" BackgroundColor="{Binding Path=Pin1Color}">
                         <Label.Triggers>
@@ -37,8 +37,8 @@
                     </Label>
                     <Button BackgroundColor="White" TextColor="Black" CornerRadius="100"  Text="X" Padding="0" Margin="0" HorizontalOptions="End" Clicked="ClearPin1_OnClicked"></Button>
                 </StackLayout>
-                <Label Text="{Binding Path=Pin2Error.Text}" HorizontalTextAlignment="Center"></Label>
-                <Label Text="Pin confirmation" HorizontalTextAlignment="Center" ></Label>
+                <Label TextColor="Black" Text="{Binding Path=Pin2Error.Text}" HorizontalTextAlignment="Center"></Label>
+                <Label TextColor="Black" Text="Pin confirmation" HorizontalTextAlignment="Center" ></Label>
                 <StackLayout Orientation="Horizontal">
                     <Label Text="{Binding Path=Pin2Masked}" FontSize="15" VerticalTextAlignment="Center" HorizontalTextAlignment="Center"
                        HorizontalOptions="FillAndExpand" FontAttributes="Bold" TextColor="Black" BackgroundColor="{Binding Path=Pin2Color}">

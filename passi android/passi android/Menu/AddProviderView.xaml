@@ -15,24 +15,24 @@
         </StackLayout>
         <ScrollView>
             <StackLayout VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand">
-                <Label HorizontalOptions="Center" Text="Identity provider:" />
-                <Entry HorizontalOptions="FillAndExpand" Text="{Binding Path=Provider.Name}" />
-                <Label HorizontalOptions="Center" Text="Base Url:" />
-                <Entry HorizontalOptions="FillAndExpand" Text="{Binding Path=Provider.WebApiUrl}" />
-                <Label HorizontalOptions="Center" Text="SignupPath:" />
-                <Entry HorizontalOptions="FillAndExpand" Text="{Binding Path=Provider.SignupPath}" />
-                <Label HorizontalOptions="Center" Text="Authorize:" />
-                <Entry HorizontalOptions="FillAndExpand" Text="{Binding Path=Provider.Authorize}" />
-                <Label HorizontalOptions="Center" Text="CancelCheck:" />
-                <Entry HorizontalOptions="FillAndExpand" Text="{Binding Path=Provider.CancelCheck}" />
-                <Label HorizontalOptions="Center" Text="CheckForStartedSessions:" />
-                <Entry HorizontalOptions="FillAndExpand" Text="{Binding Path=Provider.CheckForStartedSessions}" />
-                <Label HorizontalOptions="Center" Text="DeleteAccount:" />
-                <Entry HorizontalOptions="FillAndExpand" Text="{Binding Path=Provider.DeleteAccount}" />
-                <Label HorizontalOptions="Center" Text="SignupCheck:" />
-                <Entry HorizontalOptions="FillAndExpand" Text="{Binding Path=Provider.SignupCheck}" />
-                <Label HorizontalOptions="Center" Text="SignupConfirmation:" />
-                <Entry HorizontalOptions="FillAndExpand" Text="{Binding Path=Provider.SignupConfirmation}" />
+                <Label TextColor="Black" HorizontalOptions="Center" Text="Identity provider:" />
+                <Entry TextColor="Black" HorizontalOptions="FillAndExpand" Text="{Binding Path=Provider.Name}" />
+                <Label TextColor="Black" HorizontalOptions="Center" Text="Base Url:" />
+                <Entry TextColor="Black" HorizontalOptions="FillAndExpand" Text="{Binding Path=Provider.WebApiUrl}" />
+                <Label TextColor="Black" HorizontalOptions="Center" Text="SignupPath:" />
+                <Entry TextColor="Black" HorizontalOptions="FillAndExpand" Text="{Binding Path=Provider.SignupPath}" />
+                <Label TextColor="Black" HorizontalOptions="Center" Text="Authorize:" />
+                <Entry TextColor="Black" HorizontalOptions="FillAndExpand" Text="{Binding Path=Provider.Authorize}" />
+                <Label TextColor="Black" HorizontalOptions="Center" Text="CancelCheck:" />
+                <Entry TextColor="Black" HorizontalOptions="FillAndExpand" Text="{Binding Path=Provider.CancelCheck}" />
+                <Label TextColor="Black" HorizontalOptions="Center" Text="CheckForStartedSessions:" />
+                <Entry TextColor="Black" HorizontalOptions="FillAndExpand" Text="{Binding Path=Provider.CheckForStartedSessions}" />
+                <Label TextColor="Black" HorizontalOptions="Center" Text="DeleteAccount:" />
+                <Entry TextColor="Black" HorizontalOptions="FillAndExpand" Text="{Binding Path=Provider.DeleteAccount}" />
+                <Label TextColor="Black" HorizontalOptions="Center" Text="SignupCheck:" />
+                <Entry TextColor="Black" HorizontalOptions="FillAndExpand" Text="{Binding Path=Provider.SignupCheck}" />
+                <Label TextColor="Black" HorizontalOptions="Center" Text="SignupConfirmation:" />
+                <Entry TextColor="Black" HorizontalOptions="FillAndExpand" Text="{Binding Path=Provider.SignupConfirmation}" />
             </StackLayout>
         </ScrollView>
         <Button BackgroundColor="White" TextColor="Black" CornerRadius="100"  Text="Save" Clicked="SaveButton_OnClicked"></Button>

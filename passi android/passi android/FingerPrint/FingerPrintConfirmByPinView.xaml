@@ -10,12 +10,12 @@
     <ContentPage.Content>
 
         <StackLayout>
-            <Label Text="Enter pin to decode existing certificate."
+            <Label TextColor="Black" Text="Enter pin to decode existing certificate."
                    VerticalOptions="CenterAndExpand"
                    HorizontalOptions="CenterAndExpand" />
 
-            <Label Text="{Binding Path=Pin1Error.Text}" HorizontalTextAlignment="Center"></Label>
-            <Label Text="Pin" FontSize="15" HorizontalTextAlignment="Center"></Label>
+            <Label TextColor="Black" Text="{Binding Path=Pin1Error.Text}" HorizontalTextAlignment="Center"></Label>
+            <Label TextColor="Black" Text="Pin" FontSize="15" HorizontalTextAlignment="Center"></Label>
             <Label Text="{Binding Path=Pin1Masked}" HorizontalTextAlignment="Center" FontAttributes="Bold" TextColor="Black" BackgroundColor="Aquamarine">
                 <Label.Triggers>
                     <DataTrigger  Binding="{Binding Path=Pin1Error.HasError}" TargetType="Label" Value="true">

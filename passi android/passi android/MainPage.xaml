@@ -22,8 +22,8 @@
                                     </Grid.ColumnDefinitions>
                                     <StackLayout Grid.Column="0" Padding="10" Orientation="Horizontal">
                                         <ImageButton  Margin="10,0,10,0" BackgroundColor="#fafafa" IsVisible="{Binding Source={x:Reference list}, Path=BindingContext.IsDeleteVisible}" Source="baseline_remove_circle_outline_black_36.png" Clicked="Button_PreDeleteAccount" ></ImageButton>
-                                        <Label Text="{Binding Email}" IsEnabled="{Binding Active}"></Label>
-                                        <Label Text="REMOVED!" IsVisible="{Binding Inactive}"></Label>
+                                        <Label TextColor="Black" Text="{Binding Email}" IsEnabled="{Binding Active}"></Label>
+                                        <Label TextColor="Black" Text="REMOVED!" IsVisible="{Binding Inactive}"></Label>
                                     </StackLayout>
                                     <Button Grid.Column="1" Text="Delete" WidthRequest="50" TextColor="White" BackgroundColor="Red" Clicked="Button_DeleteAccount" IsVisible="{Binding IsDeleteVisible}"></Button>
                                 </Grid>
@@ -37,7 +37,7 @@
                         <ImageButton Margin="10" BackgroundColor="#2196f3" HorizontalOptions="CenterAndExpand" Source="baseline_delete_black_36.png" Clicked="Button_ShowDeleteAccount" ></ImageButton>
                         <ImageButton Margin="10" BackgroundColor="#2196f3" HorizontalOptions="CenterAndExpand" Source="baseline_sync_black_36.png" Clicked="Button_Sync" ></ImageButton>
                     </StackLayout>
-                    <Label HorizontalTextAlignment="End" VerticalTextAlignment="End" Text="{Binding Path=Version}"></Label>
+                    <Label TextColor="Black" HorizontalTextAlignment="End" VerticalTextAlignment="End" Text="{Binding Path=Version}"></Label>
                 </StackLayout>
             </StackLayout>
         </StackLayout>

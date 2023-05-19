@@ -10,8 +10,10 @@ namespace passi_android.Menu
     {
         public ProviderDb Provider { get; set; }
 
+        private INavigationService Navigation;
         public ProviderView(ProviderDb provider)
         {
+            Navigation = App.Services.GetService<INavigationService>();
             Provider = provider;
             InitializeComponent();
             BindingContext = this;

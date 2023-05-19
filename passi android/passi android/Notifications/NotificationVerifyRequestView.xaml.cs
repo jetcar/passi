@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Net;
 using System.Timers;
 using AppCommon;
-using AppConfig;
 using Newtonsoft.Json;
 using passi_android.Tools;
 using passi_android.utils;
@@ -33,7 +32,11 @@ namespace passi_android.Notifications
         private string _responseError;
         private static object locker = new object();
         private static NotificationVerifyRequestView _instance;
-
+        ISecureRepository _secureRepository;
+        IRestService _restService;
+        private IDateTimeService _dateTimeService;
+        ICertHelper _certHelper;
+        private INavigationService Navigation;
         public static NotificationVerifyRequestView Instance
         {
             get
@@ -49,6 +52,13 @@ namespace passi_android.Notifications
 
         private NotificationVerifyRequestView()
         {
+
+            _secureRepository = App.Services.GetService<ISecureRepository>();
+            _restService = App.Services.GetService<IRestService>();
+            _dateTimeService = App.Services.GetService<IDateTimeService>();
+            _certHelper = App.Services.GetService<ICertHelper>();
+            Navigation = App.Services.GetService<INavigationService>();
+
             InitializeComponent();
             BindingContext = this;
             _timer = new Timer();
@@ -75,7 +85,7 @@ namespace passi_android.Notifications
         {
             if (Message != null)
             {
-                var left = Message.ExpirationTime - DateTimeService.UtcNow;
+                var left = Message.ExpirationTime - _dateTimeService.UtcNow;
                 var leftTotalSeconds = ((int)left.TotalSeconds);
                 TimeLeft = leftTotalSeconds.ToString();
                 if (leftTotalSeconds <= 0)
@@ -93,7 +103,7 @@ namespace passi_android.Notifications
 
         protected override void OnAppearing()
         {
-            this.Account = SecureRepository.GetAccount(Message.AccountGuid);
+            this.Account = _secureRepository.GetAccount(Message.AccountGuid);
             RequesterName = Message.Sender;
             ReturnHost = Message.ReturnHost;
 
@@ -130,7 +140,7 @@ namespace passi_android.Notifications
 
             base.OnAppearing();
             App.CancelNotifications.Invoke();
-            SecureRepository.ReleaseSessionKey(Message.SessionId);
+            _secureRepository.ReleaseSessionKey(Message.SessionId);
         }
 
         public AccountDb Account { get; set; }
@@ -275,7 +285,7 @@ namespace passi_android.Notifications
             {
                 Navigation.PushModalSinglePage(new LoadingPage(() =>
                     {
-                        CertHelper.Sign(Message.AccountGuid, null, Message.RandomString).ContinueWith(signedGuid =>
+                        _certHelper.Sign(Message.AccountGuid, null, Message.RandomString).ContinueWith(signedGuid =>
                         {
                             if (signedGuid.IsFaulted)
                             {
@@ -290,15 +300,15 @@ namespace passi_android.Notifications
                                 return;
                             }
 
-                            var accountDb = SecureRepository.GetAccount(Message.AccountGuid);
-                            accountDb.Provider = SecureRepository.GetProvider(accountDb.ProviderGuid);
+                            var accountDb = _secureRepository.GetAccount(Message.AccountGuid);
+                            accountDb.Provider = _secureRepository.GetProvider(accountDb.ProviderGuid);
                             var authorizeDto = new AuthorizeDto
                             {
                                 SignedHash = signedGuid.Result,
                                 PublicCertThumbprint = accountDb.Thumbprint,
                                 SessionId = Message.SessionId
                             };
-                            RestService.ExecutePostAsync(accountDb.Provider, accountDb.Provider.Authorize, authorizeDto).ContinueWith((response) =>
+                            _restService.ExecutePostAsync(accountDb.Provider, accountDb.Provider.Authorize, authorizeDto).ContinueWith((response) =>
                             {
                                 if (response.Result.IsSuccessful)
                                 {
@@ -364,10 +374,10 @@ namespace passi_android.Notifications
 
         private void Cancel_OnClicked(object sender, EventArgs e)
         {
-            var accountDb = SecureRepository.GetAccount(Message.AccountGuid);
+            var accountDb = _secureRepository.GetAccount(Message.AccountGuid);
             if (accountDb != null)
-                accountDb.Provider = SecureRepository.GetProvider(accountDb.ProviderGuid);
-            RestService.ExecuteAsync(accountDb.Provider, accountDb.Provider.CancelCheck + "?SessionId=" + Message.SessionId);
+                accountDb.Provider = _secureRepository.GetProvider(accountDb.ProviderGuid);
+            _restService.ExecuteAsync(accountDb.Provider, accountDb.Provider.CancelCheck + "?SessionId=" + Message.SessionId);
             Navigation.NavigateTop();
         }
     }

@@ -3,6 +3,7 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using NUnit.Framework;
+using passi_android.utils;
 using passi_android.utils.Certificate;
 
 namespace AppCommonTests
@@ -17,12 +18,14 @@ namespace AppCommonTests
         [Test]
         public void SignByCertAndVerify()
         {
-            var task = Certificates.GenerateCertificate("test@mail.ee", "1234").Result;
+            var CertificatesService = new CertificatesService();
+            var task = CertificatesService.GenerateCertificate("test@mail.ee", new MySecureString("1234")).Result;
             string password = task.Item2;
             byte[] cert = task.Item3;
             var certificate = new X509Certificate2(cert, password + "1234", X509KeyStorageFlags.Exportable);
 
             var data = "111111111111111111111111111111111111111";
+            var CertHelper = new CertHelper(null, new CertConverter());
             var signedData = CertHelper.GetSignedData(data, certificate);
 
             var publicCertBytes = certificate.GetRawCertData();
@@ -45,7 +48,9 @@ namespace AppCommonTests
         [Test]
         public void SignByCertAndVerify2()
         {
-            var task = Certificates.GenerateCertificate("test@mail.ee", "1234").Result;
+            var CertHelper = new CertHelper(null, new CertConverter());
+            var CertificatesService = new CertificatesService();
+            var task = CertificatesService.GenerateCertificate("test@mail.ee", new MySecureString("1234")).Result;
             string password = task.Item2;
             byte[] cert = task.Item3;
             var certificate = new X509Certificate2(cert, password + "1234", X509KeyStorageFlags.Exportable);
@@ -63,7 +68,9 @@ namespace AppCommonTests
         [Test]
         public void ExportImportVerify()
         {
-            var task = Certificates.GenerateCertificate("test@mail.ee", "1234").Result;
+            var CertHelper = new CertHelper(null, new CertConverter());
+            var CertificatesService = new CertificatesService();
+            var task = CertificatesService.GenerateCertificate("test@mail.ee", new MySecureString("1234")).Result;
             string password = task.Item2;
             byte[] cert = task.Item3;
             var certificate = new X509Certificate2(cert, password + "1234", X509KeyStorageFlags.Exportable);
@@ -84,7 +91,8 @@ namespace AppCommonTests
         [Test]
         public void GetPrivateKeyFail()
         {
-            var task = Certificates.GenerateCertificate("test@mail.ee", "1234").Result;
+            var CertificatesService = new CertificatesService();
+            var task = CertificatesService.GenerateCertificate("test@mail.ee", new MySecureString("1234")).Result;
             string password = task.Item2;
             byte[] cert = task.Item3;
             var certificate = task.Item1;

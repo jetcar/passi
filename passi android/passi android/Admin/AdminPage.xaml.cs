@@ -10,8 +10,6 @@ using Xamarin.Essentials;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using Color = WebApiDto.Auth.Color;
-
-using AppCommon;
 using passi_android.Menu;
 
 namespace passi_android.Admin
@@ -20,19 +18,24 @@ namespace passi_android.Admin
     public partial class AdminPage : ContentPage
     {
         private string _cert64;
-        private string _pass;
+        private string _salt;
         private string _guid;
         private string _isFinished;
         private string _notificationToken;
         private string _deviceId;
-
+        ISecureRepository _secureRepository;
+        IMySecureStorage _mySecureStorage;
+        INavigationService Navigation;
         public AdminPage(AccountDb account)
         {
+            _secureRepository = App.Services.GetService<ISecureRepository>();
+            _mySecureStorage = App.Services.GetService<IMySecureStorage>();
+            Navigation = App.Services.GetService<INavigationService>();
             this.Account = account;
             InitializeComponent();
             BindingContext = this;
 
-            NotificationToken = SecureStorage.GetAsync(StorageKeys.NotificationToken).Result;
+            NotificationToken = _mySecureStorage.GetAsync(StorageKeys.NotificationToken).Result;
         }
 
         public AccountDb Account { get; set; }
@@ -41,9 +44,9 @@ namespace passi_android.Admin
         {
             Cert64 = StringExtensions.Truncate(Account.PublicCertBinary, 10);
             Guid = Account.Guid.ToString();
-            Pass = Account.Password;
+            Salt = Account.Salt;
             IsFinished = Account.IsConfirmed.ToString();
-            DeviceId = SecureRepository.GetDeviceId();
+            DeviceId = _secureRepository.GetDeviceId();
             base.OnAppearing();
         }
 
@@ -57,12 +60,12 @@ namespace passi_android.Admin
             }
         }
 
-        public string Pass
+        public string Salt
         {
-            get => _pass;
+            get => _salt;
             set
             {
-                _pass = value;
+                _salt = value;
                 OnPropertyChanged();
             }
         }
@@ -109,13 +112,13 @@ namespace passi_android.Admin
 
         private void ClearNotificationToken(object sender, EventArgs e)
         {
-            SecureStorage.Remove(StorageKeys.NotificationToken);
+            _mySecureStorage.Remove(StorageKeys.NotificationToken);
             NotificationToken = null;
         }
 
         private void SaveNotificationToken(object sender, EventArgs e)
         {
-            SecureStorage.SetAsync(StorageKeys.NotificationToken, NotificationToken);
+            _mySecureStorage.SetAsync(StorageKeys.NotificationToken, NotificationToken);
         }
 
         private void MainPageclicked(object sender, EventArgs e)
@@ -125,7 +128,7 @@ namespace passi_android.Admin
 
         private void RegistrationConfirmation(object sender, EventArgs e)
         {
-            ProviderDb provider = SecureRepository.GetProvider(Account.ProviderGuid);
+            ProviderDb provider = _secureRepository.GetProvider(Account.ProviderGuid);
             Account.Provider = provider;
             Navigation.PushModalSinglePage(new RegistrationConfirmation(Account));
         }
@@ -172,7 +175,7 @@ namespace passi_android.Admin
         {
             Account.Provider = null;
             Account.ProviderGuid = null;
-            SecureRepository.UpdateAccount(Account);
+            _secureRepository.UpdateAccount(Account);
         }
     }
 }

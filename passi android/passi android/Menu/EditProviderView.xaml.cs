@@ -10,9 +10,12 @@ namespace passi_android.Menu
     public partial class EditProviderView : ContentPage
     {
         public ProviderDb Provider { get; set; }
-
+        private ISecureRepository _secureRepository;
+        private INavigationService Navigation;
         public EditProviderView(ProviderDb provider)
         {
+            _secureRepository = App.Services.GetService<ISecureRepository>();
+            Navigation = App.Services.GetService<INavigationService>();
             Provider = JsonConvert.DeserializeObject<ProviderDb>(JsonConvert.SerializeObject(provider));
             InitializeComponent();
             BindingContext = this;
@@ -23,7 +26,7 @@ namespace passi_android.Menu
         {
             var button = sender as VisualElement;
             button.IsEnabled = false;
-            SecureRepository.UpdateProvider(Provider);
+            _secureRepository.UpdateProvider(Provider);
             //save
             button.IsEnabled = true;
             Navigation.PopModal();

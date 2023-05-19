@@ -3,11 +3,10 @@ using System.Linq;
 using System.Net;
 using System.Timers;
 using AppCommon;
-using AppConfig;
 using Newtonsoft.Json;
 using passi_android.Tools;
 using passi_android.utils;
-using RestSharp;
+using passi_android.utils.Certificate;
 using WebApiDto;
 using WebApiDto.Auth;
 using Xamarin.Essentials;
@@ -21,7 +20,7 @@ namespace passi_android.Notifications
     public partial class ConfirmByPinView : ContentPage, IConfirmationView
     {
         private string _requesterName;
-        private string _pin1 = "";
+        private MySecureString _pin1 = new MySecureString("");
         private string _pin1Masked;
         private string _returnHost;
         private int _pinLength;
@@ -31,9 +30,19 @@ namespace passi_android.Notifications
         private ValidationError _pin1Error = new ValidationError();
         private AccountDb _accountDb;
         private string _email;
-
+        ISecureRepository _secureRepository;
+        IRestService _restService;
+        IDateTimeService _dateTimeService;
+        ICertHelper _certHelper;
+        private INavigationService Navigation;
         public ConfirmByPinView()
         {
+            _secureRepository = App.Services.GetService<ISecureRepository>();
+            _restService = App.Services.GetService<IRestService>();
+            _dateTimeService = App.Services.GetService<IDateTimeService>();
+            _certHelper = App.Services.GetService<ICertHelper>();
+
+            Navigation = App.Services.GetService<INavigationService>();
             InitializeComponent();
             BindingContext = this;
 
@@ -49,7 +58,7 @@ namespace passi_android.Notifications
         {
             if (Message != null)
             {
-                var left = Message.ExpirationTime - DateTimeService.UtcNow;
+                var left = Message.ExpirationTime - _dateTimeService.UtcNow;
                 var leftTotalSeconds = ((int)left.TotalSeconds);
                 TimeLeft = leftTotalSeconds.ToString();
                 if (leftTotalSeconds <= 0)
@@ -88,7 +97,7 @@ namespace passi_android.Notifications
         {
             RequesterName = Message.Sender;
             ReturnHost = Message.ReturnHost;
-            _accountDb = SecureRepository.GetAccount(Message.AccountGuid);
+            _accountDb = _secureRepository.GetAccount(Message.AccountGuid);
             Email = _accountDb.Email;
             _pinLength = _accountDb.pinLength;
             if (_accountDb.HaveFingerprint)
@@ -100,7 +109,9 @@ namespace passi_android.Notifications
                     {
                         Navigation.PushModalSinglePage(new LoadingPage(() =>
                         {
-                            CertHelper.SignByFingerPrint(Message.AccountGuid, Message.RandomString).ContinueWith(signedGuid =>
+                            var privatecertificate = _secureRepository.GetCertificateWithFingerPrint(Message.AccountGuid);
+
+                            _certHelper.SignByFingerPrint(Message.RandomString, privatecertificate).ContinueWith(signedGuid =>
                             {
                                 if (signedGuid.IsFaulted)
                                 {
@@ -115,11 +126,11 @@ namespace passi_android.Notifications
                                 var authorizeDto = new AuthorizeDto
                                 {
                                     SignedHash = signedGuid.Result,
-                                    PublicCertThumbprint = SecureRepository.GetAccount(Message.AccountGuid).Thumbprint,
+                                    PublicCertThumbprint = _secureRepository.GetAccount(Message.AccountGuid).Thumbprint,
                                     SessionId = Message.SessionId
                                 };
 
-                                RestService.ExecutePostAsync(_accountDb.Provider, _accountDb.Provider.Authorize, authorizeDto).ContinueWith((response) =>
+                                _restService.ExecutePostAsync(_accountDb.Provider, _accountDb.Provider.Authorize, authorizeDto).ContinueWith((response) =>
                                 {
                                     if (response.Result.IsSuccessful)
                                     {
@@ -180,13 +191,13 @@ namespace passi_android.Notifications
             }
         }
 
-        public string Pin1
+        public MySecureString Pin1
         {
             get => _pin1;
             set
             {
                 _pin1 = value;
-                Pin1Masked = new string(_pin1.ToList().Select(x => '*').ToArray());
+                Pin1Masked = _pin1.GetMasked("*");
                 Pin1Error.HasError = false;
                 Pin1Error.Text = "";
             }
@@ -230,10 +241,11 @@ namespace passi_android.Notifications
             if (value == "del")
             {
                 if (Pin1.Length > 0)
-                    Pin1 = Pin1.Substring(0, Pin1.Length - 1);
+                    Pin1 = Pin1.TrimEnd(1);
                 return;
             }
-            Pin1 += value;
+
+            Pin1.AppendChar(value);
             if (Pin1.Length == _pinLength)
             {
                 SignRequestAndSendResponce();
@@ -245,7 +257,7 @@ namespace passi_android.Notifications
             App.CancelFingerprintReading();
             Navigation.PushModalSinglePage(new LoadingPage(() =>
             {
-                CertHelper.Sign(Message.AccountGuid, Pin1, Message.RandomString).ContinueWith(signedGuid =>
+                _certHelper.Sign(Message.AccountGuid, Pin1, Message.RandomString).ContinueWith(signedGuid =>
                 {
                     if (signedGuid.IsFaulted)
                     {
@@ -264,10 +276,10 @@ namespace passi_android.Notifications
                     var authorizeDto = new AuthorizeDto
                     {
                         SignedHash = signedGuid.Result,
-                        PublicCertThumbprint = SecureRepository.GetAccount(Message.AccountGuid).Thumbprint,
+                        PublicCertThumbprint = _secureRepository.GetAccount(Message.AccountGuid).Thumbprint,
                         SessionId = Message.SessionId
                     };
-                    RestService.ExecutePostAsync(_accountDb.Provider, _accountDb.Provider.Authorize, authorizeDto).ContinueWith((response) =>
+                    _restService.ExecutePostAsync(_accountDb.Provider, _accountDb.Provider.Authorize, authorizeDto).ContinueWith((response) =>
                     {
                         if (response.Result.IsSuccessful)
                         {
@@ -318,7 +330,7 @@ namespace passi_android.Notifications
             var element = sender as VisualElement;
             element.IsEnabled = false;
 
-            RestService.ExecuteAsync(_accountDb.Provider, _accountDb.Provider.CancelCheck + "?SessionId=" + Message.SessionId);
+            _restService.ExecuteAsync(_accountDb.Provider, _accountDb.Provider.CancelCheck + "?SessionId=" + Message.SessionId);
 
             Navigation.NavigateTop();
             element.IsEnabled = true;

@@ -4,62 +4,59 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
-using System.Threading;
 using System.Threading.Tasks;
-using AppCommon;
 using AppConfig;
 using Newtonsoft.Json;
 using passi_android.Menu;
+using passi_android.utils.Certificate;
 using Xamarin.Essentials;
-using Xamarin.Forms.Internals;
 using CertHelper = passi_android.utils.Certificate.CertHelper;
 
 namespace passi_android.utils
 {
-    public static class SecureRepository
+    public class SecureRepository : ISecureRepository
     {
         private static object _locker = new object();
-        public static List<ProviderDb> Providers { get; set; }
-        public static List<AccountDb> Accounts { get; set; }
+        List<ProviderDb> Providers { get; set; }
+        List<AccountDb> Accounts { get; set; }
 
-        public static void AddAccount(AccountDb account)
+        private ICertConverter _certConverter;
+        private IMySecureStorage _mySecureStorage;
+        public void AddAccount(AccountDb account)
         {
             lock (_locker)
             {
                 if (Accounts == null)
                 {
-                    var providersjson = SecureStorage.GetAsync(StorageKeys.AllAccounts).Result ?? "";
-                    Accounts = JsonConvert.DeserializeObject<List<AccountDb>>(providersjson) ?? new List<AccountDb>();
+                    Accounts = _mySecureStorage.GetAsync<List<AccountDb>>(StorageKeys.AllAccounts).Result;
                 }
 
                 Accounts.Add(account);
                 account.ProviderGuid = account.Provider.Guid;
-                SecureStorage.SetAsync(StorageKeys.AllAccounts, JsonConvert.SerializeObject(Accounts)).GetAwaiter().GetResult();
+                _mySecureStorage.SetAsync(StorageKeys.AllAccounts, Accounts).GetAwaiter().GetResult();
             }
         }
 
-        public static AccountDb GetAccount(Guid accountGuid)
+        public AccountDb GetAccount(Guid accountGuid)
         {
             lock (_locker)
             {
                 if (Accounts == null)
                 {
-                    var providersjson = SecureStorage.GetAsync(StorageKeys.AllAccounts).Result ?? "";
-                    Accounts = JsonConvert.DeserializeObject<List<AccountDb>>(providersjson) ?? new List<AccountDb>();
+                    Accounts = _mySecureStorage.GetAsync<List<AccountDb>>(StorageKeys.AllAccounts).Result;
                 }
                 var accountDb = Accounts.FirstOrDefault(x => x.Guid == accountGuid);
                 return accountDb;
             }
         }
 
-        public static void UpdateAccount(AccountDb account)
+        public void UpdateAccount(AccountDb account)
         {
             lock (_locker)
             {
                 if (Accounts == null)
                 {
-                    var providersjson = SecureStorage.GetAsync(StorageKeys.AllAccounts).Result ?? "";
-                    Accounts = JsonConvert.DeserializeObject<List<AccountDb>>(providersjson) ?? new List<AccountDb>();
+                    Accounts = _mySecureStorage.GetAsync<List<AccountDb>>(StorageKeys.AllAccounts).Result;
                 }
 
                 if (account.Guid == Guid.Empty)
@@ -70,19 +67,18 @@ namespace passi_android.utils
                     CopyAll(account, existingAccount);
                     existingAccount.ProviderGuid = account.Provider?.Guid ?? account.ProviderGuid;
                 }
-                SecureStorage.SetAsync(StorageKeys.AllAccounts, JsonConvert.SerializeObject(Accounts)).GetAwaiter().GetResult();
+                _mySecureStorage.SetAsync(StorageKeys.AllAccounts, Accounts).GetAwaiter().GetResult();
 
             }
         }
 
-        public static void LoadAccountIntoList(ObservableCollection<AccountView> accounts)
+        public void LoadAccountIntoList(ObservableCollection<AccountView> accounts)
         {
             lock (_locker)
             {
                 if (Accounts == null)
                 {
-                    var providersjson = SecureStorage.GetAsync(StorageKeys.AllAccounts).Result ?? "";
-                    Accounts = JsonConvert.DeserializeObject<List<AccountDb>>(providersjson) ?? new List<AccountDb>();
+                    Accounts = _mySecureStorage.GetAsync<List<AccountDb>>(StorageKeys.AllAccounts).Result;
                 }
                 foreach (var accountDb in Accounts)
                 {
@@ -93,20 +89,18 @@ namespace passi_android.utils
             }
         }
 
-        public static void DeleteAccount(AccountView account, Action callback)
+        public void DeleteAccount(AccountView account, Action callback)
         {
             lock (_locker)
             {
                 if (Accounts == null)
                 {
-                    var providersjson = SecureStorage.GetAsync(StorageKeys.AllAccounts).Result ?? "";
-                    Accounts = JsonConvert.DeserializeObject<List<AccountDb>>(providersjson) ?? new List<AccountDb>();
+                    Accounts = _mySecureStorage.GetAsync<List<AccountDb>>(StorageKeys.AllAccounts).Result;
                 }
 
                 var oldAccount = Accounts.FirstOrDefault(x => x.Guid == account.Guid);
                 Accounts.Remove(oldAccount);
-                var serializeObject = JsonConvert.SerializeObject(Accounts);
-                SecureStorage.SetAsync(StorageKeys.AllAccounts, serializeObject).ContinueWith((result) =>
+                _mySecureStorage.SetAsync(StorageKeys.AllAccounts, Accounts).ContinueWith((result) =>
                 {
                     if (callback != null)
                         callback.Invoke();
@@ -114,32 +108,32 @@ namespace passi_android.utils
             }
         }
 
-        public static async Task AddfingerPrintKey(Guid guid, string pin)
+        public async Task AddfingerPrintKey(AccountDb account, MySecureString pin)
         {
-            var account = GetAccount(guid);
-            var cert = CertHelper.GetCertificateWithKey(guid, pin);
-            SecureStorage.SetAsync(account.Thumbprint, Guid.NewGuid().ToString()).GetAwaiter().GetResult();
-            var password = SecureStorage.GetAsync(account.Thumbprint).Result;
-            SaveCertificateWithFingerPrint(guid, cert.Export(X509ContentType.Pkcs12, password));
+            var cert = _certConverter.GetCertificateWithKey(pin, account);
+            _mySecureStorage.SetAsync(account.Thumbprint, Guid.NewGuid().ToString()).GetAwaiter().GetResult();
+            var password = _mySecureStorage.GetAsync(account.Thumbprint).Result;
+            SaveCertificateWithFingerPrint(account.Guid, cert.Export(X509ContentType.Pkcs12, password));
             account.HaveFingerprint = true;
             UpdateAccount(account);
+
         }
 
-        private static void SaveCertificateWithFingerPrint(Guid guid, byte[] export)
+        public void SaveCertificateWithFingerPrint(Guid guid, byte[] export)
         {
             var base64String = Convert.ToBase64String(export);
-            SecureStorage.SetAsync("fingerprint_" + guid, base64String).GetAwaiter().GetResult();
+            _mySecureStorage.SetAsync("fingerprint_" + guid, base64String).GetAwaiter().GetResult();
         }
 
-        public static X509Certificate2 GetCertificateWithFingerPrint(Guid guid)
+        public X509Certificate2 GetCertificateWithFingerPrint(Guid guid)
         {
             var account = GetAccount(guid);
 
-            var certificateWithFingerPrintBase64 = SecureStorage.GetAsync("fingerprint_" + guid).Result;
+            var certificateWithFingerPrintBase64 = _mySecureStorage.GetAsync("fingerprint_" + guid).Result;
             if (certificateWithFingerPrintBase64 != null)
             {
                 var bytes = Convert.FromBase64String(certificateWithFingerPrintBase64);
-                var password = SecureStorage.GetAsync(account.Thumbprint).Result;
+                var password = _mySecureStorage.GetAsync(account.Thumbprint).Result;
                 var cert = new X509Certificate2(bytes, password, X509KeyStorageFlags.Exportable);
                 return cert;
             }
@@ -147,11 +141,18 @@ namespace passi_android.utils
             return null;
         }
 
-        private static bool locked = false;
-        private static object locker = new object();
-        private static DateTime lockerTime;
+        private bool locked = false;
+        private object locker = new object();
+        private DateTime lockerTime;
 
-        public static bool CheckSessionKey(Guid msgSessionId)
+        public SecureRepository(ICertConverter certConverter, IMySecureStorage mySecureStorage)
+        {
+            _certConverter = certConverter;
+            _mySecureStorage = mySecureStorage;
+        }
+
+
+        public bool CheckSessionKey(Guid msgSessionId)
         {
 
             lock (locker)
@@ -164,7 +165,7 @@ namespace passi_android.utils
 
                 locked = true;
                 lockerTime = DateTime.Now;
-                var result = SecureStorage.GetAsync(msgSessionId.ToString()).Result;
+                var result = _mySecureStorage.GetAsync(msgSessionId.ToString()).Result;
                 if (result != null)
                 {
                     locked = false;
@@ -173,32 +174,31 @@ namespace passi_android.utils
                 return true;
             }
         }
-        public static void ReleaseSessionKey(Guid msgSessionId)
+        public void ReleaseSessionKey(Guid msgSessionId)
         {
             lock (locker)
             {
-                SecureStorage.SetAsync(msgSessionId.ToString(), "").GetAwaiter().GetResult();
+                _mySecureStorage.SetAsync(msgSessionId.ToString(), "").GetAwaiter().GetResult();
                 locked = false;
             }
         }
 
-        public static string GetDeviceId()
+        public string GetDeviceId()
         {
-            var deviceId = SecureStorage.GetAsync("deviceId").Result;
+            var deviceId = _mySecureStorage.GetAsync("deviceId").Result;
             if (deviceId == null)
             {
                 deviceId = Guid.NewGuid().ToString();
-                SecureStorage.SetAsync("deviceId", deviceId).GetAwaiter().GetResult();
+                _mySecureStorage.SetAsync("deviceId", deviceId).GetAwaiter().GetResult();
             }
             return deviceId;
         }
 
-        public static List<ProviderDb> LoadProviders()
+        public List<ProviderDb> LoadProviders()
         {
             if (Providers == null)
             {
-                var providersjson = SecureStorage.GetAsync(StorageKeys.ProvidersKey).Result ?? "";
-                Providers = JsonConvert.DeserializeObject<List<ProviderDb>>(providersjson) ?? new List<ProviderDb>();
+                Providers = _mySecureStorage.GetAsync<List<ProviderDb>>(StorageKeys.ProvidersKey).Result;
             }
 
             if (Providers.All(x => x.WebApiUrl != ConfigSettings.WebApiUrl))
@@ -238,41 +238,39 @@ namespace passi_android.utils
                     TokenUpdate = ConfigSettings.TokenUpdate,
                     UpdateCertificate = ConfigSettings.UpdateCertificate,
                 });
-            SecureStorage.SetAsync(StorageKeys.ProvidersKey, JsonConvert.SerializeObject(Providers)).GetAwaiter().GetResult();
+            _mySecureStorage.SetAsync(StorageKeys.ProvidersKey, (Providers)).GetAwaiter().GetResult();
 
             return Providers;
         }
 
 
-        public static void DeleteProvider(ProviderDb provider)
+        public void DeleteProvider(ProviderDb provider)
         {
             if (Providers == null)
             {
-                var providersjson = SecureStorage.GetAsync(StorageKeys.ProvidersKey).Result ?? "";
-                Providers = JsonConvert.DeserializeObject<List<ProviderDb>>(providersjson) ?? new List<ProviderDb>();
+                Providers = _mySecureStorage.GetAsync<List<ProviderDb>>(StorageKeys.ProvidersKey).Result;
             }
 
             Providers.Remove(Providers.First(x => x.Guid == provider.Guid));
-            SecureStorage.SetAsync(StorageKeys.ProvidersKey, JsonConvert.SerializeObject(Providers)).GetAwaiter().GetResult();
+            _mySecureStorage.SetAsync(StorageKeys.ProvidersKey, (Providers)).GetAwaiter().GetResult();
 
         }
 
-        public static void UpdateProvider(ProviderDb provider)
+        public void UpdateProvider(ProviderDb provider)
         {
             if (Providers == null)
             {
-                var providersjson = SecureStorage.GetAsync(StorageKeys.ProvidersKey).Result ?? "";
-                Providers = JsonConvert.DeserializeObject<List<ProviderDb>>(providersjson) ?? new List<ProviderDb>();
+                Providers = _mySecureStorage.GetAsync<List<ProviderDb>>(StorageKeys.ProvidersKey).Result;
             }
 
             var existingProvider = Providers.First(x => x.Guid == provider.Guid);
             CopyAll(provider, existingProvider);
 
-            SecureStorage.SetAsync(StorageKeys.ProvidersKey, JsonConvert.SerializeObject(Providers)).GetAwaiter().GetResult();
+            _mySecureStorage.SetAsync(StorageKeys.ProvidersKey, (Providers)).GetAwaiter().GetResult();
 
         }
 
-        public static void CopyAll<T, R>(T source, R destination)
+        public void CopyAll<T, R>(T source, R destination)
         {
             var sourceType = typeof(T);
             var destType = typeof(R);
@@ -295,30 +293,51 @@ namespace passi_android.utils
             }
         }
 
-        public static void AddProvider(ProviderDb provider)
+        public void AddProvider(ProviderDb provider)
         {
             if (Providers == null)
             {
-                var providersjson = SecureStorage.GetAsync(StorageKeys.ProvidersKey).Result ?? "";
-                Providers = JsonConvert.DeserializeObject<List<ProviderDb>>(providersjson) ?? new List<ProviderDb>();
+                Providers = _mySecureStorage.GetAsync<List<ProviderDb>>(StorageKeys.ProvidersKey).Result;
             }
 
             Providers.Add(provider);
 
-            SecureStorage.SetAsync(StorageKeys.ProvidersKey, JsonConvert.SerializeObject(Providers)).GetAwaiter().GetResult();
+            _mySecureStorage.SetAsync(StorageKeys.ProvidersKey, (Providers)).GetAwaiter().GetResult();
 
         }
 
-        public static ProviderDb GetProvider(Guid? guid)
+        public ProviderDb GetProvider(Guid? guid)
         {
             if (Providers == null)
             {
-                var providersjson = SecureStorage.GetAsync(StorageKeys.ProvidersKey).Result ?? "";
-                Providers = JsonConvert.DeserializeObject<List<ProviderDb>>(providersjson) ?? new List<ProviderDb>();
+                Providers = _mySecureStorage.GetAsync<List<ProviderDb>>(StorageKeys.ProvidersKey).Result;
             }
 
             return Providers.First(x => x.Guid == guid);
 
         }
     }
+
+    public interface ISecureRepository
+    {
+        void AddAccount(AccountDb account);
+        AccountDb GetAccount(Guid accountGuid);
+        void UpdateAccount(AccountDb account);
+        void LoadAccountIntoList(ObservableCollection<AccountView> accounts);
+        void DeleteAccount(AccountView account, Action callback);
+        Task AddfingerPrintKey(AccountDb account, MySecureString pin);
+        void SaveCertificateWithFingerPrint(Guid guid, byte[] export);
+        X509Certificate2 GetCertificateWithFingerPrint(Guid guid);
+        bool CheckSessionKey(Guid msgSessionId);
+        void ReleaseSessionKey(Guid msgSessionId);
+        string GetDeviceId();
+        List<ProviderDb> LoadProviders();
+        void DeleteProvider(ProviderDb provider);
+        void UpdateProvider(ProviderDb provider);
+        void CopyAll<T, R>(T source, R destination);
+        void AddProvider(ProviderDb provider);
+        ProviderDb GetProvider(Guid? guid);
+    }
+
+    
 }

@@ -1,11 +1,7 @@
 ﻿using System;
-using AppCommon;
-using AppConfig;
 using Newtonsoft.Json;
 using passi_android.utils;
-using RestSharp;
 using System.Net;
-using passi_android.Menu;
 using WebApiDto;
 using WebApiDto.SignUp;
 using Xamarin.Essentials;
@@ -20,10 +16,15 @@ namespace passi_android.Registration
         private string _code = "";
         private string _responseError;
         private string _email;
-
+        private ISecureRepository _secureRepository;
+        IRestService _restService;
+        private INavigationService Navigation;
         public RegistrationConfirmation(AccountDb account)
         {
+            Navigation = App.Services.GetService<INavigationService>();
             Account = account;
+            _secureRepository = App.Services.GetService<ISecureRepository>();
+            _restService = App.Services.GetService<IRestService>();
             InitializeComponent();
             BindingContext = this;
         }
@@ -94,15 +95,15 @@ namespace passi_android.Registration
             {
                 Code = Code,
                 Email = Email,
-                DeviceId = SecureRepository.GetDeviceId()
+                DeviceId = _secureRepository.GetDeviceId()
             };
-            RestService.ExecutePostAsync(Account.Provider, Account.Provider.SignupCheck, signupConfirmationDto).ContinueWith((response) =>
+            _restService.ExecutePostAsync(Account.Provider, Account.Provider.SignupCheck, signupConfirmationDto).ContinueWith((response) =>
             {
                 if (response.Result.IsSuccessful)
                 {
                     Account.IsConfirmed = true;
                     Account.Provider = Account.Provider;
-                    SecureRepository.UpdateAccount(Account);
+                    _secureRepository.UpdateAccount(Account);
                     MainThread.BeginInvokeOnMainThread(() => { Navigation.PushModalSinglePage(new FinishConfirmation() { Code = Code, Account = Account }); });
                 }
                 else if (!response.Result.IsSuccessful && response.Result.StatusCode == HttpStatusCode.BadRequest)

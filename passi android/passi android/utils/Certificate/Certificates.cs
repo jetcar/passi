@@ -1,7 +1,8 @@
 ﻿using System;
+using System.Runtime.InteropServices;
+using System.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
-using AppCommon;
 using Org.BouncyCastle.Asn1.X509;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Generators;
@@ -14,9 +15,9 @@ using Org.BouncyCastle.X509;
 
 namespace passi_android.utils.Certificate
 {
-    public static class Certificates
+    public class CertificatesService : ICertificatesService
     {
-        public static async Task<Tuple<X509Certificate2, string, byte[]>> GenerateCertificate(string subject, string pin)
+        public async Task<Tuple<X509Certificate2, string, byte[]>> GenerateCertificate(string subject, MySecureString pin)
         {
             var random = new SecureRandom();
             var certificateGenerator = new X509V3CertificateGenerator();
@@ -48,17 +49,46 @@ namespace passi_android.utils.Certificate
 
             Pkcs12Store store = new Pkcs12StoreBuilder().Build();
             store.SetKeyEntry($"{sha512}_key", new AsymmetricKeyEntry(subjectKeyPair.Private), new[] { new X509CertificateEntry(bouncyCert) });
-            var password = Guid.NewGuid().ToString();
-            string fullPassword = password + pin;
+            MySecureString password = new MySecureString(Guid.NewGuid().ToString());
+            MySecureString fullPassword = new MySecureString(password).Append(pin);
 
             using (var ms = new System.IO.MemoryStream())
             {
-                store.Save(ms, fullPassword.ToCharArray(), random);
+                store.Save(ms, fullPassword.SecureStringToString().ToCharArray(), random);
                 var rawBytes = ms.ToArray();
-                certificate = new X509Certificate2(rawBytes, fullPassword, X509KeyStorageFlags.Exportable);
-                var result = new Tuple<X509Certificate2, string, byte[]>(certificate, password, rawBytes);
+                certificate = new X509Certificate2(rawBytes, fullPassword.SecureStringToString(), X509KeyStorageFlags.Exportable);
+                var result = new Tuple<X509Certificate2, string, byte[]>(certificate, password.SecureStringToString(), rawBytes);
                 return result;
             }
         }
     }
+
+    public interface ICertificatesService
+    {
+        Task<Tuple<X509Certificate2, string, byte[]>> GenerateCertificate(string subject, MySecureString pin);
+    }
+
+    public static class SecureStringExtensions
+    {
+        public static SecureString AppendChars(this SecureString str, SecureString chars)
+        {
+            foreach (var charValue in chars.SecureStringToString())
+            {
+                str.AppendChar(charValue);
+            }
+            return str;
+        }
+
+        public static string SecureStringToString(this SecureString value) {
+            IntPtr valuePtr = IntPtr.Zero;
+            try {
+                valuePtr = Marshal.SecureStringToGlobalAllocUnicode(value);
+                return Marshal.PtrToStringUni(valuePtr);
+            } finally {
+                Marshal.ZeroFreeGlobalAllocUnicode(valuePtr);
+            }
+        }
+    }
+
+
 }

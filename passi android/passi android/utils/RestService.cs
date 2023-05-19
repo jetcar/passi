@@ -1,18 +1,14 @@
-﻿using System;
-using System.Diagnostics;
-using System.Text;
-using System.Threading.Tasks;
-using AppConfig;
+﻿using System.Threading.Tasks;
 using passi_android.Menu;
 using RestSharp;
 
 namespace passi_android.utils
 {
-    public static class RestService
+    public class RestService : IRestService
     {
 
 
-        public static Task<RestResponse> ExecuteGetAsync(ProviderDb provider, string requestUri)
+        public Task<RestResponse> ExecuteGetAsync(ProviderDb provider, string requestUri)
         {
             var client = GetClient(provider);
             var request = new RestRequest(requestUri, Method.Get);
@@ -20,7 +16,7 @@ namespace passi_android.utils
             return client.ExecuteAsync(request);
         }
 
-        public static Task<RestResponse> ExecuteAsync(ProviderDb provider, string requestUri)
+        public Task<RestResponse> ExecuteAsync(ProviderDb provider, string requestUri)
         {
             var client = GetClient(provider);
             var request = new RestRequest(requestUri, Method.Get);
@@ -28,7 +24,7 @@ namespace passi_android.utils
             return client.ExecuteAsync(request);
         }
 
-        public static Task<RestResponse> ExecuteAsync(ProviderDb provider, string requestUri, Method method)
+        public Task<RestResponse> ExecuteAsync(ProviderDb provider, string requestUri, Method method)
         {
             var client = GetClient(provider);
             var request = new RestRequest(requestUri, method);
@@ -36,7 +32,7 @@ namespace passi_android.utils
             return client.ExecuteAsync(request);
         }
 
-        public static Task<RestResponse> ExecutePostAsync<T>(ProviderDb provider, string requestUri, T item) where T : class
+        public Task<RestResponse> ExecutePostAsync<T>(ProviderDb provider, string requestUri, T item) where T : class
         {
             var client = GetClient(provider);
             var request = new RestRequest(requestUri, Method.Post);
@@ -46,10 +42,18 @@ namespace passi_android.utils
             return client.ExecuteAsync(request);
         }
 
-        private static RestClient GetClient(ProviderDb provider)
+        private RestClient GetClient(ProviderDb provider)
         {
             var client = new RestClient(provider.WebApiUrl);
             return client;
         }
+    }
+
+    public interface IRestService
+    {
+        Task<RestResponse> ExecuteGetAsync(ProviderDb provider, string requestUri);
+        Task<RestResponse> ExecuteAsync(ProviderDb provider, string requestUri);
+        Task<RestResponse> ExecuteAsync(ProviderDb provider, string requestUri, Method method);
+        Task<RestResponse> ExecutePostAsync<T>(ProviderDb provider, string requestUri, T item) where T : class;
     }
 }

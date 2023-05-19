@@ -1,16 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
-using AppCommon;
-using AppConfig;
-using passi_android.Menu;
 using passi_android.Registration;
 using passi_android.utils;
 using RestSharp;
 using Xamarin.Essentials;
 using Xamarin.Forms;
-using Xamarin.Forms.PlatformConfiguration;
 using Xamarin.Forms.Xaml;
 
 namespace passi_android
@@ -21,7 +16,10 @@ namespace passi_android
         private ObservableCollection<utils.AccountView> _accounts = new ObservableCollection<utils.AccountView>();
         private bool _isDeleteVisible;
         private string version = "1";
-
+        private ISecureRepository _secureRepository;
+        IRestService _restService;
+        ISyncService _syncService;
+        INavigationService Navigation;
         public ObservableCollection<utils.AccountView> Accounts
         {
             get { return _accounts ?? (_accounts = new ObservableCollection<utils.AccountView>()); }
@@ -47,6 +45,12 @@ namespace passi_android
 
         public MainPage()
         {
+            _secureRepository = App.Services.GetService<ISecureRepository>();
+            _restService = App.Services.GetService<IRestService>();
+            _syncService = App.Services.GetService<ISyncService>();
+            Navigation = App.Services.GetService<INavigationService>();
+
+            if(!App.IsTest)
             InitializeComponent();
             BindingContext = this;
 
@@ -60,10 +64,11 @@ namespace passi_android
             Accounts = new ObservableCollection<utils.AccountView>();
             Task.Run(() =>
             {
-                SecureRepository.LoadAccountIntoList(Accounts);
+                _secureRepository.LoadAccountIntoList(Accounts);
             });
             base.OnAppearing();
-            App.PollNotifications.Invoke();
+
+            _syncService.PollNotifications();
         }
 
 
@@ -74,25 +79,25 @@ namespace passi_android
                 Accounts = new ObservableCollection<utils.AccountView>();
                 Task.Run(() =>
                 {
-                    SecureRepository.LoadAccountIntoList(Accounts);
+                    _secureRepository.LoadAccountIntoList(Accounts);
                 });
             });
         }
 
-        private void Button_AddAccount(object sender, EventArgs e)
+        public void Button_AddAccount(object sender, EventArgs e)
         {
             Navigation.PushModalSinglePage(new TermsAgreements());
         }
 
-        private void Button_DeleteAccount(object sender, EventArgs e)
+        public void Button_DeleteAccount(object sender, EventArgs e)
         {
             var account = (utils.AccountView)((Button)sender).BindingContext;
-            SecureRepository.DeleteAccount(account, () =>
+            _secureRepository.DeleteAccount(account, () =>
             {
                 Accounts.Clear();
-                SecureRepository.LoadAccountIntoList(Accounts);
-                var provider = SecureRepository.GetProvider(account.ProviderGuid);
-                RestService.ExecuteAsync(provider, provider.DeleteAccount + $"?accountGuid{account.Guid}&thumbprint={account.Thumbprint}", Method.Delete);
+                _secureRepository.LoadAccountIntoList(Accounts);
+                var provider = _secureRepository.GetProvider(account.ProviderGuid);
+                _restService.ExecuteAsync(provider, provider.DeleteAccount + $"?accountGuid{account.Guid}&thumbprint={account.Thumbprint}", Method.Delete);
             });
         }
 
@@ -108,8 +113,8 @@ namespace passi_android
             cell.IsEnabled = false;
 
             var account = (utils.AccountView)((ViewCell)sender).BindingContext;
-            var accountDb = SecureRepository.GetAccount(account.Guid);
-            var provider = SecureRepository.GetProvider(accountDb.ProviderGuid);
+            var accountDb = _secureRepository.GetAccount(account.Guid);
+            var provider = _secureRepository.GetProvider(accountDb.ProviderGuid);
             accountDb.Provider = provider;
             if (!accountDb.IsConfirmed || accountDb.PublicCertBinary == null)
             {
@@ -122,15 +127,15 @@ namespace passi_android
             cell.IsEnabled = true;
         }
 
-        private void Button_Sync(object sender, EventArgs e)
+        public void Button_Sync(object sender, EventArgs e)
         {
             var button = sender as VisualElement;
             button.IsEnabled = false;
-            App.PollNotifications.Invoke();
+            _syncService.PollNotifications();
             button.IsEnabled = true;
         }
 
-        private void Button_ShowDeleteAccount(object sender, EventArgs e)
+        public void Button_ShowDeleteAccount(object sender, EventArgs e)
         {
             IsDeleteVisible = !IsDeleteVisible;
             foreach (var account in Accounts)

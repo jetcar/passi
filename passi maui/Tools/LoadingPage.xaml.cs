@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics;
 using System.Timers;
-using Microsoft.Maui.LifecycleEvents;
 using passi_maui.utils;
 using Timer = System.Timers.Timer;
 

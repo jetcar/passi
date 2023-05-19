@@ -8,8 +8,10 @@ namespace passi_android
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class TermsAgreements : ContentPage
     {
+        private INavigationService Navigation;
         public TermsAgreements()
         {
+            Navigation = App.Services.GetService<INavigationService>();
             InitializeComponent();
         }
 

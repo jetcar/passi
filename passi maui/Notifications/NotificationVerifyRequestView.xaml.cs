@@ -28,10 +28,12 @@ namespace passi_maui.Notifications
         private string _responseError;
         private AccountDb _account;
         private NotificationDto _message;
-
+        private IDateTimeService _dateTimeService;
 
         public NotificationVerifyRequestView()
         {
+            _dateTimeService = App.Services.GetService<IDateTimeService>();
+
             InitializeComponent();
             BindingContext = this;
             _timer = new Timer();
@@ -54,7 +56,7 @@ namespace passi_maui.Notifications
         {
             if (Message != null)
             {
-                var left = Message.ExpirationTime - DateTimeService.UtcNow;
+                var left = Message.ExpirationTime - _dateTimeService.UtcNow;
                 var leftTotalSeconds = ((int)left.TotalSeconds);
                 TimeLeft = leftTotalSeconds.ToString();
                 if (leftTotalSeconds <= 0)

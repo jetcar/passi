@@ -1,17 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Mail;
-using AppCommon;
-using AppConfig;
 using Newtonsoft.Json;
 using passi_android.Menu;
 using passi_android.Registration;
 using passi_android.Tools;
 using passi_android.utils;
-using RestSharp;
 using WebApiDto;
 using WebApiDto.SignUp;
 using Xamarin.Essentials;
@@ -27,7 +23,8 @@ namespace passi_android
         private ValidationError _emailError;
         private string _responseError;
         private ProviderDb _currentProvider;
-
+        private ISecureRepository _secureRepository;
+        private IRestService _restService;
         public string EmailText
         {
             get
@@ -66,7 +63,7 @@ namespace passi_android
         {
             get
             {
-                return SecureRepository.LoadProviders();
+                return _secureRepository.LoadProviders();
             }
         }
 
@@ -81,8 +78,13 @@ namespace passi_android
             }
         }
 
+        private INavigationService Navigation;
         public AddAccountPage()
         {
+            _secureRepository = App.Services.GetService<ISecureRepository>();
+            _restService = App.Services.GetService<IRestService>();
+            Navigation = App.Services.GetService<INavigationService>();
+
             InitializeComponent();
             BindingContext = this;
             CurrentProvider = Providers.First(x => x.IsDefault);
@@ -99,17 +101,17 @@ namespace passi_android
                 return;
             }
 
-            var account = new AccountDb() { Email = EmailText, DeviceId = SecureRepository.GetDeviceId(), Guid = Guid.NewGuid() };
+            var account = new AccountDb() { Email = EmailText, DeviceId = _secureRepository.GetDeviceId(), Guid = Guid.NewGuid() };
             var signupDto = new SignupDto()
             {
                 Email = EmailText,
                 UserGuid = account.Guid,
-                DeviceId = SecureRepository.GetDeviceId()
+                DeviceId = _secureRepository.GetDeviceId()
             };
 
             Navigation.PushModalSinglePage(new LoadingPage(new Action(() =>
             {
-                RestService.ExecutePostAsync(CurrentProvider, CurrentProvider.SignupPath, signupDto).ContinueWith((response) =>
+                _restService.ExecutePostAsync(CurrentProvider, CurrentProvider.SignupPath, signupDto).ContinueWith((response) =>
                 {
                     if (!response.Result.IsSuccessful && response.Result.StatusCode == HttpStatusCode.BadRequest)
                     {
@@ -125,7 +127,7 @@ namespace passi_android
                     else if (response.Result.IsSuccessful)
                     {
                         account.Provider = CurrentProvider;
-                        SecureRepository.AddAccount(account);
+                        _secureRepository.AddAccount(account);
                         MainThread.BeginInvokeOnMainThread(() =>
                         {
                             Navigation.PushModalSinglePage(new NavigationPage(new RegistrationConfirmation(account)

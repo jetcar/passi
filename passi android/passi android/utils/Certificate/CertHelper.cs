@@ -6,15 +6,17 @@ using System.Threading.Tasks;
 
 namespace passi_android.utils.Certificate
 {
-    public static class CertHelper
+    public class CertHelper : ICertHelper
     {
-        public static X509Certificate2 GetCertificateWithKey(Guid accountGuid, string pin)
+        private ISecureRepository _secureRepository;
+        ICertConverter _certConverter;
+        public CertHelper(ISecureRepository secureRepository, ICertConverter certConverter)
         {
-            var account = SecureRepository.GetAccount(accountGuid);
-            return new X509Certificate2(Convert.FromBase64String(account.PrivateCertBinary), account.Password + pin, X509KeyStorageFlags.Exportable);
+            _secureRepository = secureRepository;
+            _certConverter = certConverter;
         }
-
-        public static PublicCert ConvertToPublicCertificate(X509Certificate2 cert)
+        
+        public PublicCert ConvertToPublicCertificate(X509Certificate2 cert)
         {
             var publicCertJson = new PublicCert()
             {
@@ -27,7 +29,7 @@ namespace passi_android.utils.Certificate
             return publicCertJson;
         }
 
-        public static bool VerifyData(string data, string signedData, string base64PublicCert)
+        public bool VerifyData(string data, string signedData, string base64PublicCert)
         {
             var parentCert = new X509Certificate2(Convert.FromBase64String(base64PublicCert));
 
@@ -44,13 +46,14 @@ namespace passi_android.utils.Certificate
             }
         }
 
-        public static async Task<string> Sign(Guid accountGuid, string pin, string dataForSigning)
+        public async Task<string> Sign(Guid accountGuid, MySecureString pin, string dataForSigning)
         {
-            var privatecertificate = GetCertificateWithKey(accountGuid, pin);
+            var account = _secureRepository.GetAccount(accountGuid);
+            var privatecertificate = _certConverter.GetCertificateWithKey(pin,account);
             return GetSignedData(dataForSigning, privatecertificate);
         }
 
-        public static string GetSignedData(string messageToSign, X509Certificate2 certificate)
+        public string GetSignedData(string messageToSign, X509Certificate2 certificate)
         {
             using (var sha512 = SHA512.Create())
             {
@@ -64,12 +67,20 @@ namespace passi_android.utils.Certificate
             }
         }
 
-       
-        public static async Task<string> SignByFingerPrint(Guid accountGuid, string dataForSigning)
+        public async Task<string> SignByFingerPrint(string dataForSigning,
+            X509Certificate2 privatecertificate)
         {
-            var privatecertificate = SecureRepository.GetCertificateWithFingerPrint(accountGuid);
             return GetSignedData(dataForSigning, privatecertificate);
         }
+    }
+
+    public interface ICertHelper
+    {
+        PublicCert ConvertToPublicCertificate(X509Certificate2 cert);
+        bool VerifyData(string data, string signedData, string base64PublicCert);
+        Task<string> Sign(Guid accountGuid, MySecureString pin, string dataForSigning);
+        string GetSignedData(string messageToSign, X509Certificate2 certificate);
+        Task<string> SignByFingerPrint(string dataForSigning, X509Certificate2 privatecertificate);
     }
 
     public class PublicCert

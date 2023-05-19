@@ -12,7 +12,6 @@
         <StackLayout VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand">
             <Label TextColor="Black" HorizontalOptions="Center" Text="{ Binding Path=ResponseError}" />
             <Label TextColor="Black" HorizontalOptions="Center" Text="Secure account by pin." />
-
             <Label TextColor="Black" Text="{Binding Path=Pin1Error.Text}" HorizontalTextAlignment="Center"></Label>
             <Label TextColor="Black" Text="Pin" HorizontalTextAlignment="Center"></Label>
             <Grid>

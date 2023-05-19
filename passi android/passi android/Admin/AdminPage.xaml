@@ -18,7 +18,7 @@
                 </StackLayout>
                 <StackLayout HorizontalOptions="Fill" Orientation="Horizontal">
                     <Label Text="pass" HorizontalOptions="Start" />
-                    <Editor  Text="{Binding Path=Pass}"></Editor>
+                    <Editor  Text="{Binding Path=Salt}"></Editor>
                 </StackLayout>
                 <StackLayout HorizontalOptions="Fill" Orientation="Horizontal">
                     <Label Text="Guid" HorizontalOptions="Start" />

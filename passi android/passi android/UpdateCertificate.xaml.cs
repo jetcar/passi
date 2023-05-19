@@ -4,18 +4,16 @@ using System.Net;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using AppCommon;
-using AppConfig;
 using Newtonsoft.Json;
 using passi_android.Tools;
 using passi_android.utils;
-using RestSharp;
+using passi_android.utils.Certificate;
 using WebApiDto;
 using WebApiDto.Certificate;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using CertHelper = passi_android.utils.Certificate.CertHelper;
-using Certificates = passi_android.utils.Certificate.Certificates;
 using Color = Xamarin.Forms.Color;
 
 namespace passi_android
@@ -26,9 +24,9 @@ namespace passi_android
         private string _pin1Masked;
         private string _pin2Masked;
         private string _pinOldMasked;
-        private string _pin1 = "";
-        private string _pin2 = "";
-        private string _pinOld = "";
+        private MySecureString _pin1 = new MySecureString("");
+        private MySecureString _pin2 = new MySecureString("");
+        private MySecureString _pinOld = new MySecureString("");
         private Color _pin1Color;
         private Color _pin2Color;
         private Color _pinOldColor;
@@ -38,9 +36,15 @@ namespace passi_android
         private ValidationError _pinOldError = new ValidationError();
 
         private readonly int MinPinLenght = 4;
-
+        private ISecureRepository _secureRepository;
+        private IRestService _restService;
+        private INavigationService Navigation;
         public UpdateCertificate()
         {
+            _secureRepository = App.Services.GetService<ISecureRepository>();
+            _restService = App.Services.GetService<IRestService>();
+            Navigation = App.Services.GetService<INavigationService>();
+
             InitializeComponent();
             BindingContext = this;
             SetTextBox(0);
@@ -83,7 +87,7 @@ namespace passi_android
             {
                 _pin2Masked = value;
 
-                if (Pin1 == Pin2)
+                if (Pin1.Equals(Pin2))
                 {
                     Pin2Error.HasError = false;
                     Pin2Error.Text = "";
@@ -92,54 +96,58 @@ namespace passi_android
             }
         }
 
-        public string Pin1
+        public MySecureString Pin1
         {
             get => _pin1;
             set
             {
                 _pin1 = value;
-                Pin1Masked = new string(_pin1.ToList().Select(x => '*').ToArray());
+                Pin1Masked = _pin1.GetMasked("*");
             }
         }
 
-        public string PinOld
+        public MySecureString PinOld
         {
             get => _pinOld;
             set
             {
                 _pinOld = value;
-                PinOldMasked = new string(_pinOld.ToList().Select(x => '*').ToArray());
+                PinOldMasked = _pinOld.GetMasked("*");
             }
         }
 
-        public string Pin2
+        public MySecureString Pin2
         {
             get => _pin2;
             set
             {
                 _pin2 = value;
-                Pin2Masked = new string(_pin2.ToList().Select(x => '*').ToArray());
+                Pin2Masked = _pin2.GetMasked("*");
             }
         }
 
-        public static void StartCertGeneration(string pinNew, string pinOld, AccountDb Account, INavigation Navigation, Action<string> action)
+        public static void StartCertGeneration(MySecureString pinNew, MySecureString pinOld, AccountDb Account, INavigation Navigation, Action<string> action)
         {
+            var _secureRepository = App.Services.GetService<ISecureRepository>();
+            var _restService = App.Services.GetService<IRestService>();
+            var _certHelper = App.Services.GetService<ICertHelper>();
+
             Navigation.PushModalSinglePage(new LoadingPage(() =>
             {
                 GenerateCert(pinNew, pinOld, Account, action).ContinueWith(certDto =>
                 {
                     if (certDto?.Result != null)
                     {
-                        var provider = SecureRepository.GetProvider(Account.ProviderGuid);
-                        RestService.ExecutePostAsync(provider, provider.UpdateCertificate, certDto.Result).ContinueWith((response) =>
+                        var provider = _secureRepository.GetProvider(Account.ProviderGuid);
+                        _restService.ExecutePostAsync(provider, provider.UpdateCertificate, certDto.Result).ContinueWith((response) =>
                         {
                             if (response.Result.IsSuccessful)
                             {
                                 var certificateBase64 = Convert.ToBase64String(certDto?.Result.Item3); //importable certificate
 
-                                var publicCertHelper = CertHelper.ConvertToPublicCertificate(certDto.Result.Item2);
+                                var publicCertHelper = _certHelper.ConvertToPublicCertificate(certDto.Result.Item2);
 
-                                Account.Password = pinNew;
+                                Account.Salt = Guid.NewGuid().ToString();
                                 Account.PrivateCertBinary = certificateBase64;
                                 Account.pinLength = pinNew?.Length ?? 0;
                                 Account.Thumbprint = certDto.Result.Item2.Thumbprint;
@@ -147,8 +155,8 @@ namespace passi_android
                                 Account.ValidTo = certDto.Result.Item2.NotAfter;
                                 Account.PublicCertBinary = publicCertHelper.BinaryData;
 
-                                SecureRepository.UpdateAccount(Account);
-                                SecureRepository.AddfingerPrintKey(Account.Guid, pinNew).GetAwaiter().GetResult();
+                                _secureRepository.UpdateAccount(Account);
+                                _secureRepository.AddfingerPrintKey(Account, pinNew).GetAwaiter().GetResult();
 
                                 MainThread.BeginInvokeOnMainThread(() => { Navigation.NavigateTop(); });
                             }
@@ -172,17 +180,20 @@ namespace passi_android
             }));
         }
 
-        public static async Task<Tuple<CertificateUpdateDto, X509Certificate2, byte[]>> GenerateCert(string pinNew, string pinOld, AccountDb Account, Action<string> callback)
+        public static async Task<Tuple<CertificateUpdateDto, X509Certificate2, byte[]>> GenerateCert(MySecureString pinNew, MySecureString pinOld, AccountDb Account, Action<string> callback)
         {
+            var _certificates = App.Services.GetService<ICertificatesService>();
+            var _certHelper = App.Services.GetService<ICertHelper>();
+
             var cert = new CertificateUpdateDto();
             cert.ParentCertThumbprint = Account.Thumbprint;
-            return await Certificates.GenerateCertificate(Account.Email, pinNew).ContinueWith(certificate =>
+            return await _certificates.GenerateCertificate(Account.Email, pinNew).ContinueWith(certificate =>
             {
-                var publicCertHelper = CertHelper.ConvertToPublicCertificate(certificate.Result.Item1);
+                var publicCertHelper = _certHelper.ConvertToPublicCertificate(certificate.Result.Item1);
 
                 try
                 {
-                    cert.ParentCertHashSignature = CertHelper.Sign(Account.Guid, pinOld, publicCertHelper.BinaryData).Result;
+                    cert.ParentCertHashSignature = _certHelper.Sign(Account.Guid, pinOld, publicCertHelper.BinaryData).Result;
                 }
                 catch (Exception e)
                 {
@@ -344,40 +355,40 @@ namespace passi_android
             {
                 if (currentfieldIndex == 0)
                     if (PinOld.Length > 0)
-                        PinOld = PinOld.Substring(0, PinOld.Length - 1);
+                        PinOld = PinOld.TrimEnd(1);
                 if (currentfieldIndex == 1)
                     if (Pin1.Length > 0)
-                        Pin1 = Pin1.Substring(0, Pin1.Length - 1);
+                        Pin1 = Pin1.TrimEnd(1);
                 if (currentfieldIndex == 2)
                     if (Pin2.Length > 0)
-                        Pin2 = Pin1.Substring(0, Pin2.Length - 1);
+                        Pin2 = Pin1.TrimEnd(1);
                 return;
             }
             if (currentfieldIndex == 0)
-                PinOld += value;
+                PinOld.AppendChar(value);
             if (currentfieldIndex == 1)
-                Pin1 += value;
+                Pin1.AppendChar(value);
             if (currentfieldIndex == 2)
-                Pin2 += value;
+                Pin2.AppendChar(value);
         }
 
 
 
         private void ClearPin1_OnClicked(object sender, EventArgs e)
         {
-            Pin1 = "";
+            Pin1 = new MySecureString("");  
             SetTextBox(1);
         }
 
         private void ClearPin2_OnClicked(object sender, EventArgs e)
         {
-            Pin2 = "";
+            Pin2 = new MySecureString("");
             SetTextBox(2);
         }
 
         private void ClearPinOld_OnClicked(object sender, EventArgs e)
         {
-            PinOld = "";
+            PinOld = new MySecureString("");
             SetTextBox(0);
         }
 

@@ -15,8 +15,10 @@ namespace passi_android.Tools
         private Task _task;
         private readonly Timer _timer;
 
+        private INavigationService Navigation;
         public LoadingPage(Action callBack)
         {
+            Navigation = App.Services.GetService<INavigationService>();
             _callBack = callBack;
             InitializeComponent();
             _timer = new Timer();

@@ -3,19 +3,13 @@ using Android.App;
 using Android.Content;
 using Android.Content.PM;
 using Android.Graphics;
-using Android.Media;
 using Android.OS;
-using Android.Provider;
 using Android.Support.V4.App;
 using Android.Util;
 using Firebase.Messaging;
 using Java.Util;
 using Newtonsoft.Json;
-using passi_android.Notifications;
-using passi_android.utils;
 using WebApiDto;
-using Xamarin.Essentials;
-using TaskStackBuilder = Android.Support.V4.App.TaskStackBuilder;
 
 namespace passi_android.Droid.Notifications
 {

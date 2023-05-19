@@ -1,17 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading;
 using AppConfig;
 using RestSharp;
 
 namespace AppCommon
 {
-    public static class DateTimeService
+    public class DateTimeService :IDateTimeService
     {
-        private static long serverTimeDiffirence = 0;
+        private long serverTimeDiffirence = 0;
 
-        public static void Init()
+        public void Init()
         {
             new Thread(() =>
             {
@@ -36,18 +34,23 @@ namespace AppCommon
             
             
         }
-        private static long ConvertToTimestamp(DateTime value)
+        private long ConvertToTimestamp(DateTime value)
         {
             long epoch = (value.Ticks - 621355968000000000) / 10000000;
             return epoch;
         }
 
-        public static DateTime UtcNow
+        public DateTime UtcNow
         {
             get
             {
                 return DateTime.UtcNow.AddTicks(-serverTimeDiffirence);
             }
         }
+    }
+
+    public interface IDateTimeService
+    {
+        DateTime UtcNow { get; }
     }
 }

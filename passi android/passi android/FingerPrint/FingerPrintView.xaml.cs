@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Threading.Tasks;
-using AppCommon;
 using passi_android.utils;
 using Xamarin.Essentials;
 using Xamarin.Forms;
@@ -13,9 +11,11 @@ namespace passi_android.FingerPrint
     {
         private readonly AccountDb _accountDb;
         private string _message = "Reading FingerPrint";
+        INavigationService Navigation;
 
         public FingerPrintView(AccountDb accountDb)
         {
+            Navigation = App.Services.GetService<INavigationService>();
             _accountDb = accountDb;
             InitializeComponent();
             BindingContext = this;
@@ -66,7 +66,7 @@ namespace passi_android.FingerPrint
                         else
                             MainThread.BeginInvokeOnMainThread(() =>
                             {
-                                FingerPrintConfirmByPinView.SignRequestAndSendResponce(_accountDb, null, Navigation,
+                                FingerPrintConfirmByPinView.SignRequestAndSendResponce(_accountDb, null, 
                                     (error) =>
                                     {
                                         Message = error;

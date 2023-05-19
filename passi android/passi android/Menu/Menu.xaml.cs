@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Linq;
-using passi_android.Registration;
 using passi_android.utils;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
@@ -13,12 +12,15 @@ namespace passi_android.Menu
     {
         private ObservableCollection<ProviderDb> _provider;
         private bool _isDeleteVisible;
-
+        ISecureRepository _secureRepository;
+        private INavigationService Navigation;
         public Menu()
         {
+            Navigation = App.Services.GetService<INavigationService>();
+            _secureRepository = App.Services.GetService<ISecureRepository>();
             InitializeComponent();
             BindingContext = this;
-            Providers = new ObservableCollection<ProviderDb>(SecureRepository.LoadProviders());
+            Providers = new ObservableCollection<ProviderDb>(_secureRepository.LoadProviders());
 
         }
 
@@ -46,7 +48,7 @@ namespace passi_android.Menu
             var provider = (ProviderDb)((Button)sender).BindingContext;
             if (provider.IsDefault && Providers.Count(x => x.IsDefault) == 1)
                 return;
-            SecureRepository.DeleteProvider(provider);
+            _secureRepository.DeleteProvider(provider);
             Providers.Remove(provider);
 
         }

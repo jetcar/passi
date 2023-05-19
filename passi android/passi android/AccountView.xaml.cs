@@ -1,5 +1,4 @@
 ﻿using System;
-using AppCommon;
 using passi_android.utils;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
@@ -16,9 +15,11 @@ namespace passi_android
         private string _validTo;
         private string _providerName;
 
+        private INavigationService Navigation;
         public AccountView(AccountDb accountDb)
         {
             AccountDb = accountDb;
+            Navigation = App.Services.GetService<INavigationService>();
             InitializeComponent();
             BindingContext = this;
 

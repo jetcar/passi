@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
-using AppCommon;
 using passi_android.utils;
+using passi_android.utils.Services;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -10,17 +10,20 @@ namespace passi_android.Admin
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class AdminButton : ContentView
     {
+        INavigationService _navigationService;
         public AdminButton()
         {
+            _navigationService = App.Services.GetService<INavigationService>();
             this.IsVisible = Debugger.IsAttached;
-            InitializeComponent();
+            if (!App.IsTest)
+                InitializeComponent();
         }
 
         private void AdminButton_OnClicked(object sender, EventArgs e)
         {
             var button = ((Xamarin.Forms.Button)sender);
             var account = (AccountDb)button.BindingContext;
-            Navigation.PushModalSinglePage((new AdminPage(account) { }));
+            _navigationService.PushModalSinglePage((new AdminView(account) { }));
         }
     }
 }

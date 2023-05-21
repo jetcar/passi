@@ -1,13 +1,11 @@
 ﻿using System.Threading;
-using System.Threading.Tasks;
 using Android.App;
 using Android.Util;
-using AppConfig;
 using Firebase.Messaging;
+using Microsoft.Extensions.DependencyInjection;
 using passi_android.utils;
-using RestSharp;
+using passi_android.utils.Services;
 using WebApiDto;
-using Xamarin.Essentials;
 
 namespace passi_android.Droid.Notifications
 {
@@ -25,23 +23,27 @@ namespace passi_android.Droid.Notifications
 
         public static void SendRegistrationToServer(string token)
         {
-            var deviceTokenUpdateDto = new DeviceTokenUpdateDto() { DeviceId = SecureRepository.GetDeviceId(), Token = token, Platform = Plugin.DeviceInfo.CrossDeviceInfo.Current.Platform.ToString() };
-            foreach (var provider in SecureRepository.LoadProviders())
+            var secureRepository = App.Services.GetService<ISecureRepository>();
+            var restService = App.Services.GetService<IRestService>();
+            var mySecureStorage = App.Services.GetService<IMySecureStorage>();
+
+            var deviceTokenUpdateDto = new DeviceTokenUpdateDto() { DeviceId = secureRepository.GetDeviceId(), Token = token, Platform = Plugin.DeviceInfo.CrossDeviceInfo.Current.Platform.ToString() };
+            foreach (var provider in secureRepository.LoadProviders())
             {
-                var result = RestService.ExecutePostAsync(provider, provider.TokenUpdate, deviceTokenUpdateDto);
+                var result = restService.ExecutePostAsync(provider, provider.TokenUpdate, deviceTokenUpdateDto);
                 if (!result.Result.IsSuccessful)
                 {
                     do
                     {
                         Thread.Sleep(10000);
-                        result = RestService.ExecutePostAsync(provider, provider.TokenUpdate, deviceTokenUpdateDto);
+                        result = restService.ExecutePostAsync(provider, provider.TokenUpdate, deviceTokenUpdateDto);
                     } while (!result.Result.IsSuccessful);
 
-                    SecureStorage.SetAsync(StorageKeys.NotificationToken, token);
+                    mySecureStorage.SetAsync(StorageKeys.NotificationToken, token);
                 }
                 else
                 {
-                    SecureStorage.SetAsync(StorageKeys.NotificationToken, token);
+                    mySecureStorage.SetAsync(StorageKeys.NotificationToken, token);
                 }
             }
         }

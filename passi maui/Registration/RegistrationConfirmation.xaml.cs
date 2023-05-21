@@ -1,7 +1,4 @@
 ﻿using System.Net;
-using Android.Content;
-using Android.Views.InputMethods;
-using Microsoft.Maui.Controls.Compatibility;
 using Newtonsoft.Json;
 using passi_maui.utils;
 using WebApiDto;

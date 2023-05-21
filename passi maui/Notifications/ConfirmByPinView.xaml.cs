@@ -25,9 +25,10 @@ namespace passi_maui.Notifications
         private ValidationError _pin1Error = new ValidationError();
         private AccountDb _accountDb;
         private string _email;
-
+        private IDateTimeService _dateTimeService;
         public ConfirmByPinView()
         {
+            _dateTimeService = App.Services.GetService<IDateTimeService>();
             InitializeComponent();
             BindingContext = this;
 
@@ -43,7 +44,7 @@ namespace passi_maui.Notifications
         {
             if (Message != null)
             {
-                var left = Message.ExpirationTime - DateTimeService.UtcNow;
+                var left = Message.ExpirationTime - _dateTimeService.UtcNow;
                 var leftTotalSeconds = ((int)left.TotalSeconds);
                 TimeLeft = leftTotalSeconds.ToString();
                 if (leftTotalSeconds <= 0)

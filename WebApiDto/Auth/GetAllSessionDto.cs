@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace WebApiDto.Auth
+﻿namespace WebApiDto.Auth
 {
     public class GetAllSessionDto
     {

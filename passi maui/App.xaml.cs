@@ -1,5 +1,4 @@
 ﻿using AppCommon;
-using Microsoft.Maui.Controls.PlatformConfiguration;
 using passi_maui.utils;
 using System.Security.Cryptography.X509Certificates;
 
@@ -32,5 +31,6 @@ namespace passi_maui
         public static Action AccountSyncCallback { get; set; }
         public static string Version { get; set; }
         public static Func<Tuple<X509Certificate2, string, byte[]>> CreateCertificate { get; set; }
+        public static IServiceProvider Services { get; set; }
     }
 }

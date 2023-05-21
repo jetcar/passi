@@ -1,30 +1,20 @@
-﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
+﻿using System;
 using System.Threading.Tasks;
 using Android.App;
-using Android.Content;
 using Android.Content.PM;
 using Android.Gms.Common;
 using Android.Runtime;
 using Android.OS;
 using Android.Support.V4.Hardware.Fingerprint;
-using AppCommon;
-using AppConfig;
 using Firebase.Messaging;
-using Java.Lang;
-using Newtonsoft.Json;
 using passi_android.Droid.FingerPrint;
 using passi_android.Droid.Notifications;
-using passi_android.Notifications;
-using passi_android.utils;
-using RestSharp;
-using WebApiDto;
-using WebApiDto.Auth;
 using Xamarin.Essentials;
 using Android.Gms.Extensions;
-using Xamarin.Forms;
-using Java.Security;
+using AppCommon;
+using Microsoft.Extensions.DependencyInjection;
+using passi_android.utils.Services;
+using passi_android.utils.Services.Certificate;
 
 namespace passi_android.Droid
 {
@@ -36,6 +26,24 @@ namespace passi_android.Droid
         private string msgText = "";
 
         public static App App;
+
+        private static IServiceProvider ConfigureServices()
+        {
+            var services = new ServiceCollection();
+
+            services.AddSingleton<ISecureRepository, SecureRepository>();
+            services.AddSingleton<IDateTimeService, DateTimeService>();
+            services.AddSingleton<ICertConverter, CertConverter>();
+            services.AddSingleton<ICertificatesService, CertificatesService>();
+            services.AddSingleton<ICertHelper, CertHelper>();
+            services.AddSingleton<ISyncService, SyncService>();
+            services.AddSingleton<IMySecureStorage, MySecureStorage>();
+            services.AddSingleton<IRestService, RestService>();
+            services.AddSingleton<INavigationService, NavigationService>();
+            services.AddSingleton<IMainThreadService, MainThreadService>();
+
+            return services.BuildServiceProvider();
+        }
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
@@ -50,16 +58,19 @@ namespace passi_android.Droid
 
             CreateNotificationChannel();
 
-            var intent = Intent;
-            //PackageManager.getla
+            App.Services = ConfigureServices();
+
+
             App = new App();
-            //DateTimeService.Init();
+            var secureRepository = App.Services.GetService<ISecureRepository>();
+            var dateTimeService = App.Services.GetService<IDateTimeService>();
+            dateTimeService.Init();
             LoadApplication(App);
 
             Plugin.CurrentActivity.CrossCurrentActivity.Current.Init(this, savedInstanceState);
             Task.Run(() =>
             {
-                SecureRepository.GetDeviceId();
+                secureRepository.GetDeviceId();
 
                 var task = FirebaseMessaging.Instance.GetToken().GetAwaiter().GetResult();
 
@@ -68,8 +79,6 @@ namespace passi_android.Droid
                 MyFirebaseIIDService.SendRegistrationToServer(token);
             });
 
-            //PollNotifications();
-            App.PollNotifications = PollNotifications;
             App.CloseApp = () =>
             {
                 this.FinishAffinity();
@@ -79,15 +88,15 @@ namespace passi_android.Droid
             {
                 var fingerprintManagerCompat = FingerprintManagerCompat.From(this);
 
-                App.FingerprintManager.HasEnrolledFingerprints = ()=>
+                App.FingerprintManager.HasEnrolledFingerprints = () =>
                 {
                     return fingerprintManagerCompat.HasEnrolledFingerprints;
                 };
-                App.FingerprintManager.IsHardwareDetected = ()=>
+                App.FingerprintManager.IsHardwareDetected = () =>
                 {
                     return fingerprintManagerCompat.IsHardwareDetected;
                 };
-                App.IsKeyguardSecure = ()=>
+                App.IsKeyguardSecure = () =>
                 {
                     return ((KeyguardManager)GetSystemService(KeyguardService)).IsKeyguardSecure;
                 };
@@ -111,7 +120,9 @@ namespace passi_android.Droid
 
         protected override void OnPostResume()
         {
-            PollNotifications();
+            var _syncService = App.Services.GetService<ISyncService>();
+
+            _syncService.PollNotifications();
 
             base.OnPostResume();
         }
@@ -137,88 +148,7 @@ namespace passi_android.Droid
             fingerprintManager.Authenticate(cryptoHelper.BuildCryptoObject(), flags, cancellationSignal, authenticationCallback, null);
         }
 
-        private static object locker = new object();
 
-        public static void PollNotifications()
-        {
-            PollingTask ??= Task.Run(() =>
-            {
-                lock (locker)
-                {
-
-                    var accounts = new ObservableCollection<utils.AccountView>();
-                    SecureRepository.LoadAccountIntoList(accounts);
-                    var providers = SecureRepository.LoadProviders();
-                    var groupedAccounts = accounts.GroupBy(x => x.ProviderGuid);
-                    foreach (var groupedAccount in groupedAccounts)
-                    {
-                        var providerGuid = groupedAccount.ToList().First().ProviderGuid ?? providers.First(x => x.IsDefault).Guid;
-                        var provider = SecureRepository.LoadProviders().First(x => x.Guid == providerGuid);
-                        var getAllSessionDto = new GetAllSessionDto()
-                        {
-                            DeviceId = SecureRepository.GetDeviceId()
-                        };
-
-                        var guids = accounts.Select(x => x.Guid.ToString()).ToList();
-                        var task = RestService.ExecutePostAsync(provider, provider.SyncAccounts, new SyncAccountsDto()
-                        {
-                            DeviceId = SecureRepository.GetDeviceId(),
-                            Guids = guids
-                        });
-
-                        var restResponse = task.Result;
-                        if (restResponse.IsSuccessful)
-                        {
-                            var serverAccounts = JsonConvert.DeserializeObject<List<AccountMinDto>>(restResponse.Content);
-                            foreach (var account in groupedAccount)
-                            {
-                                if (serverAccounts.All(x => x.UserGuid != account.Guid))
-                                {
-                                    var loadedAccount = SecureRepository.GetAccount(account.Guid);
-                                    if (loadedAccount != null && loadedAccount.IsConfirmed)
-                                    {
-                                        loadedAccount.Inactive = true;
-                                        SecureRepository.UpdateAccount(loadedAccount);
-                                    }
-                                }
-                            }
-
-                            if (App.AccountSyncCallback != null)
-                                App.AccountSyncCallback.Invoke();
-                        }
-
-
-
-                        var task2 = RestService.ExecutePostAsync(provider, provider.CheckForStartedSessions, getAllSessionDto);
-
-                        var response = task2.Result;
-                        if (response.IsSuccessful)
-                        {
-                            var msg = JsonConvert.DeserializeObject<NotificationDto>(response.Content);
-                            if (msg != null)
-                            {
-                                if (SecureRepository.CheckSessionKey(msg.SessionId))
-                                {
-                                    MainThread.BeginInvokeOnMainThread(() =>
-                                    {
-                                        NotificationVerifyRequestView.Instance.Message = msg;
-                                        App.MainPage.Navigation.PushModalSinglePage(
-                                            NotificationVerifyRequestView
-                                                .Instance);
-                                    });
-                                }
-                            }
-                        }
-
-                    }
-
-                    PollingTask = null;
-                }
-
-            });
-        }
-
-        public static Task PollingTask { get; set; }
 
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
         {

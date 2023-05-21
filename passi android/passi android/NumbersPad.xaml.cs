@@ -9,6 +9,7 @@ namespace passi_android
     {
         public NumbersPad()
         {
+            if(!App.IsTest)
             InitializeComponent();
         }
 

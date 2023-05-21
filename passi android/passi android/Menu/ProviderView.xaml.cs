@@ -1,5 +1,6 @@
 ﻿using System;
-using passi_android.utils;
+using passi_android.StorageModels;
+using passi_android.utils.Services;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -10,10 +11,13 @@ namespace passi_android.Menu
     {
         public ProviderDb Provider { get; set; }
 
+        private INavigationService _navigationService;
         public ProviderView(ProviderDb provider)
         {
+            _navigationService = App.Services.GetService<INavigationService>();
             Provider = provider;
-            InitializeComponent();
+            if (!App.IsTest)
+                InitializeComponent();
             BindingContext = this;
 
         }
@@ -23,14 +27,14 @@ namespace passi_android.Menu
             var button = sender as VisualElement;
             button.IsEnabled = false;
 
-            Navigation.PushModalSinglePage(new EditProviderView(Provider));
+            _navigationService.PushModalSinglePage(new EditProviderView(Provider));
             button.IsEnabled = true;
         }
 
 
         private void Button_Back(object sender, EventArgs e)
         {
-            Navigation.PopModal();
+            _navigationService.PopModal();
         }
     }
 }

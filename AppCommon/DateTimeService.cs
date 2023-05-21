@@ -52,5 +52,6 @@ namespace AppCommon
     public interface IDateTimeService
     {
         DateTime UtcNow { get; }
+        void Init();
     }
 }

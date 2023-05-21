@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
-using passi_android.utils;
+using passi_android.StorageModels;
+using passi_android.utils.Services;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -24,6 +25,7 @@ namespace passi_android.Menu
             Provider.Guid = Guid.NewGuid();
             Provider.Name = "";
             Provider.WebApiUrl = "https://";
+            if(!App.IsTest)
             InitializeComponent();
             BindingContext = this;
 

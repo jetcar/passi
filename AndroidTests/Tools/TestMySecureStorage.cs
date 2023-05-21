@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
-using passi_android.utils;
+using passi_android.utils.Services;
 
 namespace AndroidTests.Tools;
 

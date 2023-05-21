@@ -1,5 +1,6 @@
 ﻿using System;
 using passi_android.utils;
+using passi_android.utils.Services;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -15,12 +16,13 @@ namespace passi_android
         private string _validTo;
         private string _providerName;
 
-        private INavigationService Navigation;
+        private INavigationService _navigationService;
         public AccountView(AccountDb accountDb)
         {
             AccountDb = accountDb;
-            Navigation = App.Services.GetService<INavigationService>();
-            InitializeComponent();
+            _navigationService = App.Services.GetService<INavigationService>();
+            if (!App.IsTest)
+                InitializeComponent();
             BindingContext = this;
 
             try
@@ -95,10 +97,10 @@ namespace passi_android
             var button = sender as VisualElement;
             button.IsEnabled = false;
             if (AccountDb.pinLength > 0)
-                Navigation.PushModalSinglePage(new UpdateCertificate() { Account = AccountDb });
+                _navigationService.PushModalSinglePage(new UpdateCertificateView() { Account = AccountDb });
             else
             {
-                UpdateCertificate.StartCertGeneration(null, null, AccountDb, Navigation, (error) =>
+                UpdateCertificateView.StartCertGeneration(null, null, AccountDb, (error) =>
                 {
 
                 });
@@ -106,18 +108,18 @@ namespace passi_android
             button.IsEnabled = true;
         }
 
-        private void AddBiometric_Button_OnClicked(object sender, EventArgs e)
+        public void AddBiometric_Button_OnClicked(object sender, EventArgs e)
         {
             var button = sender as VisualElement;
             button.IsEnabled = false;
 
-            Navigation.PushModalSinglePage(new FingerPrint.FingerPrintView(AccountDb));
+            _navigationService.PushModalSinglePage(new FingerPrint.FingerPrintView(AccountDb));
             button.IsEnabled = true;
         }
 
         private void Button_Back(object sender, EventArgs e)
         {
-            Navigation.PopModal();
+            _navigationService.PopModal();
         }
     }
 }

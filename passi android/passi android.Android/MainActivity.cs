@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
 using System.Threading.Tasks;
 using Android.App;
 using Android.Content.PM;
@@ -10,17 +7,14 @@ using Android.Runtime;
 using Android.OS;
 using Android.Support.V4.Hardware.Fingerprint;
 using Firebase.Messaging;
-using Newtonsoft.Json;
 using passi_android.Droid.FingerPrint;
 using passi_android.Droid.Notifications;
-using passi_android.Notifications;
-using passi_android.utils;
-using WebApiDto;
-using WebApiDto.Auth;
 using Xamarin.Essentials;
 using Android.Gms.Extensions;
+using AppCommon;
 using Microsoft.Extensions.DependencyInjection;
-using passi_android.utils.Certificate;
+using passi_android.utils.Services;
+using passi_android.utils.Services.Certificate;
 
 namespace passi_android.Droid
 {
@@ -38,6 +32,7 @@ namespace passi_android.Droid
             var services = new ServiceCollection();
 
             services.AddSingleton<ISecureRepository, SecureRepository>();
+            services.AddSingleton<IDateTimeService, DateTimeService>();
             services.AddSingleton<ICertConverter, CertConverter>();
             services.AddSingleton<ICertificatesService, CertificatesService>();
             services.AddSingleton<ICertHelper, CertHelper>();
@@ -45,6 +40,8 @@ namespace passi_android.Droid
             services.AddSingleton<IMySecureStorage, MySecureStorage>();
             services.AddSingleton<IRestService, RestService>();
             services.AddSingleton<INavigationService, NavigationService>();
+            services.AddSingleton<IMainThreadService, MainThreadService>();
+
             return services.BuildServiceProvider();
         }
 
@@ -62,17 +59,18 @@ namespace passi_android.Droid
             CreateNotificationChannel();
 
             App.Services = ConfigureServices();
-           var _secureRepository = App.Services.GetService<ISecureRepository>();
 
 
             App = new App();
-            //DateTimeService.Init();
+            var secureRepository = App.Services.GetService<ISecureRepository>();
+            var dateTimeService = App.Services.GetService<IDateTimeService>();
+            dateTimeService.Init();
             LoadApplication(App);
 
             Plugin.CurrentActivity.CrossCurrentActivity.Current.Init(this, savedInstanceState);
             Task.Run(() =>
             {
-                _secureRepository.GetDeviceId();
+                secureRepository.GetDeviceId();
 
                 var task = FirebaseMessaging.Instance.GetToken().GetAwaiter().GetResult();
 
@@ -81,7 +79,6 @@ namespace passi_android.Droid
                 MyFirebaseIIDService.SendRegistrationToServer(token);
             });
 
-            //PollNotifications();
             App.CloseApp = () =>
             {
                 this.FinishAffinity();
@@ -151,7 +148,7 @@ namespace passi_android.Droid
             fingerprintManager.Authenticate(cryptoHelper.BuildCryptoObject(), flags, cancellationSignal, authenticationCallback, null);
         }
 
-       
+
 
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
         {

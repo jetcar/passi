@@ -6,7 +6,8 @@ using AppCommon;
 using Newtonsoft.Json;
 using passi_android.Tools;
 using passi_android.utils;
-using passi_android.utils.Certificate;
+using passi_android.utils.Services;
+using passi_android.utils.Services.Certificate;
 using WebApiDto;
 using WebApiDto.Auth;
 using Xamarin.Essentials;
@@ -30,36 +31,26 @@ namespace passi_android.Notifications
         private string _timeLeft;
         private bool _isButtonEnabled = true;
         private string _responseError;
-        private static object locker = new object();
-        private static NotificationVerifyRequestView _instance;
         ISecureRepository _secureRepository;
         IRestService _restService;
         private IDateTimeService _dateTimeService;
         ICertHelper _certHelper;
-        private INavigationService Navigation;
-        public static NotificationVerifyRequestView Instance
-        {
-            get
-            {
-                lock (locker)
-                {
-                    if (_instance == null)
-                        _instance = new NotificationVerifyRequestView();
-                    return _instance;
-                }
-            }
-        }
+        private INavigationService _navigationService;
+        private IMainThreadService _mainThreadService;
 
-        private NotificationVerifyRequestView()
-        {
 
+        public NotificationVerifyRequestView(NotificationDto notificationDto)
+        {
+            Message = notificationDto;
             _secureRepository = App.Services.GetService<ISecureRepository>();
             _restService = App.Services.GetService<IRestService>();
             _dateTimeService = App.Services.GetService<IDateTimeService>();
             _certHelper = App.Services.GetService<ICertHelper>();
-            Navigation = App.Services.GetService<INavigationService>();
-
-            InitializeComponent();
+            _navigationService = App.Services.GetService<INavigationService>();
+            _mainThreadService = App.Services.GetService<IMainThreadService>();
+            UpdateTimeLeft();
+            if (!App.IsTest)
+                InitializeComponent();
             BindingContext = this;
             _timer = new Timer();
             _timer.Enabled = true;
@@ -75,30 +66,32 @@ namespace passi_android.Notifications
             _timer.Stop();
             _timer.Dispose();
             base.OnDisappearing();
-            lock (locker)
-            {
-                _instance = null;
-            }
         }
 
         private void _timer_Elapsed(object sender, ElapsedEventArgs e)
         {
             if (Message != null)
             {
-                var left = Message.ExpirationTime - _dateTimeService.UtcNow;
-                var leftTotalSeconds = ((int)left.TotalSeconds);
-                TimeLeft = leftTotalSeconds.ToString();
+                var leftTotalSeconds = UpdateTimeLeft();
                 if (leftTotalSeconds <= 0)
                 {
                     _timer.Stop();
-                    MainThread.BeginInvokeOnMainThread(() =>
+                    _mainThreadService.BeginInvokeOnMainThread(() =>
                     {
-                        Application.Current.MainPage.DisplayAlert("Timeout", "Session Expired", "Ok");
+                        DisplayAlert("Timeout", "Session Expired", "Ok");
 
-                        Navigation.NavigateTop();
+                        _navigationService.NavigateTop();
                     });
                 }
             }
+        }
+
+        private int UpdateTimeLeft()
+        {
+            var left = Message.ExpirationTime - _dateTimeService.UtcNow;
+            var leftTotalSeconds = ((int)left.TotalSeconds);
+            TimeLeft = leftTotalSeconds.ToString();
+            return leftTotalSeconds;
         }
 
         protected override void OnAppearing()
@@ -265,7 +258,7 @@ namespace passi_android.Notifications
             }
         }
 
-        private void ImageButton1_OnClicked(object sender, EventArgs e)
+        public void ImageButton1_OnClicked(object sender, EventArgs e)
         {
             if (Color1 == GetColor(Message.ConfirmationColor))
             {
@@ -283,15 +276,15 @@ namespace passi_android.Notifications
         {
             if (Account.pinLength == 0)
             {
-                Navigation.PushModalSinglePage(new LoadingPage(() =>
+                _navigationService.PushModalSinglePage(new LoadingView(() =>
                     {
                         _certHelper.Sign(Message.AccountGuid, null, Message.RandomString).ContinueWith(signedGuid =>
                         {
                             if (signedGuid.IsFaulted)
                             {
-                                MainThread.BeginInvokeOnMainThread(() =>
+                                _mainThreadService.BeginInvokeOnMainThread(() =>
                                 {
-                                    Navigation.PopModal().ContinueWith((task =>
+                                    _navigationService.PopModal().ContinueWith((task =>
                                     {
                                         ResponseError = "Certificate Error:" + signedGuid.Exception.Message;
                                     }));
@@ -312,16 +305,17 @@ namespace passi_android.Notifications
                             {
                                 if (response.Result.IsSuccessful)
                                 {
-                                    MainThread.BeginInvokeOnMainThread(() =>
+                                    _mainThreadService.BeginInvokeOnMainThread(() =>
                                     {
+                                        _navigationService.NavigateTop();
                                         App.CloseApp.Invoke();
                                     });
                                 }
                                 else if (!response.Result.IsSuccessful && response.Result.StatusCode == HttpStatusCode.BadRequest)
                                 {
-                                    MainThread.BeginInvokeOnMainThread(() =>
+                                    _mainThreadService.BeginInvokeOnMainThread(() =>
                                     {
-                                        Navigation.PopModal().ContinueWith((task =>
+                                        _navigationService.PopModal().ContinueWith((task =>
                                         {
                                             ResponseError = JsonConvert
                                                 .DeserializeObject<ApiResponseDto<string>>(response.Result.Content).Message;
@@ -330,9 +324,9 @@ namespace passi_android.Notifications
                                 }
                                 else
                                 {
-                                    MainThread.BeginInvokeOnMainThread(() =>
+                                    _mainThreadService.BeginInvokeOnMainThread(() =>
                                     {
-                                        Navigation.PopModal().ContinueWith((s) =>
+                                        _navigationService.PopModal().ContinueWith((s) =>
                                         {
                                             ResponseError = "Network error. Try again";
                                         });
@@ -344,11 +338,11 @@ namespace passi_android.Notifications
             }
             else
             {
-                Navigation.PushModalSinglePage(new ConfirmByPinView() { Message = Message });
+                _navigationService.PushModalSinglePage(new ConfirmByPinView() { Message = Message });
             }
         }
 
-        private void ImageButton2_OnClicked(object sender, EventArgs e)
+        public void ImageButton2_OnClicked(object sender, EventArgs e)
         {
             if (Color2 == GetColor(Message.ConfirmationColor))
                 Process();
@@ -360,7 +354,7 @@ namespace passi_android.Notifications
             }
         }
 
-        private void ImageButton3_OnClicked(object sender, EventArgs e)
+        public void ImageButton3_OnClicked(object sender, EventArgs e)
         {
             if (Color3 == GetColor(Message.ConfirmationColor))
                 Process();
@@ -372,13 +366,13 @@ namespace passi_android.Notifications
             }
         }
 
-        private void Cancel_OnClicked(object sender, EventArgs e)
+        public void Cancel_OnClicked(object sender, EventArgs e)
         {
             var accountDb = _secureRepository.GetAccount(Message.AccountGuid);
             if (accountDb != null)
                 accountDb.Provider = _secureRepository.GetProvider(accountDb.ProviderGuid);
             _restService.ExecuteAsync(accountDb.Provider, accountDb.Provider.CancelCheck + "?SessionId=" + Message.SessionId);
-            Navigation.NavigateTop();
+            _navigationService.NavigateTop();
         }
     }
 }

@@ -11,7 +11,7 @@ namespace passi_android
         {
             InitializeComponent();
 
-            MainPage = new NavigationPage(new MainPage());
+            MainPage = new NavigationPage(new MainView());
             FirstPage = MainPage;
             FingerprintManager = new FingerPrintWrapper();
         }

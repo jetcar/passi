@@ -30,11 +30,20 @@
     <Compile Update="AccountView.xaml.cs">
       <DependentUpon>AccountView.xaml</DependentUpon>
     </Compile>
+    <Compile Update="AddAccountView.xaml.cs">
+      <DependentUpon>AddAccountView.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Admin\AdminView.xaml.cs">
+      <DependentUpon>AdminView.xaml</DependentUpon>
+    </Compile>
     <Compile Update="FingerPrint\FingerPrintView.xaml.cs">
       <DependentUpon>FingerPrintView.xaml</DependentUpon>
     </Compile>
     <Compile Update="FingerPrint\FingerPrintConfirmByPinView.xaml.cs">
       <DependentUpon>FingerPrintConfirmByPinView.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="MainView.xaml.cs">
+      <DependentUpon>MainView.xaml</DependentUpon>
     </Compile>
     <Compile Update="Menu\AddProviderView.xaml.cs">
       <DependentUpon>AddProviderView.xaml</DependentUpon>
@@ -42,14 +51,23 @@
     <Compile Update="Menu\EditProviderView.xaml.cs">
       <DependentUpon>EditProviderView.xaml</DependentUpon>
     </Compile>
-    <Compile Update="UpdateCertificate.xaml.cs">
-      <DependentUpon>UpdateCertificate.xaml</DependentUpon>
+    <Compile Update="Menu\MenuView.xaml.cs">
+      <DependentUpon>MenuView.xaml</DependentUpon>
     </Compile>
-    <Compile Update="Registration\FinishConfirmation.xaml.cs">
-      <DependentUpon>FinishConfirmation.xaml</DependentUpon>
+    <Compile Update="TermsAgreementsView.xaml.cs">
+      <DependentUpon>TermsAgreementsView.xaml</DependentUpon>
     </Compile>
-    <Compile Update="Registration\RegistrationConfirmation.xaml.cs">
-      <DependentUpon>RegistrationConfirmation.xaml</DependentUpon>
+    <Compile Update="Tools\LoadingView.xaml.cs">
+      <DependentUpon>LoadingView.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="UpdateCertificateView.xaml.cs">
+      <DependentUpon>UpdateCertificateView.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Registration\FinishConfirmationView.xaml.cs">
+      <DependentUpon>FinishConfirmationView.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Registration\RegistrationConfirmationView.xaml.cs">
+      <DependentUpon>RegistrationConfirmationView.xaml</DependentUpon>
     </Compile>
     <Compile Update="Notifications\NotificationVerifyRequestView.xaml.cs">
       <DependentUpon>NotificationVerifyRequestView.xaml</DependentUpon>
@@ -60,7 +78,7 @@
     <EmbeddedResource Update="Admin\AdminButton.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
-    <EmbeddedResource Update="Admin\AdminPage.xaml">
+    <EmbeddedResource Update="Admin\AdminView.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="AccountView.xaml">
@@ -72,25 +90,25 @@
     <EmbeddedResource Update="FingerPrint\Page1.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
-    <EmbeddedResource Update="Menu\Menu.xaml">
+    <EmbeddedResource Update="Menu\MenuView.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
-    <EmbeddedResource Update="TermsAgreements.xaml">
+    <EmbeddedResource Update="TermsAgreementsView.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
-    <EmbeddedResource Update="Tools\LoadingPage.xaml">
+    <EmbeddedResource Update="Tools\LoadingView.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="Notifications\ConfirmByPinView.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
-    <EmbeddedResource Update="Registration\FinishConfirmation.xaml">
+    <EmbeddedResource Update="Registration\FinishConfirmationView.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="NumbersPad.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
-    <EmbeddedResource Update="Registration\RegistrationConfirmation.xaml">
+    <EmbeddedResource Update="Registration\RegistrationConfirmationView.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="Notifications\NotificationVerifyRequestView.xaml">

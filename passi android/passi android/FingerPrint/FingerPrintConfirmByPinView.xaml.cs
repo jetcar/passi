@@ -2,7 +2,8 @@
 using System.Linq;
 using passi_android.Tools;
 using passi_android.utils;
-using passi_android.utils.Certificate;
+using passi_android.utils.Services;
+using passi_android.utils.Services.Certificate;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
@@ -17,14 +18,13 @@ namespace passi_android.FingerPrint
         private string _pin1Masked;
         private int _pinLength;
         private ValidationError _pin1Error = new ValidationError();
-        ICertHelper _certHelper;
-        INavigationService Navigation;
+        INavigationService _navigationService;
         public FingerPrintConfirmByPinView(AccountDb accountDb)
         {
-            _certHelper = App.Services.GetService<ICertHelper>();
             _accountDb = accountDb;
-            Navigation = App.Services.GetService<INavigationService>();
-            InitializeComponent();
+            _navigationService = App.Services.GetService<INavigationService>();
+            if (!App.IsTest)
+                InitializeComponent();
             BindingContext = this;
 
             _pinLength = 4;
@@ -87,7 +87,7 @@ namespace passi_android.FingerPrint
             Pin1.AppendChar(value);
             if (Pin1.Length == _pinLength)
             {
-                SignRequestAndSendResponce(_accountDb, Pin1,  (error) =>
+                SignRequestAndSendResponce(_accountDb, Pin1, (error) =>
                 {
                     if (error != null)
                     {
@@ -99,16 +99,15 @@ namespace passi_android.FingerPrint
             }
         }
 
-        public static void SignRequestAndSendResponce(AccountDb _accountDb, MySecureString Pin1,  Action<string> callback)
+        public static void SignRequestAndSendResponce(AccountDb _accountDb, MySecureString Pin1, Action<string> callback)
         {
-            var _secureRepository = App.Services.GetService<ISecureRepository>();
-            INavigationService Navigation;
-            Navigation = App.Services.GetService<INavigationService>();
+            var secureRepository = App.Services.GetService<ISecureRepository>();
+            var navigationService = App.Services.GetService<INavigationService>();
+            var mainThread = App.Services.GetService<IMainThreadService>();
 
-            Navigation.PushModalSinglePage(new LoadingPage(() =>
+            navigationService.PushModalSinglePage(new LoadingView(() =>
             {
-                
-                _secureRepository.AddfingerPrintKey(_accountDb, Pin1).ContinueWith((result) =>
+                secureRepository.AddfingerPrintKey(_accountDb, Pin1).ContinueWith((result) =>
                 {
                     if (result.IsFaulted)
                     {
@@ -116,10 +115,10 @@ namespace passi_android.FingerPrint
                         return;
                     }
 
-                    MainThread.BeginInvokeOnMainThread(() =>
+                    mainThread.BeginInvokeOnMainThread(() =>
                     {
-                        Application.Current.MainPage.DisplayAlert("Fingerprint", "Fingerprint key added", "Ok");
-                        Navigation.NavigateTop();
+                        App.FirstPage.DisplayAlert("Fingerprint", "Fingerprint key added", "Ok");
+                        navigationService.NavigateTop();
 
                     });
                 });
@@ -132,7 +131,7 @@ namespace passi_android.FingerPrint
             var element = sender as VisualElement;
             element.IsEnabled = false;
 
-            Navigation.NavigateTop();
+            _navigationService.NavigateTop();
             element.IsEnabled = true;
         }
     }

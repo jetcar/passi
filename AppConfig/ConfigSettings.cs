@@ -5,7 +5,7 @@
         public static string WebApiUrlLocal = "http://192.168.0.208:5004/passiapi";
         public static string WebApiUrl = "https://passi.cloud/passiapi";
 
-        public static string SignupPath = "/api/SignUp/signup";
+        public static string Signup = "/api/SignUp/signup";
         public static string SignupConfirmation = "/api/SignUp/confirm";
         public static string SignupCheck = "/api/SignUp/check";
         public static string TokenUpdate = "/api/Token/Update";

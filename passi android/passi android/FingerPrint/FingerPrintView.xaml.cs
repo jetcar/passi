@@ -1,5 +1,6 @@
 ﻿using System;
 using passi_android.utils;
+using passi_android.utils.Services;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
@@ -11,13 +12,15 @@ namespace passi_android.FingerPrint
     {
         private readonly AccountDb _accountDb;
         private string _message = "Reading FingerPrint";
-        INavigationService Navigation;
-
+        INavigationService _navigationService;
+        private IMainThreadService _mainThreadService;
         public FingerPrintView(AccountDb accountDb)
         {
-            Navigation = App.Services.GetService<INavigationService>();
+            _navigationService = App.Services.GetService<INavigationService>();
+            _mainThreadService = App.Services.GetService<IMainThreadService>();
             _accountDb = accountDb;
-            InitializeComponent();
+            if (!App.IsTest)
+                InitializeComponent();
             BindingContext = this;
         }
 
@@ -59,14 +62,14 @@ namespace passi_android.FingerPrint
                     if (result.ErrorMessage == null)
                     {
                         if (_accountDb.pinLength > 0)
-                            MainThread.BeginInvokeOnMainThread(() =>
+                            _mainThreadService.BeginInvokeOnMainThread(() =>
                             {
-                                Navigation.PushModalSinglePage(new FingerPrintConfirmByPinView(_accountDb));
+                                _navigationService.PushModalSinglePage(new FingerPrintConfirmByPinView(_accountDb));
                             });
                         else
-                            MainThread.BeginInvokeOnMainThread(() =>
+                            _mainThreadService.BeginInvokeOnMainThread(() =>
                             {
-                                FingerPrintConfirmByPinView.SignRequestAndSendResponce(_accountDb, null, 
+                                FingerPrintConfirmByPinView.SignRequestAndSendResponce(_accountDb, null,
                                     (error) =>
                                     {
                                         Message = error;
@@ -90,7 +93,7 @@ namespace passi_android.FingerPrint
             element.IsEnabled = false;
 
             App.CancelFingerprintReading();
-            Navigation.PopModal();
+            _navigationService.PopModal();
             element.IsEnabled = true;
         }
     }

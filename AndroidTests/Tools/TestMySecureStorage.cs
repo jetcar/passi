@@ -13,7 +13,7 @@ internal class TestMySecureStorage : IMySecureStorage
     {
         if (!_dict.ContainsKey(keyName))
             _dict[keyName] = "";
-        return Task.FromResult(JsonConvert.DeserializeObject<T>(_dict[keyName]) ?? Activator.CreateInstance<T>());
+        return Task.FromResult(JsonConvert.DeserializeObject<T>(_dict[keyName]) ?? default);
     }
 
     public Task<string> GetAsync(string keyName)

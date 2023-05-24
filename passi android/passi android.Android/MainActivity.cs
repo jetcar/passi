@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Android.App;
+using Android.Content;
 using Android.Content.PM;
 using Android.Gms.Common;
 using Android.Runtime;
@@ -41,6 +42,7 @@ namespace passi_android.Droid
             services.AddSingleton<IRestService, RestService>();
             services.AddSingleton<INavigationService, NavigationService>();
             services.AddSingleton<IMainThreadService, MainThreadService>();
+            services.AddSingleton<IBiometricHelper, BiometricHelper>();
 
             return services.BuildServiceProvider();
         }
@@ -111,12 +113,13 @@ namespace passi_android.Droid
             };
         }
 
-        //protected override void OnNewIntent(Intent intent)
-        //{
-        //    PollNotifications();
+        protected override void OnNewIntent(Intent intent)
+        {
+            var _syncService = App.Services.GetService<ISyncService>();
 
-        //    base.OnNewIntent(intent);
-        //}
+            _syncService.PollNotifications();
+            base.OnNewIntent(intent);
+        }
 
         protected override void OnPostResume()
         {
@@ -129,23 +132,8 @@ namespace passi_android.Droid
 
         protected void FingerPrintAuthentication()
         {
-            const int flags = 0; /* always zero (0) */
-
-            // CryptoObjectHelper is described in the previous section.
-            CryptoObjectHelper cryptoHelper = new CryptoObjectHelper();
-
-            // cancellationSignal can be used to manually stop the fingerprint scanner.
-            var cancellationSignal = new Android.Support.V4.OS.CancellationSignal();
-            App.CancelfingerPrint = () =>
-            {
-                cancellationSignal.Cancel();
-            };
-            FingerprintManagerCompat fingerprintManager = FingerprintManagerCompat.From(this);
-
-            // AuthenticationCallback is a base class that will be covered later on in this guide.
-            FingerprintManagerCompat.AuthenticationCallback authenticationCallback = new MyAuthCallbackSample(this);
-            // Start the fingerprint scanner.
-            fingerprintManager.Authenticate(cryptoHelper.BuildCryptoObject(), flags, cancellationSignal, authenticationCallback, null);
+            var biometricHelper = App.Services.GetService<IBiometricHelper>();
+            biometricHelper.RegisterOrAuthenticate();
         }
 
 

@@ -15,15 +15,6 @@ public class FingerPrintClass
         TestBase.EnableFingerPrintWithGoodResult();
         accountView.AddBiometric_Button_OnClicked(new Button(), null);
 
-        while (!(TestBase.CurrentPage is FingerPrintView))
-        {
-            Thread.Sleep(1);
-        }
-
-        Assert.IsTrue(TestBase.CurrentPage is FingerPrintView);
-
-
-        App.FingerPrintReadingResult.Invoke(new FingerPrintResult());
 
         while (!(TestBase.CurrentPage is FingerPrintConfirmByPinView))
         {

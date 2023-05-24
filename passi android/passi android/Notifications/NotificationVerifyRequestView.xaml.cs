@@ -18,7 +18,7 @@ using Color = WebApiDto.Auth.Color;
 namespace passi_android.Notifications
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class NotificationVerifyRequestView : ContentPage, IConfirmationView
+    public partial class NotificationVerifyRequestView : ContentPage
     {
         private List<Color> possibleCodes = null;
         private Xamarin.Forms.Color _color1;

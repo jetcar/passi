@@ -115,9 +115,8 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="FingerPrint\CryptoObjectHelper.cs" />
-    <Compile Include="FingerPrint\FingerprintManagerApiActivity.cs" />
-    <Compile Include="FingerPrint\FingerprintManagerApiDialogFragment.cs" />
+    <Compile Include="FingerPrint\BiometricHelper.cs" />
+    <Compile Include="FingerPrint\DialogEvent.cs" />
     <Compile Include="MainActivity.cs" />
     <Compile Include="FingerPrint\MyAuthCallbackSample.cs" />
     <Compile Include="Notifications\MyFirebaseIIDService.cs" />

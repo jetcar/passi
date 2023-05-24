@@ -36,7 +36,7 @@ namespace AndroidTests.FunctionalTests
             }
             Assert.AreEqual(mainPage.Accounts.Count, 1);
             var notificationPage =
-                NofiticationViewClass.OpenNotificationPage(mainPage.Accounts[0].Guid, Color.blue, 10);
+                NofiticationViewClass.OpenNotificationPage(mainPage.Accounts[0], Color.blue, 10);
             Assert.AreEqual(notificationPage.TimeLeft, "9");
 
             var confirmByPinView = NofiticationViewClass.ChooseColorWithPin(notificationPage, Xamarin.Forms.Color.Blue);
@@ -70,7 +70,7 @@ namespace AndroidTests.FunctionalTests
 
 
             var notificationPage =
-                NofiticationViewClass.OpenNotificationPage(mainPage.Accounts[0].Guid, Color.blue, 10);
+                NofiticationViewClass.OpenNotificationPage(mainPage.Accounts[0], Color.blue, 10);
             Assert.AreEqual(notificationPage.TimeLeft, "9");
 
             var confirmByPinView = NofiticationViewClass.ChooseColorWithPin(notificationPage, Xamarin.Forms.Color.Blue);
@@ -95,7 +95,7 @@ namespace AndroidTests.FunctionalTests
             }
             Assert.AreEqual(mainPage.Accounts.Count, 1);
             var notificationPage =
-                NofiticationViewClass.OpenNotificationPage(mainPage.Accounts[0].Guid, Color.blue, 10);
+                NofiticationViewClass.OpenNotificationPage(mainPage.Accounts[0], Color.blue, 10);
             Assert.AreEqual(notificationPage.TimeLeft, "9");
 
             var confirmByPinView = NofiticationViewClass.ChooseColorWithPin(notificationPage, Xamarin.Forms.Color.Blue);
@@ -125,7 +125,7 @@ namespace AndroidTests.FunctionalTests
             }
             Assert.AreEqual(mainPage.Accounts.Count, 1);
             var notificationPage =
-                NofiticationViewClass.OpenNotificationPage(mainPage.Accounts[0].Guid, Color.blue, 10);
+                NofiticationViewClass.OpenNotificationPage(mainPage.Accounts[0], Color.blue, 10);
             Assert.AreEqual(notificationPage.TimeLeft, "9");
 
             notificationPage.Cancel_OnClicked(new Button(),null);
@@ -154,7 +154,7 @@ namespace AndroidTests.FunctionalTests
             }
             Assert.AreEqual(mainPage.Accounts.Count, 1);
             var notificationPage =
-                NofiticationViewClass.OpenNotificationPage(mainPage.Accounts[0].Guid, Color.blue, 1);
+                NofiticationViewClass.OpenNotificationPage(mainPage.Accounts[0], Color.blue, 1);
             Assert.AreEqual(notificationPage.TimeLeft, "0");
 
             var confirmByPinView = NofiticationViewClass.ChooseColorWithPin(notificationPage, Xamarin.Forms.Color.Blue);
@@ -186,7 +186,7 @@ namespace AndroidTests.FunctionalTests
             Assert.AreEqual(mainPage.Accounts.Count, 1);
 
             var notificationPage =
-                NofiticationViewClass.OpenNotificationPage(mainPage.Accounts[0].Guid, Color.blue, 10);
+                NofiticationViewClass.OpenNotificationPage(mainPage.Accounts[0], Color.blue, 10);
             Assert.AreEqual(notificationPage.TimeLeft, "9");
 
             var mainPage2 = NofiticationViewClass.ChooseColorWithoutPin(notificationPage, Xamarin.Forms.Color.Blue);
@@ -194,6 +194,7 @@ namespace AndroidTests.FunctionalTests
             Assert.IsNotNull(mainPage2);
 
         }
+        
 
         [Test]
         public void NotificationTimeoutTest()
@@ -213,7 +214,7 @@ namespace AndroidTests.FunctionalTests
             Assert.AreEqual(mainPage.Accounts.Count, 1);
 
             var notificationPage =
-                NofiticationViewClass.OpenNotificationPage(mainPage.Accounts[0].Guid, Color.blue, 1);
+                NofiticationViewClass.OpenNotificationPage(mainPage.Accounts[0], Color.blue, 1);
             Assert.AreEqual(notificationPage.TimeLeft, "0");
 
             while (!(CurrentPage is MainView))

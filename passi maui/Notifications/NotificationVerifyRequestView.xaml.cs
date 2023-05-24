@@ -13,7 +13,7 @@ using Timer = System.Timers.Timer;
 namespace passi_maui.Notifications
 {
     [QueryProperty("Message", "Message")]
-    public partial class NotificationVerifyRequestView : ContentPage, IConfirmationView
+    public partial class NotificationVerifyRequestView : ContentPage
     {
         private List<Color> possibleCodes = null;
         private Microsoft.Maui.Graphics.Color  _color1;

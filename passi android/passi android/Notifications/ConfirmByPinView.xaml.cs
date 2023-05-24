@@ -18,7 +18,7 @@ using CertHelper = passi_android.utils.Services.Certificate.CertHelper;
 namespace passi_android.Notifications
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class ConfirmByPinView : ContentPage, IConfirmationView
+    public partial class ConfirmByPinView : ContentPage
     {
         private string _requesterName;
         private MySecureString _pin1 = new MySecureString("");
@@ -80,6 +80,7 @@ namespace passi_android.Notifications
 
         protected override void OnDisappearing()
         {
+            App.FingerPrintReadingResult = null;
             _timer.Elapsed -= _timer_Elapsed;
 
             _timer.Stop();
@@ -107,6 +108,7 @@ namespace passi_android.Notifications
             if (_accountDb.HaveFingerprint)
             {
                 App.StartFingerPrintReading();
+
                 App.FingerPrintReadingResult = (fingerPrintResult) =>
                 {
                     if (fingerPrintResult.ErrorMessage == null)
@@ -172,6 +174,7 @@ namespace passi_android.Notifications
                         App.StartFingerPrintReading();
                     }
                 };
+
             }
         }
 

@@ -1,12 +1,18 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using AndroidTests.Tools;
 using AppConfig;
+using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
 using passi_android;
 using passi_android.Notifications;
 using passi_android.Tools;
+using passi_android.utils.Services;
+using passi_android.ViewModels;
+using RestSharp;
 using WebApiDto;
+using WebApiDto.Auth;
 using Xamarin.Forms;
 using Color = WebApiDto.Auth.Color;
 
@@ -14,11 +20,31 @@ namespace AndroidTests.TestClasses;
 
 public class NofiticationViewClass
 {
-    public static NotificationVerifyRequestView OpenNotificationPage(Guid accountGuid, Color color, int timeoutSeconds)
+    public static NotificationVerifyRequestView OpenNotificationPage(AccountViewModel accountViewModel, Color color, int timeoutSeconds)
     {
-        TestBase.Navigation.PushModalSinglePage(new NotificationVerifyRequestView(new NotificationDto() { AccountGuid = accountGuid, ConfirmationColor = color, ExpirationTime = DateTime.UtcNow.AddSeconds(timeoutSeconds), RandomString = TestBase.GetRandomString(20), ReturnHost = "https://localhost", Sender = "localhost", SessionId = Guid.NewGuid() }));
+        TestRestService.Result[ConfigSettings.SyncAccounts]= TestBase.SuccesfullResponce<List<AccountMinDto>>(new List<AccountMinDto>()
+        {
+            new AccountMinDto()
+            {
+                UserGuid = accountViewModel.Guid,
+                Username = accountViewModel.Email
+            }
+        });
+
+        TestRestService.Result[ConfigSettings.CheckForStartedSessions]= TestBase.SuccesfullResponce<NotificationDto>(new NotificationDto()
+        {
+            AccountGuid = accountViewModel.Guid,
+            ConfirmationColor = color, ExpirationTime = DateTime.UtcNow.AddSeconds(timeoutSeconds),
+            RandomString = TestBase.GetRandomString(20), ReturnHost = "https://localhost", Sender = "localhost", SessionId = Guid.NewGuid(),
+            
+        });
+        App.Services.GetService<ISyncService>().PollNotifications();
+        while (!(TestBase.CurrentPage is NotificationVerifyRequestView))
+        {
+            Thread.Sleep(1);
+        }
         var page = TestBase.CurrentPage as NotificationVerifyRequestView;
-        Assert.AreEqual(page.Account.Guid, accountGuid);
+        Assert.AreEqual(page.Account.Guid, accountViewModel.Guid);
         Assert.AreEqual(page.ReturnHost, "https://localhost");
         Assert.AreEqual(page.RequesterName, "localhost");
         return page;

@@ -59,7 +59,11 @@ public class TestBase
         App.FingerprintManager.HasEnrolledFingerprints = () => true;
         App.FingerprintManager.IsHardwareDetected = () => true;
         App.IsKeyguardSecure = () => true;
-        App.StartFingerPrintReading = () => new FingerPrintResult();
+        App.StartFingerPrintReading = () =>
+        {
+            if (App.FingerPrintReadingResult != null) 
+                App.FingerPrintReadingResult.Invoke(new FingerPrintResult());
+        };
     }
 
 

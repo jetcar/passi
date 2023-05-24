@@ -16,10 +16,11 @@ namespace passi_android.utils.Services
     {
         private object locker = new object();
         private IMainThreadService _mainThreadService;
-
-        public SyncService(IMainThreadService mainThreadService)
+        private INavigationService _navigationService;
+        public SyncService(IMainThreadService mainThreadService, INavigationService navigationService)
         {
             _mainThreadService = mainThreadService;
+            _navigationService = navigationService;
         }
 
         public void PollNotifications()
@@ -84,7 +85,7 @@ namespace passi_android.utils.Services
                                 {
                                     _mainThreadService.BeginInvokeOnMainThread(() =>
                                     {
-                                        App.FirstPage.Navigation.PushModalSinglePage(new NotificationVerifyRequestView(msg));
+                                        _navigationService.PushModalSinglePage(new NotificationVerifyRequestView(msg));
                                     });
                                 }
                             }

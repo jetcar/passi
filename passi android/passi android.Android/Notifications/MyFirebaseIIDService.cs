@@ -1,5 +1,6 @@
 ﻿using System.Threading;
 using Android.App;
+using Android.Gms.Tasks;
 using Android.Util;
 using Firebase.Messaging;
 using Microsoft.Extensions.DependencyInjection;
@@ -30,21 +31,27 @@ namespace passi_android.Droid.Notifications
             var deviceTokenUpdateDto = new DeviceTokenUpdateDto() { DeviceId = secureRepository.GetDeviceId(), Token = token, Platform = Plugin.DeviceInfo.CrossDeviceInfo.Current.Platform.ToString() };
             foreach (var provider in secureRepository.LoadProviders())
             {
-                var result = restService.ExecutePostAsync(provider, provider.TokenUpdate, deviceTokenUpdateDto);
-                if (!result.Result.IsSuccessful)
+                System.Threading.Tasks.Task.Run(() =>
                 {
-                    do
+                    var result = restService.ExecutePostAsync(provider, provider.TokenUpdate, deviceTokenUpdateDto)
+                        .Result;
+                    if (!result.IsSuccessful)
                     {
-                        Thread.Sleep(10000);
-                        result = restService.ExecutePostAsync(provider, provider.TokenUpdate, deviceTokenUpdateDto);
-                    } while (!result.Result.IsSuccessful);
+                        do
+                        {
+                            Thread.Sleep(10000);
+                            result = restService.ExecutePostAsync(provider, provider.TokenUpdate, deviceTokenUpdateDto)
+                                .Result;
+                        } while (!result.IsSuccessful);
 
-                    mySecureStorage.SetAsync(StorageKeys.NotificationToken, token);
-                }
-                else
-                {
-                    mySecureStorage.SetAsync(StorageKeys.NotificationToken, token);
-                }
+                        mySecureStorage.SetAsync(StorageKeys.NotificationToken, token);
+                    }
+                    else
+                    {
+                        mySecureStorage.SetAsync(StorageKeys.NotificationToken, token);
+                    }
+                });
+
             }
         }
     }

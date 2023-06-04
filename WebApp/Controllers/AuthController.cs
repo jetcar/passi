@@ -4,26 +4,33 @@ using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Http;
+using Google.Cloud.Diagnostics.Common;
 
 namespace WebApp.Controllers
 {
     public class AuthController : Controller
     {
-        public AuthController()
+        private readonly IManagedTracer _tracer;
+        public AuthController(IManagedTracer tracer)
         {
+            _tracer = tracer;
         }
 
         public async Task Login(string returnUrl = "/")
         {
-            foreach (var key in Request.Cookies.Keys)
+            using (_tracer.StartSpan("login"))
             {
-                Response.Cookies.Delete(key, new CookieOptions() { Secure = true });
-            }
+                foreach (var key in Request.Cookies.Keys)
+                {
+                    Response.Cookies.Delete(key, new CookieOptions() { Secure = true });
+                }
 
-            await HttpContext.ChallengeAsync(OpenIdConnectDefaults.AuthenticationScheme, new AuthenticationProperties
-            {
-                RedirectUri = returnUrl,
-            });
+                await HttpContext.ChallengeAsync(OpenIdConnectDefaults.AuthenticationScheme,
+                    new AuthenticationProperties
+                    {
+                        RedirectUri = returnUrl,
+                    });
+            }
         }
 
         [Authorize]

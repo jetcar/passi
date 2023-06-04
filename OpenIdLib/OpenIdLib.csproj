@@ -6,10 +6,10 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
-	  <PackageReference Include="IdentityModel" Version="6.0.0" />
-	  <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.2" />
-	  <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="7.0.2" />
-	  <PackageReference Include="RestSharp" Version="108.0.3" />
+	  <PackageReference Include="IdentityModelCore" Version="1.0.1" />
+	  <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.5" />
+	  <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="7.0.5" />
+	  <PackageReference Include="RestSharp" Version="110.2.0" />
 
   </ItemGroup>
   <ItemGroup>

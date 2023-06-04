@@ -18,6 +18,8 @@ using Models;
 using AutoMapper;
 using passi_webapi.Dto;
 using NodaTime;
+using Google.Cloud.Diagnostics.AspNetCore3;
+using Google.Cloud.Diagnostics.Common;
 
 namespace passi_webapi
 {
@@ -51,7 +53,13 @@ namespace passi_webapi
             var secret = Environment.GetEnvironmentVariable("PassiSecret") ?? Configuration.GetValue<string>("AppSetting:PassiSecret");
 
 
-            services.AddControllers();
+            services.AddGoogleTraceForAspNetCore(new AspNetCoreTraceOptions
+            {
+                ServiceOptions = new TraceServiceOptions()
+                {
+                    ProjectId = "passi-165ca"
+                }
+            }); services.AddControllers();
             services.AddSingleton<AppSetting>();
             services.AddSingleton(mapper);
             var myRestClient = new MyRestClient(passiUrl);

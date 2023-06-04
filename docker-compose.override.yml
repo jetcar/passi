@@ -6,7 +6,9 @@ services:
     - "5432:5432"
     env_file:
     - ./passi_config_local/dev.env
-
+    volumes:
+    - db-data:/var/lib/postgresql/data/:rwx
+  
 
   redis:
     ports:
@@ -39,10 +41,10 @@ services:
     build:
       context: .
       dockerfile: WebApp/Dockerfile
+    ports:
+    - "5002:5002"
     networks:
       - dock_net
-    env_file:
-    - ./passi_config_local/dev.env
     volumes:
     - ../creds:/home/creds
     depends_on:
@@ -55,11 +57,11 @@ services:
     build:
       context: .
       dockerfile: IdentityServer/Dockerfile
+    ports:
+    - "5003:5003"
     networks:
       - dock_net
     container_name: identityserver   
-    env_file:
-    - ./passi_config_local/dev.env
     volumes:
     - ../creds:/home/creds
     depends_on:
@@ -75,17 +77,19 @@ services:
     build:
       context: .
       dockerfile: passiwebapi/Dockerfile
+    ports:
+    - "5004:5004"
     networks:
       - dock_net
     depends_on:
     - database   
     - redis
-    env_file:
-    - ./passi_config_local/dev.env
     volumes:
     - ../creds:/home/creds
     restart: always
 
 
 
-
+volumes:
+  db-data:
+    

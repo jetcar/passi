@@ -8,6 +8,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using ConfigurationManager;
+using Google.Cloud.Diagnostics.AspNetCore3;
+using Google.Cloud.Diagnostics.Common;
 using IdentityModel;
 using IdentityServer.DbContext;
 using IdentityServer.services;
@@ -53,6 +55,13 @@ namespace IdentityServer
             services.AddSingleton<IStartupFilter, MigrationStartupFilter<IdentityDbContext>>();
             services.AddSingleton<IRandomGenerator, RandomGenerator>();
 
+            services.AddGoogleTraceForAspNetCore(new AspNetCoreTraceOptions
+            {
+                ServiceOptions = new TraceServiceOptions()
+                {
+                    ProjectId = "passi-165ca"
+                }
+            });
             services.AddIdentityServer(options =>
                 {
                     options.UserInteraction = new UserInteractionOptions() { ConsentUrl = "/Account/Login", LoginUrl = "/Account/Login" };

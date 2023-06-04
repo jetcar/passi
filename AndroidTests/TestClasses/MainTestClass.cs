@@ -7,7 +7,7 @@ using Xamarin.Forms;
 
 namespace AndroidTests.TestClasses;
 
-public class MainClass
+public class MainTestClass
 {
     public static MainView OpenMainPage()
     {

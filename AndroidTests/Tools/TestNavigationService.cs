@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,39 +11,43 @@ namespace AndroidTests.Tools;
 internal class TestNavigationService : INavigationService
 {
     private List<Page> _pages = new List<Page>();
-    public void PushModalSinglePage(Page page)
+    public async Task PushModalSinglePage(Page page)
     {
         _pages.Add(page);
-        if(TestBase.CurrentPage != null)
+        Console.WriteLine(page.ToString());
+        if (TestBase.CurrentPage != null)
+        {
             TestBase.CurrentPage.SendDisappearing();
+        }
         TestBase.CurrentPage = page;
         page.SendAppearing();
     }
 
-    public void NavigateTop()
+    public async Task NavigateTop()
     {
         var page = _pages[0];
         for (int i = _pages.Count - 1; i > 0; i--)
         {
             _pages.RemoveAt(i);
         }
-        if(TestBase.CurrentPage != null)
+        if (TestBase.CurrentPage != null)
             TestBase.CurrentPage.SendDisappearing();
 
         TestBase.CurrentPage = page;
+        Console.WriteLine(page.ToString());
         page.SendAppearing();
 
     }
 
-    public Task PopModal()
+    public async Task PopModal()
     {
         _pages.RemoveAt(_pages.Count - 1);
         var page = _pages.Last();
-        if(TestBase.CurrentPage != null)
+        if (TestBase.CurrentPage != null)
             TestBase.CurrentPage.SendDisappearing();
 
         TestBase.CurrentPage = page;
+        Console.WriteLine(page.ToString());
         page.SendAppearing();
-        return Task.CompletedTask;
     }
 }

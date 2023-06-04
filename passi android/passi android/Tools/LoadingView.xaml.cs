@@ -1,10 +1,12 @@
 ﻿using passi_android.utils.Services;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
+using Timer = System.Timers.Timer;
 
 namespace passi_android.Tools
 {
@@ -51,6 +53,10 @@ namespace passi_android.Tools
 
         protected override void OnDisappearing()
         {
+            while (!_task.IsCompleted)
+            {
+                Thread.Sleep(1);
+            }
             _task.Dispose();
             _timer.Elapsed -= _timer_Elapsed;
             _timer.Stop();

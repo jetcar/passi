@@ -172,6 +172,7 @@ namespace passi_android.utils.Services
                     locked = false;
                     return false;
                 }
+                _mySecureStorage.SetAsync(msgSessionId.ToString(),"used").GetAwaiter().GetResult();
                 return true;
             }
         }
@@ -179,7 +180,6 @@ namespace passi_android.utils.Services
         {
             lock (locker)
             {
-                _mySecureStorage.SetAsync(msgSessionId.ToString(), "").GetAwaiter().GetResult();
                 locked = false;
             }
         }
@@ -192,6 +192,23 @@ namespace passi_android.utils.Services
                 deviceId = Guid.NewGuid().ToString();
                 _mySecureStorage.SetAsync("deviceId", deviceId).GetAwaiter().GetResult();
             }
+            return deviceId;
+        }
+        public string GetReplyId()
+        {
+            var deviceId = _mySecureStorage.GetAsync("replyId").Result;
+            if (string.IsNullOrEmpty(deviceId))
+            {
+                deviceId = Guid.NewGuid().ToString();
+                _mySecureStorage.SetAsync("replyId", deviceId).GetAwaiter().GetResult();
+            }
+            return deviceId;
+        }
+        public string SetReplyId()
+        {
+            var deviceId = Guid.NewGuid().ToString();
+            _mySecureStorage.SetAsync("replyId", deviceId).GetAwaiter().GetResult();
+
             return deviceId;
         }
 
@@ -341,6 +358,8 @@ namespace passi_android.utils.Services
         void CopyAll<T, R>(T source, R destination);
         void AddProvider(ProviderDb provider);
         ProviderDb GetProvider(Guid? guid);
+        string GetReplyId();
+        string SetReplyId();
     }
 
 

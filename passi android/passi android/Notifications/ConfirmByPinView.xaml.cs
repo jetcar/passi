@@ -37,12 +37,14 @@ namespace passi_android.Notifications
         ICertHelper _certHelper;
         private INavigationService _navigationService;
         private IMainThreadService _mainThreadService;
+        private IFingerPrintService _fingerPrintService;
         public ConfirmByPinView()
         {
             _secureRepository = App.Services.GetService<ISecureRepository>();
             _restService = App.Services.GetService<IRestService>();
             _dateTimeService = App.Services.GetService<IDateTimeService>();
             _certHelper = App.Services.GetService<ICertHelper>();
+            _fingerPrintService = App.Services.GetService<IFingerPrintService>();
 
             _mainThreadService = App.Services.GetService<IMainThreadService>();
             _navigationService = App.Services.GetService<INavigationService>();
@@ -107,73 +109,10 @@ namespace passi_android.Notifications
             _pinLength = _accountDb.pinLength;
             if (_accountDb.HaveFingerprint)
             {
-                App.StartFingerPrintReading();
-
-                App.FingerPrintReadingResult = (fingerPrintResult) =>
+                _fingerPrintService.StartReadingConfirmRequest(Message,_accountDb, (error) =>
                 {
-                    if (fingerPrintResult.ErrorMessage == null)
-                    {
-                        _navigationService.PushModalSinglePage(new LoadingView(() =>
-                        {
-                            var privatecertificate = _secureRepository.GetCertificateWithFingerPrint(Message.AccountGuid);
-
-                            _certHelper.SignByFingerPrint(Message.RandomString, privatecertificate).ContinueWith(signedGuid =>
-                            {
-                                if (signedGuid.IsFaulted)
-                                {
-                                    _navigationService.PopModal().ContinueWith((task =>
-                                    {
-                                        Pin1Error.HasError = true;
-                                        Pin1Error.Text = "Invalid Pin";
-                                    }));
-                                    return;
-                                }
-
-                                var authorizeDto = new AuthorizeDto
-                                {
-                                    SignedHash = signedGuid.Result,
-                                    PublicCertThumbprint = _secureRepository.GetAccount(Message.AccountGuid).Thumbprint,
-                                    SessionId = Message.SessionId
-                                };
-
-                                _restService.ExecutePostAsync(_accountDb.Provider, _accountDb.Provider.Authorize, authorizeDto).ContinueWith((response) =>
-                                {
-                                    if (response.Result.IsSuccessful)
-                                    {
-                                        _mainThreadService.BeginInvokeOnMainThread(() => { _navigationService.NavigateTop(); });
-                                    }
-                                    else if (!response.Result.IsSuccessful && response.Result.StatusCode == HttpStatusCode.BadRequest)
-                                    {
-                                        _mainThreadService.BeginInvokeOnMainThread(() =>
-                                        {
-                                            _navigationService.PopModal().ContinueWith((task =>
-                                            {
-                                                ResponseError = JsonConvert
-                                                    .DeserializeObject<ApiResponseDto<string>>(response.Result.Content)
-                                                    .Message;
-                                            }));
-                                        });
-                                    }
-                                    else
-                                    {
-                                        _mainThreadService.BeginInvokeOnMainThread(() =>
-                                        {
-                                            _navigationService.PopModal().ContinueWith((s) =>
-                                            {
-                                                ResponseError = "Network error. Try again";
-                                            });
-                                        });
-                                    }
-                                });
-                            });
-                        }));
-                    }
-                    else
-                    {
-                        ResponseError = fingerPrintResult.ErrorMessage;
-                        App.StartFingerPrintReading();
-                    }
-                };
+                    ResponseError = error;
+                });
 
             }
         }
@@ -261,7 +200,6 @@ namespace passi_android.Notifications
 
         private void SignRequestAndSendResponce()
         {
-            App.CancelFingerprintReading();
             _navigationService.PushModalSinglePage(new LoadingView(() =>
             {
                 _certHelper.Sign(Message.AccountGuid, Pin1, Message.RandomString).ContinueWith(signedGuid =>

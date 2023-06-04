@@ -18,11 +18,11 @@ using Color = WebApiDto.Auth.Color;
 
 namespace AndroidTests.TestClasses;
 
-public class NofiticationViewClass
+public class NofiticationViewTestClass
 {
-    public static NotificationVerifyRequestView OpenNotificationPage(AccountViewModel accountViewModel, Color color, int timeoutSeconds)
+    public static NotificationVerifyRequestView PollOpenSessions(AccountViewModel accountViewModel, Color color, int timeoutSeconds, Guid? sessionid = null)
     {
-        TestRestService.Result[ConfigSettings.SyncAccounts]= TestBase.SuccesfullResponce<List<AccountMinDto>>(new List<AccountMinDto>()
+        TestRestService.Result[ConfigSettings.SyncAccounts] = TestBase.SuccesfullResponce<List<AccountMinDto>>(new List<AccountMinDto>()
         {
             new AccountMinDto()
             {
@@ -31,22 +31,64 @@ public class NofiticationViewClass
             }
         });
 
-        TestRestService.Result[ConfigSettings.CheckForStartedSessions]= TestBase.SuccesfullResponce<NotificationDto>(new NotificationDto()
+        TestRestService.Result[ConfigSettings.CheckForStartedSessions] = TestBase.SuccesfullResponce<NotificationDto>(new NotificationDto()
         {
             AccountGuid = accountViewModel.Guid,
-            ConfirmationColor = color, ExpirationTime = DateTime.UtcNow.AddSeconds(timeoutSeconds),
-            RandomString = TestBase.GetRandomString(20), ReturnHost = "https://localhost", Sender = "localhost", SessionId = Guid.NewGuid(),
-            
+            ConfirmationColor = color,
+            ExpirationTime = DateTime.UtcNow.AddSeconds(timeoutSeconds),
+            RandomString = TestBase.GetRandomString(20),
+            ReturnHost = "https://localhost",
+            Sender = "localhost",
+            SessionId = sessionid ?? Guid.NewGuid(),
+
         });
-        App.Services.GetService<ISyncService>().PollNotifications();
+        var syncService = App.Services.GetService<ISyncService>();
+        syncService.PollNotifications();
+        while (!(syncService.PollingTask.IsCompleted))
+            Thread.Sleep(1);
+
         while (!(TestBase.CurrentPage is NotificationVerifyRequestView))
         {
             Thread.Sleep(1);
         }
         var page = TestBase.CurrentPage as NotificationVerifyRequestView;
-        Assert.AreEqual(page.Account.Guid, accountViewModel.Guid);
+        while (page._account == null)
+            Thread.Sleep(1);
+        Assert.AreEqual(page._account.Guid, accountViewModel.Guid);
         Assert.AreEqual(page.ReturnHost, "https://localhost");
         Assert.AreEqual(page.RequesterName, "localhost");
+        return page;
+    }
+
+    public static MainView PollExistingSessionId(AccountViewModel accountViewModel, Color color, int timeoutSeconds, Guid? sessionid = null)
+    {
+        TestRestService.Result[ConfigSettings.SyncAccounts] = TestBase.SuccesfullResponce<List<AccountMinDto>>(new List<AccountMinDto>()
+        {
+            new AccountMinDto()
+            {
+                UserGuid = accountViewModel.Guid,
+                Username = accountViewModel.Email
+            }
+        });
+
+        TestRestService.Result[ConfigSettings.CheckForStartedSessions] = TestBase.SuccesfullResponce<NotificationDto>(new NotificationDto()
+        {
+            AccountGuid = accountViewModel.Guid,
+            ConfirmationColor = color,
+            ExpirationTime = DateTime.UtcNow.AddSeconds(timeoutSeconds),
+            RandomString = TestBase.GetRandomString(20),
+            ReturnHost = "https://localhost",
+            Sender = "localhost",
+            SessionId = sessionid ?? Guid.NewGuid(),
+
+        });
+        var syncService = App.Services.GetService<ISyncService>();
+        syncService.PollNotifications();
+        while (!(syncService.PollingTask.IsCompleted))
+        {
+            Thread.Sleep(1);
+        }
+        var page = TestBase.CurrentPage as MainView;
         return page;
     }
 
@@ -93,4 +135,6 @@ public class NofiticationViewClass
         return mainPage;
 
     }
+
+
 }

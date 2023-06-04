@@ -8,7 +8,7 @@ using Xamarin.Forms;
 
 namespace AndroidTests.TestClasses;
 
-public class AddAccountClass
+public class AddAccountTestClass
 {
     public static RegistrationConfirmationView ClickConfirm(AddAccountView addAccountView)
     {
@@ -16,7 +16,7 @@ public class AddAccountClass
 
         Assert.IsTrue(TestBase.CurrentPage is LoadingView);
 
-        while (TestBase.CurrentPage is LoadingView)
+        while (!(TestBase.CurrentPage is RegistrationConfirmationView))
         {
             Thread.Sleep(1);
         }

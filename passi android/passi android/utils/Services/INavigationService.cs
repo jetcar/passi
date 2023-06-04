@@ -6,8 +6,8 @@ namespace passi_android.utils.Services
 {
     public interface INavigationService
     {
-        void PushModalSinglePage(Page page);
-        void NavigateTop();
+        Task PushModalSinglePage(Page page);
+        Task NavigateTop();
         Task PopModal();
     }
 

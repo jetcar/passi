@@ -7,13 +7,13 @@ namespace passi_android.utils.Services
     public class NavigationService : INavigationService
     {
         private List<Page> _pages = new List<Page>();
-        public void PushModalSinglePage(Page page)
+        public async Task PushModalSinglePage(Page page)
         {
             _pages.Add(page);
             App.FirstPage.Navigation.PushModalSinglePage(page);
         }
 
-        public void NavigateTop()
+        public async Task NavigateTop()
         {
             for (int i = _pages.Count - 1; i > 0; i--)
             {
@@ -23,10 +23,10 @@ namespace passi_android.utils.Services
 
         }
 
-        public Task PopModal()
+        public async Task PopModal()
         {
             _pages.RemoveAt(_pages.Count - 1);
-            return App.FirstPage.Navigation.PopModal();
+            await App.FirstPage.Navigation.PopModal();
         }
     }
 }

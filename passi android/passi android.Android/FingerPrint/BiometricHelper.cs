@@ -11,6 +11,7 @@ using AppCommon;
 using Java.Lang;
 using Java.Security;
 using Java.Security.Spec;
+using passi_android.utils.Services;
 using Signature = Java.Security.Signature;
 
 namespace passi_android.Droid.FingerPrint
@@ -19,15 +20,19 @@ namespace passi_android.Droid.FingerPrint
     {
         private const string KEY_STORE_NAME = "AndroidKeyStore";
         private const string KEY_NAME = "BiometricKey";
-        private const string REPLAY_ID = "12345";// TODO: Set random value?
+        private string REPLAY_ID = "";// TODO: Set random value?
         private const string SIGNATURE_ALGORITHM = "SHA256withECDSA";
 
         private BiometricPrompt biometricPrompt;
         private string signatureMessage;
+        private ISecureRepository _secureRepository;
         private MainActivity _activity;
-        public BiometricHelper(MainActivity activity)
+        public BiometricHelper(ISecureRepository secureRepository)
         {
-            _activity = activity;
+            _secureRepository = secureRepository;
+            _activity = MainActivity.Instance;
+            REPLAY_ID = _secureRepository.GetReplyId();
+
         }
 
         public void RegisterOrAuthenticate()
@@ -40,7 +45,7 @@ namespace passi_android.Droid.FingerPrint
 
             // TODO: How do we determine whether to register or authenticate?
             var alreadyRegistered = false;
-            if (!alreadyRegistered)
+            if (string.IsNullOrEmpty(REPLAY_ID))
                 Register();
             else
                 Authenticate();
@@ -54,6 +59,7 @@ namespace passi_android.Droid.FingerPrint
                 Signature signature;
                 try
                 {
+                    REPLAY_ID = _secureRepository.SetReplyId();
                     // Before generating a key pair, we have to check enrollment of biometrics on the device but there is no such method on new biometric prompt API
                     // Note that this method will throw an exception if there is no enrolled biometric on the device
                     // This issue is reported to Android issue tracker: https://issuetracker.google.com/issues/112495828
@@ -225,11 +231,5 @@ namespace passi_android.Droid.FingerPrint
                 Help(helpCode, helpString);
             }
         }
-    }
-
-    public interface IBiometricHelper
-    {
-        void RegisterOrAuthenticate();
-        BiometricPrompt.AuthenticationCallback GetAuthenticationCallback();
     }
 }

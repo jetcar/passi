@@ -9,7 +9,7 @@ using passi_android.Tools;
 
 namespace AndroidTests.TestClasses;
 
-public class ConfirmByPinClass
+public class ConfirmByPinTestClass
 {
     public static MainView ConfirmByPin(ConfirmByPinView confirmByPinView)
     {
@@ -37,9 +37,8 @@ public class ConfirmByPinClass
 
     public static MainView ConfirmByFingerprint(ConfirmByPinView confirmByPinView)
     {
-
         TestRestService.Result[ConfigSettings.Authorize] = TestBase.SuccesfullResponce();
-        App.FingerPrintReadingResult.Invoke(new FingerPrintResult());
+        TestBase.TouchFingerPrintWithGoodResult();
         Assert.IsTrue(TestBase.CurrentPage is LoadingView);
 
         while (!(TestBase.CurrentPage is MainView))

@@ -12,7 +12,7 @@ using Timer = System.Timers.Timer;
 namespace passi_maui.Notifications
 {
     [QueryProperty("Message", "Message")]
-    public partial class ConfirmByPinView : ContentPage, IConfirmationView
+    public partial class ConfirmByPinView : ContentPage
     {
         private string _requesterName;
         private string _pin1 = "";

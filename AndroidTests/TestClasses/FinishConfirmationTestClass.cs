@@ -9,7 +9,7 @@ using Xamarin.Forms;
 
 namespace AndroidTests.TestClasses;
 
-public class FinishConfirmationClass
+public class FinishConfirmationTestClass
 {
     public static MainView FinishRegistrationWithPin(FinishConfirmationView finishConfirmationView)
     {

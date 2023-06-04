@@ -1,4 +1,5 @@
 ﻿using System;
+using passi_android.FingerPrint;
 using passi_android.utils;
 using passi_android.utils.Services;
 using Xamarin.Forms;
@@ -17,10 +18,14 @@ namespace passi_android
         private string _providerName;
 
         private INavigationService _navigationService;
+        private string _message;
+        private IMainThreadService _mainThreadService;
+
         public AccountView(AccountDb accountDb)
         {
             AccountDb = accountDb;
             _navigationService = App.Services.GetService<INavigationService>();
+            _mainThreadService = App.Services.GetService<IMainThreadService>();
             if (!App.IsTest)
                 InitializeComponent();
             BindingContext = this;
@@ -92,6 +97,16 @@ namespace passi_android
             }
         }
 
+        public string Message
+        {
+            get => _message;
+            set
+            {
+                _message = value;
+                OnPropertyChanged();
+            }
+        }
+
         private void UpdateCertificate_OnClicked(object sender, EventArgs e)
         {
             var button = sender as VisualElement;
@@ -113,8 +128,42 @@ namespace passi_android
             var button = sender as VisualElement;
             button.IsEnabled = false;
 
-            _navigationService.PushModalSinglePage(new FingerPrint.FingerPrintView(AccountDb));
+
+            App.FingerPrintReadingResult = (result) =>
+            {
+                if (result.ErrorMessage == null)
+                {
+                    if (AccountDb.pinLength > 0)
+                        _mainThreadService.BeginInvokeOnMainThread(() =>
+                        {
+                            _navigationService.PushModalSinglePage(new FingerPrintConfirmByPinView(AccountDb));
+                        });
+                    else
+                        _mainThreadService.BeginInvokeOnMainThread(() =>
+                        {
+                            FingerPrintConfirmByPinView.SignRequestAndSendResponce(AccountDb, null,
+                                (error) =>
+                                {
+                                    Message = error;
+                                });
+                        });
+                }
+                else
+                {
+                    Message = result.ErrorMessage;
+                    App.StartFingerPrintReading();
+                }
+            };
+
+            App.StartFingerPrintReading();
+            
             button.IsEnabled = true;
+        }
+
+        protected override void OnDisappearing()
+        {
+            App.FingerPrintReadingResult = null;
+            base.OnDisappearing();
         }
 
         private void Button_Back(object sender, EventArgs e)

@@ -5,7 +5,7 @@ using Xamarin.Forms;
 
 namespace AndroidTests.TestClasses;
 
-public class TermsAgreementsClass
+public class TermsAgreementsTestClass
 {
     public static AddAccountView ClickAgree(TermsAgreementsView tcView)
     {

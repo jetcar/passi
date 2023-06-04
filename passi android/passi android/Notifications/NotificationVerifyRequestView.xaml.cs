@@ -18,7 +18,7 @@ using Color = WebApiDto.Auth.Color;
 namespace passi_android.Notifications
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class NotificationVerifyRequestView : ContentPage, IConfirmationView
+    public partial class NotificationVerifyRequestView : ContentPage
     {
         private List<Color> possibleCodes = null;
         private Xamarin.Forms.Color _color1;
@@ -37,7 +37,7 @@ namespace passi_android.Notifications
         ICertHelper _certHelper;
         private INavigationService _navigationService;
         private IMainThreadService _mainThreadService;
-
+        IFingerPrintService _fingerPrintService;
 
         public NotificationVerifyRequestView(NotificationDto notificationDto)
         {
@@ -48,6 +48,7 @@ namespace passi_android.Notifications
             _certHelper = App.Services.GetService<ICertHelper>();
             _navigationService = App.Services.GetService<INavigationService>();
             _mainThreadService = App.Services.GetService<IMainThreadService>();
+            _fingerPrintService = App.Services.GetService<IFingerPrintService>();
             UpdateTimeLeft();
             if (!App.IsTest)
                 InitializeComponent();
@@ -96,7 +97,8 @@ namespace passi_android.Notifications
 
         protected override void OnAppearing()
         {
-            this.Account = _secureRepository.GetAccount(Message.AccountGuid);
+            _account = _secureRepository.GetAccount(Message.AccountGuid);
+            _account.Provider = _secureRepository.GetProvider(_account.ProviderGuid);
             RequesterName = Message.Sender;
             ReturnHost = Message.ReturnHost;
 
@@ -136,7 +138,7 @@ namespace passi_android.Notifications
             _secureRepository.ReleaseSessionKey(Message.SessionId);
         }
 
-        public AccountDb Account { get; set; }
+        public AccountDb _account;
 
         private Xamarin.Forms.Color RandomColor()
         {
@@ -274,7 +276,7 @@ namespace passi_android.Notifications
 
         private void Process()
         {
-            if (Account.pinLength == 0)
+            if (_account.pinLength == 0 && !_account.HaveFingerprint)
             {
                 _navigationService.PushModalSinglePage(new LoadingView(() =>
                     {
@@ -335,6 +337,14 @@ namespace passi_android.Notifications
                             });
                         });
                     }));
+            }
+
+            if (_account.pinLength == 0 && _account.HaveFingerprint)
+            {
+                _fingerPrintService.StartReadingConfirmRequest(Message,_account, (error) =>
+                {
+                    ResponseError = error;
+                });
             }
             else
             {

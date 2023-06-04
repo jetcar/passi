@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionName="1.35" package="com.passi.cloud.passi_android" android:installLocation="internalOnly" android:versionCode="35">
-	<uses-sdk android:minSdkVersion="21" android:targetSdkVersion="31" />
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionName="1.36" package="com.passi.cloud.passi_android" android:installLocation="internalOnly" android:versionCode="36">
+	<uses-sdk android:minSdkVersion="28" android:targetSdkVersion="31" />
 	<application android:allowBackup="false" android:label="passi_android.Android" android:theme="@style/MainTheme" android:icon="@drawable/xamagonBlue">
 		<receiver android:name="com.google.firebase.iid.FirebaseInstanceIdInternalReceiver" android:exported="false" />
 		<receiver android:name="com.google.firebase.iid.FirebaseInstanceIdReceiver" android:exported="true" android:permission="com.google.android.c2dm.permission.SEND">

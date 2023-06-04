@@ -36,9 +36,6 @@
     <Compile Update="Admin\AdminView.xaml.cs">
       <DependentUpon>AdminView.xaml</DependentUpon>
     </Compile>
-    <Compile Update="FingerPrint\FingerPrintView.xaml.cs">
-      <DependentUpon>FingerPrintView.xaml</DependentUpon>
-    </Compile>
     <Compile Update="FingerPrint\FingerPrintConfirmByPinView.xaml.cs">
       <DependentUpon>FingerPrintConfirmByPinView.xaml</DependentUpon>
     </Compile>
@@ -82,9 +79,6 @@
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="AccountView.xaml">
-      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
-    </EmbeddedResource>
-    <EmbeddedResource Update="FingerPrint\FingerPrintView.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="FingerPrint\Page1.xaml">

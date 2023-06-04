@@ -29,7 +29,7 @@ namespace passi_android.utils.Services
             {
                 if (Accounts == null)
                 {
-                    Accounts = _mySecureStorage.GetAsync<List<AccountDb>>(StorageKeys.AllAccounts).Result;
+                    Accounts = _mySecureStorage.GetAsync<List<AccountDb>>(StorageKeys.AllAccounts).Result ?? new List<AccountDb>();
                 }
 
                 Accounts.Add(account);
@@ -44,7 +44,7 @@ namespace passi_android.utils.Services
             {
                 if (Accounts == null)
                 {
-                    Accounts = _mySecureStorage.GetAsync<List<AccountDb>>(StorageKeys.AllAccounts).Result;
+                    Accounts = _mySecureStorage.GetAsync<List<AccountDb>>(StorageKeys.AllAccounts).Result ?? new List<AccountDb>();
                 }
                 var accountDb = Accounts.FirstOrDefault(x => x.Guid == accountGuid);
                 return accountDb;
@@ -57,7 +57,7 @@ namespace passi_android.utils.Services
             {
                 if (Accounts == null)
                 {
-                    Accounts = _mySecureStorage.GetAsync<List<AccountDb>>(StorageKeys.AllAccounts).Result;
+                    Accounts = _mySecureStorage.GetAsync<List<AccountDb>>(StorageKeys.AllAccounts).Result ?? new List<AccountDb>();
                 }
 
                 if (account.Guid == Guid.Empty)
@@ -79,7 +79,7 @@ namespace passi_android.utils.Services
             {
                 if (Accounts == null)
                 {
-                    Accounts = _mySecureStorage.GetAsync<List<AccountDb>>(StorageKeys.AllAccounts).Result;
+                    Accounts = _mySecureStorage.GetAsync<List<AccountDb>>(StorageKeys.AllAccounts).Result ?? new List<AccountDb>();
                 }
                 foreach (var accountDb in Accounts)
                 {
@@ -96,7 +96,7 @@ namespace passi_android.utils.Services
             {
                 if (Accounts == null)
                 {
-                    Accounts = _mySecureStorage.GetAsync<List<AccountDb>>(StorageKeys.AllAccounts).Result;
+                    Accounts = _mySecureStorage.GetAsync<List<AccountDb>>(StorageKeys.AllAccounts).Result ?? new List<AccountDb>();
                 }
 
                 var oldAccount = Accounts.FirstOrDefault(x => x.Guid == account.Guid);
@@ -167,11 +167,12 @@ namespace passi_android.utils.Services
                 locked = true;
                 lockerTime = DateTime.Now;
                 var result = _mySecureStorage.GetAsync(msgSessionId.ToString()).Result;
-                if (result != null)
+                if (!string.IsNullOrEmpty(result))
                 {
                     locked = false;
                     return false;
                 }
+                _mySecureStorage.SetAsync(msgSessionId.ToString(),"used").GetAwaiter().GetResult();
                 return true;
             }
         }
@@ -179,7 +180,6 @@ namespace passi_android.utils.Services
         {
             lock (locker)
             {
-                _mySecureStorage.SetAsync(msgSessionId.ToString(), "").GetAwaiter().GetResult();
                 locked = false;
             }
         }
@@ -187,11 +187,28 @@ namespace passi_android.utils.Services
         public string GetDeviceId()
         {
             var deviceId = _mySecureStorage.GetAsync("deviceId").Result;
-            if (deviceId == null)
+            if (string.IsNullOrEmpty(deviceId))
             {
                 deviceId = Guid.NewGuid().ToString();
                 _mySecureStorage.SetAsync("deviceId", deviceId).GetAwaiter().GetResult();
             }
+            return deviceId;
+        }
+        public string GetReplyId()
+        {
+            var deviceId = _mySecureStorage.GetAsync("replyId").Result;
+            if (string.IsNullOrEmpty(deviceId))
+            {
+                deviceId = Guid.NewGuid().ToString();
+                _mySecureStorage.SetAsync("replyId", deviceId).GetAwaiter().GetResult();
+            }
+            return deviceId;
+        }
+        public string SetReplyId()
+        {
+            var deviceId = Guid.NewGuid().ToString();
+            _mySecureStorage.SetAsync("replyId", deviceId).GetAwaiter().GetResult();
+
             return deviceId;
         }
 
@@ -201,7 +218,7 @@ namespace passi_android.utils.Services
             {
                 if (Providers == null)
                 {
-                    Providers = _mySecureStorage.GetAsync<List<ProviderDb>>(StorageKeys.ProvidersKey).Result;
+                    Providers = _mySecureStorage.GetAsync<List<ProviderDb>>(StorageKeys.ProvidersKey).Result ?? new List<ProviderDb>();
                 }
 
                 if (Providers.All(x => x.WebApiUrl != ConfigSettings.WebApiUrl))
@@ -252,7 +269,7 @@ namespace passi_android.utils.Services
         {
             if (Providers == null)
             {
-                Providers = _mySecureStorage.GetAsync<List<ProviderDb>>(StorageKeys.ProvidersKey).Result;
+                Providers = _mySecureStorage.GetAsync<List<ProviderDb>>(StorageKeys.ProvidersKey).Result ?? new List<ProviderDb>();
             }
 
             Providers.Remove(Providers.First(x => x.Guid == provider.Guid));
@@ -264,7 +281,7 @@ namespace passi_android.utils.Services
         {
             if (Providers == null)
             {
-                Providers = _mySecureStorage.GetAsync<List<ProviderDb>>(StorageKeys.ProvidersKey).Result;
+                Providers = _mySecureStorage.GetAsync<List<ProviderDb>>(StorageKeys.ProvidersKey).Result ?? new List<ProviderDb>();
             }
 
             var existingProvider = Providers.First(x => x.Guid == provider.Guid);
@@ -301,7 +318,7 @@ namespace passi_android.utils.Services
         {
             if (Providers == null)
             {
-                Providers = _mySecureStorage.GetAsync<List<ProviderDb>>(StorageKeys.ProvidersKey).Result;
+                Providers = _mySecureStorage.GetAsync<List<ProviderDb>>(StorageKeys.ProvidersKey).Result ?? new List<ProviderDb>();
             }
 
             Providers.Add(provider);
@@ -314,7 +331,7 @@ namespace passi_android.utils.Services
         {
             if (Providers == null)
             {
-                Providers = _mySecureStorage.GetAsync<List<ProviderDb>>(StorageKeys.ProvidersKey).Result;
+                Providers = _mySecureStorage.GetAsync<List<ProviderDb>>(StorageKeys.ProvidersKey).Result ?? new List<ProviderDb>();
             }
 
             return Providers.First(x => x.Guid == guid);
@@ -341,6 +358,8 @@ namespace passi_android.utils.Services
         void CopyAll<T, R>(T source, R destination);
         void AddProvider(ProviderDb provider);
         ProviderDb GetProvider(Guid? guid);
+        string GetReplyId();
+        string SetReplyId();
     }
 
 

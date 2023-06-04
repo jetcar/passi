@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Android.App;
+using Android.Content;
 using Android.Content.PM;
 using Android.Gms.Common;
 using Android.Runtime;
 using Android.OS;
-using Android.Support.V4.Hardware.Fingerprint;
 using Firebase.Messaging;
 using passi_android.Droid.FingerPrint;
 using passi_android.Droid.Notifications;
@@ -26,6 +26,7 @@ namespace passi_android.Droid
         private string msgText = "";
 
         public static App App;
+        public static MainActivity Instance;
 
         private static IServiceProvider ConfigureServices()
         {
@@ -41,6 +42,8 @@ namespace passi_android.Droid
             services.AddSingleton<IRestService, RestService>();
             services.AddSingleton<INavigationService, NavigationService>();
             services.AddSingleton<IMainThreadService, MainThreadService>();
+            services.AddSingleton<IBiometricHelper, BiometricHelper>();
+            services.AddSingleton<IFingerPrintService, FingerPrintService>();
 
             return services.BuildServiceProvider();
         }
@@ -62,6 +65,7 @@ namespace passi_android.Droid
 
 
             App = new App();
+            Instance = this;
             var secureRepository = App.Services.GetService<ISecureRepository>();
             var dateTimeService = App.Services.GetService<IDateTimeService>();
             dateTimeService.Init();
@@ -83,25 +87,7 @@ namespace passi_android.Droid
             {
                 this.FinishAffinity();
             };
-            // Using API level 23:
-            Task.Run(() =>
-            {
-                var fingerprintManagerCompat = FingerprintManagerCompat.From(this);
-
-                App.FingerprintManager.HasEnrolledFingerprints = () =>
-                {
-                    return fingerprintManagerCompat.HasEnrolledFingerprints;
-                };
-                App.FingerprintManager.IsHardwareDetected = () =>
-                {
-                    return fingerprintManagerCompat.IsHardwareDetected;
-                };
-                App.IsKeyguardSecure = () =>
-                {
-                    return ((KeyguardManager)GetSystemService(KeyguardService)).IsKeyguardSecure;
-                };
-                App.StartFingerPrintReading = FingerPrintAuthentication;
-            });
+            App.StartFingerPrintReading = FingerPrintAuthentication;
 
             App.CancelNotifications = () =>
             {
@@ -111,12 +97,13 @@ namespace passi_android.Droid
             };
         }
 
-        //protected override void OnNewIntent(Intent intent)
-        //{
-        //    PollNotifications();
+        protected override void OnNewIntent(Intent intent)
+        {
+            var _syncService = App.Services.GetService<ISyncService>();
 
-        //    base.OnNewIntent(intent);
-        //}
+            _syncService.PollNotifications();
+            base.OnNewIntent(intent);
+        }
 
         protected override void OnPostResume()
         {
@@ -129,23 +116,8 @@ namespace passi_android.Droid
 
         protected void FingerPrintAuthentication()
         {
-            const int flags = 0; /* always zero (0) */
-
-            // CryptoObjectHelper is described in the previous section.
-            CryptoObjectHelper cryptoHelper = new CryptoObjectHelper();
-
-            // cancellationSignal can be used to manually stop the fingerprint scanner.
-            var cancellationSignal = new Android.Support.V4.OS.CancellationSignal();
-            App.CancelfingerPrint = () =>
-            {
-                cancellationSignal.Cancel();
-            };
-            FingerprintManagerCompat fingerprintManager = FingerprintManagerCompat.From(this);
-
-            // AuthenticationCallback is a base class that will be covered later on in this guide.
-            FingerprintManagerCompat.AuthenticationCallback authenticationCallback = new MyAuthCallbackSample(this);
-            // Start the fingerprint scanner.
-            fingerprintManager.Authenticate(cryptoHelper.BuildCryptoObject(), flags, cancellationSignal, authenticationCallback, null);
+            var biometricHelper = App.Services.GetService<IBiometricHelper>();
+            biometricHelper.RegisterOrAuthenticate();
         }
 
 

@@ -15,8 +15,9 @@ namespace Services
         public EmailSender(AppSetting appSetting)
         {
             _appSetting = appSetting;
+            var apiKey = _appSetting["SendgridApiKey"];
             this.client = new SendGridClient(new HttpClient(new HttpClientHandler()),
-                _appSetting["SendgridApiKey"]);
+                apiKey);
         }
 
         public string SendInvitationEmail(string email, string code)

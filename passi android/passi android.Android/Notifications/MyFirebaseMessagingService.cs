@@ -6,6 +6,7 @@ using Android.Graphics;
 using Android.OS;
 using Android.Support.V4.App;
 using Android.Util;
+using AndroidX.Core.App;
 using Firebase.Messaging;
 using Java.Util;
 using Newtonsoft.Json;

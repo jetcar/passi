@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              BackgroundColor="#FAFAFA"
              xmlns:utils="clr-namespace:passi_android.utils;assembly=passi android"
+             xmlns:viewModels="clr-namespace:passi_android.ViewModels;assembly=passi android"
              x:Name="list"
              x:Class="passi_android.MainView">
     <ContentPage.Content>
@@ -13,7 +14,7 @@
             <StackLayout VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand">
                 <ListView  ItemsSource="{Binding Path=Accounts}">
                     <ListView.ItemTemplate>
-                        <DataTemplate x:DataType="utils:AccountViewModel">
+                        <DataTemplate x:DataType="viewModels:AccountViewModel">
                             <ViewCell Tapped="Cell_OnTapped">
                                 <Grid>
                                     <Grid.ColumnDefinitions>

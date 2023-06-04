@@ -12,6 +12,8 @@ using OpenIdLib.OpenId;
 using Serilog;
 using Serilog.Events;
 using Services;
+using Google.Cloud.Diagnostics.AspNetCore3;
+using Google.Cloud.Diagnostics.Common;
 
 namespace WebApp
 {
@@ -32,8 +34,15 @@ namespace WebApp
             var returnUrl = Environment.GetEnvironmentVariable("returnUrl") ?? Configuration.GetValue<string>("AppSetting:returnUrl");
             var clientId = Environment.GetEnvironmentVariable("ClientId") ?? Configuration.GetValue<string>("AppSetting:ClientId");
             var secret = Environment.GetEnvironmentVariable("ClientSecret") ?? Configuration.GetValue<string>("AppSetting:ClientSecret");
+            var projectId = Environment.GetEnvironmentVariable("projectId") ?? Configuration.GetValue<string>("AppSetting:projectId");
 
-            services.AddSingleton<AppSetting>();
+            services.AddGoogleTraceForAspNetCore(new AspNetCoreTraceOptions
+            {
+                ServiceOptions = new TraceServiceOptions()
+                {
+                    ProjectId = "passi-165ca"
+                }
+            }); services.AddSingleton<AppSetting>();
             services.AddScoped<WebAppDbContext>();
             services.AddSingleton<IStartupFilter, MigrationStartupFilter<WebAppDbContext>>();
             var myRestClient = new MyRestClient(passiUrl);

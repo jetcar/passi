@@ -6,8 +6,6 @@ namespace passi_android.utils.Services
 {
     public class RestService : IRestService
     {
-
-
         public Task<RestResponse> ExecuteGetAsync(ProviderDb provider, string requestUri)
         {
             var client = GetClient(provider);

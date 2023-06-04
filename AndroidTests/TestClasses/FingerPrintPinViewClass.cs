@@ -19,7 +19,11 @@ public class FingerPrintPinViewClass
         {
             Thread.Sleep(1);
         }
-
+        var mainpage = TestBase.CurrentPage as MainView;
+        while (!mainpage._loadAccountTask.IsCompleted)
+        {
+            Thread.Sleep(1);
+        }
         Assert.IsTrue(TestBase.CurrentPage is MainView);
     }
 }

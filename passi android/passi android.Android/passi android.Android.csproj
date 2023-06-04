@@ -96,12 +96,6 @@
     <PackageReference Include="Xam.Plugin.DeviceInfo">
       <Version>4.1.1</Version>
     </PackageReference>
-    <PackageReference Include="Xamarin.Android.Support.Compat">
-      <Version>28.0.0.3</Version>
-    </PackageReference>
-    <PackageReference Include="Xamarin.Android.Support.v4">
-      <Version>28.0.0.3</Version>
-    </PackageReference>
     <PackageReference Include="Xamarin.Firebase.Iid">
       <Version>121.1.0.7</Version>
     </PackageReference>
@@ -115,11 +109,10 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="FingerPrint\CryptoObjectHelper.cs" />
-    <Compile Include="FingerPrint\FingerprintManagerApiActivity.cs" />
-    <Compile Include="FingerPrint\FingerprintManagerApiDialogFragment.cs" />
+    <Compile Include="FingerPrint\BiometricHelper.cs" />
+    <Compile Include="FingerPrint\DialogEvent.cs" />
+    <Compile Include="FingerPrint\IBiometricHelper.cs" />
     <Compile Include="MainActivity.cs" />
-    <Compile Include="FingerPrint\MyAuthCallbackSample.cs" />
     <Compile Include="Notifications\MyFirebaseIIDService.cs" />
     <Compile Include="Notifications\MyFirebaseMessagingService.cs" />
     <Compile Include="Resources\Resource.designer.cs" />

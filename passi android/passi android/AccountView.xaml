@@ -14,6 +14,8 @@
         </StackLayout>
         <admin:AdminButton BindingContext="{Binding Path=AccountDb}"></admin:AdminButton>
         <StackLayout VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand">
+            <Label HorizontalTextAlignment="Center" TextColor="Black" Margin="10" Text="{Binding Path=Message}"></Label>
+
             <Label TextColor="Black" HorizontalOptions="Center" Text="Current user:" />
             <Label TextColor="Black" HorizontalOptions="Center" Text="{Binding Path=Email}" />
             <Label TextColor="Black" HorizontalOptions="Center" Text="Certificate Thumbprint:" />

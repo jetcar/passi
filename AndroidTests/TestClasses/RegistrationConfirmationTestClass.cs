@@ -7,7 +7,7 @@ using passi_android.Tools;
 
 namespace AndroidTests.TestClasses;
 
-public class RegistrationConfirmationClass
+public class RegistrationConfirmationTestClass
 {
     public static FinishConfirmationView EnterCorrectCode(RegistrationConfirmationView registrationConfirmationView)
     {

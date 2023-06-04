@@ -23,7 +23,7 @@ public class TestBase
         App.IsTest = true;
         App.CancelNotifications = () => { Console.WriteLine("cancel notifications"); };
         App.CloseApp = () => { Console.WriteLine("close ap"); };
-        App.FingerprintManager = new FingerPrintWrapper();
+        App.StartFingerPrintReading = () => { Console.WriteLine("fingerprint reading started"); };
     }
 
     public static Page CurrentPage { get; set; }
@@ -41,6 +41,7 @@ public class TestBase
         services.AddSingleton<IRestService, TestRestService>();
         services.AddSingleton<INavigationService, TestNavigationService>();
         services.AddSingleton<IMainThreadService, TestMainThreadService>();
+        services.AddSingleton<IFingerPrintService, FingerPrintService>();
 
         return services.BuildServiceProvider();
     }
@@ -54,12 +55,9 @@ public class TestBase
         get { return App.Services.GetService<ISecureRepository>(); }
     }
 
-    public static void EnableFingerPrintWithGoodResult()
+    public static void TouchFingerPrintWithGoodResult()
     {
-        App.FingerprintManager.HasEnrolledFingerprints = () => true;
-        App.FingerprintManager.IsHardwareDetected = () => true;
-        App.IsKeyguardSecure = () => true;
-        App.StartFingerPrintReading = () => new FingerPrintResult();
+        App.FingerPrintReadingResult.Invoke(new FingerPrintResult());
     }
 
 

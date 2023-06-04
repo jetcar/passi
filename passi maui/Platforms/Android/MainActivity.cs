@@ -111,29 +111,7 @@ namespace passi_maui.Platforms.Android
             var cert = Encoding.UTF8.GetString(bytes);
             return null;
         }
-
-
-
-        protected void FingerPrintAuthentication()
-        {
-            const int flags = 0; /* always zero (0) */
-
-            // CryptoObjectHelper is described in the previous section.
-            CryptoObjectHelper cryptoHelper = new CryptoObjectHelper();
-
-            // cancellationSignal can be used to manually stop the fingerprint scanner.
-            var cancellationSignal = new CancellationSignal();
-            App.CancelfingerPrint = () =>
-            {
-                cancellationSignal.Cancel();
-            };
-            FingerprintManagerCompat fingerprintManager = FingerprintManagerCompat.From(this);
-
-            // AuthenticationCallback is a base class that will be covered later on in this guide.
-            FingerprintManagerCompat.AuthenticationCallback authenticationCallback = new MyAuthCallbackSample(this);
-            // Start the fingerprint scanner.
-            //fingerprintManager.Authenticate(cryptoHelper.BuildCryptoObject(), flags, cancellationSignal, authenticationCallback, null);
-        }
+        
 
         private static object locker = new object();
 

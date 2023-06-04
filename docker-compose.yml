@@ -3,18 +3,19 @@ version: '3.4'
 services:
 
   database:
-    image: 'postgres:13.8'
+    image: 'postgres:15.3'
     container_name: postgres
     networks:
     - dock_net
     env_file:
     - ../passi_config/dev.env
     volumes:
-    - ../db-data/:/var/lib/postgresql/data/
+    - ../db-data/:/var/lib/postgresql/data/:rwx
     restart: always
 
+
   pgadmin:
-    image: 'dpage/pgadmin4:6.14'
+    image: 'dpage/pgadmin4:7.2'
     container_name: pgadmin
     networks:
     - dock_net

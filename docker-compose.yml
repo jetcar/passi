@@ -10,7 +10,7 @@ services:
     env_file:
     - ../passi_config/dev.env
     volumes:
-    - ../db-data/:/var/lib/postgresql/data/:rwx
+    - ../db-data/:/var/lib/postgresql/data/
     restart: always
 
 

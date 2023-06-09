@@ -9,16 +9,12 @@ using Xamarin.Forms.Xaml;
 namespace passi_android.Menu
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class MenuView : ContentPage
+    public partial class MenuView : BaseContentPage
     {
         private ObservableCollection<ProviderDb> _provider;
         private bool _isDeleteVisible;
-        ISecureRepository _secureRepository;
-        private INavigationService _navigationService;
         public MenuView()
         {
-            _navigationService = App.Services.GetService<INavigationService>();
-            _secureRepository = App.Services.GetService<ISecureRepository>();
             if (!App.IsTest)
                 InitializeComponent();
             BindingContext = this;

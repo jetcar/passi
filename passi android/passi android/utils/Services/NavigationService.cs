@@ -6,8 +6,8 @@ namespace passi_android.utils.Services
 {
     public class NavigationService : INavigationService
     {
-        private List<Page> _pages = new List<Page>();
-        public async Task PushModalSinglePage(Page page)
+        private List<BaseContentPage> _pages = new List<BaseContentPage>();
+        public async Task PushModalSinglePage(BaseContentPage page)
         {
             _pages.Add(page);
             App.FirstPage.Navigation.PushModalSinglePage(page);

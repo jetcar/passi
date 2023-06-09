@@ -17,10 +17,14 @@ namespace passi_android.utils.Services
         private object locker = new object();
         private IMainThreadService _mainThreadService;
         private INavigationService _navigationService;
-        public SyncService(IMainThreadService mainThreadService, INavigationService navigationService)
+        private ISecureRepository _secureRepository;
+        private IRestService _restService;
+        public SyncService(IMainThreadService mainThreadService, INavigationService navigationService, ISecureRepository secureRepository, IRestService restService)
         {
             _mainThreadService = mainThreadService;
             _navigationService = navigationService;
+            _secureRepository = secureRepository;
+            _restService = restService;
         }
 
         public void PollNotifications()
@@ -30,8 +34,6 @@ namespace passi_android.utils.Services
                 {
                     lock (locker)
                     {
-                        var _secureRepository = App.Services.GetService<ISecureRepository>();
-                        var _restService = App.Services.GetService<IRestService>();
 
                         var accounts = new ObservableCollection<AccountViewModel>();
                         _secureRepository.LoadAccountIntoList(accounts);

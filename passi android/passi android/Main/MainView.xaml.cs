@@ -2,26 +2,19 @@
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using passi_android.Registration;
-using passi_android.utils.Services;
 using passi_android.ViewModels;
 using RestSharp;
-using Xamarin.Essentials;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
-namespace passi_android
+namespace passi_android.Main
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class MainView : ContentPage
+    public partial class MainView : BaseContentPage
     {
         private ObservableCollection<AccountViewModel> _accounts = new ObservableCollection<AccountViewModel>();
         private bool _isDeleteVisible;
         private string version = "1";
-        private ISecureRepository _secureRepository;
-        IRestService _restService;
-        ISyncService _syncService;
-        INavigationService _navigationService;
-        private IMainThreadService _mainThreadService;
         public Task _loadAccountTask;
 
         public ObservableCollection<AccountViewModel> Accounts
@@ -49,11 +42,6 @@ namespace passi_android
 
         public MainView()
         {
-            _secureRepository = App.Services.GetService<ISecureRepository>();
-            _restService = App.Services.GetService<IRestService>();
-            _syncService = App.Services.GetService<ISyncService>();
-            _navigationService = App.Services.GetService<INavigationService>();
-            _mainThreadService = App.Services.GetService<IMainThreadService>();
             _secureRepository.LoadProviders();
             if (!App.IsTest)
                 InitializeComponent();
@@ -72,8 +60,9 @@ namespace passi_android
                 _secureRepository.LoadAccountIntoList(Accounts);
             });
             base.OnAppearing();
-
             _syncService.PollNotifications();
+
+
         }
 
 

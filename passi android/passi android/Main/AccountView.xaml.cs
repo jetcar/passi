@@ -1,14 +1,13 @@
 ﻿using System;
 using passi_android.FingerPrint;
 using passi_android.utils;
-using passi_android.utils.Services;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
-namespace passi_android
+namespace passi_android.Main
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class AccountView : ContentPage
+    public partial class AccountView : BaseContentPage
     {
         public AccountDb AccountDb { get; set; }
         private string _email;
@@ -17,15 +16,11 @@ namespace passi_android
         private string _validTo;
         private string _providerName;
 
-        private INavigationService _navigationService;
         private string _message;
-        private IMainThreadService _mainThreadService;
 
         public AccountView(AccountDb accountDb)
         {
             AccountDb = accountDb;
-            _navigationService = App.Services.GetService<INavigationService>();
-            _mainThreadService = App.Services.GetService<IMainThreadService>();
             if (!App.IsTest)
                 InitializeComponent();
             BindingContext = this;
@@ -107,15 +102,19 @@ namespace passi_android
             }
         }
 
-        private void UpdateCertificate_OnClicked(object sender, EventArgs e)
+        public void UpdateCertificate_OnClicked(object sender, EventArgs e)
         {
             var button = sender as VisualElement;
             button.IsEnabled = false;
             if (AccountDb.pinLength > 0)
                 _navigationService.PushModalSinglePage(new UpdateCertificateView() { Account = AccountDb });
+            else if (AccountDb.HaveFingerprint)
+            {
+                //only fingerprint
+            }
             else
             {
-                UpdateCertificateView.StartCertGeneration(null, null, AccountDb, (error) =>
+                _certificatesService.StartCertGeneration(null, null, AccountDb, (error) =>
                 {
 
                 });
@@ -141,7 +140,7 @@ namespace passi_android
                     else
                         _mainThreadService.BeginInvokeOnMainThread(() =>
                         {
-                            FingerPrintConfirmByPinView.SignRequestAndSendResponce(AccountDb, null,
+                            _certificatesService.SignRequestAndSendResponce(AccountDb, null,
                                 (error) =>
                                 {
                                     Message = error;

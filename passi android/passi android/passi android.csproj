@@ -27,10 +27,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="AccountView.xaml.cs">
+    <Compile Update="Main\AccountView.xaml.cs">
       <DependentUpon>AccountView.xaml</DependentUpon>
     </Compile>
-    <Compile Update="AddAccountView.xaml.cs">
+    <Compile Update="Main\AddAccountView.xaml.cs">
       <DependentUpon>AddAccountView.xaml</DependentUpon>
     </Compile>
     <Compile Update="Admin\AdminView.xaml.cs">
@@ -39,7 +39,7 @@
     <Compile Update="FingerPrint\FingerPrintConfirmByPinView.xaml.cs">
       <DependentUpon>FingerPrintConfirmByPinView.xaml</DependentUpon>
     </Compile>
-    <Compile Update="MainView.xaml.cs">
+    <Compile Update="Main\MainView.xaml.cs">
       <DependentUpon>MainView.xaml</DependentUpon>
     </Compile>
     <Compile Update="Menu\AddProviderView.xaml.cs">
@@ -51,13 +51,13 @@
     <Compile Update="Menu\MenuView.xaml.cs">
       <DependentUpon>MenuView.xaml</DependentUpon>
     </Compile>
-    <Compile Update="TermsAgreementsView.xaml.cs">
+    <Compile Update="Main\TermsAgreementsView.xaml.cs">
       <DependentUpon>TermsAgreementsView.xaml</DependentUpon>
     </Compile>
     <Compile Update="Tools\LoadingView.xaml.cs">
       <DependentUpon>LoadingView.xaml</DependentUpon>
     </Compile>
-    <Compile Update="UpdateCertificateView.xaml.cs">
+    <Compile Update="Main\UpdateCertificateView.xaml.cs">
       <DependentUpon>UpdateCertificateView.xaml</DependentUpon>
     </Compile>
     <Compile Update="Registration\FinishConfirmationView.xaml.cs">
@@ -78,7 +78,7 @@
     <EmbeddedResource Update="Admin\AdminView.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
-    <EmbeddedResource Update="AccountView.xaml">
+    <EmbeddedResource Update="Main\AccountView.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="FingerPrint\Page1.xaml">
@@ -87,7 +87,7 @@
     <EmbeddedResource Update="Menu\MenuView.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
-    <EmbeddedResource Update="TermsAgreementsView.xaml">
+    <EmbeddedResource Update="Main\TermsAgreementsView.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="Tools\LoadingView.xaml">
@@ -99,7 +99,7 @@
     <EmbeddedResource Update="Registration\FinishConfirmationView.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
-    <EmbeddedResource Update="NumbersPad.xaml">
+    <EmbeddedResource Update="Tools\NumbersPad.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="Registration\RegistrationConfirmationView.xaml">

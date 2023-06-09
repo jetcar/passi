@@ -7,14 +7,12 @@ using Xamarin.Forms.Xaml;
 namespace passi_android.Menu
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class ProviderView : ContentPage
+    public partial class ProviderView : BaseContentPage
     {
         public ProviderDb Provider { get; set; }
 
-        private INavigationService _navigationService;
         public ProviderView(ProviderDb provider)
         {
-            _navigationService = App.Services.GetService<INavigationService>();
             Provider = provider;
             if (!App.IsTest)
                 InitializeComponent();

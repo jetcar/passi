@@ -4,6 +4,7 @@ using AppCommon;
 using NUnit.Framework;
 using passi_android;
 using passi_android.FingerPrint;
+using passi_android.Main;
 using Xamarin.Forms;
 
 namespace AndroidTests.TestClasses;
@@ -16,15 +17,15 @@ public class FingerPrintTestClass
 
         TestBase.TouchFingerPrintWithGoodResult();
 
-        while (!(TestBase.CurrentPage is FingerPrintConfirmByPinView))
+        while (!(TestBase.CurrentView is FingerPrintConfirmByPinView))
         {
             Thread.Sleep(1);
         }
 
-        Assert.IsTrue(TestBase.CurrentPage is FingerPrintConfirmByPinView);
+        Assert.IsTrue(TestBase.CurrentView is FingerPrintConfirmByPinView);
 
 
-        var fingerPrintConfirmByPinView = TestBase.CurrentPage as FingerPrintConfirmByPinView;
+        var fingerPrintConfirmByPinView = TestBase.CurrentView as FingerPrintConfirmByPinView;
         return fingerPrintConfirmByPinView;
     }
     public static void AddFingerPrintNoPin(AccountView accountView)
@@ -33,15 +34,15 @@ public class FingerPrintTestClass
         TestBase.TouchFingerPrintWithGoodResult();
 
 
-        while (!(TestBase.CurrentPage is MainView))
+        while (!(TestBase.CurrentView is MainView))
         {
             Thread.Sleep(1);
         }
-        var mainpage = TestBase.CurrentPage as MainView;
+        var mainpage = TestBase.CurrentView as MainView;
         while (!mainpage._loadAccountTask.IsCompleted)
         {
             Thread.Sleep(1);
         }
-        Assert.IsTrue(TestBase.CurrentPage is MainView);
+        Assert.IsTrue(TestBase.CurrentView is MainView);
     }
 }

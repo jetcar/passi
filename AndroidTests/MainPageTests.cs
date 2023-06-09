@@ -6,6 +6,7 @@ using AndroidTests.Tools;
 using AppConfig;
 using NUnit.Framework;
 using passi_android;
+using passi_android.Main;
 using passi_android.ViewModels;
 using WebApiDto.Auth;
 using Xamarin.Forms;

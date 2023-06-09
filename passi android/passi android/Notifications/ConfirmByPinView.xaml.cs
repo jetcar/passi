@@ -18,7 +18,7 @@ using CertHelper = passi_android.utils.Services.Certificate.CertHelper;
 namespace passi_android.Notifications
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class ConfirmByPinView : ContentPage
+    public partial class ConfirmByPinView : BaseContentPage
     {
         private string _requesterName;
         private MySecureString _pin1 = new MySecureString("");
@@ -31,23 +31,9 @@ namespace passi_android.Notifications
         private ValidationError _pin1Error = new ValidationError();
         private AccountDb _accountDb;
         private string _email;
-        ISecureRepository _secureRepository;
-        IRestService _restService;
-        IDateTimeService _dateTimeService;
-        ICertHelper _certHelper;
-        private INavigationService _navigationService;
-        private IMainThreadService _mainThreadService;
-        private IFingerPrintService _fingerPrintService;
         public ConfirmByPinView()
         {
-            _secureRepository = App.Services.GetService<ISecureRepository>();
-            _restService = App.Services.GetService<IRestService>();
-            _dateTimeService = App.Services.GetService<IDateTimeService>();
-            _certHelper = App.Services.GetService<ICertHelper>();
-            _fingerPrintService = App.Services.GetService<IFingerPrintService>();
 
-            _mainThreadService = App.Services.GetService<IMainThreadService>();
-            _navigationService = App.Services.GetService<INavigationService>();
             if (!App.IsTest)
                 InitializeComponent();
             BindingContext = this;
@@ -109,12 +95,13 @@ namespace passi_android.Notifications
             _pinLength = _accountDb.pinLength;
             if (_accountDb.HaveFingerprint)
             {
-                _fingerPrintService.StartReadingConfirmRequest(Message,_accountDb, (error) =>
+                _fingerPrintService.StartReadingConfirmRequest(Message, _accountDb, (error) =>
                 {
                     ResponseError = error;
                 });
 
             }
+            base.OnAppearing();
         }
 
         public string RequesterName
@@ -179,11 +166,6 @@ namespace passi_android.Notifications
 
         public void NumbersPad_OnNumberClicked(string value)
         {
-            if (value == "confirm")
-            {
-                SignRequestAndSendResponce();
-                return;
-            }
             if (value == "del")
             {
                 if (Pin1.Length > 0)
@@ -192,7 +174,7 @@ namespace passi_android.Notifications
             }
 
             Pin1.AppendChar(value);
-            if (Pin1.Length == _pinLength)
+            if (Pin1.Length == _pinLength || value == "confirm")
             {
                 SignRequestAndSendResponce();
             }

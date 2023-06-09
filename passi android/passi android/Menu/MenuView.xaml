@@ -1,15 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:passiAndroid="clr-namespace:passi_android;assembly=passi android"
-             xmlns:menu="clr-namespace:passi_android.Menu;assembly=passi android"
-             xmlns:storageModels="clr-namespace:passi_android.StorageModels;assembly=passi android"
-             x:Name="list"
-             BackgroundColor="#FAFAFA"
-             x:Class="passi_android.Menu.MenuView"
-             x:DataType="menu:MenuView"
-             >
-    <ContentPage.Content>
+<passiAndroid:BaseContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                 xmlns:passiAndroid="clr-namespace:passi_android;assembly=passi android"
+                 xmlns:menu="clr-namespace:passi_android.Menu;assembly=passi android"
+                 xmlns:storageModels="clr-namespace:passi_android.StorageModels;assembly=passi android"
+                 x:Name="list"
+                 BackgroundColor="#FAFAFA"
+                 x:Class="passi_android.Menu.MenuView"
+                 x:DataType="menu:MenuView"
+>
+    <passiAndroid:BaseContentPage.Content>
         <StackLayout>
             <StackLayout Padding="0" Margin="0"  Orientation="Vertical" BackgroundColor="#2196f3">
                 <StackLayout  Margin="0"  Orientation="Horizontal" BackgroundColor="#2196f3">
@@ -42,5 +42,5 @@
                 </StackLayout>
             </StackLayout>
         </StackLayout>
-    </ContentPage.Content>
-</ContentPage>
+    </passiAndroid:BaseContentPage.Content>
+</passiAndroid:BaseContentPage>

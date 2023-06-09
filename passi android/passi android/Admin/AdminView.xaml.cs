@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using AppCommon;
+using passi_android.Main;
 using passi_android.Notifications;
 using passi_android.Registration;
 using passi_android.Tools;
@@ -16,7 +17,7 @@ using passi_android.StorageModels;
 namespace passi_android.Admin
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class AdminView : ContentPage
+    public partial class AdminView : BaseContentPage
     {
         private string _cert64;
         private string _salt;
@@ -24,19 +25,12 @@ namespace passi_android.Admin
         private string _isFinished;
         private string _notificationToken;
         private string _deviceId;
-        ISecureRepository _secureRepository;
-        IMySecureStorage _mySecureStorage;
-        INavigationService _navigationService;
         public AdminView(AccountDb account)
         {
-            _secureRepository = App.Services.GetService<ISecureRepository>();
-            _mySecureStorage = App.Services.GetService<IMySecureStorage>();
-            _navigationService = App.Services.GetService<INavigationService>();
             this.Account = account;
-            if(!App.IsTest)
-            InitializeComponent();
+            if (!App.IsTest)
+                InitializeComponent();
             BindingContext = this;
-
             NotificationToken = _mySecureStorage.GetAsync(StorageKeys.NotificationToken).Result;
         }
 

@@ -11,6 +11,7 @@ internal class TestRestService : IRestService
 {
     public Task<RestResponse> ExecuteGetAsync(ProviderDb provider, string requestUri)
     {
+        Console.WriteLine("request started:" + requestUri);
         RestResponse result = null;
         if (Result.ContainsKey(requestUri))
         {
@@ -23,6 +24,7 @@ internal class TestRestService : IRestService
 
     public Task<RestResponse> ExecuteAsync(ProviderDb provider, string requestUri)
     {
+        Console.WriteLine("request started:" + requestUri);
         RestResponse result = null;
         if (Result.ContainsKey(requestUri))
         {
@@ -35,6 +37,7 @@ internal class TestRestService : IRestService
 
     public Task<RestResponse> ExecuteAsync(ProviderDb provider, string requestUri, Method method)
     {
+        Console.WriteLine("request started:" + requestUri);
         RestResponse result = null;
         if (Result.ContainsKey(requestUri))
         {
@@ -48,6 +51,7 @@ internal class TestRestService : IRestService
 
     public Task<RestResponse> ExecutePostAsync<T>(ProviderDb provider, string requestUri, T item) where T : class
     {
+        Console.WriteLine("request started:" + requestUri);
         RestResponse result = null;
         if (Result.ContainsKey(requestUri))
         {

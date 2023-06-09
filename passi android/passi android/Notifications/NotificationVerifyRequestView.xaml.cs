@@ -18,7 +18,7 @@ using Color = WebApiDto.Auth.Color;
 namespace passi_android.Notifications
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class NotificationVerifyRequestView : ContentPage
+    public partial class NotificationVerifyRequestView : BaseContentPage
     {
         private List<Color> possibleCodes = null;
         private Xamarin.Forms.Color _color1;
@@ -31,24 +31,10 @@ namespace passi_android.Notifications
         private string _timeLeft;
         private bool _isButtonEnabled = true;
         private string _responseError;
-        ISecureRepository _secureRepository;
-        IRestService _restService;
-        private IDateTimeService _dateTimeService;
-        ICertHelper _certHelper;
-        private INavigationService _navigationService;
-        private IMainThreadService _mainThreadService;
-        IFingerPrintService _fingerPrintService;
 
         public NotificationVerifyRequestView(NotificationDto notificationDto)
         {
             Message = notificationDto;
-            _secureRepository = App.Services.GetService<ISecureRepository>();
-            _restService = App.Services.GetService<IRestService>();
-            _dateTimeService = App.Services.GetService<IDateTimeService>();
-            _certHelper = App.Services.GetService<ICertHelper>();
-            _navigationService = App.Services.GetService<INavigationService>();
-            _mainThreadService = App.Services.GetService<IMainThreadService>();
-            _fingerPrintService = App.Services.GetService<IFingerPrintService>();
             UpdateTimeLeft();
             if (!App.IsTest)
                 InitializeComponent();

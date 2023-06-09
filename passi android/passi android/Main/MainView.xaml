@@ -1,12 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             BackgroundColor="#FAFAFA"
-             xmlns:utils="clr-namespace:passi_android.utils;assembly=passi android"
-             xmlns:viewModels="clr-namespace:passi_android.ViewModels;assembly=passi android"
-             x:Name="list"
-             x:Class="passi_android.MainView">
-    <ContentPage.Content>
+<passiAndroid:BaseContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                 BackgroundColor="#FAFAFA"
+                 xmlns:viewModels="clr-namespace:passi_android.ViewModels;assembly=passi android"
+                 xmlns:passiAndroid="clr-namespace:passi_android;assembly=passi android"
+                 x:Name="list"
+                 x:Class="passi_android.Main.MainView">
+    <passiAndroid:BaseContentPage.Content>
         <StackLayout VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand">
             <StackLayout VerticalOptions="CenterAndExpand" BackgroundColor="#2196f3" HorizontalOptions="FillAndExpand">
                 <ImageButton  Margin="10,0,10,10" BackgroundColor="#2196f3" HorizontalOptions="End" Source="baseline_list_black_24.png" Clicked="Menu_button"></ImageButton>
@@ -42,6 +42,6 @@
                 </StackLayout>
             </StackLayout>
         </StackLayout>
-    </ContentPage.Content>
+    </passiAndroid:BaseContentPage.Content>
 
-</ContentPage>
+</passiAndroid:BaseContentPage>

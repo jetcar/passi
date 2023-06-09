@@ -45,6 +45,7 @@ namespace IdentityServer
         public void ConfigureServices(IServiceCollection services)
         {
             var passiUrl = Environment.GetEnvironmentVariable("PassiUrl") ?? Configuration.GetValue<string>("AppSetting:PassiUrl");
+            var projectId = Environment.GetEnvironmentVariable("projectId") ?? Configuration.GetValue<string>("AppSetting:projectId");
             services.AddControllersWithViews();
             services.AddSingleton<AppSetting>();
             var myRestClient = new MyRestClient(passiUrl);
@@ -59,9 +60,11 @@ namespace IdentityServer
             {
                 ServiceOptions = new TraceServiceOptions()
                 {
-                    ProjectId = "passi-165ca"
+                    ProjectId = projectId,
+                    
                 }
             });
+            services.AddGoogleDiagnostics(projectId, "Identity");
             services.AddIdentityServer(options =>
                 {
                     options.UserInteraction = new UserInteractionOptions() { ConsentUrl = "/Account/Login", LoginUrl = "/Account/Login" };
@@ -107,7 +110,6 @@ namespace IdentityServer
 
                 var appSetting = applicationBuilder.ApplicationServices.GetService<AppSetting>();
                 applicationBuilder.UseMiddleware<PublicFacingUrlMiddleware>(appSetting["IdentityUrlBase"]);
-
                 applicationBuilder.UseStaticFiles(new StaticFileOptions()
                 {
                     OnPrepareResponse = (context) =>

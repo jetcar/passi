@@ -9,6 +9,7 @@ using passi_android.utils;
 using passi_android.utils.Services;
 using passi_android.utils.Services.Certificate;
 using RestSharp;
+using WebApiDto;
 using Xamarin.Forms;
 
 namespace AndroidTests.Tools;
@@ -26,7 +27,7 @@ public class TestBase
         App.StartFingerPrintReading = () => { Console.WriteLine("fingerprint reading started"); };
     }
 
-    public static Page CurrentPage { get; set; }
+    public static BaseContentPage CurrentView { get; set; }
     private static IServiceProvider ConfigureServices()
     {
         var services = new ServiceCollection();
@@ -57,17 +58,34 @@ public class TestBase
 
     public static void TouchFingerPrintWithGoodResult()
     {
+        Console.WriteLine("touch fingerprint");
         App.FingerPrintReadingResult.Invoke(new FingerPrintResult());
     }
 
 
     public static RestResponse SuccesfullResponce()
     {
+        Console.WriteLine("rest response ok");
         return new RestResponse()
         { IsSuccessStatusCode = true, StatusCode = HttpStatusCode.OK, ResponseStatus = ResponseStatus.Completed };
     }
+    public static RestResponse BadResponce(string errorMessage)
+    {
+        Console.WriteLine("rest response Bad");
+        return new RestResponse()
+        {
+            IsSuccessStatusCode = false,
+            StatusCode = HttpStatusCode.BadRequest,
+            ResponseStatus = ResponseStatus.Completed,
+            Content = JsonConvert.SerializeObject(new ApiResponseDto<string>()
+            {
+                Message = errorMessage
+            })
+        };
+    }
     public static RestResponse SuccesfullResponce<T>(T value)
     {
+        Console.WriteLine("rest response: " + JsonConvert.SerializeObject(value));
         return new RestResponse()
         { IsSuccessStatusCode = true, StatusCode = HttpStatusCode.OK, ResponseStatus = ResponseStatus.Completed, Content = JsonConvert.SerializeObject(value) };
     }
@@ -112,4 +130,10 @@ public class TestBase
     }
 
 
+    public static RestResponse FailedResponce()
+    {
+        Console.WriteLine("rest failed response ");
+        return new RestResponse()
+        { IsSuccessStatusCode = false, StatusCode = HttpStatusCode.NotFound, ResponseStatus = ResponseStatus.Completed, Content = "error" };
+    }
 }

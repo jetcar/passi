@@ -11,18 +11,17 @@ using Xamarin.Forms.Xaml;
 namespace passi_android.FingerPrint
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class FingerPrintConfirmByPinView : ContentPage
+    public partial class FingerPrintConfirmByPinView : BaseContentPage
     {
         private readonly AccountDb _accountDb;
         private MySecureString _pin1 = new MySecureString("");
         private string _pin1Masked;
         private int _pinLength;
         private ValidationError _pin1Error = new ValidationError();
-        INavigationService _navigationService;
+
         public FingerPrintConfirmByPinView(AccountDb accountDb)
         {
             _accountDb = accountDb;
-            _navigationService = App.Services.GetService<INavigationService>();
             if (!App.IsTest)
                 InitializeComponent();
             BindingContext = this;
@@ -33,6 +32,7 @@ namespace passi_android.FingerPrint
         protected override void OnAppearing()
         {
             _pinLength = _accountDb.pinLength;
+            base.OnAppearing();
         }
 
         public MySecureString Pin1
@@ -65,18 +65,6 @@ namespace passi_android.FingerPrint
 
         public void NumbersPad_OnNumberClicked(string value)
         {
-            if (value == "confirm")
-            {
-                SignRequestAndSendResponce(_accountDb, Pin1, (error) =>
-                {
-                    if (error != null)
-                    {
-                        Pin1Error.HasError = true;
-                        Pin1Error.Text = error;
-                    }
-                });
-                return;
-            }
             if (value == "del")
             {
                 if (Pin1.Length > 0)
@@ -85,9 +73,10 @@ namespace passi_android.FingerPrint
             }
 
             Pin1.AppendChar(value);
-            if (Pin1.Length == _pinLength)
+            Pin1Masked = Pin1.GetMasked("*");
+            if (Pin1.Length == _pinLength || value == "confirm")
             {
-                SignRequestAndSendResponce(_accountDb, Pin1, (error) =>
+                _certificatesService.SignRequestAndSendResponce(_accountDb, Pin1, (error) =>
                 {
                     if (error != null)
                     {
@@ -97,33 +86,6 @@ namespace passi_android.FingerPrint
                 });
 
             }
-        }
-
-        public static void SignRequestAndSendResponce(AccountDb _accountDb, MySecureString Pin1, Action<string> callback)
-        {
-            var secureRepository = App.Services.GetService<ISecureRepository>();
-            var navigationService = App.Services.GetService<INavigationService>();
-            var mainThread = App.Services.GetService<IMainThreadService>();
-
-            navigationService.PushModalSinglePage(new LoadingView(() =>
-            {
-                secureRepository.AddfingerPrintKey(_accountDb, Pin1).ContinueWith((result) =>
-                {
-                    if (result.IsFaulted)
-                    {
-                        callback.Invoke("Invalid Pin");
-                        return;
-                    }
-
-                    mainThread.BeginInvokeOnMainThread(() =>
-                    {
-                        App.FirstPage.DisplayAlert("Fingerprint", "Fingerprint key added", "Ok");
-                        navigationService.NavigateTop();
-
-                    });
-                });
-            }));
-
         }
 
         private void Cancel_OnClicked(object sender, EventArgs e)

@@ -1,10 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:notifications="clr-namespace:passi_android.Notifications"
-             x:DataType="notifications:NotificationVerifyRequestView"
-             BackgroundColor="#FAFAFA"
-             x:Class="passi_android.Notifications.NotificationVerifyRequestView">
+<passiAndroid:BaseContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                 xmlns:notifications="clr-namespace:passi_android.Notifications"
+                 xmlns:passiAndroid="clr-namespace:passi_android;assembly=passi android"
+                 x:DataType="notifications:NotificationVerifyRequestView"
+                 BackgroundColor="#FAFAFA"
+                 x:Class="passi_android.Notifications.NotificationVerifyRequestView">
     <StackLayout HorizontalOptions="CenterAndExpand" VerticalOptions="Center">
 
         <Label TextColor="Black" Text="{Binding Path=TimeLeft}"
@@ -27,4 +28,4 @@
         </StackLayout>
         <Button BackgroundColor="White" TextColor="Black" CornerRadius="100"  Text="Cancel" Clicked="Cancel_OnClicked"></Button>
     </StackLayout>
-</ContentPage>
+</passiAndroid:BaseContentPage>

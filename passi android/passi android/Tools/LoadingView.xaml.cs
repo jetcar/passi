@@ -11,18 +11,14 @@ using Timer = System.Timers.Timer;
 namespace passi_android.Tools
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class LoadingView : ContentPage
+    public partial class LoadingView : BaseContentPage
     {
         private readonly Action _callBack;
         private Task _task;
         private readonly Timer _timer;
 
-        private INavigationService _navigationService;
-        private IMainThreadService _mainThreadService;
         public LoadingView(Action callBack)
         {
-            _navigationService = App.Services.GetService<INavigationService>();
-            _mainThreadService = App.Services.GetService<IMainThreadService>();
             _callBack = callBack;
             if (!App.IsTest)
                 InitializeComponent();

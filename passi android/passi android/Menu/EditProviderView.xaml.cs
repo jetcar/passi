@@ -8,15 +8,11 @@ using Xamarin.Forms.Xaml;
 namespace passi_android.Menu
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class EditProviderView : ContentPage
+    public partial class EditProviderView : BaseContentPage
     {
         public ProviderDb Provider { get; set; }
-        private ISecureRepository _secureRepository;
-        private INavigationService _navigationService;
         public EditProviderView(ProviderDb provider)
         {
-            _secureRepository = App.Services.GetService<ISecureRepository>();
-            _navigationService = App.Services.GetService<INavigationService>();
             Provider = JsonConvert.DeserializeObject<ProviderDb>(JsonConvert.SerializeObject(provider));
             if(!App.IsTest)
             InitializeComponent();

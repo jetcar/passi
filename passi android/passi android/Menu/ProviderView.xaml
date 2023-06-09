@@ -1,12 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:passiAndroid="clr-namespace:passi_android"
-             xmlns:menu="clr-namespace:passi_android.Menu;assembly=passi android"
-             xmlns:admin="clr-namespace:passi_android.Admin;assembly=passi android"
-             BackgroundColor="#FAFAFA"
-             x:DataType="menu:ProviderView"
-             x:Class="passi_android.Menu.ProviderView">
+<passiAndroid:BaseContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                 xmlns:passiAndroid="clr-namespace:passi_android"
+                 xmlns:menu="clr-namespace:passi_android.Menu;assembly=passi android"
+                 xmlns:admin="clr-namespace:passi_android.Admin;assembly=passi android"
+                 BackgroundColor="#FAFAFA"
+                 x:DataType="menu:ProviderView"
+                 x:Class="passi_android.Menu.ProviderView">
     <StackLayout HorizontalOptions="FillAndExpand">
             <StackLayout Padding="0" Margin="0"  Orientation="Vertical" BackgroundColor="#2196f3">
                 <StackLayout  Margin="0"  Orientation="Horizontal" BackgroundColor="#2196f3">
@@ -37,4 +37,4 @@
         </StackLayout>
         <Button BackgroundColor="White" TextColor="Black" CornerRadius="100"  Text="Edit" Clicked="EditButton_OnClicked"></Button>
     </StackLayout>
-</ContentPage>
+</passiAndroid:BaseContentPage>

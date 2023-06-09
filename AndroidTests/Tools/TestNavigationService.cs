@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
+using passi_android;
 using passi_android.utils.Services;
 using Xamarin.Forms;
 
@@ -10,16 +11,16 @@ namespace AndroidTests.Tools;
 
 internal class TestNavigationService : INavigationService
 {
-    private List<Page> _pages = new List<Page>();
-    public async Task PushModalSinglePage(Page page)
+    private List<BaseContentPage> _pages = new List<BaseContentPage>();
+    public async Task PushModalSinglePage(BaseContentPage page)
     {
         _pages.Add(page);
         Console.WriteLine(page.ToString());
-        if (TestBase.CurrentPage != null)
+        if (TestBase.CurrentView != null)
         {
-            TestBase.CurrentPage.SendDisappearing();
+            TestBase.CurrentView.SendDisappearing();
         }
-        TestBase.CurrentPage = page;
+        TestBase.CurrentView = page;
         page.SendAppearing();
     }
 
@@ -30,10 +31,10 @@ internal class TestNavigationService : INavigationService
         {
             _pages.RemoveAt(i);
         }
-        if (TestBase.CurrentPage != null)
-            TestBase.CurrentPage.SendDisappearing();
+        if (TestBase.CurrentView != null)
+            TestBase.CurrentView.SendDisappearing();
 
-        TestBase.CurrentPage = page;
+        TestBase.CurrentView = page;
         Console.WriteLine(page.ToString());
         page.SendAppearing();
 
@@ -43,10 +44,10 @@ internal class TestNavigationService : INavigationService
     {
         _pages.RemoveAt(_pages.Count - 1);
         var page = _pages.Last();
-        if (TestBase.CurrentPage != null)
-            TestBase.CurrentPage.SendDisappearing();
+        if (TestBase.CurrentView != null)
+            TestBase.CurrentView.SendDisappearing();
 
-        TestBase.CurrentPage = page;
+        TestBase.CurrentView = page;
         Console.WriteLine(page.ToString());
         page.SendAppearing();
     }

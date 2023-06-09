@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using NUnit.Framework;
 using passi_android;
+using passi_android.Main;
 using passi_android.Tools;
 using passi_android.utils.Services;
 using RestSharp;
@@ -44,6 +45,85 @@ namespace AndroidTests.FunctionalTests
 
             var mainPage2 = ConfirmByPinTestClass.ConfirmByPin(confirmByPinView);
             Assert.IsNotNull(mainPage2);
+        }
+        [Test]
+        public void NotificationAccountWithInvalidPin()
+        {
+            var page = MainTestClass.OpenMainPage();
+            var tcView = MainTestClass.ClickAddAccount(page);
+            var addAccountView = TermsAgreementsTestClass.ClickAgree(tcView);
+            addAccountView.EmailText = "test@test.ee";
+            TestRestService.Result[ConfigSettings.Signup] = TestBase.SuccesfullResponce();
+            var registrationConfirmation = AddAccountTestClass.ClickConfirm(addAccountView);
+            var finishConfirmation = RegistrationConfirmationTestClass.EnterCorrectCode(registrationConfirmation);
+            var mainPage = FinishConfirmationTestClass.FinishRegistrationWithPin(finishConfirmation);
+            while (page.Accounts.Count == 0)
+            {
+                Thread.Sleep(1);
+            }
+            Assert.AreEqual(mainPage.Accounts.Count, 1);
+            var notificationPage =
+                NofiticationViewTestClass.PollOpenSessions(mainPage.Accounts[0], Color.blue, 10);
+            Assert.AreEqual(notificationPage.TimeLeft, "9");
+
+            var confirmByPinView = NofiticationViewTestClass.ChooseColorWithPin(notificationPage, Xamarin.Forms.Color.Blue);
+
+            confirmByPinView = ConfirmByPinTestClass.ConfirmByIncorrectPin(confirmByPinView);
+            Assert.IsNotNull(confirmByPinView);
+            Assert.IsNotEmpty(confirmByPinView.Pin1Error.Text);
+            Assert.IsTrue(confirmByPinView.Pin1Error.HasError);
+        }
+        [Test]
+        public void NotificationAccountBadResponse()
+        {
+            var page = MainTestClass.OpenMainPage();
+            var tcView = MainTestClass.ClickAddAccount(page);
+            var addAccountView = TermsAgreementsTestClass.ClickAgree(tcView);
+            addAccountView.EmailText = "test@test.ee";
+            TestRestService.Result[ConfigSettings.Signup] = TestBase.SuccesfullResponce();
+            var registrationConfirmation = AddAccountTestClass.ClickConfirm(addAccountView);
+            var finishConfirmation = RegistrationConfirmationTestClass.EnterCorrectCode(registrationConfirmation);
+            var mainPage = FinishConfirmationTestClass.FinishRegistrationWithPin(finishConfirmation);
+            while (page.Accounts.Count == 0)
+            {
+                Thread.Sleep(1);
+            }
+            Assert.AreEqual(mainPage.Accounts.Count, 1);
+            var notificationPage =
+                NofiticationViewTestClass.PollOpenSessions(mainPage.Accounts[0], Color.blue, 10);
+            Assert.AreEqual(notificationPage.TimeLeft, "9");
+
+            var confirmByPinView = NofiticationViewTestClass.ChooseColorWithPin(notificationPage, Xamarin.Forms.Color.Blue);
+
+            confirmByPinView = ConfirmByPinTestClass.ConfirmByPinBadResponse(confirmByPinView);
+            Assert.IsNotNull(confirmByPinView);
+            Assert.IsNotEmpty(confirmByPinView.ResponseError);
+        }
+        [Test]
+        public void NotificationAccountNetworkError()
+        {
+            var page = MainTestClass.OpenMainPage();
+            var tcView = MainTestClass.ClickAddAccount(page);
+            var addAccountView = TermsAgreementsTestClass.ClickAgree(tcView);
+            addAccountView.EmailText = "test@test.ee";
+            TestRestService.Result[ConfigSettings.Signup] = TestBase.SuccesfullResponce();
+            var registrationConfirmation = AddAccountTestClass.ClickConfirm(addAccountView);
+            var finishConfirmation = RegistrationConfirmationTestClass.EnterCorrectCode(registrationConfirmation);
+            var mainPage = FinishConfirmationTestClass.FinishRegistrationWithPin(finishConfirmation);
+            while (page.Accounts.Count == 0)
+            {
+                Thread.Sleep(1);
+            }
+            Assert.AreEqual(mainPage.Accounts.Count, 1);
+            var notificationPage =
+                NofiticationViewTestClass.PollOpenSessions(mainPage.Accounts[0], Color.blue, 10);
+            Assert.AreEqual(notificationPage.TimeLeft, "9");
+
+            var confirmByPinView = NofiticationViewTestClass.ChooseColorWithPin(notificationPage, Xamarin.Forms.Color.Blue);
+
+            confirmByPinView = ConfirmByPinTestClass.ConfirmByPinNetworkError(confirmByPinView);
+            Assert.IsNotNull(confirmByPinView);
+            Assert.IsNotEmpty(confirmByPinView.ResponseError);
         }
         [Test]
         public void NotificationAccountWithFingerPrintAndPin()
@@ -132,11 +212,11 @@ namespace AndroidTests.FunctionalTests
 
             var confirmByPinView = NofiticationViewTestClass.ChooseColorWithPin(notificationPage, Xamarin.Forms.Color.Blue);
             confirmByPinView.Cancel_OnClicked(new Button(), null);
-            while (!(CurrentPage is MainView))
+            while (!(CurrentView is MainView))
             {
                 Thread.Sleep(1);
             }
-            var mainPage2 = CurrentPage as MainView;
+            var mainPage2 = CurrentView as MainView;
             Assert.IsNotNull(mainPage2);
 
         }
@@ -161,11 +241,11 @@ namespace AndroidTests.FunctionalTests
             Assert.AreEqual(notificationPage.TimeLeft, "9");
 
             notificationPage.Cancel_OnClicked(new Button(), null);
-            while (!(CurrentPage is MainView))
+            while (!(CurrentView is MainView))
             {
                 Thread.Sleep(1);
             }
-            var mainPage2 = CurrentPage as MainView;
+            var mainPage2 = CurrentView as MainView;
             Assert.IsNotNull(mainPage2);
 
         }
@@ -191,11 +271,11 @@ namespace AndroidTests.FunctionalTests
 
             var confirmByPinView = NofiticationViewTestClass.ChooseColorWithPin(notificationPage, Xamarin.Forms.Color.Blue);
 
-            while (!(CurrentPage is MainView))
+            while (!(CurrentView is MainView))
             {
                 Thread.Sleep(1);
             }
-            var mainPage2 = CurrentPage as MainView;
+            var mainPage2 = CurrentView as MainView;
             Assert.IsNotNull(mainPage2);
         }
 
@@ -280,11 +360,11 @@ namespace AndroidTests.FunctionalTests
                 NofiticationViewTestClass.PollOpenSessions(mainPage.Accounts[0], Color.blue, 1);
             Assert.AreEqual(notificationPage.TimeLeft, "0");
 
-            while (!(CurrentPage is MainView))
+            while (!(CurrentView is MainView))
             {
                 Thread.Sleep(1);
             }
-            var mainPage2 = CurrentPage as MainView;
+            var mainPage2 = CurrentView as MainView;
             Assert.IsNotNull(mainPage2);
 
         }

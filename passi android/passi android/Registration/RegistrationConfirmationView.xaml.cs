@@ -6,29 +6,20 @@ using passi_android.Tools;
 using WebApiDto;
 using WebApiDto.SignUp;
 using Xamarin.Essentials;
-using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using passi_android.utils.Services;
 
 namespace passi_android.Registration
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class RegistrationConfirmationView : ContentPage
+    public partial class RegistrationConfirmationView : BaseContentPage
     {
         private string _code = "";
         private string _responseError;
         private string _email;
-        private ISecureRepository _secureRepository;
-        IRestService _restService;
-        private INavigationService _navigationService;
-        private IMainThreadService _mainThreadService;
         public RegistrationConfirmationView(AccountDb account)
         {
-            _navigationService = App.Services.GetService<INavigationService>();
             Account = account;
-            _secureRepository = App.Services.GetService<ISecureRepository>();
-            _restService = App.Services.GetService<IRestService>();
-            _mainThreadService = App.Services.GetService<IMainThreadService>();
             if (!App.IsTest)
                 InitializeComponent();
             BindingContext = this;
@@ -47,7 +38,6 @@ namespace passi_android.Registration
             {
                 _code = value;
                 OnPropertyChanged();
-                ResponseError = "";
             }
         }
 
@@ -115,24 +105,40 @@ namespace passi_android.Registration
                             _mainThreadService.BeginInvokeOnMainThread(() =>
                             {
                                 _navigationService.PushModalSinglePage(new FinishConfirmationView()
-                                    { Code = Code, Account = Account });
+                                { Code = Code, Account = Account });
                             });
                         }
                         else if (!response.Result.IsSuccessful &&
                                  response.Result.StatusCode == HttpStatusCode.BadRequest)
                         {
-                            ResponseError = JsonConvert
-                                .DeserializeObject<ApiResponseDto<string>>(response.Result.Content).Message;
+
+                            _mainThreadService.BeginInvokeOnMainThread(() =>
+                            {
+                                _navigationService.PopModal().ContinueWith((task =>
+                                {
+                                    var resultContent = response.Result.Content ?? "{\"Message\":\"Network error. Try again\"}";
+                                    ResponseError = JsonConvert
+                                        .DeserializeObject<ApiResponseDto<string>>(resultContent).Message;
+                                    Code = "";
+                                }));
+                            });
                         }
                         else
                         {
-                            ResponseError = "Network error. Try again";
+                            _mainThreadService.BeginInvokeOnMainThread(() =>
+                            {
+                                _navigationService.PopModal().ContinueWith((task =>
+                                {
+                                    ResponseError = "Network error. Try again";
+
+                                }));
+                            });
                         }
                     });
             }));
         }
 
-        private void CancelButton_OnClicked(object sender, EventArgs e)
+        public void CancelButton_OnClicked(object sender, EventArgs e)
         {
             _navigationService.NavigateTop();
         }

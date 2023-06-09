@@ -6,6 +6,7 @@ using AppConfig;
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
 using passi_android;
+using passi_android.Main;
 using passi_android.Notifications;
 using passi_android.Tools;
 using passi_android.utils.Services;
@@ -47,11 +48,11 @@ public class NofiticationViewTestClass
         while (!(syncService.PollingTask.IsCompleted))
             Thread.Sleep(1);
 
-        while (!(TestBase.CurrentPage is NotificationVerifyRequestView))
+        while (!(TestBase.CurrentView is NotificationVerifyRequestView))
         {
             Thread.Sleep(1);
         }
-        var page = TestBase.CurrentPage as NotificationVerifyRequestView;
+        var page = TestBase.CurrentView as NotificationVerifyRequestView;
         while (page._account == null)
             Thread.Sleep(1);
         Assert.AreEqual(page._account.Guid, accountViewModel.Guid);
@@ -88,7 +89,7 @@ public class NofiticationViewTestClass
         {
             Thread.Sleep(1);
         }
-        var page = TestBase.CurrentPage as MainView;
+        var page = TestBase.CurrentView as MainView;
         return page;
     }
 
@@ -101,12 +102,12 @@ public class NofiticationViewTestClass
         if (notificationPage.Color3 == color)
             notificationPage.ImageButton3_OnClicked(new Button(), null);
 
-        while (!(TestBase.CurrentPage is ConfirmByPinView))
+        while (!(TestBase.CurrentView is ConfirmByPinView))
         {
             Thread.Sleep(1);
         }
 
-        var confirmByPin = TestBase.CurrentPage as ConfirmByPinView;
+        var confirmByPin = TestBase.CurrentView as ConfirmByPinView;
         return confirmByPin;
     }
 
@@ -121,12 +122,12 @@ public class NofiticationViewTestClass
         if (notificationPage.Color3 == color)
             notificationPage.ImageButton3_OnClicked(new Button(), null);
 
-        while (!(TestBase.CurrentPage is MainView))
+        while (!(TestBase.CurrentView is MainView))
         {
             Thread.Sleep(1);
         }
 
-        var mainPage = TestBase.CurrentPage as MainView;
+        var mainPage = TestBase.CurrentView as MainView;
         if (mainPage._loadAccountTask != null)
             while (!mainPage._loadAccountTask.IsCompleted)
             {

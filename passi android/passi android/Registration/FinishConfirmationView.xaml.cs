@@ -17,7 +17,7 @@ using Color = Xamarin.Forms.Color;
 namespace passi_android.Registration
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class FinishConfirmationView : ContentPage
+    public partial class FinishConfirmationView : BaseContentPage
     {
         private string _pin1Masked;
         private string _pin2Masked;
@@ -31,20 +31,8 @@ namespace passi_android.Registration
         private ValidationError _pin2Error = new ValidationError();
 
         private readonly int MinPinLenght = 4;
-        private ISecureRepository _secureRepository;
-        private IRestService _restService;
-        private ICertHelper _certHelper;
-        private ICertificatesService _certificatesService;
-        private INavigationService _navigationService;
-        private IMainThreadService _mainThreadService;
         public FinishConfirmationView()
         {
-            _secureRepository = App.Services.GetService<ISecureRepository>();
-            _restService = App.Services.GetService<IRestService>();
-            _certHelper = App.Services.GetService<ICertHelper>();
-            _certificatesService = App.Services.GetService<ICertificatesService>();
-            _navigationService = App.Services.GetService<INavigationService>();
-            _mainThreadService = App.Services.GetService<IMainThreadService>();
             if (!App.IsTest)
                 InitializeComponent();
             BindingContext = this;
@@ -257,7 +245,7 @@ namespace passi_android.Registration
                         return;
                     }
 
-                    if (Pin1.Equals(Pin2))
+                    if (!Pin1.Equals(Pin2))
                     {
                         SecondPin = false;
                         //error
@@ -279,25 +267,37 @@ namespace passi_android.Registration
             {
                 if (!SecondPin)
                     if (Pin1.Length > 0)
+                    {
                         Pin1 = Pin1.TrimEnd(1);
+                    }
                 if (SecondPin)
                     if (Pin2.Length > 0)
-                        Pin2 = Pin1.TrimEnd(1);
+                    {
+                        Pin2 = Pin2.TrimEnd(1);
+                    }
                 return;
             }
+
             if (!SecondPin)
+            {
                 Pin1.AppendChar(value);
+                Pin1Masked = _pin1.GetMasked("*");
+            }
+
             if (SecondPin)
+            {
                 Pin2.AppendChar(value);
+                Pin2Masked = _pin2.GetMasked("*");
+            }
         }
 
-        private void ClearPin1_OnClicked(object sender, EventArgs e)
+        public void ClearPin1_OnClicked(object sender, EventArgs e)
         {
             Pin1 = new MySecureString("");
             SecondPin = false;
         }
 
-        private void ClearPin2_OnClicked(object sender, EventArgs e)
+        public void ClearPin2_OnClicked(object sender, EventArgs e)
         {
             Pin2 = new MySecureString("");
             SecondPin = true;

@@ -1,19 +1,16 @@
 ﻿using System;
-using passi_android.utils.Services;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
-namespace passi_android
+namespace passi_android.Main
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class TermsAgreementsView : ContentPage
+    public partial class TermsAgreementsView : BaseContentPage
     {
-        private INavigationService Navigation;
         public TermsAgreementsView()
         {
-            Navigation = App.Services.GetService<INavigationService>();
-            if(!App.IsTest)
-            InitializeComponent();
+            if (!App.IsTest)
+                InitializeComponent();
         }
 
         public void Button_OnAgreeClicked(object sender, EventArgs e)
@@ -21,16 +18,16 @@ namespace passi_android
             var element = sender as VisualElement;
             element.IsEnabled = false;
 
-            Navigation.PushModalSinglePage(new AddAccountView());
+            _navigationService.PushModalSinglePage(new AddAccountView());
             element.IsEnabled = true;
         }
 
-        private void Button_OnCancelClicked(object sender, EventArgs e)
+        public void Button_OnCancelClicked(object sender, EventArgs e)
         {
             var element = sender as VisualElement;
             element.IsEnabled = false;
 
-            Navigation.NavigateTop();
+            _navigationService.NavigateTop();
             element.IsEnabled = true;
         }
     }

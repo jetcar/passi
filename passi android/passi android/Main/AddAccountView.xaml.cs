@@ -8,25 +8,20 @@ using passi_android.Registration;
 using passi_android.StorageModels;
 using passi_android.Tools;
 using passi_android.utils;
-using passi_android.utils.Services;
 using WebApiDto;
 using WebApiDto.SignUp;
-using Xamarin.Essentials;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
-namespace passi_android
+namespace passi_android.Main
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class AddAccountView : ContentPage
+    public partial class AddAccountView : BaseContentPage
     {
         private string _emailText = "";
         private ValidationError _emailError;
         private string _responseError;
         private ProviderDb _currentProvider;
-        private ISecureRepository _secureRepository;
-        private IRestService _restService;
-        private IMainThreadService _mainThreadService;
         public string EmailText
         {
             get
@@ -80,13 +75,8 @@ namespace passi_android
             }
         }
 
-        private INavigationService _navigationService;
         public AddAccountView()
         {
-            _secureRepository = App.Services.GetService<ISecureRepository>();
-            _restService = App.Services.GetService<IRestService>();
-            _navigationService = App.Services.GetService<INavigationService>();
-            _mainThreadService = App.Services.GetService<IMainThreadService>();
 
             if (!App.IsTest)
                 InitializeComponent();

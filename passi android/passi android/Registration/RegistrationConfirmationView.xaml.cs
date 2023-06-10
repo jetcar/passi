@@ -86,11 +86,10 @@ namespace passi_android.Registration
         private void CheckCodeAndNavigateForward()
         {
             ResponseError = "";
-            var signupConfirmationDto = new SignupConfirmationDto()
+            var signupConfirmationDto = new SignupCheckDto()
             {
                 Code = Code,
                 Email = Email,
-                DeviceId = _secureRepository.GetDeviceId()
             };
             _navigationService.PushModalSinglePage(new LoadingView(() =>
             {

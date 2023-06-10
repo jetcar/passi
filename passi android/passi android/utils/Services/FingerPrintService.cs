@@ -33,7 +33,7 @@ namespace passi_android.utils.Services
                 {
                     _navigationService.PushModalSinglePage(new LoadingView(() =>
                     {
-                        var privatecertificate = _secureRepository.GetCertificateWithFingerPrint(message.AccountGuid);
+                        var privatecertificate = _secureRepository.GetCertificateWithFingerPrint(accountDb);
 
                         _certHelper.SignByFingerPrint(message.RandomString, privatecertificate).ContinueWith(signedGuid =>
                         {

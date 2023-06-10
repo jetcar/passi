@@ -17,14 +17,14 @@ namespace passi_android.Tools
         private Task _task;
         private readonly Timer _timer;
 
-        public LoadingView(Action callBack)
+        public LoadingView(Action callBack, int timeout = 30000)
         {
             _callBack = callBack;
             if (!App.IsTest)
                 InitializeComponent();
             _timer = new Timer();
             _timer.Enabled = true;
-            _timer.Interval = 30000;
+            _timer.Interval = timeout;
             _timer.Elapsed += _timer_Elapsed;
             _timer.Start();
         }

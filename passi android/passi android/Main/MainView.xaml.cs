@@ -65,6 +65,11 @@ namespace passi_android.Main
 
         }
 
+        protected override void OnDisappearing()
+        {
+            base.OnDisappearing();
+        }
+
 
         private void AccountSyncCallback()
         {

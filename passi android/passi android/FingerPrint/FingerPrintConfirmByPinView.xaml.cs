@@ -76,7 +76,7 @@ namespace passi_android.FingerPrint
             Pin1Masked = Pin1.GetMasked("*");
             if (Pin1.Length == _pinLength || value == "confirm")
             {
-                _certificatesService.SignRequestAndSendResponce(_accountDb, Pin1, (error) =>
+                _certificatesService.CreateFingerPrintCertificate(_accountDb, Pin1, (error) =>
                 {
                     if (error != null)
                     {

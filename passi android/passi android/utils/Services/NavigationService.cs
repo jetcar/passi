@@ -15,7 +15,8 @@ namespace passi_android.utils.Services
 
         public async Task NavigateTop()
         {
-            for (int i = _pages.Count - 1; i > 0; i--)
+            var pagesCount = _pages.Count;
+            for (int i = pagesCount - 1; i > 0; i--)
             {
                 _pages.RemoveAt(i);
             }

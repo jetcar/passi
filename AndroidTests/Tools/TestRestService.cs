@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 using passi_android.StorageModels;
 using passi_android.utils.Services;
@@ -51,6 +52,8 @@ internal class TestRestService : IRestService
 
     public Task<RestResponse> ExecutePostAsync<T>(ProviderDb provider, string requestUri, T item) where T : class
     {
+        var validationContext = new ValidationContext(item);
+        Validator.ValidateObject(item, validationContext);
         Console.WriteLine("request started:" + requestUri);
         RestResponse result = null;
         if (Result.ContainsKey(requestUri))

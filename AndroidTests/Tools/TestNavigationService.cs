@@ -27,7 +27,8 @@ internal class TestNavigationService : INavigationService
     public async Task NavigateTop()
     {
         var page = _pages[0];
-        for (int i = _pages.Count - 1; i > 0; i--)
+        var pagesCount = _pages.Count;
+        for (int i = pagesCount - 1; i > 0; i--)
         {
             _pages.RemoveAt(i);
         }
@@ -45,7 +46,13 @@ internal class TestNavigationService : INavigationService
         _pages.RemoveAt(_pages.Count - 1);
         var page = _pages.Last();
         if (TestBase.CurrentView != null)
-            TestBase.CurrentView.SendDisappearing();
+        {
+            var currentView = TestBase.CurrentView;
+            Task.Run(() =>
+            {
+                currentView.SendDisappearing();
+            });
+        }
 
         TestBase.CurrentView = page;
         Console.WriteLine(page.ToString());

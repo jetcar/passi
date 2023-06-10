@@ -11,7 +11,7 @@ using passi_android.StorageModels;
 using passi_android.utils.Services.Certificate;
 using passi_android.ViewModels;
 using Xamarin.Essentials;
-using CertHelper = passi_android.utils.Services.Certificate.CertHelper;
+using Xamarin.Forms;
 
 namespace passi_android.utils.Services
 {
@@ -21,8 +21,13 @@ namespace passi_android.utils.Services
         List<ProviderDb> Providers { get; set; }
         List<AccountDb> Accounts { get; set; }
 
-        private ICertConverter _certConverter;
         private IMySecureStorage _mySecureStorage;
+
+        public SecureRepository(IMySecureStorage mySecureStorage)
+        {
+            _mySecureStorage = mySecureStorage;
+        }
+
         public void AddAccount(AccountDb account)
         {
             lock (_locker)
@@ -109,28 +114,19 @@ namespace passi_android.utils.Services
             }
         }
 
-        public async Task AddfingerPrintKey(AccountDb account, MySecureString pin)
+        public async Task SaveFingerPrintKey(AccountDb account, X509Certificate2 cert)
         {
-            var cert = _certConverter.GetCertificateWithKey(pin, account);
             _mySecureStorage.SetAsync(account.Thumbprint, Guid.NewGuid().ToString()).GetAwaiter().GetResult();
             var password = _mySecureStorage.GetAsync(account.Thumbprint).Result;
-            SaveCertificateWithFingerPrint(account.Guid, cert.Export(X509ContentType.Pkcs12, password));
+            var base64String = Convert.ToBase64String(cert.Export(X509ContentType.Pkcs12, password));
+            _mySecureStorage.SetAsync("fingerprint_" + account.Guid, base64String).GetAwaiter().GetResult();
             account.HaveFingerprint = true;
             UpdateAccount(account);
-
         }
 
-        public void SaveCertificateWithFingerPrint(Guid guid, byte[] export)
+        public X509Certificate2 GetCertificateWithFingerPrint(AccountDb account)
         {
-            var base64String = Convert.ToBase64String(export);
-            _mySecureStorage.SetAsync("fingerprint_" + guid, base64String).GetAwaiter().GetResult();
-        }
-
-        public X509Certificate2 GetCertificateWithFingerPrint(Guid guid)
-        {
-            var account = GetAccount(guid);
-
-            var certificateWithFingerPrintBase64 = _mySecureStorage.GetAsync("fingerprint_" + guid).Result;
+            var certificateWithFingerPrintBase64 = _mySecureStorage.GetAsync("fingerprint_" + account.Guid).Result;
             if (certificateWithFingerPrintBase64 != null)
             {
                 var bytes = Convert.FromBase64String(certificateWithFingerPrintBase64);
@@ -138,20 +134,21 @@ namespace passi_android.utils.Services
                 var cert = new X509Certificate2(bytes, password, X509KeyStorageFlags.Exportable);
                 return cert;
             }
-
             return null;
+        }
+
+        public X509Certificate2 GetCertificateWithKey(MySecureString pin, AccountDb account)
+        {
+            var mySecureString = new MySecureString(account.Salt);
+            if (pin != null)
+                mySecureString.Append(pin);
+            var secureStringToString = mySecureString.SecureStringToString();
+            return new X509Certificate2(Convert.FromBase64String(account.PrivateCertBinary), secureStringToString, X509KeyStorageFlags.Exportable);
         }
 
         private bool locked = false;
         private object locker = new object();
         private DateTime lockerTime;
-
-        public SecureRepository(ICertConverter certConverter, IMySecureStorage mySecureStorage)
-        {
-            _certConverter = certConverter;
-            _mySecureStorage = mySecureStorage;
-        }
-
 
         public bool CheckSessionKey(Guid msgSessionId)
         {
@@ -172,7 +169,7 @@ namespace passi_android.utils.Services
                     locked = false;
                     return false;
                 }
-                _mySecureStorage.SetAsync(msgSessionId.ToString(),"used").GetAwaiter().GetResult();
+                _mySecureStorage.SetAsync(msgSessionId.ToString(), "used").GetAwaiter().GetResult();
                 return true;
             }
         }
@@ -341,14 +338,15 @@ namespace passi_android.utils.Services
 
     public interface ISecureRepository
     {
+        X509Certificate2 GetCertificateWithKey(MySecureString pin, AccountDb account);
+
         void AddAccount(AccountDb account);
         AccountDb GetAccount(Guid accountGuid);
         void UpdateAccount(AccountDb account);
         void LoadAccountIntoList(ObservableCollection<AccountViewModel> accounts);
         void DeleteAccount(AccountViewModel account, Action callback);
-        Task AddfingerPrintKey(AccountDb account, MySecureString pin);
-        void SaveCertificateWithFingerPrint(Guid guid, byte[] export);
-        X509Certificate2 GetCertificateWithFingerPrint(Guid guid);
+        Task SaveFingerPrintKey(AccountDb account, X509Certificate2 cert);
+        X509Certificate2 GetCertificateWithFingerPrint(AccountDb account);
         bool CheckSessionKey(Guid msgSessionId);
         void ReleaseSessionKey(Guid msgSessionId);
         string GetDeviceId();

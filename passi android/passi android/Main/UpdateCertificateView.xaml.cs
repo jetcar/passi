@@ -228,7 +228,7 @@ namespace passi_android.Main
                         return;
                     }
 
-                    _certificatesService.StartCertGeneration(Pin1, PinOld, Account, (error) =>
+                    _certificatesService.UpdateCertificate(Pin1, PinOld, Account, (error) =>
                     {
                         _mainThreadService.BeginInvokeOnMainThread(() =>
                         {

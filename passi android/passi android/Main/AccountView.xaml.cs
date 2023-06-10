@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net.NetworkInformation;
 using passi_android.FingerPrint;
 using passi_android.utils;
 using Xamarin.Forms;
@@ -107,16 +108,42 @@ namespace passi_android.Main
             var button = sender as VisualElement;
             button.IsEnabled = false;
             if (AccountDb.pinLength > 0)
+            {
                 _navigationService.PushModalSinglePage(new UpdateCertificateView() { Account = AccountDb });
+            }
             else if (AccountDb.HaveFingerprint)
             {
-                //only fingerprint
+                App.FingerPrintReadingResult = (result) =>
+                {
+                    if (result.ErrorMessage == null)
+                    {
+                        _certificatesService.UpdateCertificateFingerprint(AccountDb, (error) =>
+                        {
+                            _mainThreadService.BeginInvokeOnMainThread(() =>
+                            {
+                                _navigationService.PopModal().ContinueWith((task =>
+                                {
+                                    Message = result.ErrorMessage;
+                                    App.StartFingerPrintReading();
+                                }));
+                            });
+
+                        });
+                    }
+                    else
+                    {
+                        Message = result.ErrorMessage;
+                        App.StartFingerPrintReading();
+                    }
+                };
+
+                App.StartFingerPrintReading();
             }
             else
             {
-                _certificatesService.StartCertGeneration(null, null, AccountDb, (error) =>
+                _certificatesService.UpdateCertificate(null, null, AccountDb, (error) =>
                 {
-
+                    Message = error;
                 });
             }
             button.IsEnabled = true;
@@ -138,14 +165,16 @@ namespace passi_android.Main
                             _navigationService.PushModalSinglePage(new FingerPrintConfirmByPinView(AccountDb));
                         });
                     else
+                    {
                         _mainThreadService.BeginInvokeOnMainThread(() =>
                         {
-                            _certificatesService.SignRequestAndSendResponce(AccountDb, null,
+                            _certificatesService.CreateFingerPrintCertificate(AccountDb, null,
                                 (error) =>
                                 {
                                     Message = error;
                                 });
                         });
+                    }
                 }
                 else
                 {
@@ -155,7 +184,7 @@ namespace passi_android.Main
             };
 
             App.StartFingerPrintReading();
-            
+
             button.IsEnabled = true;
         }
 

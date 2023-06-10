@@ -84,48 +84,49 @@ namespace passi_android.utils.Services.Certificate
             }
         }
 
-        public void SignRequestAndSendResponce(AccountDb _accountDb, MySecureString Pin1, Action<string> callback)
+        public void CreateFingerPrintCertificate(AccountDb accountDb, MySecureString pin1, Action<string> errorCallback)
         {
-
             _navigationService.PushModalSinglePage(new LoadingView(() =>
             {
-                _secureRepository.AddfingerPrintKey(_accountDb, Pin1).ContinueWith((result) =>
+                try
                 {
-                    if (result.IsFaulted)
+                    var cert = _secureRepository.GetCertificateWithKey(pin1, accountDb);
+                    _secureRepository.SaveFingerPrintKey(accountDb, cert).ContinueWith((result) =>
                     {
                         _mainThreadService.BeginInvokeOnMainThread(() =>
                         {
-                            _navigationService.PopModal().ContinueWith((task =>
-                            {
-                                callback.Invoke("Invalid Pin");
-
-                            }));
+                            App.FirstPage.DisplayAlert("Fingerprint", "Fingerprint key added", "Ok");
+                            _navigationService.NavigateTop();
                         });
-
-                        return;
-                    }
-
+                    });
+                }
+                catch (Exception e)
+                {
                     _mainThreadService.BeginInvokeOnMainThread(() =>
                     {
-                        App.FirstPage.DisplayAlert("Fingerprint", "Fingerprint key added", "Ok");
-                        _navigationService.NavigateTop();
-
+                        _navigationService.PopModal().ContinueWith((task =>
+                        {
+                            errorCallback.Invoke("Invalid Pin");
+                        }));
                     });
-                });
+                }
+
+
             }));
 
         }
 
-        public void StartCertGeneration(MySecureString pinNew, MySecureString pinOld, AccountDb Account, Action<string> errorAction)
+        public void UpdateCertificate(MySecureString pinNew, MySecureString pinOld, AccountDb accountDb, Action<string> errorAction)
         {
             _navigationService.PushModalSinglePage(new LoadingView(() =>
             {
-                GenerateCert(pinNew, pinOld, Account, errorAction).ContinueWith(certDto =>
+                GenerateCertFromOldCertificate(pinNew, pinOld, accountDb, errorAction).ContinueWith(certDto =>
                 {
                     if (certDto?.Result != null)
                     {
-                        var provider = _secureRepository.GetProvider(Account.ProviderGuid);
-                        _restService.ExecutePostAsync<Tuple<CertificateUpdateDto, X509Certificate2,string, byte[]>>(provider, provider.UpdateCertificate, certDto.Result).ContinueWith((response) =>
+                        var provider = _secureRepository.GetProvider(accountDb.ProviderGuid);
+                        certDto.Result.Item1.DeviceId = _secureRepository.GetDeviceId();
+                        _restService.ExecutePostAsync(provider, provider.UpdateCertificate, certDto.Result.Item1).ContinueWith((response) =>
                         {
                             if (response.Result.IsSuccessful)
                             {
@@ -133,20 +134,68 @@ namespace passi_android.utils.Services.Certificate
 
                                 var publicCertHelper = _certHelper.ConvertToPublicCertificate(certDto.Result.Item2);
 
-                                Account.Salt = certDto.Result.Item3;
-                                Account.PrivateCertBinary = certificateBase64;
-                                Account.pinLength = pinNew?.Length ?? 0;
-                                Account.Thumbprint = certDto.Result.Item2.Thumbprint;
-                                Account.ValidFrom = certDto.Result.Item2.NotBefore;
-                                Account.ValidTo = certDto.Result.Item2.NotAfter;
-                                Account.PublicCertBinary = publicCertHelper.BinaryData;
+                                accountDb.Salt = certDto.Result.Item3;
+                                accountDb.PrivateCertBinary = certificateBase64;
+                                accountDb.pinLength = pinNew?.Length ?? 0;
+                                accountDb.Thumbprint = certDto.Result.Item2.Thumbprint;
+                                accountDb.ValidFrom = certDto.Result.Item2.NotBefore;
+                                accountDb.ValidTo = certDto.Result.Item2.NotAfter;
+                                accountDb.PublicCertBinary = publicCertHelper.BinaryData;
 
-                                _secureRepository.UpdateAccount(Account);
-                                _secureRepository.AddfingerPrintKey(Account, pinNew).GetAwaiter().GetResult();
+                                _secureRepository.UpdateAccount(accountDb);
+                                _secureRepository.SaveFingerPrintKey(accountDb, certDto.Result.Item2).GetAwaiter().GetResult();
 
                                 _mainThreadService.BeginInvokeOnMainThread(() => { _navigationService.NavigateTop(); });
                             }
-                            if (!response.Result.IsSuccessful && response.Result.StatusCode == HttpStatusCode.BadRequest)
+                            else if (!response.Result.IsSuccessful && response.Result.StatusCode == HttpStatusCode.BadRequest)
+                            {
+                                _navigationService.PopModal().ContinueWith((task) =>
+                                {
+                                    errorAction.Invoke(JsonConvert.DeserializeObject<ApiResponseDto<string>>(response.Result.Content).Message);
+                                });
+                            }
+                            else
+                            {
+                                _navigationService.PopModal().ContinueWith((task) =>
+                                {
+                                    errorAction.Invoke("Network error. Try again");
+                                });
+                            }
+                        });
+                    }
+                });
+            }));
+        }
+        public void UpdateCertificateFingerprint(AccountDb accountDb, Action<string> errorAction)
+        {
+            _navigationService.PushModalSinglePage(new LoadingView(() =>
+            {
+                GenerateCertFromOldCertificateFingerPrint(accountDb, errorAction).ContinueWith(certDto =>
+                {
+                    if (certDto?.Result != null)
+                    {
+                        var provider = _secureRepository.GetProvider(accountDb.ProviderGuid);
+                        certDto.Result.Item1.DeviceId = _secureRepository.GetDeviceId();
+                        _restService.ExecutePostAsync(provider, provider.UpdateCertificate, certDto.Result.Item1).ContinueWith((response) =>
+                        {
+                            if (response.Result.IsSuccessful)
+                            {
+                                var certificateBase64 = Convert.ToBase64String(certDto?.Result.Item4); //importable certificate
+
+                                var publicCertHelper = _certHelper.ConvertToPublicCertificate(certDto.Result.Item2);
+                                accountDb.Salt = certDto.Result.Item3;
+                                accountDb.PrivateCertBinary = certificateBase64;
+                                accountDb.Thumbprint = certDto.Result.Item2.Thumbprint;
+                                accountDb.ValidFrom = certDto.Result.Item2.NotBefore;
+                                accountDb.ValidTo = certDto.Result.Item2.NotAfter;
+                                accountDb.PublicCertBinary = publicCertHelper.BinaryData;
+
+                                _secureRepository.UpdateAccount(accountDb);
+                                _secureRepository.SaveFingerPrintKey(accountDb, certDto.Result.Item2).GetAwaiter().GetResult();
+
+                                _mainThreadService.BeginInvokeOnMainThread(() => { _navigationService.NavigateTop(); });
+                            }
+                            else if (!response.Result.IsSuccessful && response.Result.StatusCode == HttpStatusCode.BadRequest)
                             {
                                 _navigationService.PopModal().ContinueWith((task) =>
                                 {
@@ -166,7 +215,7 @@ namespace passi_android.utils.Services.Certificate
             }));
         }
 
-        public async Task<Tuple<CertificateUpdateDto, X509Certificate2, string, byte[]>> GenerateCert(MySecureString pinNew, MySecureString pinOld, AccountDb Account, Action<string> callback)
+        private async Task<Tuple<CertificateUpdateDto, X509Certificate2, string, byte[]>> GenerateCertFromOldCertificate(MySecureString pinNew, MySecureString pinOld, AccountDb Account, Action<string> callback)
         {
 
             var cert = new CertificateUpdateDto();
@@ -189,11 +238,36 @@ namespace passi_android.utils.Services.Certificate
                 return new Tuple<CertificateUpdateDto, X509Certificate2, string, byte[]>(cert, certificate.Result.Item1, certificate.Result.Item2, certificate.Result.Item3);
             });
         }
+        private async Task<Tuple<CertificateUpdateDto, X509Certificate2, string, byte[]>> GenerateCertFromOldCertificateFingerPrint(AccountDb accountDb, Action<string> callback)
+        {
+
+            var cert = new CertificateUpdateDto();
+            cert.ParentCertThumbprint = accountDb.Thumbprint;
+            return await GenerateCertificate(accountDb.Email, null).ContinueWith(certificate =>
+            {
+                var publicCertHelper = _certHelper.ConvertToPublicCertificate(certificate.Result.Item1);
+
+                try
+                {
+                    var fingerPrintCertificate = _secureRepository.GetCertificateWithFingerPrint(accountDb);
+                    cert.ParentCertHashSignature = _certHelper.SignByFingerPrint(publicCertHelper.BinaryData, fingerPrintCertificate).Result;
+                }
+                catch (Exception e)
+                {
+                    callback.Invoke("Invalid old pin");
+
+                    return null;
+                }
+                cert.PublicCert = publicCertHelper.BinaryData;
+                return new Tuple<CertificateUpdateDto, X509Certificate2, string, byte[]>(cert, certificate.Result.Item1, certificate.Result.Item2, certificate.Result.Item3);
+            });
+        }
     }
     public interface ICertificatesService
     {
         Task<Tuple<X509Certificate2, string, byte[]>> GenerateCertificate(string subject, MySecureString pin);
-        void SignRequestAndSendResponce(AccountDb _accountDb, MySecureString Pin1, Action<string> callback);
-        void StartCertGeneration(MySecureString pinNew, MySecureString pinOld, AccountDb Account, Action<string> errorAction);
+        void CreateFingerPrintCertificate(AccountDb accountDb, MySecureString pin1, Action<string> errorCallback);
+        void UpdateCertificate(MySecureString pinNew, MySecureString pinOld, AccountDb accountDb, Action<string> errorAction);
+        void UpdateCertificateFingerprint(AccountDb accountDb, Action<string> action);
     }
 }

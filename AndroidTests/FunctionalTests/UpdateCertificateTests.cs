@@ -95,5 +95,82 @@ namespace AndroidTests.FunctionalTests
             }
             Assert.IsTrue(CurrentView is MainView);
         }
+        [Test,Timeout(10000)]
+        public void UpdateCertificateNoPin()
+        {
+            var mainView = MainTestClass.OpenMainPage();
+            var tcView = MainTestClass.ClickAddAccount(mainView);
+            var addAccountView = TermsAgreementsTestClass.ClickAgree(tcView);
+            addAccountView.EmailText = "test@test.ee";
+            TestRestService.Result[ConfigSettings.Signup] = SuccesfullResponce();
+            var registrationConfirmation = AddAccountTestClass.ClickConfirm(addAccountView);
+            RegistrationConfirmationTestClass.EnterInCorrectCode(registrationConfirmation);
+            Assert.AreEqual(registrationConfirmation.ResponseError, "error");
+            var finishConfirmation = RegistrationConfirmationTestClass.EnterCorrectCode(registrationConfirmation);
+            TestRestService.Result[ConfigSettings.SignupConfirmation] = SuccesfullResponce();
+            var mainPage = FinishConfirmationTestClass.FinishRegistrationSkipPin(finishConfirmation);
+            while (!mainView._loadAccountTask.IsCompleted)
+            {
+                Thread.Sleep(1);
+            }
+            Assert.AreEqual(mainPage.Accounts.Count, 1);
+
+            var accountView = MainTestClass.OpenAccount(mainPage, mainPage.Accounts[0]);
+            TestRestService.Result[ConfigSettings.UpdateCertificate] = TestBase.SuccesfullResponce();
+            accountView.UpdateCertificate_OnClicked(new Button(),null);
+
+            Assert.IsTrue(CurrentView is LoadingView);
+            while (!(CurrentView is MainView) || !CurrentView.Appeared)
+            {
+                Thread.Sleep(1);
+            }
+            Assert.IsTrue(CurrentView is MainView);
+        } 
+        [Test,Timeout(10000)]
+        public void UpdateCertificateNoPinFingerprint()
+        {
+            var mainView = MainTestClass.OpenMainPage();
+            var tcView = MainTestClass.ClickAddAccount(mainView);
+            var addAccountView = TermsAgreementsTestClass.ClickAgree(tcView);
+            addAccountView.EmailText = "test@test.ee";
+            TestRestService.Result[ConfigSettings.Signup] = SuccesfullResponce();
+            var registrationConfirmation = AddAccountTestClass.ClickConfirm(addAccountView);
+            RegistrationConfirmationTestClass.EnterInCorrectCode(registrationConfirmation);
+            Assert.AreEqual(registrationConfirmation.ResponseError, "error");
+            var finishConfirmation = RegistrationConfirmationTestClass.EnterCorrectCode(registrationConfirmation);
+            TestRestService.Result[ConfigSettings.SignupConfirmation] = SuccesfullResponce();
+            var mainPage = FinishConfirmationTestClass.FinishRegistrationSkipPin(finishConfirmation);
+            while (!mainView._loadAccountTask.IsCompleted)
+            {
+                Thread.Sleep(1);
+            }
+            Assert.AreEqual(mainPage.Accounts.Count, 1);
+
+            var accountView = MainTestClass.OpenAccount(mainPage, mainPage.Accounts[0]);
+
+            FingerPrintTestClass.AddFingerPrintNoPin(accountView);
+
+            while (!(CurrentView is MainView))
+            {
+                Thread.Sleep(1);
+            }
+
+            Assert.IsTrue(CurrentView is MainView);
+
+            accountView = MainTestClass.OpenAccount(mainPage, mainPage.Accounts[0]);
+            TestRestService.Result[ConfigSettings.UpdateCertificate] = TestBase.SuccesfullResponce();
+            accountView.UpdateCertificate_OnClicked(new Button(),null);
+            TestBase.TouchFingerPrintWithGoodResult();
+            while (!(CurrentView is LoadingView) || !CurrentView.Appeared)
+            {
+                Thread.Sleep(1);
+            }
+            Assert.IsTrue(CurrentView is LoadingView);
+            while (!(CurrentView is MainView) || !CurrentView.Appeared)
+            {
+                Thread.Sleep(1);
+            }
+            Assert.IsTrue(CurrentView is MainView);
+        }
     }
 }

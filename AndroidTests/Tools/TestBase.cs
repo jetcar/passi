@@ -34,7 +34,6 @@ public class TestBase
 
         services.AddSingleton<ISecureRepository, SecureRepository>();
         services.AddSingleton<IDateTimeService, DateTimeService>();
-        services.AddSingleton<ICertConverter, CertConverter>();
         services.AddSingleton<ICertificatesService, CertificatesService>();
         services.AddSingleton<ICertHelper, CertHelper>();
         services.AddSingleton<ISyncService, SyncService>();

@@ -10,11 +10,9 @@ namespace passi_android.utils.Services.Certificate
     public class CertHelper : ICertHelper
     {
         private ISecureRepository _secureRepository;
-        ICertConverter _certConverter;
-        public CertHelper(ISecureRepository secureRepository, ICertConverter certConverter)
+        public CertHelper(ISecureRepository secureRepository)
         {
             _secureRepository = secureRepository;
-            _certConverter = certConverter;
         }
 
         public PublicCert ConvertToPublicCertificate(X509Certificate2 cert)
@@ -50,7 +48,7 @@ namespace passi_android.utils.Services.Certificate
         public async Task<string> Sign(Guid accountGuid, MySecureString pin, string dataForSigning)
         {
             var account = _secureRepository.GetAccount(accountGuid);
-            var privatecertificate = _certConverter.GetCertificateWithKey(pin, account);
+            var privatecertificate = _secureRepository.GetCertificateWithKey(pin, account);
             return GetSignedData(dataForSigning, privatecertificate);
         }
 

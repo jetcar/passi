@@ -24,7 +24,7 @@ namespace AppCommonTests
             var certificate = new X509Certificate2(cert, password + "1234", X509KeyStorageFlags.Exportable);
 
             var data = "111111111111111111111111111111111111111";
-            var CertHelper = new CertHelper(null, new CertConverter());
+            var CertHelper = new CertHelper(null);
             var signedData = CertHelper.GetSignedData(data, certificate);
 
             var publicCertBytes = certificate.GetRawCertData();
@@ -47,7 +47,7 @@ namespace AppCommonTests
         [Test]
         public void SignByCertAndVerify2()
         {
-            var CertHelper = new CertHelper(null, new CertConverter());
+            var CertHelper = new CertHelper(null);
             var CertificatesService = new CertificatesService(null, null, null,null,null);
             var task = CertificatesService.GenerateCertificate("test@mail.ee", new MySecureString("1234")).Result;
             string password = task.Item2;
@@ -67,7 +67,7 @@ namespace AppCommonTests
         [Test]
         public void ExportImportVerify()
         {
-            var CertHelper = new CertHelper(null, new CertConverter());
+            var CertHelper = new CertHelper(null);
             var CertificatesService = new CertificatesService(null, null, null, null, null);
             var task = CertificatesService.GenerateCertificate("test@mail.ee", new MySecureString("1234")).Result;
             string password = task.Item2;

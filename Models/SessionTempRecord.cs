@@ -1,6 +1,5 @@
 ﻿using NodaTime;
 using System;
-using System.ComponentModel.DataAnnotations;
 
 namespace Models
 {

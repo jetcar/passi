@@ -2,7 +2,6 @@
 using System.Net.Http;
 using ConfigurationManager;
 using SendGrid;
-using SendGrid.Helpers.Errors.Model;
 using SendGrid.Helpers.Mail;
 
 namespace Services

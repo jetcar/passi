@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Repos;
 using Services;
 using WebApiDto;
@@ -9,7 +10,7 @@ namespace passi_webapi.Controllers
     [Route("api/[controller]")]
     public class TokenController : ControllerBase
     {
-      
+
         IUserRepository _userRepository;
         IUserService _userService;
         public TokenController(IUserRepository userRepository, IUserService userService)
@@ -21,12 +22,16 @@ namespace passi_webapi.Controllers
         [HttpPost, Route("update")]
         public IActionResult UpdateToken([FromBody] DeviceTokenUpdateDto deviceTokenUpdateDto)
         {
-            using (var transaction = _userRepository.BeginTransaction())
+            var strategy = _userRepository.GetExecutionStrategy();
+            strategy.Execute(() =>
             {
-                _userRepository.UpdateNotificationToken(deviceTokenUpdateDto.DeviceId,
-                    deviceTokenUpdateDto.Token, deviceTokenUpdateDto.Platform);
-                transaction.Commit();
-            }
+                using (var transaction = _userRepository.BeginTransaction())
+                {
+                    _userRepository.UpdateNotificationToken(deviceTokenUpdateDto.DeviceId,
+                        deviceTokenUpdateDto.Token, deviceTokenUpdateDto.Platform);
+                    transaction.Commit();
+                }
+            });
 
             return Ok();
         }

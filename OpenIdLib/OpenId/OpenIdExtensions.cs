@@ -1,4 +1,3 @@
-using System.Net;
 using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.AspNetCore.Authentication;
@@ -11,8 +10,6 @@ using OpenIdLib.AutomaticTokenManagement;
 using passi_webapi.Dto;
 using RestSharp;
 using Services;
-using WebApiDto.Auth;
-using WebApiDto.Certificate;
 
 namespace OpenIdLib.OpenId
 {

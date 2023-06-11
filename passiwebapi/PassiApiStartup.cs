@@ -16,10 +16,12 @@ using OpenIdLib.OpenId;
 using System.Linq;
 using Models;
 using AutoMapper;
+using Elastic.Apm.NetCoreAll;
 using passi_webapi.Dto;
 using NodaTime;
 using Google.Cloud.Diagnostics.AspNetCore3;
 using Google.Cloud.Diagnostics.Common;
+using System.Collections.Generic;
 
 namespace passi_webapi
 {
@@ -127,6 +129,18 @@ namespace passi_webapi
                     applicationBuilder.UseDeveloperExceptionPage();
                 }
 
+                var elasticSecret = Environment.GetEnvironmentVariable("SecretToken");
+                var elasticUrl = Environment.GetEnvironmentVariable("ServerUrl");
+                var myConfiguration = new Dictionary<string, string>
+                {
+                    {"ElasticApm:ServiceName", "passiapi"},
+                    {"ElasticApm:SecretToken", elasticSecret},
+                    {"ElasticApm:ServerUrl", elasticUrl},
+                    {"ElasticApm:Environment", "dev"},
+                };
+                var config = new ConfigurationBuilder().AddInMemoryCollection(myConfiguration).Build();
+                if (!string.IsNullOrEmpty(elasticSecret))
+                    applicationBuilder.UseAllElasticApm(config);
                 applicationBuilder.UseRouting();
 
                 //applicationBuilder.UseMiddleware<MyAuthenticationMiddleware>();

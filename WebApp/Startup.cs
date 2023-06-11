@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -14,6 +13,8 @@ using Serilog.Events;
 using Services;
 using Google.Cloud.Diagnostics.AspNetCore3;
 using Google.Cloud.Diagnostics.Common;
+using Elastic.Apm.NetCoreAll;
+using System.Collections.Generic;
 
 namespace WebApp
 {
@@ -35,6 +36,7 @@ namespace WebApp
             var clientId = Environment.GetEnvironmentVariable("ClientId") ?? Configuration.GetValue<string>("AppSetting:ClientId");
             var secret = Environment.GetEnvironmentVariable("ClientSecret") ?? Configuration.GetValue<string>("AppSetting:ClientSecret");
             var projectId = Environment.GetEnvironmentVariable("projectId") ?? Configuration.GetValue<string>("AppSetting:projectId");
+
 
             services.AddGoogleTraceForAspNetCore(new AspNetCoreTraceOptions
             {
@@ -67,7 +69,7 @@ namespace WebApp
                         options.SlidingExpiration = true;
                         options.ExpireTimeSpan = System.TimeSpan.FromDays(30);
                     })
-                .AddOpenIdAuthentication(identityUrl, returnUrl, passiUrl, clientId, secret,myRestClient)
+                .AddOpenIdAuthentication(identityUrl, returnUrl, passiUrl, clientId, secret, myRestClient)
                 .AddOpenIdTokenManagement(x =>
                 {
                     x.RevokeRefreshTokenOnSignout = true;
@@ -93,6 +95,19 @@ namespace WebApp
                     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                     //applicationBuilder.UseHsts();
                 }
+
+                var elasticSecret = Environment.GetEnvironmentVariable("SecretToken");
+                var elasticUrl = Environment.GetEnvironmentVariable("ServerUrl");
+                var myConfiguration = new Dictionary<string, string>
+                {
+                    {"ElasticApm:ServiceName", "webapp"},
+                    {"ElasticApm:SecretToken", elasticSecret},
+                    {"ElasticApm:ServerUrl", elasticUrl},
+                    {"ElasticApm:Environment", "dev"},
+                };
+                var config = new ConfigurationBuilder().AddInMemoryCollection(myConfiguration).Build();
+                if (!string.IsNullOrEmpty(elasticSecret))
+                    applicationBuilder.UseAllElasticApm(config);
                 applicationBuilder.UseForwardedHeaders();
                 applicationBuilder.UseCookiePolicy(
                             new CookiePolicyOptions

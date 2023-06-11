@@ -1,9 +1,6 @@
-using System.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
-using ConfigurationManager;
 using Serilog;
-using System.Net;
 
 namespace IdentityServer
 {

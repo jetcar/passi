@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using AppCommon;
-using Models;
+﻿using Models;
 using Repos;
 using WebApiDto.SignUp;
 

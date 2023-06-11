@@ -1,32 +1,25 @@
 ﻿using System;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
-using AppCommon;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Models;
 
 namespace Repos
 {
-    public class UserRepository : IUserRepository
+    public class UserRepository : BaseRepo<PassiDbContext>, IUserRepository
     {
-        private PassiDbContext _dbContext;
 
-        public UserRepository(PassiDbContext dbContext)
+        public UserRepository(PassiDbContext dbContext) : base(dbContext)
         {
-            _dbContext = dbContext;
         }
+
 
         public bool IsUsernameTaken(string username)
         {
             return _dbContext.Users.Any(x => x.EmailHash == username);
         }
-
-        public IDbContextTransaction BeginTransaction()
-        {
-            return _dbContext.Database.BeginTransaction();
-        }
-
+        
         public UserDb AddUser(UserDb user)
         {
             var device = _dbContext.Devices.FirstOrDefault(x => x.DeviceId == user.Device.DeviceId);
@@ -125,13 +118,12 @@ namespace Repos
                 _dbContext.Users.Where(x => x.Id == exinstingUser.Id).DeleteFromQuery();
             }
         }
+
     }
 
-    public interface IUserRepository
+    public interface IUserRepository : ITransaction
     {
         public bool IsUsernameTaken(string username);
-
-        IDbContextTransaction BeginTransaction();
 
         UserDb AddUser(UserDb user);
 

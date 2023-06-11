@@ -1,6 +1,5 @@
-﻿using System.Security.Cryptography;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.Query.Internal;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Repos;
 using Services;
 using WebApiDto.SignUp;
@@ -25,36 +24,45 @@ namespace passi_webapi.Controllers
         [HttpPost, Route("signup")]
         public IActionResult SignUp([FromBody] SignupDto signupDto)
         {
-            using (var transaction = _userRepository.BeginTransaction())
+            var strategy = _userRepository.GetExecutionStrategy();
+            strategy.Execute(() =>
             {
-                if (_userRepository.IsUsernameTaken(signupDto.Email))
+                using (var transaction = _userRepository.BeginTransaction())
                 {
-                    _userService.SendConfirmationEmail(signupDto);
-                }
-                else
-                {
-                    _userService.AddUserAndSendConfirmationEmail(signupDto);
-                }
+                    if (_userRepository.IsUsernameTaken(signupDto.Email))
+                    {
+                        _userService.SendConfirmationEmail(signupDto);
+                    }
+                    else
+                    {
+                        _userService.AddUserAndSendConfirmationEmail(signupDto);
+                    }
 
-                transaction.Commit();
-            }
-
+                    transaction.Commit();
+                }
+            });
             return Ok();
         }
 
         [HttpPost, Route("confirm")]
         public IActionResult Confirm([FromBody] SignupConfirmationDto signupConfirmationDto)
         {
-            using (var transaction = _userRepository.BeginTransaction())
+            var strategy = _userRepository.GetExecutionStrategy();
+            strategy.Execute(() =>
             {
-                if (!_userRepository.ValidateConfirmationCode(signupConfirmationDto.Email, signupConfirmationDto.Code))
-                    throw new BadRequestException("Code not found");
 
-                _certValidator.ValidateCertificate(signupConfirmationDto.PublicCert, signupConfirmationDto.Email);
+                using (var transaction = _userRepository.BeginTransaction())
+                {
+                    if (!_userRepository.ValidateConfirmationCode(signupConfirmationDto.Email,
+                            signupConfirmationDto.Code))
+                        throw new BadRequestException("Code not found");
 
-                _userService.ConfirmUser(signupConfirmationDto);
-                transaction.Commit();
-            }
+                    _certValidator.ValidateCertificate(signupConfirmationDto.PublicCert, signupConfirmationDto.Email);
+
+                    _userService.ConfirmUser(signupConfirmationDto);
+                    transaction.Commit();
+                }
+            });
 
             return Ok();
         }
@@ -62,12 +70,8 @@ namespace passi_webapi.Controllers
         [HttpPost, Route("check")]
         public IActionResult Check([FromBody] SignupCheckDto confirmationDto)
         {
-            using (var transaction = _userRepository.BeginTransaction())
-            {
-                if (!_userRepository.ValidateConfirmationCode(confirmationDto.Email, confirmationDto.Code))
-                    throw new BadRequestException("Code not found");
-
-            }
+            if (!_userRepository.ValidateConfirmationCode(confirmationDto.Email, confirmationDto.Code))
+                throw new BadRequestException("Code not found");
 
             return Ok();
         }

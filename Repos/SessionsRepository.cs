@@ -1,36 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using AppCommon;
 using ConfigurationManager;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Conventions;
-using Microsoft.EntityFrameworkCore.Storage;
 using Models;
 using NodaTime;
 
 namespace Repos
 {
-    public class SessionsRepository : ISessionsRepository
+    public class SessionsRepository : BaseRepo<PassiDbContext>, ISessionsRepository
     {
-        private PassiDbContext _dbContext;
         private AppSetting _appSetting;
         private int _sessionTimeout;
         IRedisService _redisService;
 
-        public SessionsRepository(PassiDbContext dbContext, AppSetting appSetting, IRedisService redisService)
+        public SessionsRepository(PassiDbContext dbContext, AppSetting appSetting, IRedisService redisService) : base(dbContext)
         {
-            _dbContext = dbContext;
             _appSetting = appSetting;
             _redisService = redisService;
             _sessionTimeout = Convert.ToInt32(_appSetting["Timeout"]);
         }
-
-        public IDbContextTransaction BeginTransaction()
-        {
-            return _dbContext.Database.BeginTransaction();
-        }
-
+        
         public SessionTempRecord BeginSession(string username, string clientId, string randomString, string color, string returnUrl)
         {
             var user = _dbContext.Users.First(x => x.EmailHash == username);
@@ -75,7 +65,7 @@ namespace Repos
             if (session != null)
             {
                 var sessionDb = _dbContext.Sessions.FirstOrDefault(x => x.Guid == guid);
-                if(sessionDb != null)
+                if (sessionDb != null)
                 {
                     sessionDb.SignedHashNew = signedHash;
                     _dbContext.SaveChanges();
@@ -88,7 +78,7 @@ namespace Repos
 
         public SessionTempRecord GetActiveSession(string deviceId, Instant expirationTime)
         {
-            var sessionDbs = _dbContext.Sessions.Include(x => x.User).Where(x => x.User.Device.DeviceId == deviceId).OrderByDescending(x=>x.CreationTime).FirstOrDefault(x => x.Status != SessionStatus.Canceled && x.Status != SessionStatus.Confirmed && x.ExpirationTime >= expirationTime);
+            var sessionDbs = _dbContext.Sessions.Include(x => x.User).Where(x => x.User.Device.DeviceId == deviceId).OrderByDescending(x => x.CreationTime).FirstOrDefault(x => x.Status != SessionStatus.Canceled && x.Status != SessionStatus.Confirmed && x.ExpirationTime >= expirationTime);
             if (sessionDbs != null)
                 return _redisService.Get(sessionDbs.Guid);
             return null;
@@ -124,14 +114,11 @@ namespace Repos
             if (certificate != null)
                 return sessionDb;
             return null;
-
         }
     }
 
-    public interface ISessionsRepository
+    public interface ISessionsRepository : ITransaction
     {
-        IDbContextTransaction BeginTransaction();
-
         SessionTempRecord BeginSession(string username, string clientId, string randomString, string color, string returnUrl);
 
         SessionTempRecord CheckSessionAndReturnUser(Guid sessionId);

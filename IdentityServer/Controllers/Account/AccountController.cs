@@ -26,12 +26,10 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using passi_webapi.Dto;
-using Repos.Migrations;
 using RestSharp;
 using Services;
 using WebApiDto;
 using WebApiDto.Auth;
-using WebApiDto.Certificate;
 
 namespace IdentityServer.Controllers.Account
 {

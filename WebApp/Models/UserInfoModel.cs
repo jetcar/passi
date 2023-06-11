@@ -1,5 +1,4 @@
 using System.Security.Claims;
-using IdentityModel;
 
 namespace WebApp.Models
 {

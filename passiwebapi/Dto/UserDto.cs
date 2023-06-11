@@ -1,7 +1,5 @@
-﻿using Models;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System;
-using NodaTime;
 
 namespace passi_webapi.Dto
 {

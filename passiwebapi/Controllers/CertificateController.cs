@@ -1,13 +1,9 @@
-﻿using System;
-using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Models;
 using passi_webapi.Dto;
 using Repos;
 using Services;
-using WebApiDto;
 using WebApiDto.Certificate;
 
 namespace passi_webapi.Controllers
@@ -30,35 +26,39 @@ namespace passi_webapi.Controllers
         [HttpGet, Route("Public")]
         public CertificateDto PublicCert([FromQuery] string thumbprint, string username)
         {
-            using (var transaction = _certificateRepository.BeginTransaction())
+            var certificateDb = _certificateRepository.GetUserCertificate(username, thumbprint);
+            return new CertificateDto()
             {
-                var certificateDb = _certificateRepository.GetUserCertificate(username, thumbprint);
-                return new CertificateDto()
-                {
-                    PublicCert = certificateDb?.PublicCert,
-                };
-            }
+                PublicCert = certificateDb?.PublicCert,
+            };
 
         }
 
         [HttpPost, Route("UpdatePublicCert")]
         public CertificateUpdateDto UpdatePublicCert([FromBody] CertificateUpdateDto newCertificate)
         {
-            using (var transaction = _certificateRepository.BeginTransaction())
+            string cert = "";
+            var strategy = _certificateRepository.GetExecutionStrategy();
+            strategy.Execute(() =>
             {
-                var oldCertificate = _certificateRepository.GetCertificate(newCertificate.ParentCertThumbprint);
-
-                _certValidator.ValidateCertificateChain(newCertificate, oldCertificate);
-                _certValidator.ValidateCertificate(newCertificate, oldCertificate);
-
-                var certificateDb = _certificatesService.UpdateCertificate(newCertificate);
-                transaction.Commit();
-                return new CertificateUpdateDto()
+                using (var transaction = _certificateRepository.BeginTransaction())
                 {
-                    PublicCert = certificateDb?.PublicCert
-                };
+                    var oldCertificate = _certificateRepository.GetCertificate(newCertificate.ParentCertThumbprint);
 
-            }
+                    _certValidator.ValidateCertificateChain(newCertificate, oldCertificate);
+                    _certValidator.ValidateCertificate(newCertificate, oldCertificate);
+
+                    var certificateDb = _certificatesService.UpdateCertificate(newCertificate);
+                    transaction.Commit();
+                    cert = certificateDb?.PublicCert;
+                    
+
+                }
+            });
+            return new CertificateUpdateDto()
+            {
+                PublicCert = cert
+            };
 
         }
     }

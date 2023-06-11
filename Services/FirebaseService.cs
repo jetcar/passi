@@ -2,12 +2,11 @@
 using System.Collections.Generic;
 using System.Threading;
 using ConfigurationManager;
-using FirebaseAdmin;
 using FirebaseAdmin.Messaging;
-using Google.Apis.Auth.OAuth2;
 using Repos;
 using Serilog.Core;
 using AppCommon;
+using Microsoft.EntityFrameworkCore;
 
 namespace Services
 {
@@ -56,14 +55,19 @@ namespace Services
                 catch (Exception e)
                 {
                     var sessionrepo = new SessionsRepository(new PassiDbContext(appsetting, currentContext, Logger.None), appsetting, _redisService);
-                    using (var transaction = sessionrepo.BeginTransaction())
+                    var strategy = sessionrepo.GetExecutionStrategy();
+                    strategy.Execute(() =>
                     {
-                        var session = sessionrepo.GetSessionById(sessionId);
-                        session.Status = Models.SessionStatus.Error;
-                        session.ErrorMessage = e.Message.Truncate(256);
-                        sessionrepo.Update(session);
-                        transaction.Commit();
-                    }
+                        using (var transaction = sessionrepo.BeginTransaction())
+                        {
+                            var session = sessionrepo.GetSessionById(sessionId);
+                            session.Status = Models.SessionStatus.Error;
+                            session.ErrorMessage = e.Message.Truncate(256);
+                            sessionrepo.Update(session);
+                            transaction.Commit();
+                        }
+                    });
+
                 }
             }).Start();
             return "";

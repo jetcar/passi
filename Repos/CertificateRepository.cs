@@ -1,27 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AppCommon;
+﻿using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Models;
 
 namespace Repos
 {
-    public class CertificateRepository : ICertificateRepository
+    public class CertificateRepository : BaseRepo<PassiDbContext>, ICertificateRepository
     {
-        private PassiDbContext _dbContext;
-
-        public CertificateRepository(PassiDbContext dbContext)
+        public CertificateRepository(PassiDbContext dbContext) : base(dbContext)
         {
-            _dbContext = dbContext;
-        }
-
-        public IDbContextTransaction BeginTransaction()
-        {
-            return _dbContext.Database.BeginTransaction();
         }
 
         public CertificateDb GetUserCertificate(string username, string thumbprint)
@@ -66,11 +53,12 @@ namespace Repos
         {
             return _dbContext.Certificates.FirstOrDefault(x => x.Thumbprint == parentCertThumbprint);
         }
+
+
     }
 
-    public interface ICertificateRepository
+    public interface ICertificateRepository : ITransaction
     {
-        public IDbContextTransaction BeginTransaction();
 
         CertificateDb GetUserCertificate(string username, string thumbprint);
 

@@ -4,7 +4,6 @@ using AppCommon;
 using ConfigurationManager;
 using Microsoft.Extensions.Configuration;
 using NUnit.Framework;
-using Serilog.Core;
 
 namespace ConfigurationManagerTests
 {

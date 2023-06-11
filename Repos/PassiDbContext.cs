@@ -91,7 +91,11 @@ namespace Repos
             //optionsBuilder.AddInterceptors(new TaggedQueryCommandInterceptor(_logger));
             _connectionString = $"host={_appSetting["DbHost"]};database={_appSetting["DbName"]};user id={_appSetting["DbUser"]};password={_appSetting["DbPassword"]};Ssl Mode={_appSetting["DbSslMode"]};{trustMode}";
             Console.WriteLine(_connectionString);
-            optionsBuilder.UseNpgsql(_connectionString, o => o.UseNodaTime());
+            optionsBuilder.UseNpgsql(_connectionString, o =>
+            {
+                o.UseNodaTime();
+                o.EnableRetryOnFailure(30, TimeSpan.FromSeconds(2), null);
+            });
             //optionsBuilder.UseModel(PassiDbContextModel.Instance);
         }
 

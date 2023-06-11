@@ -53,7 +53,11 @@ namespace IdentityServer.DbContext
             var serviceProvider = new ServiceCollection()
                 .AddEntityFrameworkNpgsql()
                 .BuildServiceProvider();
-            optionsBuilder.UseNpgsql(connectionString).UseInternalServiceProvider(serviceProvider);
+            optionsBuilder.UseNpgsql(connectionString, o =>
+            {
+                o.EnableRetryOnFailure(30, TimeSpan.FromSeconds(2), null);
+
+            }).UseInternalServiceProvider(serviceProvider);
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

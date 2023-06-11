@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using ConfigurationManager;
 using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
@@ -48,7 +49,12 @@ namespace WebApp
             var serviceProvider = new ServiceCollection()
                 .AddEntityFrameworkNpgsql()
                 .BuildServiceProvider();
-            optionsBuilder.UseNpgsql(_connectionString, c => c.MigrationsAssembly(typeof(WebAppDbContext).Assembly.FullName)).UseInternalServiceProvider(serviceProvider);
+            optionsBuilder.UseNpgsql(_connectionString, c =>
+            {
+                c.MigrationsAssembly(typeof(WebAppDbContext).Assembly.FullName);
+                c.EnableRetryOnFailure(30, TimeSpan.FromSeconds(2), null);
+
+            }).UseInternalServiceProvider(serviceProvider);
         }
     }
 }

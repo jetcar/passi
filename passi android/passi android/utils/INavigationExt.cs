@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
+using passi_android.Tools;
 using Xamarin.Forms;
 
 namespace passi_android.utils
@@ -8,26 +9,31 @@ namespace passi_android.utils
     {
         public static async Task NavigateTop(this INavigation navigator)
         {
-           // var modalStackCount = navigator.ModalStack.Count;
-            navigator.PopToRootAsync();
-           //// for (int i = 0; i < modalStackCount; i++)
-           // {
-           //     await navigator.PopModal();
-           // }
+            var modalStackCount = navigator.NavigationStack.Count;
+            for (int i = modalStackCount-1; i > 1; i--)
+            {
+                navigator.RemovePage(navigator.NavigationStack[i]);
+            }
+
+            var page = await navigator.PopAsync();
         }
 
         public static async Task PopModal(this INavigation navigator)
         {
-            await navigator.PopModalAsync();
+            await navigator.PopAsync();
         }
 
         public static async Task PushModalSinglePage(this INavigation navigator, Page page)
         {
-            var modalStackCount = navigator.ModalStack.ToList();
+            var loadingPage = navigator.NavigationStack.FirstOrDefault(x => x is LoadingView);
+            if (loadingPage != null)
+                navigator.RemovePage(loadingPage);
+
+            var modalStackCount = navigator.NavigationStack.ToList();
             var lastOrDefault = modalStackCount.LastOrDefault();
             if (lastOrDefault != null && lastOrDefault.GetType() == page.GetType())
                 return;
-            await navigator.PushModalAsync(page);
+            await navigator.PushAsync(page);
         }
     }
 }

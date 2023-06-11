@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Mail;
@@ -77,6 +78,8 @@ namespace passi_android.Main
 
         public AddAccountView()
         {
+            if (Debugger.IsAttached)
+                EmailText = "admin@passi.cloud";
 
             if (!App.IsTest)
                 InitializeComponent();

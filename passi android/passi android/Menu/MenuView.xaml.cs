@@ -87,9 +87,5 @@ namespace passi_android.Menu
             }
         }
 
-        private void Button_Back(object sender, EventArgs e)
-        {
-            _navigationService.PopModal();
-        }
     }
 }

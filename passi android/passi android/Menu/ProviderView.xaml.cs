@@ -29,10 +29,5 @@ namespace passi_android.Menu
             button.IsEnabled = true;
         }
 
-
-        private void Button_Back(object sender, EventArgs e)
-        {
-            _navigationService.PopModal();
-        }
     }
 }

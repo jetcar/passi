@@ -10,17 +10,13 @@ namespace passi_android.utils.Services
         public async Task PushModalSinglePage(BaseContentPage page)
         {
             _pages.Add(page);
-            App.FirstPage.Navigation.PushModalSinglePage(page);
+            await App.FirstPage.Navigation.PushModalSinglePage(page);
         }
 
         public async Task NavigateTop()
         {
-            var pagesCount = _pages.Count;
-            for (int i = pagesCount - 1; i > 0; i--)
-            {
-                _pages.RemoveAt(i);
-            }
-            App.FirstPage.Navigation.NavigateTop();
+            _pages.Clear();
+            await App.FirstPage.Navigation.NavigateTop();
 
         }
 

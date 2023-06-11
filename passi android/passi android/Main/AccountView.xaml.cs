@@ -194,9 +194,6 @@ namespace passi_android.Main
             base.OnDisappearing();
         }
 
-        private void Button_Back(object sender, EventArgs e)
-        {
-            _navigationService.PopModal();
-        }
+      
     }
 }

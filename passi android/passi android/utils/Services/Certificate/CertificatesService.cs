@@ -143,7 +143,8 @@ namespace passi_android.utils.Services.Certificate
                                 accountDb.PublicCertBinary = publicCertHelper.BinaryData;
 
                                 _secureRepository.UpdateAccount(accountDb);
-                                _secureRepository.SaveFingerPrintKey(accountDb, certDto.Result.Item2).GetAwaiter().GetResult();
+                                if (accountDb.HaveFingerprint)
+                                    _secureRepository.SaveFingerPrintKey(accountDb, certDto.Result.Item2).GetAwaiter().GetResult();
 
                                 _mainThreadService.BeginInvokeOnMainThread(() => { _navigationService.NavigateTop(); });
                             }

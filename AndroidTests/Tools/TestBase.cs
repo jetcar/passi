@@ -22,9 +22,12 @@ public class TestBase
     {
         App.Services = ConfigureServices();
         App.IsTest = true;
+        App.SkipLoadingTimer = true;
+
         App.CancelNotifications = () => { Console.WriteLine("cancel notifications"); };
         App.CloseApp = () => { Console.WriteLine("close ap"); };
         App.StartFingerPrintReading = () => { Console.WriteLine("fingerprint reading started"); };
+        TestNavigationService.navigationsCount = 0;
     }
 
     public static BaseContentPage CurrentView { get; set; }

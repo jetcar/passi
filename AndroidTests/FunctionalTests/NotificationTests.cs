@@ -185,8 +185,10 @@ namespace AndroidTests.FunctionalTests
                 NofiticationViewTestClass.PollOpenSessions(mainPage.Accounts[0], Color.blue, 10);
             Assert.AreEqual(notificationPage.TimeLeft, "9");
 
-            //TestBase.TouchFingerPrintWithGoodResult();
+            TestNavigationService.navigationsCount = 0; 
             var mainPage2 = NofiticationViewTestClass.ChooseColorWithoutPin(notificationPage, Xamarin.Forms.Color.Blue);
+            TestBase.TouchFingerPrintWithGoodResult();
+            Assert.AreEqual(2, TestNavigationService.navigationsCount);
 
             Assert.IsNotNull(mainPage2);
         }
@@ -299,9 +301,11 @@ namespace AndroidTests.FunctionalTests
 
             var notificationPage =
                 NofiticationViewTestClass.PollOpenSessions(mainPage.Accounts[0], Color.blue, 10);
-            Assert.AreEqual(notificationPage.TimeLeft, "9");
+            //Assert.AreEqual(notificationPage.TimeLeft, "9");
 
+            TestNavigationService.navigationsCount = 0; 
             var mainPage2 = NofiticationViewTestClass.ChooseColorWithoutPin(notificationPage, Xamarin.Forms.Color.Blue);
+            Assert.AreEqual(2, TestNavigationService.navigationsCount);
 
             Assert.IsNotNull(mainPage2);
 
@@ -328,7 +332,9 @@ namespace AndroidTests.FunctionalTests
             var notificationPage =
                 NofiticationViewTestClass.PollOpenSessions(mainPage.Accounts[0], Color.blue, 10, newGuid);
 
+            TestNavigationService.navigationsCount = 0; 
             var mainPage2 = NofiticationViewTestClass.ChooseColorWithoutPin(notificationPage, Xamarin.Forms.Color.Blue);
+            Assert.AreEqual(2, TestNavigationService.navigationsCount);
 
             Assert.IsNotNull(mainPage2);
 

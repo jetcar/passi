@@ -20,13 +20,15 @@ public class ConfirmByPinTestClass
         confirmByPinView.NumbersPad_OnNumberClicked("1");
         confirmByPinView.NumbersPad_OnNumberClicked("1");
         TestRestService.Result[ConfigSettings.Authorize] = TestBase.SuccesfullResponce();
-
+        TestNavigationService.navigationsCount = 0;
         confirmByPinView.NumbersPad_OnNumberClicked("1");
+        Assert.IsTrue(TestBase.CurrentView is LoadingView);
 
         while (!(TestBase.CurrentView is MainView))
         {
             Thread.Sleep(1);
         }
+        Assert.AreEqual(2, TestNavigationService.navigationsCount);
 
         Assert.IsTrue(TestBase.CurrentView is MainView);
         var mainPage = TestBase.CurrentView as MainView;
@@ -40,6 +42,7 @@ public class ConfirmByPinTestClass
 
     public static MainView ConfirmByFingerprint(ConfirmByPinView confirmByPinView)
     {
+        TestNavigationService.navigationsCount = 0;
         TestRestService.Result[ConfigSettings.Authorize] = TestBase.SuccesfullResponce();
         TestBase.TouchFingerPrintWithGoodResult();
         Assert.IsTrue(TestBase.CurrentView is LoadingView);
@@ -48,6 +51,7 @@ public class ConfirmByPinTestClass
         {
             Thread.Sleep(1);
         }
+        Assert.AreEqual(2, TestNavigationService.navigationsCount);
 
         Assert.IsTrue(TestBase.CurrentView is MainView);
         var mainPage = TestBase.CurrentView as MainView;

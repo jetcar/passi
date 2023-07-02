@@ -323,6 +323,7 @@ namespace passi_android.Notifications
                             });
                         });
                     }));
+                return;
             }
 
             if (_account.pinLength == 0 && _account.HaveFingerprint)

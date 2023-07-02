@@ -5,6 +5,7 @@ using NUnit.Framework;
 using passi_android;
 using passi_android.FingerPrint;
 using passi_android.Main;
+using passi_android.Tools;
 using Xamarin.Forms;
 
 namespace AndroidTests.TestClasses;
@@ -30,14 +31,17 @@ public class FingerPrintTestClass
     }
     public static void AddFingerPrintNoPin(AccountView accountView)
     {
+        TestNavigationService.navigationsCount = 0;
         accountView.AddBiometric_Button_OnClicked(new Button(), null);
         TestBase.TouchFingerPrintWithGoodResult();
+        Assert.IsTrue(TestBase.CurrentView is LoadingView);
 
 
         while (!(TestBase.CurrentView is MainView))
         {
             Thread.Sleep(1);
         }
+        Assert.AreEqual(2, TestNavigationService.navigationsCount);
         var mainpage = TestBase.CurrentView as MainView;
         while (!mainpage._loadAccountTask.IsCompleted)
         {

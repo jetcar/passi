@@ -25,6 +25,7 @@ namespace passi_android
         public static IServiceProvider Services { get; set; }
         public static bool IsTest { get; set; }
         public static Page FirstPage { get; set; }
+        public static bool SkipLoadingTimer { get; set; }
 
         protected override void OnStart()
         {

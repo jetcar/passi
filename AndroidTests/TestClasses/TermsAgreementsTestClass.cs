@@ -20,11 +20,13 @@ public class TermsAgreementsTestClass
 
     public static MainView ClickCancel(TermsAgreementsView tcView)
     {
+        TestNavigationService.navigationsCount = 0;
         tcView.Button_OnCancelClicked(new Button(), null);
 
         Assert.IsTrue(TestBase.CurrentView is MainView);
 
         var mainView = TestBase.CurrentView as MainView;
+        Assert.AreEqual(1, TestNavigationService.navigationsCount);
         return mainView;
     }
 }

@@ -14,8 +14,9 @@ public class FinishConfirmationTestClass
 {
     public static MainView FinishRegistrationWithPin(FinishConfirmationView finishConfirmationView)
     {
+        TestNavigationService.navigationsCount = 0;
         finishConfirmationView.NumbersPad_OnNumberClicked("1");
-        finishConfirmationView.ClearPin1_OnClicked(new Button(),null);
+        finishConfirmationView.ClearPin1_OnClicked(new Button(), null);
         finishConfirmationView.NumbersPad_OnNumberClicked("1");
         finishConfirmationView.NumbersPad_OnNumberClicked("1");
         finishConfirmationView.NumbersPad_OnNumberClicked("2");
@@ -23,8 +24,8 @@ public class FinishConfirmationTestClass
         finishConfirmationView.NumbersPad_OnNumberClicked("1");
         finishConfirmationView.NumbersPad_OnNumberClicked("1");
         finishConfirmationView.NumbersPad_OnNumberClicked("confirm");
-        Assert.AreEqual(4,finishConfirmationView.Pin1.Length);
-        Assert.AreEqual("****",finishConfirmationView.Pin1Masked);
+        Assert.AreEqual(4, finishConfirmationView.Pin1.Length);
+        Assert.AreEqual("****", finishConfirmationView.Pin1Masked);
 
         finishConfirmationView.NumbersPad_OnNumberClicked("1");
         finishConfirmationView.ClearPin2_OnClicked(new Button(), null);
@@ -34,8 +35,8 @@ public class FinishConfirmationTestClass
         finishConfirmationView.NumbersPad_OnNumberClicked("del");
         finishConfirmationView.NumbersPad_OnNumberClicked("1");
         finishConfirmationView.NumbersPad_OnNumberClicked("1");
-        Assert.AreEqual(4,finishConfirmationView.Pin2.Length);
-        Assert.AreEqual("****",finishConfirmationView.Pin2Masked);
+        Assert.AreEqual(4, finishConfirmationView.Pin2.Length);
+        Assert.AreEqual("****", finishConfirmationView.Pin2Masked);
         TestRestService.Result[ConfigSettings.SignupConfirmation] = TestBase.SuccesfullResponce();
 
         finishConfirmationView.NumbersPad_OnNumberClicked("confirm");
@@ -47,6 +48,7 @@ public class FinishConfirmationTestClass
         }
 
         Assert.IsTrue(TestBase.CurrentView is MainView);
+        Assert.AreEqual(2, TestNavigationService.navigationsCount);
         var mainPage = TestBase.CurrentView as MainView;
         if (mainPage._loadAccountTask != null)
             while (!mainPage._loadAccountTask.IsCompleted)
@@ -58,6 +60,7 @@ public class FinishConfirmationTestClass
 
     public static MainView FinishRegistrationSkipPin(FinishConfirmationView finishConfirmationView)
     {
+        TestNavigationService.navigationsCount = 0;
         TestRestService.Result[ConfigSettings.SignupConfirmation] = TestBase.SuccesfullResponce();
         finishConfirmationView.SkipButton_OnClicked(new Button(), null);
         Assert.IsTrue(TestBase.CurrentView is LoadingView);
@@ -66,6 +69,7 @@ public class FinishConfirmationTestClass
         {
             Thread.Sleep(1);
         }
+        Assert.AreEqual(2, TestNavigationService.navigationsCount);
 
         Assert.IsTrue(TestBase.CurrentView is MainView);
         var mainPage = TestBase.CurrentView as MainView;

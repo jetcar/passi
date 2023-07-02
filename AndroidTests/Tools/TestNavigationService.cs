@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using passi_android;
@@ -11,6 +12,7 @@ namespace AndroidTests.Tools;
 
 internal class TestNavigationService : INavigationService
 {
+    public static int navigationsCount = 0;
     private List<BaseContentPage> _pages = new List<BaseContentPage>();
     public async Task PushModalSinglePage(BaseContentPage page)
     {
@@ -21,6 +23,7 @@ internal class TestNavigationService : INavigationService
             TestBase.CurrentView.SendDisappearing();
         }
         TestBase.CurrentView = page;
+        Interlocked.Increment(ref navigationsCount);
         page.SendAppearing();
     }
 
@@ -37,6 +40,7 @@ internal class TestNavigationService : INavigationService
 
         TestBase.CurrentView = page;
         Console.WriteLine(page.ToString());
+        Interlocked.Increment(ref navigationsCount);
         page.SendAppearing();
 
     }
@@ -56,6 +60,7 @@ internal class TestNavigationService : INavigationService
 
         TestBase.CurrentView = page;
         Console.WriteLine(page.ToString());
+        Interlocked.Increment(ref navigationsCount);
         page.SendAppearing();
     }
 }

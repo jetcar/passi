@@ -29,7 +29,7 @@ namespace passi_android.utils.Services
 
         public void PollNotifications()
         {
-            if (PollingTask?.IsCompleted != false)
+           if (PollingTask?.IsCompleted != false)
                 PollingTask = Task.Run(() =>
                 {
                     lock (locker)

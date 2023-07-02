@@ -31,11 +31,12 @@ namespace passi_android.Tools
 
         private void _timer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            _mainThreadService.BeginInvokeOnMainThread(() =>
-            {
-                DisplayAlert("Something went wrong", "Something went wrong, redirecting to first page.", "Ok");
-                _navigationService.NavigateTop();
-            });
+            if (!App.SkipLoadingTimer)
+                _mainThreadService.BeginInvokeOnMainThread(() =>
+                {
+                    DisplayAlert("Something went wrong", "Something went wrong, redirecting to first page.", "Ok");
+                    _navigationService.NavigateTop();
+                });
         }
 
         protected override void OnAppearing()

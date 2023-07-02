@@ -63,6 +63,7 @@ public class NofiticationViewTestClass
 
     public static MainView PollExistingSessionId(AccountViewModel accountViewModel, Color color, int timeoutSeconds, Guid? sessionid = null)
     {
+       // TestNavigationService.navigationsCount = 0;
         TestRestService.Result[ConfigSettings.SyncAccounts] = TestBase.SuccesfullResponce<List<AccountMinDto>>(new List<AccountMinDto>()
         {
             new AccountMinDto()
@@ -89,12 +90,14 @@ public class NofiticationViewTestClass
         {
             Thread.Sleep(1);
         }
+       // Assert.AreEqual(1, TestNavigationService.navigationsCount);
         var page = TestBase.CurrentView as MainView;
         return page;
     }
 
     public static ConfirmByPinView ChooseColorWithPin(NotificationVerifyRequestView notificationPage, Xamarin.Forms.Color color)
     {
+        TestNavigationService.navigationsCount = 0;
         if (notificationPage.Color1 == color)
             notificationPage.ImageButton1_OnClicked(new Button(), null);
         if (notificationPage.Color2 == color)
@@ -106,6 +109,7 @@ public class NofiticationViewTestClass
         {
             Thread.Sleep(1);
         }
+        Assert.AreEqual(1, TestNavigationService.navigationsCount);
 
         var confirmByPin = TestBase.CurrentView as ConfirmByPinView;
         return confirmByPin;

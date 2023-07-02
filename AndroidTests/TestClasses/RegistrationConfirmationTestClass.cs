@@ -39,6 +39,7 @@ public class RegistrationConfirmationTestClass
 
     public static MainView CancelClick(RegistrationConfirmationView registrationConfirmation)
     {
+        TestNavigationService.navigationsCount = 0;
         registrationConfirmation.CancelButton_OnClicked(new Button(), null);
 
         while (!(TestBase.CurrentView is MainView) || !TestBase.CurrentView.Appeared)
@@ -49,6 +50,7 @@ public class RegistrationConfirmationTestClass
         Assert.IsTrue(TestBase.CurrentView is MainView);
 
         var finishConfirmation = TestBase.CurrentView as MainView;
+        Assert.AreEqual(1, TestNavigationService.navigationsCount);
         return finishConfirmation;
 
     }

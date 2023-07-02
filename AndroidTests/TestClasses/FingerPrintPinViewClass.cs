@@ -12,6 +12,7 @@ public class FingerPrintPinViewClass
 {
     public static void FinishFingerPrintAdding(FingerPrintConfirmByPinView fingerPrintConfirmByPinView)
     {
+        TestNavigationService.navigationsCount = 0;
         fingerPrintConfirmByPinView.NumbersPad_OnNumberClicked("1");
         fingerPrintConfirmByPinView.NumbersPad_OnNumberClicked("1");
         fingerPrintConfirmByPinView.NumbersPad_OnNumberClicked("del");
@@ -23,6 +24,7 @@ public class FingerPrintPinViewClass
         {
             Thread.Sleep(1);
         }
+        Assert.AreEqual(2, TestNavigationService.navigationsCount);
         var mainpage = TestBase.CurrentView as MainView;
         while (!mainpage._loadAccountTask.IsCompleted)
         {

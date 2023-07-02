@@ -25,6 +25,7 @@ namespace AndroidTests
         [Test, Timeout(100000)]
         public void LoadingViewExpired()
         {
+            App.SkipLoadingTimer = false;
             TestBase.Navigation.PushModalSinglePage(new MainView());
             TestBase.Navigation.PushModalSinglePage(new LoadingView(() =>
             {
@@ -58,7 +59,7 @@ namespace AndroidTests
 
         }
 
-       
+
 
     }
 }

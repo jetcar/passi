@@ -4,8 +4,8 @@ git checkout .
 git fetch
 git pull
 
-sudo docker image prune -f
-sudo docker volume prune -f
+sudo docker image prune -f --all
+sudo docker volume prune -f --all
 
 sudo docker pull mcr.microsoft.com/dotnet/sdk:7.0
 sudo docker pull mcr.microsoft.com/dotnet/aspnet:7.0

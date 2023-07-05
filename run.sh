@@ -5,13 +5,10 @@ git fetch
 git pull
 
 sudo docker-compose down
-sudo docker stop $(docker ps -aq)
-sudo docker rm $(docker ps -aq)
-
 sudo docker image prune -f --all
 sudo docker volume prune -f --all
 sudo service docker stop
-sudo rm -rf /var/lib/docker/overlay2
+sudo rm -rf /var/lib/docker
 sudo service docker start
 
 

@@ -1,4 +1,5 @@
 #!/bin/bash
+cd /home/jetcarq/passi
 sudo apt-get clean
 sudo git clean -fdx
 git checkout .

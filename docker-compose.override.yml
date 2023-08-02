@@ -21,19 +21,20 @@ services:
     - ./passi_config_local/dev.env
 
 
-  nginx:
+  haproxy:
+    container_name: haproxy
+    image: haproxy:2.8.1
     volumes:
-      - ../passi_cert:/etc/cert:ro
-      - ./nginx_local/conf:/etc/nginx:ro
-      - ./logs:/logs
+      - ../passi_cert:/usr/local/etc/haproxy/cert
+      - ./haproxy_local:/usr/local/etc/haproxy
     ports:
       - "80:80"
       - "443:443"
+      - "9090:9090"
     depends_on:
     - webapp
     networks:
       - dock_net
-
 
 
   webapp:

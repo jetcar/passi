@@ -40,13 +40,12 @@ services:
     - ../redis_data/:/data
 
 
-  nginx:
-    container_name: nginx
-    image: nginx:1.23.0
+  haproxy:
+    container_name: haproxy
+    image: haproxy:2.8.1
     volumes:
-      - ../passi_cert:/etc/cert:ro
-      - ./nginx/conf:/etc/nginx:ro
-      - ./logs:/logs
+      - ../passi_cert:/usr/local/etc/haproxy/cert
+      - ./haproxy:/usr/local/etc/haproxy
     ports:
       - "80:80"
       - "443:443"

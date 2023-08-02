@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using ConfigurationManager;
-using Elastic.Apm.NetCoreAll;
 using Google.Cloud.Diagnostics.AspNetCore3;
 using Google.Cloud.Diagnostics.Common;
 using IdentityModel;
@@ -110,19 +109,7 @@ namespace IdentityServer
                 }
 
                 var appSetting = applicationBuilder.ApplicationServices.GetService<AppSetting>();
-
-                var elasticSecret = Environment.GetEnvironmentVariable("SecretToken");
-                var elasticUrl = Environment.GetEnvironmentVariable("ServerUrl");
-                var myConfiguration = new Dictionary<string, string>
-                {
-                    {"ElasticApm:ServiceName", "identity"},
-                    {"ElasticApm:SecretToken", elasticSecret},
-                    {"ElasticApm:ServerUrl", elasticUrl},
-                    {"ElasticApm:Environment", "dev"},
-                };
-                var config = new ConfigurationBuilder().AddInMemoryCollection(myConfiguration).Build();
-                if (!string.IsNullOrEmpty(elasticSecret))
-                    applicationBuilder.UseAllElasticApm(config);
+                
                 applicationBuilder.UseMiddleware<PublicFacingUrlMiddleware>(appSetting["IdentityUrlBase"]);
                 applicationBuilder.UseStaticFiles(new StaticFileOptions()
                 {

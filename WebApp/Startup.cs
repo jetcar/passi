@@ -13,7 +13,6 @@ using Serilog.Events;
 using Services;
 using Google.Cloud.Diagnostics.AspNetCore3;
 using Google.Cloud.Diagnostics.Common;
-using Elastic.Apm.NetCoreAll;
 using System.Collections.Generic;
 
 namespace WebApp
@@ -95,19 +94,6 @@ namespace WebApp
                     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                     //applicationBuilder.UseHsts();
                 }
-
-                var elasticSecret = Environment.GetEnvironmentVariable("SecretToken");
-                var elasticUrl = Environment.GetEnvironmentVariable("ServerUrl");
-                var myConfiguration = new Dictionary<string, string>
-                {
-                    {"ElasticApm:ServiceName", "webapp"},
-                    {"ElasticApm:SecretToken", elasticSecret},
-                    {"ElasticApm:ServerUrl", elasticUrl},
-                    {"ElasticApm:Environment", "dev"},
-                };
-                var config = new ConfigurationBuilder().AddInMemoryCollection(myConfiguration).Build();
-                if (!string.IsNullOrEmpty(elasticSecret))
-                    applicationBuilder.UseAllElasticApm(config);
                 applicationBuilder.UseForwardedHeaders();
                 applicationBuilder.UseCookiePolicy(
                             new CookiePolicyOptions

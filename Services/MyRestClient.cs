@@ -3,7 +3,6 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using ConfigurationManager;
 using Google.Cloud.Diagnostics.Common;
-using Microsoft.AspNetCore.Http;
 using PostSharp.Extensibility;
 using RestSharp;
 

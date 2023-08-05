@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Net.Http;
 using ConfigurationManager;
+using PostSharp.Extensibility;
 using SendGrid;
 using SendGrid.Helpers.Mail;
 
 namespace Services
 {
+    [Profile(AttributeTargetElements = MulticastTargets.Method)]
     public class EmailSender : IEmailSender
     {
         private SendGridClient client;

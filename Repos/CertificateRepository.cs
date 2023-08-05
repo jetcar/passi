@@ -2,9 +2,11 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Models;
+using PostSharp.Extensibility;
 
 namespace Repos
 {
+    [ReposProfile(AttributeTargetElements = MulticastTargets.Method)]
     public class CertificateRepository : BaseRepo<PassiDbContext>, ICertificateRepository
     {
         public CertificateRepository(PassiDbContext dbContext) : base(dbContext)

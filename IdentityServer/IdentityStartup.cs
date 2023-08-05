@@ -7,9 +7,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using ConfigurationManager;
 using Google.Cloud.Diagnostics.AspNetCore3;
 using Google.Cloud.Diagnostics.Common;
+using GoogleTracer;
 using IdentityModel;
 using IdentityServer.DbContext;
 using IdentityServer.services;
@@ -44,17 +46,28 @@ namespace IdentityServer
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            var passiUrl = Environment.GetEnvironmentVariable("PassiUrl") ?? Configuration.GetValue<string>("AppSetting:PassiUrl");
             var projectId = Environment.GetEnvironmentVariable("projectId") ?? Configuration.GetValue<string>("AppSetting:projectId");
             services.AddControllersWithViews();
             services.AddSingleton<AppSetting>();
-            var myRestClient = new MyRestClient(passiUrl);
-            services.AddSingleton<IMyRestClient>(myRestClient);
+            services.AddScoped<IMyRestClient,MyRestClient>();
 
             services.AddScoped<IdentityDbContext>();
             services.AddScoped<IIdentityClientsRepository, IdentityClientsRepository>();
             services.AddSingleton<IStartupFilter, MigrationStartupFilter<IdentityDbContext>>();
             services.AddSingleton<IRandomGenerator, RandomGenerator>();
+
+            services.AddScoped(CustomTraceContextProvider);
+            static ITraceContext CustomTraceContextProvider(IServiceProvider sp)
+            {
+                var accessor = sp.GetRequiredService<IHttpContextAccessor>();
+                var traceId = accessor.HttpContext?.Request?.Headers["custom_trace_id"];
+                return new SimpleTraceContext(traceId, null, null);
+            }
+
+            // Register a method that sets the updated trace context information on the response.
+            services.AddSingleton<Action<HttpResponse, ITraceContext>>(
+                (response, traceContext) => response.Headers.Add("custom_trace_id", traceContext.TraceId));
+
 
             services.AddGoogleTraceForAspNetCore(new AspNetCoreTraceOptions
             {
@@ -64,6 +77,15 @@ namespace IdentityServer
                     
                 }
             });
+            services.AddSingleton<Action<HttpRequestMessage, ITraceContext>>(
+                (request, traceContext) => request.Headers.Add("custom_trace_id", traceContext.TraceId));
+
+            // Register an HttpClient for outgoing requests.
+            services.AddHttpClient("tracesOutgoing")
+                // The next call guarantees that trace information is propagated for outgoing
+                // requests that are already being traced.
+                .AddOutgoingGoogleTraceHandler();
+
             services.AddGoogleDiagnostics(projectId, "Identity");
             services.AddIdentityServer(options =>
                 {
@@ -86,6 +108,7 @@ namespace IdentityServer
                     options.NewKeyLifetime = TimeSpan.FromDays(7);
                 })
                 .PersistKeysToDbContext<IdentityDbContext>();
+            services.AddHttpContextAccessor();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
@@ -98,6 +121,7 @@ namespace IdentityServer
             InitializeDatabase(app);
             app.Map(new PathString("/identity"), (applicationBuilder) =>
             {
+                Tracer.CurrentTracer = app.ApplicationServices.GetService<IManagedTracer>();
                 if (env.IsDevelopment())
                 {
                     applicationBuilder.UseDeveloperExceptionPage();

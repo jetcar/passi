@@ -8,11 +8,13 @@ using IdentityServer4.Extensions;
 using IdentityServer4.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using PostSharp.Extensibility;
 
 namespace IdentityServer.Controllers.ClientRegistration
 {
     //[SecurityHeaders]
     [Authorize]
+    [Profile(AttributeTargetElements = MulticastTargets.Method)]
     public class ClientController : Controller
     {
         private IIdentityClientsRepository _clients;

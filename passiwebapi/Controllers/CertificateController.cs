@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Models;
 using passi_webapi.Dto;
+using PostSharp.Extensibility;
 using Repos;
 using Services;
 using WebApiDto.Certificate;
@@ -10,6 +11,7 @@ namespace passi_webapi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Profile(AttributeTargetElements = MulticastTargets.Method)]
     public class CertificateController : ControllerBase
     {
 

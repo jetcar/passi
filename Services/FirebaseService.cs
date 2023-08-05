@@ -7,9 +7,12 @@ using Repos;
 using Serilog.Core;
 using AppCommon;
 using Microsoft.EntityFrameworkCore;
+using PostSharp.Extensibility;
+using Message = FirebaseAdmin.Messaging.Message;
 
 namespace Services
 {
+    [Profile(AttributeTargetElements = MulticastTargets.Method)]
     public class FirebaseService : IFirebaseService
     {
         private AppSetting _appSetting;

@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Security.Cryptography.X509Certificates;
 using Models;
+using PostSharp.Extensibility;
 using WebApiDto.Certificate;
 
 namespace Services
 {
+    [Profile(AttributeTargetElements = MulticastTargets.Method)]
     public class CertValidator : ICertValidator
     {
         public void ValidateCertificate(string publicCertBase64, string email)

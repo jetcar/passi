@@ -9,12 +9,14 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using passi_webapi.Dto;
 using passi_webapi.Filters;
+using PostSharp.Extensibility;
 using Repos;
 
 namespace passi_webapi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Profile(AttributeTargetElements = MulticastTargets.Method)]
     public class AdminController : Controller
     {
         private PassiDbContext _db;

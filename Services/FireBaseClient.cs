@@ -1,9 +1,12 @@
 ﻿using FirebaseAdmin;
 using FirebaseAdmin.Messaging;
 using Google.Apis.Auth.OAuth2;
+using PostSharp.Extensibility;
+using Message = FirebaseAdmin.Messaging.Message;
 
 namespace Services
 {
+    [Profile(AttributeTargetElements = MulticastTargets.Method)]
     public class FireBaseClient : IFireBaseClient
     {
         public FireBaseClient()

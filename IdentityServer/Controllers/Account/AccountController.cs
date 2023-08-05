@@ -9,6 +9,7 @@ using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using System.Web;
+using AppCommon;
 using ConfigurationManager;
 using Google.Cloud.Diagnostics.Common;
 using IdentityModel;
@@ -26,6 +27,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using passi_webapi.Dto;
+using PostSharp.Extensibility;
 using RestSharp;
 using Services;
 using WebApiDto;
@@ -40,6 +42,7 @@ namespace IdentityServer.Controllers.Account
     /// </summary>
     [SecurityHeaders]
     [AllowAnonymous]
+    [Profile(AttributeTargetElements = MulticastTargets.Method)]
     public class AccountController : Controller
     {
         private readonly IIdentityServerInteractionService _interaction;
@@ -49,7 +52,6 @@ namespace IdentityServer.Controllers.Account
         private AppSetting _appSetting;
         private IMyRestClient _myRestClient;
         private IRandomGenerator _randomGenerator;
-        private readonly IManagedTracer _tracer;
         public AccountController(
             IIdentityServerInteractionService interaction,
             IClientStore clientStore,
@@ -67,7 +69,6 @@ namespace IdentityServer.Controllers.Account
             _appSetting = appSetting;
             _myRestClient = myRestClient;
             _randomGenerator = randomGenerator;
-            _tracer = tracer;
         }
 
 
@@ -112,8 +113,6 @@ namespace IdentityServer.Controllers.Account
         public async Task<IActionResult> Login([FromQuery] string returnUrl)
         {
             // build a model so we know what to show on the login page
-            using (_tracer.StartSpan("login"))
-            {
                 LoginViewModel vm = new LoginViewModel()
                 {
                     Username = ""
@@ -129,7 +128,6 @@ namespace IdentityServer.Controllers.Account
                 vm.Nonce = context?.Parameters["nonce"];
 
                 return View(vm);
-            }
         }
 
         /// <summary>

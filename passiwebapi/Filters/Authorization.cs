@@ -3,10 +3,12 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using PostSharp.Extensibility;
 using Repos;
 
 namespace passi_webapi.Filters
 {
+    [Profile(AttributeTargetElements = MulticastTargets.Method)]
     public class Authorization : AuthorizeAttribute, IAuthorizationFilter
     {
         public Authorization()

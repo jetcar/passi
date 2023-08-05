@@ -7,6 +7,7 @@ using Models;
 using Newtonsoft.Json;
 using NodaTime;
 using passi_webapi.Dto;
+using PostSharp.Extensibility;
 using Repos;
 using Services;
 using WebApiDto;
@@ -16,6 +17,7 @@ namespace passi_webapi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Profile(AttributeTargetElements = MulticastTargets.Method)]
     public class AuthController : ControllerBase
     {
         private ISessionsRepository _sessionsRepository;

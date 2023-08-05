@@ -4,11 +4,13 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using PostSharp.Extensibility;
 
 namespace IdentityServer.Controllers.Home
 {
     [SecurityHeaders]
     [AllowAnonymous]
+    [Profile(AttributeTargetElements = MulticastTargets.Method)]
     public class HomeController : Controller
     {
         private readonly IIdentityServerInteractionService _interaction;

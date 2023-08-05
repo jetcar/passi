@@ -9,10 +9,12 @@ using Serilog;
 using Serilog.Core;
 using NodaTime;
 using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
+using PostSharp.Extensibility;
 using Repos.CompiledModels;
 
 namespace Repos
 {
+[ReposProfile(AttributeTargetElements = MulticastTargets.Method)]
     public class PassiDbContext : DbContext, IDataProtectionKeyContext
     {
         private AppSetting _appSetting;
@@ -80,7 +82,7 @@ namespace Repos
         {
             optionsBuilder.UseModel(PassiDbContextModel.Instance);
             var trustMode = _appSetting["DbSslMode"] == "Require" ? "Trust Server Certificate=true;" : "";
-            //optionsBuilder.AddInterceptors(new TaggedQueryCommandInterceptor(_logger));
+            optionsBuilder.AddInterceptors(new TaggedQueryCommandInterceptor(_logger));
             _connectionString = $"host={_appSetting["DbHost"]};database={_appSetting["DbName"]};user id={_appSetting["DbUser"]};password={_appSetting["DbPassword"]};Ssl Mode={_appSetting["DbSslMode"]};{trustMode}";
             Console.WriteLine(_connectionString);
             optionsBuilder.UseNpgsql(_connectionString, o =>

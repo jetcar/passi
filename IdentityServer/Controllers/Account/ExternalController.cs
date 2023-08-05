@@ -13,11 +13,13 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using PostSharp.Extensibility;
 
 namespace IdentityServer.Controllers.Account
 {
     [SecurityHeaders]
     [AllowAnonymous]
+    [Profile(AttributeTargetElements = MulticastTargets.Method)]
     public class ExternalController : Controller
     {
         private readonly TestUserStore _users;

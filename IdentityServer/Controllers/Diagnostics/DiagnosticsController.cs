@@ -6,11 +6,13 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using PostSharp.Extensibility;
 
 namespace IdentityServer.Controllers.Diagnostics
 {
     [SecurityHeaders]
     [Authorize]
+    [Profile(AttributeTargetElements = MulticastTargets.Method)]
     public class DiagnosticsController : Controller
     {
         public async Task<IActionResult> Index()

@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Security.Cryptography.X509Certificates;
 using Models;
+using PostSharp.Extensibility;
 using Repos;
 using WebApiDto.Certificate;
 
 namespace Services
 {
+    [Profile(AttributeTargetElements = MulticastTargets.Method)]
     public class CertificatesService : ICertificatesService
     {
         private ICertificateRepository _certificateRepository;

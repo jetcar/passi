@@ -5,9 +5,11 @@ using ConfigurationManager;
 using Microsoft.EntityFrameworkCore;
 using Models;
 using NodaTime;
+using PostSharp.Extensibility;
 
 namespace Repos
 {
+[ReposProfile(AttributeTargetElements = MulticastTargets.Method)]
     public class SessionsRepository : BaseRepo<PassiDbContext>, ISessionsRepository
     {
         private AppSetting _appSetting;

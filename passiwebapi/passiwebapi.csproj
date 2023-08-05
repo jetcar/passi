@@ -20,6 +20,7 @@
 		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.5" />
 		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.18.1" />
 		<PackageReference Include="NodaTime" Version="3.1.9" />
+		<PackageReference Include="PostSharp" Version="2023.0.6" />
 		<PackageReference Include="Serilog" Version="2.12.0" />
 		<PackageReference Include="Serilog.AspNetCore" Version="7.0.0" />
 		<PackageReference Include="Serilog.Enrichers.Context" Version="4.6.0" />
@@ -38,6 +39,7 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\ConfigurationManager\ConfigurationManager.csproj" />
+	  <ProjectReference Include="..\GoogleTracer\GoogleTracer.csproj" />
 	  <ProjectReference Include="..\OpenIdLib\OpenIdLib.csproj" />
 	  <ProjectReference Include="..\Repos\Repos.csproj" />
 	  <ProjectReference Include="..\Services\Services.csproj" />

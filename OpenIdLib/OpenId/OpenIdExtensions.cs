@@ -15,13 +15,10 @@ namespace OpenIdLib.OpenId
 {
     public static class OpenIdExtensions
     {
-        private static MyRestClient _restClient;
 
         public static AuthenticationBuilder AddOpenIdAuthentication(this AuthenticationBuilder builder,
-            string identityUrl, string returnUrl, string passiUrl, string clientId, string clientSecret,
-            MyRestClient myRestClient)
+            string identityUrl, string returnUrl, string passiUrl, string clientId, string clientSecret)
         {
-            _restClient = myRestClient;
 
             return builder.AddOpenIdConnect(OpenIdConnectDefaults.AuthenticationScheme, options =>
             {
@@ -102,13 +99,15 @@ namespace OpenIdLib.OpenId
             {
                 return;
             }
+
+            var myRestClient = context.HttpContext.RequestServices.GetService<IMyRestClient>();
             var thumbprint = claimsIdentity.FindFirst("Thumbprint")?.Value;
             var sessionId = claimsIdentity.FindFirst("SessionId")?.Value;
             var username = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (thumbprint != null)
             {
                 var request = new RestRequest($"api/Auth/session?sessionId={sessionId}&thumbprint={thumbprint}&username={username}", Method.Get);
-                var result = _restClient.ExecuteAsync(request).Result;
+                var result = myRestClient.ExecuteAsync(request).Result;
                 if (result.IsSuccessful)
                 {
                     var cert = JsonConvert.DeserializeObject<SessionMinDto>(result.Content);

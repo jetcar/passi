@@ -3,6 +3,12 @@
   <PropertyGroup>
     <ActiveDebugProfile>WebApp</ActiveDebugProfile>
     <NameOfLastUsedPublishProfile>FolderProfile</NameOfLastUsedPublishProfile>
+    <ShouldLintTypeScript>False</ShouldLintTypeScript>
+    <ShouldLintJavaScriptReact>False</ShouldLintJavaScriptReact>
+    <ShouldLintJavaScript>False</ShouldLintJavaScript>
+    <ShouldLintTypeScriptReact>False</ShouldLintTypeScriptReact>
+    <ShouldLintHTML>False</ShouldLintHTML>
+    <ShouldLintVue>False</ShouldLintVue>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DebuggerFlavor>ProjectDebugger</DebuggerFlavor>

@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Net.Http;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using AppCommon;
 using ConfigurationManager;
 using Google.Cloud.Diagnostics.Common;
 using IdentityModel.Client;
@@ -10,10 +11,12 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using PostSharp.Extensibility;
 using WebApp.Models;
 
 namespace WebApp.Controllers
 {
+    [Profile(AttributeTargetElements = MulticastTargets.Method)]
     public class HomeController : Controller
     {
         private AppSetting _appSetting;

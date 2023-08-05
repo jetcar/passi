@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using PostSharp.Extensibility;
 using Repos;
 using Services;
 using WebApiDto.SignUp;
@@ -8,6 +9,7 @@ namespace passi_webapi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Profile(AttributeTargetElements = MulticastTargets.Method)]
     public class SignUpController : ControllerBase
     {
 

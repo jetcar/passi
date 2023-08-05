@@ -4,9 +4,11 @@ using System.Security.Cryptography.X509Certificates;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Models;
+using PostSharp.Extensibility;
 
 namespace Repos
 {
+[ReposProfile(AttributeTargetElements = MulticastTargets.Method)]
     public class UserRepository : BaseRepo<PassiDbContext>, IUserRepository
     {
 

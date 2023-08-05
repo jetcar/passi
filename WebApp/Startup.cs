@@ -14,6 +14,8 @@ using Services;
 using Google.Cloud.Diagnostics.AspNetCore3;
 using Google.Cloud.Diagnostics.Common;
 using System.Collections.Generic;
+using System.Net.Http;
+using GoogleTracer;
 
 namespace WebApp
 {
@@ -46,8 +48,7 @@ namespace WebApp
             }); services.AddSingleton<AppSetting>();
             services.AddScoped<WebAppDbContext>();
             services.AddSingleton<IStartupFilter, MigrationStartupFilter<WebAppDbContext>>();
-            var myRestClient = new MyRestClient(passiUrl);
-            services.AddSingleton<IMyRestClient>(myRestClient);
+            services.AddScoped<IMyRestClient,MyRestClient>();
             services.AddDataProtection()
                 .SetApplicationName("WebApp")
                 .AddKeyManagementOptions(options =>
@@ -56,6 +57,28 @@ namespace WebApp
                     options.NewKeyLifetime = TimeSpan.FromDays(7);
                 })
                 .PersistKeysToDbContext<WebAppDbContext>();
+
+            services.AddScoped(CustomTraceContextProvider);
+            static ITraceContext CustomTraceContextProvider(IServiceProvider sp)
+            {
+                var accessor = sp.GetRequiredService<IHttpContextAccessor>();
+                string traceId = accessor.HttpContext?.Request?.Headers["custom_trace_id"];
+                return new SimpleTraceContext(traceId, null, null);
+            }
+
+            // Register a method that sets the updated trace context information on the response.
+            services.AddSingleton<Action<HttpResponse, ITraceContext>>(
+                (response, traceContext) => response.Headers.Add("custom_trace_id", traceContext.TraceId));
+
+            services.AddSingleton<Action<HttpRequestMessage, ITraceContext>>(
+                (request, traceContext) => request.Headers.Add("custom_trace_id", traceContext.TraceId));
+
+            // Register an HttpClient for outgoing requests.
+            services.AddHttpClient("tracesOutgoing")
+                // The next call guarantees that trace information is propagated for outgoing
+                // requests that are already being traced.
+                .AddOutgoingGoogleTraceHandler();
+
 
             services.AddAuthentication(options =>
                 {
@@ -68,12 +91,13 @@ namespace WebApp
                         options.SlidingExpiration = true;
                         options.ExpireTimeSpan = System.TimeSpan.FromDays(30);
                     })
-                .AddOpenIdAuthentication(identityUrl, returnUrl, passiUrl, clientId, secret, myRestClient)
+                .AddOpenIdAuthentication(identityUrl, returnUrl, passiUrl, clientId, secret)
                 .AddOpenIdTokenManagement(x =>
                 {
                     x.RevokeRefreshTokenOnSignout = true;
                 });
 
+            services.AddHttpContextAccessor();
             services.AddHttpClient();
             services.AddHealthChecks();
             services.AddMvc(x => { x.EnableEndpointRouting = false; });
@@ -84,6 +108,7 @@ namespace WebApp
         {
             app.Map(new PathString(""), (applicationBuilder) =>
             {
+                Tracer.CurrentTracer = app.ApplicationServices.GetService<IManagedTracer>();
                 if (Debugger.IsAttached)
                 {
                     applicationBuilder.UseDeveloperExceptionPage();

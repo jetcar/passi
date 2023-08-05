@@ -2,9 +2,11 @@
 using System.Security.Cryptography;
 using System.Text;
 using System;
+using PostSharp.Extensibility;
 
 namespace Services;
 
+[Profile(AttributeTargetElements = MulticastTargets.Method)]
 public class CertHelper
 {
 

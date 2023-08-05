@@ -2,10 +2,12 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using PostSharp.Extensibility;
 using Serilog;
 
 namespace Repos
 {
+    [ReposProfile(AttributeTargetElements = MulticastTargets.Method)]
     public class TaggedQueryCommandInterceptor : DbCommandInterceptor
     {
         private ILogger _logger;

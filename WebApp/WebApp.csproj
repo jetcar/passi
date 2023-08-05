@@ -10,6 +10,8 @@
 		<OutputPath>publish</OutputPath>
 		<StartupObject>WebApp.Program</StartupObject>
 		<BaseOutputPath>publish</BaseOutputPath>
+		<RunAnalyzersDuringBuild>False</RunAnalyzersDuringBuild>
+		<RunAnalyzersDuringLiveAnalysis>False</RunAnalyzersDuringLiveAnalysis>
 
 	</PropertyGroup>
 
@@ -31,6 +33,7 @@
 		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.18.1" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="7.0.4" />
+		<PackageReference Include="PostSharp" Version="2023.0.6" />
 		<PackageReference Include="RestSharp" Version="110.2.0" />
 		<PackageReference Include="Serilog" Version="2.12.0" />
 		<PackageReference Include="Serilog.AspNetCore" Version="7.0.0" />
@@ -46,6 +49,7 @@
 
 
 	<ItemGroup>
+	  <ProjectReference Include="..\GoogleTracer\GoogleTracer.csproj" />
 	  <ProjectReference Include="..\OpenIdLib\OpenIdLib.csproj" />
 	  <ProjectReference Include="..\AppCommon\AppCommon.csproj" />
 	  <ProjectReference Include="..\ConfigurationManager\ConfigurationManager.csproj" />

@@ -3,9 +3,11 @@ using System;
 using ConfigurationManager;
 using Models;
 using Newtonsoft.Json;
+using PostSharp.Extensibility;
 
 namespace Repos
 {
+[ReposProfile(AttributeTargetElements = MulticastTargets.Method)]
     public class RedisService : IRedisService
     {
         private readonly ConnectionMultiplexer _redis;

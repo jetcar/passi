@@ -2,12 +2,15 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
+using AppCommon;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Http;
 using Google.Cloud.Diagnostics.Common;
+using PostSharp.Extensibility;
 
 namespace WebApp.Controllers
 {
+    [Profile(AttributeTargetElements = MulticastTargets.Method)]
     public class AuthController : Controller
     {
         private readonly IManagedTracer _tracer;

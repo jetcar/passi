@@ -1,8 +1,10 @@
 ﻿using System;
+using PostSharp.Extensibility;
 
 namespace Services
 {
 
+    [Profile(AttributeTargetElements = MulticastTargets.Method)]
     public class RandomGenerator : IRandomGenerator
     {
         private Random _random;

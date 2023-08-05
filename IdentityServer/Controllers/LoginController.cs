@@ -5,12 +5,14 @@ using IdentityServer4.Stores;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using PostSharp.Extensibility;
 
 namespace IdentityServer.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     [AllowAnonymous]
+    [Profile(AttributeTargetElements = MulticastTargets.Method)]
     public class LoginController : ControllerBase
     {
         private readonly IIdentityServerInteractionService _interaction;

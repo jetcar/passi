@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Docker Compose": {
+      "commandName": "DockerCompose",
+      "commandVersion": "2.0"
+    }
+  }
+}

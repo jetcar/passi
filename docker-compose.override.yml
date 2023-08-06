@@ -38,10 +38,6 @@ services:
 
 
   webapp:
-    image: webapp:1
-    build:
-      context: .
-      dockerfile: WebApp/Dockerfile
     ports:
     - "5002:5002"
     networks:
@@ -54,10 +50,6 @@ services:
 
 
   identityserver:
-    image: identityserver:1
-    build:
-      context: .
-      dockerfile: IdentityServer/Dockerfile
     ports:
     - "5003:5003"
     networks:
@@ -74,10 +66,6 @@ services:
 
 
   passiwebapi:
-    image: passiwebapi:1
-    build:
-      context: .
-      dockerfile: passiwebapi/Dockerfile
     ports:
     - "5004:5004"
     networks:
@@ -88,8 +76,6 @@ services:
     volumes:
     - ../creds:/home/creds
     restart: always
-
-
 
 volumes:
   db-data:

@@ -44,7 +44,6 @@ namespace passi_android.Droid.FingerPrint
             }
 
             // TODO: How do we determine whether to register or authenticate?
-            var alreadyRegistered = false;
             if (string.IsNullOrEmpty(REPLAY_ID))
                 Register();
             else

@@ -12,6 +12,10 @@ using Org.BouncyCastle.X509;
 using RestSharp;
 using WebApiDto.SignUp;
 using System.Net;
+using System.IO;
+using System.Threading.Tasks;
+using System.Threading;
+using System;
 
 namespace RegisterManyUsersTestApp
 {

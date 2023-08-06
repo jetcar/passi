@@ -6,17 +6,8 @@ EXPOSE 5002
 
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /src
-COPY ["WebApp/WebApp.csproj", "WebApp/"]
-COPY ["OpenIdLib/OpenIdLib.csproj", "OpenIdLib/"]
-COPY ["Services/Services.csproj", "Services/"]
-COPY ["AppCommon/AppCommon.csproj", "AppCommon/"]
-COPY ["AppConfig/AppConfig.csproj", "AppConfig/"]
-COPY ["Models/Models.csproj", "Models/"]
-COPY ["Repos/Repos.csproj", "Repos/"]
-COPY ["ConfigurationManager/ConfigurationManager.csproj", "ConfigurationManager/"]
-COPY ["WebApiDto/WebApiDto.csproj", "WebApiDto/"]
-RUN dotnet restore "WebApp/WebApp.csproj"
 COPY . .
+RUN dotnet restore "WebApp/WebApp.csproj"
 WORKDIR "/src/WebApp"
 RUN dotnet build "WebApp.csproj" -c Release -o /app/build
 

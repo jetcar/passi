@@ -1,4 +1,6 @@
-﻿namespace OpenIdLib.AutomaticTokenManagement
+﻿using System;
+
+namespace OpenIdLib.AutomaticTokenManagement
 {
     public class AutomaticTokenManagementOptions
     {

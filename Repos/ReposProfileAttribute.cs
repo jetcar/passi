@@ -2,6 +2,7 @@
 using GoogleTracer;
 using PostSharp.Aspects;
 using PostSharp.Serialization;
+using System.Threading.Tasks;
 
 namespace Repos
 {
@@ -24,6 +25,18 @@ namespace Repos
                 base.OnInvoke(args);
             }
         }
+
+        //public override Task OnInvokeAsync(MethodInterceptionArgs args)
+        //{
+        //    if (_tracer != null)
+        //        using (_tracer.StartSpan(args.Method.Name))
+        //            return base.OnInvokeAsync(args);
+        //    else
+        //    {
+        //        return base.OnInvokeAsync(args);
+        //    }
+        //}
+
 
     }
 }

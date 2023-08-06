@@ -6,16 +6,8 @@ EXPOSE 5003
 
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /src
-COPY ["IdentityServer/IdentityServer.csproj", "IdentityServer/"]
-COPY ["ConfigurationManager/ConfigurationManager.csproj", "ConfigurationManager/"]
-COPY ["Services/Services.csproj", "Services/"]
-COPY ["AppCommon/AppCommon.csproj", "AppCommon/"]
-COPY ["AppConfig/AppConfig.csproj", "AppConfig/"]
-COPY ["Models/Models.csproj", "Models/"]
-COPY ["Repos/Repos.csproj", "Repos/"]
-COPY ["WebApiDto/WebApiDto.csproj", "WebApiDto/"]
-RUN dotnet restore "IdentityServer/IdentityServer.csproj"
 COPY . .
+RUN dotnet restore "IdentityServer/IdentityServer.csproj"
 WORKDIR "/src/IdentityServer"
 RUN dotnet build "IdentityServer.csproj" -c Release -o /app/build
 

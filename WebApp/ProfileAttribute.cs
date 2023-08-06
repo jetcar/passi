@@ -2,6 +2,7 @@
 using GoogleTracer;
 using PostSharp.Aspects;
 using PostSharp.Serialization;
+using System.Threading.Tasks;
 
 namespace WebApp
 {
@@ -18,6 +19,11 @@ namespace WebApp
         {
             using (_tracer.StartSpan(args.Method.Name))
                 base.OnInvoke(args);
+        }
+        public override Task OnInvokeAsync(MethodInterceptionArgs args)
+        {
+            using (_tracer.StartSpan(args.Method.Name))
+                return base.OnInvokeAsync(args);
         }
 
     }

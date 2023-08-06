@@ -113,21 +113,21 @@ namespace IdentityServer.Controllers.Account
         public async Task<IActionResult> Login([FromQuery] string returnUrl)
         {
             // build a model so we know what to show on the login page
-                LoginViewModel vm = new LoginViewModel()
-                {
-                    Username = ""
-                };
+            LoginViewModel vm = new LoginViewModel()
+            {
+                Username = ""
+            };
 
-                var context = await _interaction.GetAuthorizationContextAsync(returnUrl);
-                if (context?.IdP != null && await _schemeProvider.GetSchemeAsync(context.IdP) != null)
-                {
-                    // this is meant to short circuit the UI and only trigger the one external IdP
-                    vm.ReturnUrl = returnUrl;
-                }
+            var context = await _interaction.GetAuthorizationContextAsync(returnUrl);
+            if (context?.IdP != null && await _schemeProvider.GetSchemeAsync(context.IdP) != null)
+            {
+                // this is meant to short circuit the UI and only trigger the one external IdP
+                vm.ReturnUrl = returnUrl;
+            }
 
-                vm.Nonce = context?.Parameters["nonce"];
+            vm.Nonce = context?.Parameters["nonce"];
 
-                return View(vm);
+            return View(vm);
         }
 
         /// <summary>
@@ -137,67 +137,64 @@ namespace IdentityServer.Controllers.Account
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginInputModel model)
         {
-            using (_tracer.StartSpan("login"))
-            {
-                ServicePointManager.ServerCertificateValidationCallback +=
-                    (sender, cert, chain, sslPolicyErrors) => true;
+            ServicePointManager.ServerCertificateValidationCallback +=
+                (sender, cert, chain, sslPolicyErrors) => true;
 
-                var context = await _interaction.GetAuthorizationContextAsync(model.ReturnUrl);
+            var context = await _interaction.GetAuthorizationContextAsync(model.ReturnUrl);
 
-                var request = new RestRequest(_appSetting["startRequest"], Method.Post);
-                var possibleCodes = new List<Color>()
+            var request = new RestRequest(_appSetting["startRequest"], Method.Post);
+            var possibleCodes = new List<Color>()
                 {
                     Color.blue,
                     Color.green,
                     Color.red,
                     Color.yellow
                 };
-                var redirect_uri = model.ReturnUrl.Split('&').Select(x =>
-                {
-                    var values = x.Split('=').Select(a => HttpUtility.UrlDecode(a)).ToArray();
-                    if (values.Length >= 2)
-                        return new { Key = values[0], Value = values[1] };
-                    return new { Key = "redirect_uri", Value = model.ReturnUrl };
-                }).Where(x => x.Key == "redirect_uri").Select(x => x.Value).FirstOrDefault();
+            var redirect_uri = model.ReturnUrl.Split('&').Select(x =>
+            {
+                var values = x.Split('=').Select(a => HttpUtility.UrlDecode(a)).ToArray();
+                if (values.Length >= 2)
+                    return new { Key = values[0], Value = values[1] };
+                return new { Key = "redirect_uri", Value = model.ReturnUrl };
+            }).Where(x => x.Key == "redirect_uri").Select(x => x.Value).FirstOrDefault();
 
-                var index = new Random().Next(0, possibleCodes.Count - 1);
-                var startLoginDto = new StartLoginDto()
+            var index = new Random().Next(0, possibleCodes.Count - 1);
+            var startLoginDto = new StartLoginDto()
+            {
+                Username = model.Username,
+                ClientId = context?.Client.ClientId ?? "IdentityServer",
+                ReturnUrl = redirect_uri,
+                CheckColor = possibleCodes[index],
+                RandomString = model.Nonce ?? _randomGenerator.GetNumbersString(10)
+            };
+            request.AddJsonBody(startLoginDto);
+            var result = _myRestClient.ExecuteAsync(request).Result;
+            if (result.IsSuccessful)
+            {
+                var loginResponceDto = JsonConvert.DeserializeObject<LoginResponceDto>(result.Content);
+                var color = startLoginDto.CheckColor.ToString();
+                return RedirectToAction("Check", new
                 {
-                    Username = model.Username,
-                    ClientId = context?.Client.ClientId ?? "IdentityServer",
-                    ReturnUrl = redirect_uri,
-                    CheckColor = possibleCodes[index],
-                    RandomString = model.Nonce ?? _randomGenerator.GetNumbersString(10)
-                };
-                request.AddJsonBody(startLoginDto);
-                var result = _myRestClient.ExecuteAsync(request).Result;
-                if (result.IsSuccessful)
-                {
-                    var loginResponceDto = JsonConvert.DeserializeObject<LoginResponceDto>(result.Content);
-                    var color = startLoginDto.CheckColor.ToString();
-                    return RedirectToAction("Check", new
-                    {
-                        sessionId = loginResponceDto.SessionId,
-                        returnUrl = model.ReturnUrl,
-                        username = model.Username,
-                        color = color,
-                        randomString = startLoginDto.RandomString
-                    });
-                }
-                else
-                {
-                    //var errorResult = JsonConvert.DeserializeObject<ApiResponse<string>>(result.Content);
-                    ModelState.AddModelError(result.Content, result.ErrorMessage);
-                    //ModelState.AddModelError(errorResult.Message, errorResult.Message);
-                }
-
-                return View(new LoginViewModel()
-                {
-                    ReturnUrl = model.ReturnUrl,
-                    Username = model.Username,
-                    RememberLogin = model.RememberLogin,
+                    sessionId = loginResponceDto.SessionId,
+                    returnUrl = model.ReturnUrl,
+                    username = model.Username,
+                    color = color,
+                    randomString = startLoginDto.RandomString
                 });
             }
+            else
+            {
+                //var errorResult = JsonConvert.DeserializeObject<ApiResponse<string>>(result.Content);
+                ModelState.AddModelError(result.Content, result.ErrorMessage);
+                //ModelState.AddModelError(errorResult.Message, errorResult.Message);
+            }
+
+            return View(new LoginViewModel()
+            {
+                ReturnUrl = model.ReturnUrl,
+                Username = model.Username,
+                RememberLogin = model.RememberLogin,
+            });
         }
 
         [HttpGet]

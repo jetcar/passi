@@ -76,7 +76,3 @@ services:
     volumes:
     - ../creds:/home/creds
     restart: always
-
-volumes:
-  db-data:
-    

@@ -77,7 +77,6 @@ services:
       dockerfile: IdentityServer/Dockerfile
     networks:
       - dock_net
-    container_name: identityserver
     env_file:
     - ../passi_config/dev.env
     volumes:

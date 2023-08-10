@@ -7,6 +7,7 @@ git fetch
 git pull
 
 #sudo docker-compose down
+docker system prune -a -f
 sudo docker image prune -f --all
 sudo docker volume prune -f --all
 #sudo service docker stop

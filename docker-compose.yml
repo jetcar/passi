@@ -55,6 +55,7 @@ services:
       - dock_net
 
   webapp:
+    container_name: webapp
     build:
       context: .
       dockerfile: WebApp/Dockerfile
@@ -70,6 +71,7 @@ services:
 
 
   identityserver:
+    container_name: identityserver
     build:
       context: .
       dockerfile: IdentityServer/Dockerfile
@@ -86,6 +88,7 @@ services:
     restart: always
 
   passiwebapi:
+    container_name: passiwebapi
     build:
       context: .
       dockerfile: passiwebapi/Dockerfile

@@ -51,6 +51,10 @@ services:
     ports:
       - "80:80"
       - "443:443"
+    depends_on:
+      - passiwebapi
+      - webapp
+      - identityserver
     networks:
       - dock_net
 

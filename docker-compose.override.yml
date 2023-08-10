@@ -6,9 +6,6 @@ services:
     - "5432:5432"
     env_file:
     - ./passi_config_local/dev.env
-    volumes:
-    - db-data:/var/lib/postgresql/data/:rwx
-  
 
   redis:
     ports:

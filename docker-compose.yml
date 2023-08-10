@@ -1,7 +1,6 @@
 version: '3.4'
 
 services:
-
   database:
     image: 'postgres:13.8'
     container_name: postgres
@@ -12,6 +11,19 @@ services:
     volumes:
       - type: bind
         source: ../db-data/
+        target: /var/lib/postgresql/data/
+    restart: always
+
+  database2:
+    image: 'postgres:15.3'
+    container_name: postgres2
+    networks:
+    - dock_net
+    env_file:
+    - ../passi_config/dev.env
+    volumes:
+      - type: bind
+        source: ../db-data2/
         target: /var/lib/postgresql/data/
     restart: always
 
@@ -79,6 +91,7 @@ services:
       dockerfile: IdentityServer/Dockerfile
     networks:
       - dock_net
+    container_name: identityserver
     env_file:
     - ../passi_config/dev.env
     volumes:

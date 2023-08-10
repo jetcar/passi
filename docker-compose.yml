@@ -1,9 +1,9 @@
 version: '3.4'
 
 services:
-  database:
+  database2:
     image: 'postgres:13.8'
-    container_name: postgres
+    container_name: postgres2
     networks:
     - dock_net
     env_file:
@@ -14,9 +14,9 @@ services:
         target: /var/lib/postgresql/data/
     restart: always
 
-  database2:
+  database:
     image: 'postgres:15.3'
-    container_name: postgres2
+    container_name: postgres
     networks:
     - dock_net
     env_file:

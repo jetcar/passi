@@ -17,12 +17,12 @@ namespace passi_webapi
 
         public override void OnInvoke(MethodInterceptionArgs args)
         {
-            using (_tracer.StartSpan(args.Method.Name))
+            using (_tracer.StartSpan(args.Instance.GetType().Name + "." + args.Method.Name))
                 base.OnInvoke(args);
         }
         public override Task OnInvokeAsync(MethodInterceptionArgs args)
         {
-            using (_tracer.StartSpan(args.Method.Name))
+            using (_tracer.StartSpan(args.Instance.GetType().Name + "." + args.Method.Name))
                 return base.OnInvokeAsync(args);
         }
 

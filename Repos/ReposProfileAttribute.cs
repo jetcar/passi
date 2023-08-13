@@ -18,7 +18,7 @@ namespace Repos
         public override void OnInvoke(MethodInterceptionArgs args)
         {
             if (_tracer != null)
-                using (_tracer.StartSpan(args.Method.Name))
+                using (_tracer.StartSpan(args.Instance.GetType().Name +"."+ args.Method.Name))
                     base.OnInvoke(args);
             else
             {

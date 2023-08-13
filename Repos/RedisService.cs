@@ -7,7 +7,7 @@ using PostSharp.Extensibility;
 
 namespace Repos
 {
-[ReposProfile(AttributeTargetElements = MulticastTargets.Method)]
+    [ReposProfile(AttributeTargetElements = MulticastTargets.Method)]
     public class RedisService : IRedisService
     {
         private readonly ConnectionMultiplexer _redis;

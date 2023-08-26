@@ -5,5 +5,5 @@ sudo git clean -fdx
 git checkout .
 git fetch
 git pull
-./run_deploy.sh
+sudo ./run_deploy.sh
 

@@ -18,7 +18,7 @@ sudo docker volume prune -f --all
 sudo docker pull mcr.microsoft.com/dotnet/sdk:7.0
 sudo docker pull mcr.microsoft.com/dotnet/aspnet:7.0
 
-sudo docker compose -f docker-compose.yml build
+sudo docker compose -f docker-compose-cloud.yml build
 
-sudo docker compose -f docker-compose.yml up
+sudo docker compose -f docker-compose-cloud.yml up
 

@@ -13,7 +13,6 @@ using Serilog.Events;
 using Services;
 using Google.Cloud.Diagnostics.AspNetCore3;
 using Google.Cloud.Diagnostics.Common;
-using System.Collections.Generic;
 using System.Net.Http;
 using GoogleTracer;
 
@@ -43,7 +42,7 @@ namespace WebApp
             {
                 ServiceOptions = new TraceServiceOptions()
                 {
-                    ProjectId = "passi-165ca"
+                    ProjectId = projectId
                 }
             }); services.AddSingleton<AppSetting>();
             services.AddScoped<WebAppDbContext>();

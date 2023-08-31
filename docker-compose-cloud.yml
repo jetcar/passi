@@ -58,7 +58,7 @@ services:
       - dock_net
 
   webapp:
-    image: jetcar/webapp:1.0.3
+    image: jetcar/webapp:1.0.4
     networks:
       - dock_net
     env_file:
@@ -71,7 +71,7 @@ services:
 
 
   identityserver:
-    image: jetcar/identityserver:1.0.3
+    image: jetcar/identityserver:1.0.4
     networks:
       - dock_net
     container_name: identityserver
@@ -85,7 +85,7 @@ services:
     restart: always
 
   passiwebapi:
-    image: jetcar/passiwebapi:1.0.3
+    image: jetcar/passiwebapi:1.0.4
     networks:
       - dock_net
     depends_on:

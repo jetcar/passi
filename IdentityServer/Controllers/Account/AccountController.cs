@@ -1,6 +1,3 @@
-// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,9 +6,7 @@ using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using System.Web;
-using AppCommon;
 using ConfigurationManager;
-using Google.Cloud.Diagnostics.Common;
 using IdentityModel;
 using IdentityServer.Controllers.ViewInputs;
 using IdentityServer.Controllers.ViewModels;
@@ -56,7 +51,7 @@ namespace IdentityServer.Controllers.Account
             IIdentityServerInteractionService interaction,
             IClientStore clientStore,
             IAuthenticationSchemeProvider schemeProvider,
-            IEventService events, AppSetting appSetting, IMyRestClient myRestClient, IRandomGenerator randomGenerator, IManagedTracer tracer)
+            IEventService events, AppSetting appSetting, IMyRestClient myRestClient, IRandomGenerator randomGenerator)
         {
             // if the TestUserStore is not in DI, then we'll just use the global users collection
             // this is where you would plug in your own custom identity management library (e.g. ASP.NET Identity)
@@ -184,9 +179,8 @@ namespace IdentityServer.Controllers.Account
             }
             else
             {
-                //var errorResult = JsonConvert.DeserializeObject<ApiResponse<string>>(result.Content);
-                ModelState.AddModelError(result.Content, result.ErrorMessage);
-                //ModelState.AddModelError(errorResult.Message, errorResult.Message);
+                var errorResult = JsonConvert.DeserializeObject<ApiResponseDto>(result.Content);
+                ModelState.AddModelError("error", errorResult.Message);
             }
 
             return View(new LoginViewModel()
@@ -309,6 +303,9 @@ namespace IdentityServer.Controllers.Account
             {
                 return RedirectPermanent("/");
             }
+            if(model.ReturnUrl == "\"/identity/client\"")
+                return RedirectPermanent("/");
+
             var redirect_uri = model.ReturnUrl.Split('&').Select(x =>
             {
                 var values = x.Split('=').Select(a => HttpUtility.UrlDecode(a)).ToArray();

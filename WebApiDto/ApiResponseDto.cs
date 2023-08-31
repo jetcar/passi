@@ -1,10 +1,9 @@
 namespace WebApiDto
 {
-    public class ApiResponseDto<T>
+    public class ApiResponseDto<T> : ApiResponseDto
     {
         public T Data { get; set; }
         public bool Succeeded { get; set; }
-        public string Message { get; set; }
 
         public static ApiResponseDto<T> Fail(string errorMessage)
         {
@@ -18,4 +17,10 @@ namespace WebApiDto
 
         public object errors { get; set; }
     }
+
+    public class ApiResponseDto
+    {
+        public string Message { get; set; }
+    }
+
 }

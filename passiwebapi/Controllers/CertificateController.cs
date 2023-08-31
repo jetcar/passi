@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Models;
 using passi_webapi.Dto;
 using PostSharp.Extensibility;
 using Repos;

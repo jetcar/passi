@@ -20,7 +20,6 @@ using passi_webapi.Dto;
 using NodaTime;
 using Google.Cloud.Diagnostics.AspNetCore3;
 using Google.Cloud.Diagnostics.Common;
-using System.Collections.Generic;
 using GoogleTracer;
 
 namespace passi_webapi
@@ -53,13 +52,14 @@ namespace passi_webapi
             var passiUrl = Environment.GetEnvironmentVariable("PassiUrl") ?? Configuration.GetValue<string>("AppSetting:PassiUrl");
             var clientId = Environment.GetEnvironmentVariable("PassiClientId") ?? Configuration.GetValue<string>("AppSetting:PassiClientId");
             var secret = Environment.GetEnvironmentVariable("PassiSecret") ?? Configuration.GetValue<string>("AppSetting:PassiSecret");
+            var projectId = Environment.GetEnvironmentVariable("projectId") ?? Configuration.GetValue<string>("AppSetting:projectId");
 
 
             services.AddGoogleTraceForAspNetCore(new AspNetCoreTraceOptions
             {
                 ServiceOptions = new TraceServiceOptions()
                 {
-                    ProjectId = "passi-165ca"
+                    ProjectId = projectId
                 }
             }); services.AddControllers();
             services.AddSingleton<AppSetting>();

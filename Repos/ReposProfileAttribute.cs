@@ -2,7 +2,7 @@
 using GoogleTracer;
 using PostSharp.Aspects;
 using PostSharp.Serialization;
-using System.Threading.Tasks;
+using System.Reflection;
 
 namespace Repos
 {
@@ -17,13 +17,17 @@ namespace Repos
 
         public override void OnInvoke(MethodInterceptionArgs args)
         {
-            if (_tracer != null)
-                using (_tracer.StartSpan(args.Instance.GetType().Name +"."+ args.Method.Name))
+            var type = args.Instance.GetType();
+            if (!IsPropertyMethod(args.Method) && _tracer != null)
+                using (_tracer.StartSpan(type.FullName + "." + args.Method.Name))
                     base.OnInvoke(args);
             else
-            {
-                base.OnInvoke(args);
-            }
+                    base.OnInvoke(args);
+        }
+
+        private bool IsPropertyMethod(MethodBase method)
+        {
+            return method.IsSpecialName && (method.Name.StartsWith("get_") || method.Name.StartsWith("set_"));
         }
 
         //public override Task OnInvokeAsync(MethodInterceptionArgs args)

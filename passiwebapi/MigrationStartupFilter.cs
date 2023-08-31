@@ -17,8 +17,21 @@ namespace passi_webapi
                 {
                     foreach (var context in scope.ServiceProvider.GetServices<TContext>())
                     {
-                        while (context.Database.GetDbConnection() == null)
-                            Thread.Sleep(100);
+                        while (true)
+                        {
+
+                            try
+                            {
+                                while (context.Database.GetDbConnection() == null)
+                                    Thread.Sleep(100);
+                                break;
+                            }
+                            catch (Exception e)
+                            {
+                                Thread.Sleep(100);
+                            }
+                        }
+
                         context.Database.SetCommandTimeout(1000);
                         context.Database.Migrate();
                     }

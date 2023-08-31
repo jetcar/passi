@@ -3,9 +3,7 @@ using System.Diagnostics;
 using System.Net.Http;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using AppCommon;
 using ConfigurationManager;
-using Google.Cloud.Diagnostics.Common;
 using IdentityModel.Client;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -20,24 +18,20 @@ namespace WebApp.Controllers
     public class HomeController : Controller
     {
         private AppSetting _appSetting;
-        private readonly IManagedTracer _tracer;
-        public HomeController(AppSetting appSetting, IManagedTracer tracer)
+        public HomeController(AppSetting appSetting)
         {
             _appSetting = appSetting;
-            _tracer = tracer;
         }
 
         public IActionResult Index()
         {
-            using (_tracer.StartSpan("index"))
-                return View();
+            return View();
         }
 
         [Authorize]
         public IActionResult UserInfo()
         {
-            using (_tracer.StartSpan("userInfo"))
-                return View(UserInfoModel.Create(HttpContext.User.Identity as ClaimsIdentity));
+            return View(UserInfoModel.Create(HttpContext.User.Identity as ClaimsIdentity));
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

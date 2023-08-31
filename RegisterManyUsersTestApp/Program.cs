@@ -1,5 +1,4 @@
 ﻿using System.Security.Cryptography.X509Certificates;
-using System.Security;
 using Org.BouncyCastle.Asn1.X509;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Generators;
@@ -11,7 +10,6 @@ using Org.BouncyCastle.Utilities;
 using Org.BouncyCastle.X509;
 using RestSharp;
 using WebApiDto.SignUp;
-using System.Net;
 using System.IO;
 using System.Threading.Tasks;
 using System.Threading;

@@ -6,27 +6,29 @@ services:
     container_name: postgres
     networks:
     - dock_net
+    ports:
+      - "5432:5432"
     env_file:
-    - ../passi_config/dev.env
+    - ./configs/variables/dev.env
+    - ./configs/variables/postgres_dev.env
     volumes:
       - type: bind
         source: ../db-data2/
         target: /var/lib/postgresql/data/
     restart: always
-
-
+    
   pgadmin:
     image: 'dpage/pgadmin4:7.4'
     container_name: pgadmin
     networks:
     - dock_net
     env_file:
-    - ../passi_config/dev.env
+    - ./configs/variables/pgadmin_dev.env
     restart: always
     depends_on:
     - database
     volumes:
-    - ../passi_config/pgadmin/:/etc/pgadmin/:ro
+    - ./configs/pgadmin/:/etc/pgadmin/:ro #config
     - ../pgadmin/:/var/lib/pgadmin/:rw
 
   redis:
@@ -34,19 +36,17 @@ services:
     container_name: redis
     networks:
     - dock_net
-    env_file:
-    - ../passi_config/dev.env
+    #env_file:
+    #- ./configs/variables/dev.env
     restart: always
     volumes:
     - ../redis_data/:/data
-
 
   haproxy:
     container_name: haproxy
     image: haproxy:2.8.1
     volumes:
-      - ../passi_cert:/usr/local/etc/haproxy/cert
-      - ./haproxy:/usr/local/etc/haproxy
+      - ./configs/haproxy:/usr/local/etc/haproxy
     ports:
       - "80:80"
       - "443:443"
@@ -63,14 +63,16 @@ services:
       dockerfile: WebApp/Dockerfile
     networks:
       - dock_net
+    ports:
+      - "5002:5002"
     env_file:
-    - ../passi_config/dev.env
+    - ./configs/variables/dev.env
+    - ./configs/variables/webapp_dev.env
     volumes:
     - ../creds:/home/creds
     depends_on:
     - database
     restart: always
-
 
   identityserver:
     build:
@@ -78,9 +80,12 @@ services:
       dockerfile: IdentityServer/Dockerfile
     networks:
       - dock_net
+    ports:
+      - "5003:5003"
     container_name: identityserver
     env_file:
-    - ../passi_config/dev.env
+    - ./configs/variables/dev.env
+    - ./configs/variables/identity_dev.env
     volumes:
     - ../creds:/home/creds
     depends_on:
@@ -94,11 +99,15 @@ services:
       dockerfile: passiwebapi/Dockerfile
     networks:
       - dock_net
+    ports:
+      - "5004:5004"
     depends_on:
     - database
     - redis
     env_file:
-    - ../passi_config/dev.env
+    - ../passi_config/sendgrid.env
+    - ./configs/variables/dev.env
+    - ./configs/variables/passiwebapi_dev.env
     volumes:
     - ../creds:/home/creds
     restart: always

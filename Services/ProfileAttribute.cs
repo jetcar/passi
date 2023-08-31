@@ -2,6 +2,7 @@
 using GoogleTracer;
 using PostSharp.Aspects;
 using PostSharp.Serialization;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace Services
@@ -17,13 +18,25 @@ namespace Services
 
         public override void OnInvoke(MethodInterceptionArgs args)
         {
-            using (_tracer.StartSpan(args.Instance.GetType().Name + "." + args.Method.Name))
+            var type = args?.Instance?.GetType();
+            if (!IsPropertyMethod(args?.Method))
+                using (_tracer.StartSpan(type?.FullName + "." + args.Method.Name))
+                    base.OnInvoke(args);
+            else
                 base.OnInvoke(args);
         }
         public override Task OnInvokeAsync(MethodInterceptionArgs args)
         {
-            using (_tracer.StartSpan(args.Instance.GetType().Name + "." + args.Method.Name))
-                return base.OnInvokeAsync(args);
+            var type = args.Instance.GetType();
+            if (!IsPropertyMethod(args.Method))
+                using (_tracer.StartSpan(type.FullName + "." + args.Method.Name))
+                    return base.OnInvokeAsync(args);
+            return base.OnInvokeAsync(args);
+
+        }
+        private bool IsPropertyMethod(MethodBase method)
+        {
+            return method.IsSpecialName && (method.Name.StartsWith("get_") || method.Name.StartsWith("set_"));
         }
 
     }

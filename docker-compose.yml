@@ -45,6 +45,7 @@ services:
     container_name: haproxy
     image: haproxy:2.8.1
     volumes:
+      - ./configs/cert:/usr/local/etc/haproxy/cert
       - ./configs/haproxy:/usr/local/etc/haproxy
     ports:
       - "80:80"

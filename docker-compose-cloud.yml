@@ -46,7 +46,7 @@ services:
     image: haproxy:2.8.1
     volumes:
       - ../passi_cert:/usr/local/etc/haproxy/cert
-      - ./haproxy:/usr/local/etc/haproxy
+      - ./configs/haproxy:/usr/local/etc/haproxy
     ports:
       - "80:80"
       - "443:443"

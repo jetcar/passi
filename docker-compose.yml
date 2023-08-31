@@ -5,12 +5,11 @@ services:
     image: 'postgres:15.3'
     container_name: postgres
     networks:
-    - dock_net
+      - dock_net
     ports:
       - "5432:5432"
     env_file:
-    - ./configs/variables/dev.env
-    - ./configs/variables/postgres_dev.env
+      - ./configs/variables/dev.env
     volumes:
       - type: bind
         source: ../db-data2/
@@ -21,15 +20,15 @@ services:
     image: 'dpage/pgadmin4:7.4'
     container_name: pgadmin
     networks:
-    - dock_net
+      - dock_net
     env_file:
-    - ./configs/variables/pgadmin_dev.env
+      - ./configs/variables/dev.env
     restart: always
     depends_on:
-    - database
+      - database
     volumes:
-    - ./configs/pgadmin/:/etc/pgadmin/:ro #config
-    - ../pgadmin/:/var/lib/pgadmin/:rw
+      - ./configs/pgadmin/:/etc/pgadmin/:ro #config
+      - ../pgadmin/:/var/lib/pgadmin/:rw
 
   redis:
     image: 'redis/redis-stack-server:7.0.6-RC5'
@@ -40,7 +39,7 @@ services:
     #- ./configs/variables/dev.env
     restart: always
     volumes:
-    - ../redis_data/:/data
+      - ../redis_data/:/data
 
   haproxy:
     container_name: haproxy
@@ -66,12 +65,11 @@ services:
     ports:
       - "5002:5002"
     env_file:
-    - ./configs/variables/dev.env
-    - ./configs/variables/webapp_dev.env
+      - ./configs/variables/dev.env
     volumes:
-    - ../creds:/home/creds
+      - ../creds:/home/creds
     depends_on:
-    - database
+      - database
     restart: always
 
   identityserver:
@@ -84,13 +82,12 @@ services:
       - "5003:5003"
     container_name: identityserver
     env_file:
-    - ./configs/variables/dev.env
-    - ./configs/variables/identity_dev.env
+      - ./configs/variables/dev.env
     volumes:
-    - ../creds:/home/creds
+      - ../creds:/home/creds
     depends_on:
-    - database
-    - passiwebapi
+      - database
+      - passiwebapi
     restart: always
 
   passiwebapi:
@@ -102,14 +99,12 @@ services:
     ports:
       - "5004:5004"
     depends_on:
-    - database
-    - redis
+      - database
+      - redis
     env_file:
-    - ../passi_config/sendgrid.env
-    - ./configs/variables/dev.env
-    - ./configs/variables/passiwebapi_dev.env
+      - ./configs/variables/dev.env
     volumes:
-    - ../creds:/home/creds
+      - ../creds:/home/creds
     restart: always
     
 networks:

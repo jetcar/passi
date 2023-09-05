@@ -54,19 +54,9 @@ services:
     networks:
       - haproxy_net
 
-  common_image:
-    build:
-      tags: 
-        - common_image:1.0.5
-      context: .
-      dockerfile: DockerfileBuildAll
 
   webapp:
-    build:
-      tags: 
-        - webapp:1.0.5
-      context: .
-      dockerfile: WebApp/Dockerfile
+    image: jetcar/webapp:1.0.4
     networks:
       - haproxy_net
       - database_net
@@ -80,11 +70,7 @@ services:
     restart: always
 
   identityserver:
-    build:
-      tags: 
-        - identityserver:1.0.5
-      context: .
-      dockerfile: IdentityServer/Dockerfile
+    image: jetcar/identityserver:1.0.4
     networks:
       - haproxy_net
       - database_net
@@ -100,11 +86,7 @@ services:
     restart: always
 
   passiwebapi:
-    build:
-      tags: 
-        - passiwebapi:1.0.5
-      context: .
-      dockerfile: passiwebapi/Dockerfile
+    image: jetcar/passiwebapi:1.0.4
     networks:
       - haproxy_net
       - database_net

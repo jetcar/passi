@@ -23,7 +23,19 @@ services:
       - ./configs/cert:/usr/local/etc/haproxy/cert
       - ./configs/haproxy:/usr/local/etc/haproxy
 
+  common_image:
+    build:
+      tags: 
+        - common_image:1.0.5
+      context: .
+      dockerfile: DockerfileBuildAll
+
   webapp:
+    build:
+      tags: 
+        - webapp:1.0.5
+      context: .
+      dockerfile: WebApp/Docker
     ports:
       - "5002:5002"
     env_file:
@@ -32,6 +44,11 @@ services:
       - ../creds:/home/creds
 
   identityserver:
+    build:
+      tags: 
+        - identityserver:1.0.5
+      context: .
+      dockerfile: IdentityServer/Dockerfile
     ports:
       - "5003:5003"
     env_file:
@@ -40,6 +57,11 @@ services:
       - ../creds:/home/creds
 
   passiwebapi:
+    build:
+      tags: 
+        - identityserver:1.0.5
+      context: .
+      dockerfile: passiwebapi/Dockerfile
     ports:
       - "5004:5004"
     env_file:

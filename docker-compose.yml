@@ -66,7 +66,6 @@ services:
       - ../creds:/home/creds
     depends_on:
       - database
-      - common_image     
     restart: always
 
   identityserver:
@@ -82,7 +81,6 @@ services:
     depends_on:
       - database
       - passiwebapi
-      - common_image
     restart: always
 
   passiwebapi:
@@ -94,7 +92,6 @@ services:
     depends_on:
       - database
       - redis
-      - common_image
     env_file:
     - ../passi_config/dev.env
     volumes:

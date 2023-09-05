@@ -35,7 +35,7 @@ services:
       tags: 
         - webapp:1.0.5
       context: .
-      dockerfile: WebApp/Docker
+      dockerfile: WebApp/Dockerfile
     ports:
       - "5002:5002"
     env_file:

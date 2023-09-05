@@ -1,0 +1,52 @@
+version: '3.4'
+
+services:
+  database:
+    ports:
+      - "5432:5432"
+    env_file:
+      - ./configs/variables/dev.env
+    volumes:
+      - type: bind
+        source: ../db-data/
+        target: /var/lib/postgresql/data/
+    
+  pgadmin:
+    env_file:
+      - ./configs/variables/dev.env
+    volumes:
+      - ./configs/pgadmin/:/etc/pgadmin/:ro #config
+      - ../pgadmin/:/var/lib/pgadmin/:rw
+
+  haproxy:
+    volumes:
+      - ./configs/cert:/usr/local/etc/haproxy/cert
+      - ./configs/haproxy:/usr/local/etc/haproxy
+
+  webapp:
+    ports:
+      - "5002:5002"
+    env_file:
+      - ./configs/variables/dev.env
+    volumes:
+      - ../creds:/home/creds
+
+  identityserver:
+    ports:
+      - "5003:5003"
+    env_file:
+      - ./configs/variables/dev.env
+    volumes:
+      - ../creds:/home/creds
+
+  passiwebapi:
+    ports:
+      - "5004:5004"
+    env_file:
+      - ./configs/variables/dev.env
+    volumes:
+      - ../creds:/home/creds
+
+
+
+

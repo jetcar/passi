@@ -11,10 +11,11 @@ using OpenIdLib.OpenId;
 using Serilog;
 using Serilog.Events;
 using Services;
-using Google.Cloud.Diagnostics.AspNetCore3;
 using Google.Cloud.Diagnostics.Common;
 using System.Net.Http;
+using Google.Cloud.Diagnostics.AspNetCore;
 using GoogleTracer;
+using TraceServiceOptions = Google.Cloud.Diagnostics.Common.TraceServiceOptions;
 
 namespace WebApp
 {

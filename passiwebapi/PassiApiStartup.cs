@@ -16,11 +16,12 @@ using OpenIdLib.OpenId;
 using System.Linq;
 using Models;
 using AutoMapper;
+using Google.Cloud.Diagnostics.AspNetCore;
 using passi_webapi.Dto;
 using NodaTime;
-using Google.Cloud.Diagnostics.AspNetCore3;
 using Google.Cloud.Diagnostics.Common;
 using GoogleTracer;
+using TraceServiceOptions = Google.Cloud.Diagnostics.Common.TraceServiceOptions;
 
 namespace passi_webapi
 {

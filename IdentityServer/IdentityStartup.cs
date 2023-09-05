@@ -9,7 +9,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using ConfigurationManager;
-using Google.Cloud.Diagnostics.AspNetCore3;
+using Google.Cloud.Diagnostics.AspNetCore;
 using Google.Cloud.Diagnostics.Common;
 using GoogleTracer;
 using IdentityModel;
@@ -27,6 +27,7 @@ using Services;
 using ApiScope = IdentityServer4.EntityFramework.Entities.ApiScope;
 using Client = IdentityServer4.Models.Client;
 using Microsoft.OpenApi.Models;
+using TraceServiceOptions = Google.Cloud.Diagnostics.Common.TraceServiceOptions;
 
 namespace IdentityServer
 {
@@ -98,7 +99,7 @@ namespace IdentityServer
                 .AddProfileService<MyProfileService>()
                 .AddUserSession<UserSession>()
                 .AddConfigurationStore<IdentityDbContext>()
-                .AddDeveloperSigningCredential()
+                //.AddDeveloperSigningCredential()
                 .AddOperationalStore<IdentityDbContext>();
             services.AddDataProtection()
                 .SetApplicationName("***")

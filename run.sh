@@ -14,8 +14,8 @@ sudo docker volume prune -f --all
 sudo docker compose -f docker-compose.yml build
 sudo docker compose -f docker-compose.yml up -d
 
-#sudo docker push jetcar/passiwebapi:1.0.5
-#sudo docker push jetcar/identityserver:1.0.5
-#sudo docker push jetcar/webapp:1.0.5
+#sudo docker push jetcar/passiwebapi:1.0.6
+#sudo docker push jetcar/identityserver:1.0.6
+#sudo docker push jetcar/webapp:1.0.6
 
 

@@ -16,7 +16,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AppCommon\AppCommon.csproj" />
     <ProjectReference Include="..\Services\Services.csproj" />
   </ItemGroup>
 

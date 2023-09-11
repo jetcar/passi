@@ -26,14 +26,14 @@ services:
   common_image:
     build:
       tags: 
-        - common_image:1.0.5
+        - common_image:1.0.6
       context: .
       dockerfile: DockerfileBuildAll
 
   webapp:
     build:
       tags: 
-        - webapp:1.0.5
+        - webapp:1.0.6
       context: .
       dockerfile: WebApp/Dockerfile
     ports:
@@ -42,11 +42,14 @@ services:
       - ./configs/variables/dev.env
     volumes:
       - ../creds:/home/creds
+    depends_on:
+      - common_image
+
 
   identityserver:
     build:
       tags: 
-        - identityserver:1.0.5
+        - identityserver:1.0.6
       context: .
       dockerfile: IdentityServer/Dockerfile
     ports:
@@ -55,11 +58,13 @@ services:
       - ./configs/variables/dev.env
     volumes:
       - ../creds:/home/creds
+    depends_on:
+      - common_image
 
   passiwebapi:
     build:
       tags: 
-        - identityserver:1.0.5
+        - identityserver:1.0.6
       context: .
       dockerfile: passiwebapi/Dockerfile
     ports:
@@ -68,7 +73,8 @@ services:
       - ./configs/variables/dev.env
     volumes:
       - ../creds:/home/creds
-
+    depends_on:
+      - common_image
 
 
 

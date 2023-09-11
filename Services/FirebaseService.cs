@@ -5,7 +5,6 @@ using ConfigurationManager;
 using FirebaseAdmin.Messaging;
 using Repos;
 using Serilog.Core;
-using AppCommon;
 using Microsoft.EntityFrameworkCore;
 using PostSharp.Extensibility;
 using Message = FirebaseAdmin.Messaging.Message;
@@ -65,7 +64,7 @@ namespace Services
                         {
                             var session = sessionrepo.GetSessionById(sessionId);
                             session.Status = Models.SessionStatus.Error;
-                            session.ErrorMessage = e.Message.Truncate(256);
+                            session.ErrorMessage = Truncate(e.Message, 256);
                             sessionrepo.Update(session);
                             transaction.Commit();
                         }
@@ -75,7 +74,19 @@ namespace Services
             }).Start();
             return "";
         }
+
+        public static string Truncate(string text, int maxLength)
+        {
+            if (string.IsNullOrEmpty(text))
+                return text;
+
+            // If we're asked for more than we've got, we can just return the
+            // original reference
+            return text.Length > maxLength ? text.Substring(0, maxLength) : text;
+        }
     }
+
+
 
     public interface IFirebaseService
     {

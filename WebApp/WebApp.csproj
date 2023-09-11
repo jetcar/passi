@@ -51,7 +51,6 @@
 	<ItemGroup>
 	  <ProjectReference Include="..\GoogleTracer\GoogleTracer.csproj" />
 	  <ProjectReference Include="..\OpenIdLib\OpenIdLib.csproj" />
-	  <ProjectReference Include="..\AppCommon\AppCommon.csproj" />
 	  <ProjectReference Include="..\ConfigurationManager\ConfigurationManager.csproj" />
 	  <ProjectReference Include="..\OpenIdLib\OpenIdLib.csproj" />
 	  <ProjectReference Include="..\Services\Services.csproj" />

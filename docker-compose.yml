@@ -55,7 +55,7 @@ services:
       - haproxy_net
 
   webapp:
-    image: jetcar/webapp:1.0.6
+    image: jetcar/webapp:1.0.7
     networks:
       - haproxy_net
       - database_net
@@ -68,7 +68,7 @@ services:
     restart: always
 
   identityserver:
-    image: jetcar/identityserver:1.0.6
+    image: jetcar/identityserver:1.0.7
     networks:
       - haproxy_net
       - database_net
@@ -76,6 +76,7 @@ services:
     env_file:
     - ../passi_config/dev.env
     volumes:
+      - ../passi_identity_cert:/myapp/cert
       - ../creds:/home/creds
     depends_on:
       - database
@@ -83,7 +84,7 @@ services:
     restart: always
 
   passiwebapi:
-    image: jetcar/passiwebapi:1.0.6
+    image: jetcar/passiwebapi:1.0.7
     networks:
       - haproxy_net
       - database_net
@@ -103,9 +104,15 @@ networks:
 
   database_net:
     driver: bridge
+    internal: true
+    attachable: false
+    enable_ipv6: false
 
   redis_net:
     driver: bridge
+    internal: true
+    attachable: false
+    enable_ipv6: false
 
 
 

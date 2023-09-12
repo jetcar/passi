@@ -5,9 +5,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Security.Cryptography.X509Certificates;
 using ConfigurationManager;
 using Google.Cloud.Diagnostics.AspNetCore;
 using Google.Cloud.Diagnostics.Common;
@@ -48,6 +50,7 @@ namespace IdentityServer
         public void ConfigureServices(IServiceCollection services)
         {
             var projectId = Environment.GetEnvironmentVariable("projectId") ?? Configuration.GetValue<string>("AppSetting:projectId");
+            var identityCertPass = Environment.GetEnvironmentVariable("IdentityCertPassword") ?? Configuration.GetValue<string>("AppSetting:IdentityCertPassword");
             services.AddControllersWithViews();
             services.AddSingleton<AppSetting>();
             services.AddScoped<IMyRestClient,MyRestClient>();
@@ -86,7 +89,8 @@ namespace IdentityServer
                 // The next call guarantees that trace information is propagated for outgoing
                 // requests that are already being traced.
                 .AddOutgoingGoogleTraceHandler();
-
+            byte[] certData = File.ReadAllBytes("/myapp/cert/your_certificate.pfx");
+            
             services.AddGoogleDiagnostics(projectId, "Identity");
             services.AddIdentityServer(options =>
                 {
@@ -96,6 +100,7 @@ namespace IdentityServer
                         CookieSlidingExpiration = true,
                     };
                 })
+                .AddSigningCredential(new X509Certificate2(certData,identityCertPass))
                 .AddProfileService<MyProfileService>()
                 .AddUserSession<UserSession>()
                 .AddConfigurationStore<IdentityDbContext>()

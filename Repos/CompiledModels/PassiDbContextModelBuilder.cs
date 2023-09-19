@@ -41,7 +41,7 @@ namespace Repos.CompiledModels
             UserInvitationDbEntityType.CreateAnnotations(userInvitationDb);
 
             AddAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
-            AddAnnotation("ProductVersion", "7.0.2");
+            AddAnnotation("ProductVersion", "7.0.9");
             AddAnnotation("Relational:MaxIdentifierLength", 63);
         }
     }

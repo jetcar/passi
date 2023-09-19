@@ -45,14 +45,6 @@
 		<MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
 	</ItemGroup>
 
-
-	
-	<ItemGroup>
-	  <GoogleServicesJson Include="Platforms\Android\google-services.json">
-	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-	  </GoogleServicesJson>
-	</ItemGroup>
-
 	
 
 	<ItemGroup>

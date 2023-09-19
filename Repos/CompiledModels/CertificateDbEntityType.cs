@@ -93,16 +93,16 @@ namespace Repos.CompiledModels
                 new[] { thumbprint });
             runtimeEntityType.SetPrimaryKey(key);
 
-            var iXCertificatesModifiedById = runtimeEntityType.AddIndex(
+            var iX_Certificates_ModifiedById = runtimeEntityType.AddIndex(
                 new[] { modifiedById },
                 name: "IX_Certificates_ModifiedById");
 
-            var iXCertificatesParentCertId = runtimeEntityType.AddIndex(
+            var iX_Certificates_ParentCertId = runtimeEntityType.AddIndex(
                 new[] { parentCertId },
                 name: "IX_Certificates_ParentCertId",
                 unique: true);
 
-            var iXCertificatesUserId = runtimeEntityType.AddIndex(
+            var iX_Certificates_UserId = runtimeEntityType.AddIndex(
                 new[] { userId },
                 name: "IX_Certificates_UserId");
 

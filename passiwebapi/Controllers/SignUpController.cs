@@ -57,7 +57,10 @@ namespace passi_webapi.Controllers
                 {
                     if (!_userRepository.ValidateConfirmationCode(signupConfirmationDto.Email,
                             signupConfirmationDto.Code))
+                    {
+                        _userRepository.IncreaseFailedRetryCount(signupConfirmationDto.Email);
                         throw new BadRequestException("Code not found");
+                    }
 
                     _certValidator.ValidateCertificate(signupConfirmationDto.PublicCert, signupConfirmationDto.Email);
 

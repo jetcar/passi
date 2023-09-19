@@ -19,7 +19,7 @@ namespace IdentityServer
         public override void OnInvoke(MethodInterceptionArgs args)
         {
             var type = args.Instance.GetType();
-            if (!IsPropertyMethod(args.Method))
+            if (!IsPropertyMethod(args.Method) && _tracer != null)
                 using (_tracer.StartSpan(type.FullName + "." + args.Method.Name))
                     base.OnInvoke(args);
             else
@@ -28,7 +28,7 @@ namespace IdentityServer
         public override Task OnInvokeAsync(MethodInterceptionArgs args)
         {
             var type = args.Instance.GetType();
-            if (!IsPropertyMethod(args.Method))
+            if (!IsPropertyMethod(args.Method) && _tracer != null)
                 using (_tracer.StartSpan(type.FullName + "." + args.Method.Name))
                     return base.OnInvokeAsync(args);
             return base.OnInvokeAsync(args);

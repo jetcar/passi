@@ -55,15 +55,16 @@ namespace passi_webapi
             var secret = Environment.GetEnvironmentVariable("PassiSecret") ?? Configuration.GetValue<string>("AppSetting:PassiSecret");
             var projectId = Environment.GetEnvironmentVariable("projectId") ?? Configuration.GetValue<string>("AppSetting:projectId");
 
-
-            services.AddGoogleTraceForAspNetCore(new AspNetCoreTraceOptions
-            {
-                ServiceOptions = new TraceServiceOptions()
+            if (projectId != null)
+                services.AddGoogleTraceForAspNetCore(new AspNetCoreTraceOptions
                 {
-                    ProjectId = projectId
-                }
-            }); services.AddControllers();
-            services.AddSingleton<AppSetting>();
+                    ServiceOptions = new TraceServiceOptions()
+                    {
+                        ProjectId = projectId
+                    }
+                });
+            services.AddControllers();
+            services.AddSingleton<AppSetting>(new AppSetting(Configuration));
             services.AddSingleton(mapper);
             services.AddScoped<IMyRestClient, MyRestClient>();
 
@@ -135,7 +136,7 @@ namespace passi_webapi
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            InitializeDatabase(app);
+            InitializeDatabase(app.ApplicationServices);
             app.Map(new PathString("/passiapi"), (applicationBuilder) =>
             {
                 Tracer.CurrentTracer = app.ApplicationServices.GetService<IManagedTracer>();
@@ -182,11 +183,10 @@ namespace passi_webapi
             });
         }
 
-        private void InitializeDatabase(IApplicationBuilder app)
+        public void InitializeDatabase(IServiceProvider services)
         {
-            using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
+            using (var serviceScope = services.GetService<IServiceScopeFactory>().CreateScope())
             {
-                var appsettings = serviceScope.ServiceProvider.GetRequiredService<AppSetting>();
                 var context = serviceScope.ServiceProvider.GetRequiredService<PassiDbContext>();
 
                 if (!context.Admins.Any(x => x.Email == "admin@passi.cloud"))

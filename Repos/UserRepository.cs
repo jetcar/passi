@@ -7,7 +7,7 @@ using PostSharp.Extensibility;
 
 namespace Repos
 {
-[ReposProfile(AttributeTargetElements = MulticastTargets.Method)]
+    [ReposProfile(AttributeTargetElements = MulticastTargets.Method)]
     public class UserRepository : BaseRepo<PassiDbContext>, IUserRepository
     {
 
@@ -20,7 +20,7 @@ namespace Repos
         {
             return _dbContext.Users.Any(x => x.EmailHash == username);
         }
-        
+
         public UserDb AddUser(UserDb user)
         {
             var device = _dbContext.Devices.FirstOrDefault(x => x.DeviceId == user.Device.DeviceId);
@@ -36,7 +36,9 @@ namespace Repos
 
         public bool ValidateConfirmationCode(string email, string code)
         {
-            return _dbContext.Invitations.Any(x => x.User.EmailHash == email && x.Code == code && x.IsConfirmed == false);
+            _dbContext.Invitations.Load();
+            var validateConfirmationCode = _dbContext.Invitations.FirstOrDefault(x => x.User.EmailHash == email && x.Code == code && x.IsConfirmed == false);
+            return validateConfirmationCode != null && validateConfirmationCode.TryCount < 10;
         }
 
         public void ConfirmInvitation(string email, string publicCert, string guid, string code, string deviceId)
@@ -101,7 +103,7 @@ namespace Repos
 
         public void AddInvitation(UserInvitationDb userInvitationDb)
         {
-            _dbContext.RemoveRange(_dbContext.Invitations.Where(x=>x.UserId == userInvitationDb.UserId));
+            _dbContext.RemoveRange(_dbContext.Invitations.Where(x => x.UserId == userInvitationDb.UserId));
             _dbContext.Invitations.Add(userInvitationDb);
             _dbContext.SaveChanges();
         }
@@ -120,6 +122,18 @@ namespace Repos
             }
         }
 
+        public void IncreaseFailedRetryCount(string email)
+        {
+            var invitations = _dbContext.Invitations.Where(x => x.User.EmailHash == email).ToList();
+            foreach (var userInvitationDb in invitations)
+            {
+
+                userInvitationDb.TryCount++;
+            }
+
+            _dbContext.SaveChanges();
+
+        }
     }
 
     public interface IUserRepository : ITransaction
@@ -141,5 +155,6 @@ namespace Repos
         void AddInvitation(UserInvitationDb userInvitationDb);
 
         void DeleteAccount(Guid accountGuid, string thumbprint);
+        void IncreaseFailedRetryCount(string email);
     }
 }

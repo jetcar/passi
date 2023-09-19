@@ -21,13 +21,4 @@
     <ProjectReference Include="..\WebApiDto\WebApiDto.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Reference Include="Microsoft.AspNetCore.Http.Abstractions">
-      <HintPath>C:\Program Files\dotnet\shared\Microsoft.AspNetCore.App\7.0.4\Microsoft.AspNetCore.Http.Abstractions.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.AspNetCore.Http.Features">
-      <HintPath>C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\7.0.4\ref\net7.0\Microsoft.AspNetCore.Http.Features.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
 </Project>

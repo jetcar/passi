@@ -6,15 +6,15 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Models;
 using Serilog;
-using Serilog.Core;
 using NodaTime;
 using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using PostSharp.Extensibility;
 using Repos.CompiledModels;
+using Serilog.Core;
 
 namespace Repos
 {
-[ReposProfile(AttributeTargetElements = MulticastTargets.Method)]
+    [ReposProfile(AttributeTargetElements = MulticastTargets.Method)]
     public class PassiDbContext : DbContext, IDataProtectionKeyContext
     {
         private AppSetting _appSetting;

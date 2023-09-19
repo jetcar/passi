@@ -1,0 +1,51 @@
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft": "Warning",
+      "Microsoft.Hosting.Lifetime": "Information",
+      "Elastic.Apm": "Debug"
+    }
+  },
+  "Urls": "http://0.0.0.0:5004",
+
+  "AllowedHosts": "*",
+  "AppSetting": {
+    "DoNotSendMail": "false",
+    "returnUrl": "/oauth/callback",
+    "EmailFrom": "sender@passi.cloud",
+    "DbHost": "localhost",
+    "DbName": "passi_test",
+    "DbUser": "postgres",
+    "DbPassword": "test1",
+    "Timeout": "2",
+    "DbSslMode": "Allow",
+    "PassiUrl": "http://192.168.0.208:5004/passiapi",
+    "IdentityUrl": "https://192.168.0.208/identity",
+    "PassiClientId": "PassiClient",
+    "PassiSecret": "secret1",
+    "redis": "localhost",
+    "IsTest": "false",
+    "projectId": "projectId"
+  },
+
+  "Serilog": {
+    "Using": [ "Serilog.Sinks.Console", "Serilog.Sinks.GoogleCloudLogging" ],
+    "MinimumLevel": "Verbose",
+    "WriteTo": [
+      { "Name": "Console" },
+      {
+        "Name": "GoogleCloudLogging",
+        "Args": {
+          "projectID": "passi-165ca",
+          "restrictedToMinimumLevel": "Information"
+        }
+      }
+    ],
+    "Enrich": [ "FromLogContext", "WithMachineName", "WithThreadId" ],
+
+    "Properties": {
+      "Application": "Passi webapi"
+    }
+  }
+}

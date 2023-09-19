@@ -67,6 +67,13 @@ namespace Repos.CompiledModels
                 nullable: true);
             modifiedTime.AddAnnotation("Relational:ColumnType", "timestamp without time zone");
 
+            var tryCount = runtimeEntityType.AddProperty(
+                "TryCount",
+                typeof(int?),
+                propertyInfo: typeof(UserInvitationDb).GetProperty("TryCount", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
+                fieldInfo: typeof(UserInvitationDb).GetField("<TryCount>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly),
+                nullable: true);
+
             var userId = runtimeEntityType.AddProperty(
                 "UserId",
                 typeof(long),
@@ -77,11 +84,11 @@ namespace Repos.CompiledModels
                 new[] { id });
             runtimeEntityType.SetPrimaryKey(key);
 
-            var iXInvitationsModifiedById = runtimeEntityType.AddIndex(
+            var iX_Invitations_ModifiedById = runtimeEntityType.AddIndex(
                 new[] { modifiedById },
                 name: "IX_Invitations_ModifiedById");
 
-            var iXInvitationsUserId = runtimeEntityType.AddIndex(
+            var iX_Invitations_UserId = runtimeEntityType.AddIndex(
                 new[] { userId },
                 name: "IX_Invitations_UserId");
 

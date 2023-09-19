@@ -1,4 +1,6 @@
-﻿using Android.App;
+﻿using System;
+using System.Collections.Generic;
+using Android.App;
 using Android.Content.PM;
 using Android.Gms.Common;
 using Android.OS;
@@ -7,14 +9,18 @@ using Newtonsoft.Json;
 using passi_maui.utils;
 using Plugin.Firebase.CloudMessaging;
 using System.Collections.ObjectModel;
+using System.Linq;
 using passi_maui.FingerPrint;
 using passi_maui.Notifications;
 using WebApiDto;
 using WebApiDto.Auth;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading.Tasks;
 using Android.Security.Keystore;
 using AndroidX.Security.Crypto;
 using Java.Security;
+using Microsoft.Maui;
+using Microsoft.Maui.ApplicationModel;
 using Encoding = System.Text.Encoding;
 
 namespace passi_maui.Platforms.Android

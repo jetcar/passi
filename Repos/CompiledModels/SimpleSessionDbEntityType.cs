@@ -83,19 +83,19 @@ namespace Repos.CompiledModels
                 new[] { guid });
             runtimeEntityType.SetPrimaryKey(key);
 
-            var iXSessionsCreationTime = runtimeEntityType.AddIndex(
+            var iX_Sessions_CreationTime = runtimeEntityType.AddIndex(
                 new[] { creationTime },
                 name: "IX_Sessions_CreationTime");
 
-            var iXSessionsModifiedById = runtimeEntityType.AddIndex(
+            var iX_Sessions_ModifiedById = runtimeEntityType.AddIndex(
                 new[] { modifiedById },
                 name: "IX_Sessions_ModifiedById");
 
-            var iXSessionsStatus = runtimeEntityType.AddIndex(
+            var iX_Sessions_Status = runtimeEntityType.AddIndex(
                 new[] { status },
                 name: "IX_Sessions_Status");
 
-            var iXSessionsUserId = runtimeEntityType.AddIndex(
+            var iX_Sessions_UserId = runtimeEntityType.AddIndex(
                 new[] { userId },
                 name: "IX_Sessions_UserId");
 

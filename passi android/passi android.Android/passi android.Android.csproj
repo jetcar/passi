@@ -97,7 +97,7 @@
       <Version>4.1.1</Version>
     </PackageReference>
     <PackageReference Include="Xamarin.Firebase.Iid">
-      <Version>121.1.0.7</Version>
+      <Version>121.1.0.10</Version>
     </PackageReference>
     <PackageReference Include="Xamarin.Firebase.Messaging">
       <Version>123.0.8</Version>

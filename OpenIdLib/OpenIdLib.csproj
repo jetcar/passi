@@ -5,8 +5,8 @@
   </PropertyGroup>
   <ItemGroup>
 	  <PackageReference Include="IdentityModelCore" Version="1.0.1" />
-	  <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.9" />
-	  <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="7.0.9" />
+	  <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.11" />
+	  <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="7.0.11" />
 	  <PackageReference Include="RestSharp" Version="110.2.0" />
 
   </ItemGroup>

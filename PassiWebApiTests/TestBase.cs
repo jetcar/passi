@@ -141,6 +141,12 @@ public class TestBase
         }
     }
 
+    [OneTimeTearDown]
+    public void OnetimeTearDown()
+    {
+        ServiceProvider = null;
+    }
+
 
     public IServiceScope CurrentScope
     {

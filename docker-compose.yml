@@ -22,7 +22,7 @@ services:
       - PGID=1000
       - TZ=Etc/UTC
     volumes:
-    - ../passi_config:/config
+    - ../passi_config_ddlclient:/config
     restart: always
     networks:
       - haproxy_net

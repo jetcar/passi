@@ -10,7 +10,7 @@ services:
       - ./configs/variables/dev.env
     volumes:
       - type: bind
-        source: ../db-data2/
+        source: /mnt/newdisk/db-data2/
         target: /var/lib/postgresql/data/
     restart: always
 

@@ -100,12 +100,12 @@
       <Version>121.1.0.10</Version>
     </PackageReference>
     <PackageReference Include="Xamarin.Firebase.Messaging">
-      <Version>123.0.8</Version>
+      <Version>123.1.2.2</Version>
     </PackageReference>
-    <PackageReference Include="Xamarin.Forms" Version="5.0.0.2578" />
-    <PackageReference Include="Xamarin.Essentials" Version="1.7.7" />
+    <PackageReference Include="Xamarin.Forms" Version="5.0.0.2612" />
+    <PackageReference Include="Xamarin.Essentials" Version="1.8.0" />
     <PackageReference Include="Xamarin.GooglePlayServices.Base">
-      <Version>118.1.0</Version>
+      <Version>118.2.0.2</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>

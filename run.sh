@@ -12,7 +12,7 @@ sudo docker image prune -f --all
 sudo docker volume prune -f --all
 
 sudo docker compose -f docker-compose.yml build
-sudo docker compose -f docker-compose.yml up -d
+sudo docker compose -f docker-compose.yml up -d --remove-orphans
 
 #sudo docker push jetcar/passiwebapi:1.0.10
 #sudo docker push jetcar/identityserver:1.0.10

@@ -13,6 +13,19 @@ services:
         source: ../db-data2/
         target: /var/lib/postgresql/data/
     restart: always
+
+  ddclient:
+    image: lscr.io/linuxserver/ddclient:3.10.0
+    container_name: ddclient
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+    volumes:
+    - ../passi_config:/config
+    restart: always
+    networks:
+      - haproxy_net
     
   pgadmin:
     image: 'dpage/pgadmin4:7.6'

@@ -1,6 +1,13 @@
 version: '3.4'
 
 services:
+  redis:
+    ports:
+      - "6379:6379"
+    networks:
+    - haproxy_net
+
+
   database:
     ports:
       - "5432:5432"
@@ -89,5 +96,34 @@ services:
     depends_on:
       - common_image
 
+  front:
+    env_file:
+    - ./configs/variables/dev.env
+
+  resolver:
+    env_file:
+    - ./configs/variables/dev.env
+  
+  admin:
+    ports:
+    - "8080:8080"
+    env_file:
+    - ./configs/variables/dev.env
+
+  imap:
+    env_file:
+    - ./configs/variables/dev.env
+  
+  smtp:
+    env_file:
+    - ./configs/variables/dev.env
+  
+  antispam:
+    env_file:
+    - ./configs/variables/dev.env
+  
+  webmail:
+    env_file:
+    - ./configs/variables/dev.env
 
 

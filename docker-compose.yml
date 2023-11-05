@@ -110,7 +110,141 @@ services:
     volumes:
       - ../creds:/home/creds
     restart: always
-    
+
+  # Core services
+  front:
+    image: ${DOCKER_ORG:-ghcr.io/mailu}/${DOCKER_PREFIX:-}nginx:${MAILU_VERSION:-2.0}
+    restart: always
+    env_file:
+      - ../passi_config/dev.env
+    logging:
+      options:
+        tag: mailu-front
+    ports:
+      - "127.0.0.1:25:25"
+      - "127.0.0.1:465:465"
+      - "127.0.0.1:587:587"
+      - "127.0.0.1:110:110"
+      - "127.0.0.1:995:995"
+      - "127.0.0.1:143:143"
+      - "127.0.0.1:993:993"
+    networks:
+      - default
+      - haproxy_net
+    volumes:
+      - "/mnt/newdisk/mailu/certs:/certs"
+      - "/mnt/newdisk/mailu/overrides/nginx:/overrides:ro"
+    depends_on:
+      - resolver
+    dns:
+      - 192.168.202.254
+
+  resolver:
+    image: ${DOCKER_ORG:-ghcr.io/mailu}/${DOCKER_PREFIX:-}unbound:${MAILU_VERSION:-2.0}
+    env_file:
+      - ../passi_config/dev.env
+    restart: always
+    networks:
+      default:
+        ipv4_address: 192.168.202.254
+
+
+  admin:
+    image: ${DOCKER_ORG:-ghcr.io/mailu}/${DOCKER_PREFIX:-}admin:${MAILU_VERSION:-2.0}
+    restart: always
+    env_file:
+      - ../passi_config/dev.env
+    logging:
+      options:
+        tag: mailu-admin
+    volumes:
+      - "/mnt/newdisk/mailu/data:/data"
+      - "/mnt/newdisk/mailu/dkim:/dkim"
+    networks:
+      - default
+      - redis_net
+    depends_on:
+      - redis
+      - resolver
+    dns:
+      - 192.168.202.254
+
+  imap:
+    image: ${DOCKER_ORG:-ghcr.io/mailu}/${DOCKER_PREFIX:-}dovecot:${MAILU_VERSION:-2.0}
+    restart: always
+    env_file:
+      - ../passi_config/dev.env
+    logging:
+      options:
+        tag: mailu-imap
+    volumes:
+      - "/mnt/newdisk/mailu/mail:/mail"
+      - "/mnt/newdisk/mailu/overrides/dovecot:/overrides:ro"
+    networks:
+      - default
+    depends_on:
+      - front
+      - resolver
+    dns:
+      - 192.168.202.254
+
+  smtp:
+    image: ${DOCKER_ORG:-ghcr.io/mailu}/${DOCKER_PREFIX:-}postfix:${MAILU_VERSION:-2.0}
+    restart: always
+    env_file:
+      - ../passi_config/dev.env
+    logging:
+      options:
+        tag: mailu-smtp
+    volumes:
+      - "/mnt/newdisk/mailu/mailqueue:/queue"
+      - "/mnt/newdisk/mailu/overrides/postfix:/overrides:ro"
+    depends_on:
+      - front
+      - resolver
+    dns:
+      - 192.168.202.254
+      
+  antispam:
+    image: ${DOCKER_ORG:-ghcr.io/mailu}/${DOCKER_PREFIX:-}rspamd:${MAILU_VERSION:-2.0}
+    hostname: antispam
+    restart: always
+    env_file:
+      - ../passi_config/dev.env
+    logging:
+      options:
+        tag: mailu-antispam
+    volumes:
+      - "/mnt/newdisk/mailu/filter:/var/lib/rspamd"
+      - "/mnt/newdisk/mailu/overrides/rspamd:/overrides:ro"
+    networks:
+      - redis_net
+      - default
+    depends_on:
+      - front
+      - redis
+      - resolver
+    dns:
+      - 192.168.202.254
+  # Optional services
+  
+  # Webmail
+  webmail:
+    image: ${DOCKER_ORG:-ghcr.io/mailu}/${DOCKER_PREFIX:-}webmail:${MAILU_VERSION:-2.0}
+    restart: always
+    env_file:
+      - ../passi_config/dev.env
+    volumes:
+      - "/mailu/webmail:/data"
+      - "/mailu/overrides/roundcube:/overrides:ro"
+    networks:
+      - default
+    depends_on:
+      - front
+    dns:
+      - 192.168.202.254
+
+
 networks:
   haproxy_net:
     driver: bridge
@@ -126,6 +260,13 @@ networks:
     internal: true
     attachable: false
     enable_ipv6: false
+  default:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 192.168.202.0/24
+
 
 
 

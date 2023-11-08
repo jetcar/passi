@@ -162,6 +162,7 @@ services:
       - "/mnt/newdisk/mailu/dkim:/dkim"
     networks:
       - default
+      - haproxy_net
       - redis_net
     depends_on:
       - redis
@@ -181,6 +182,7 @@ services:
       - "/mnt/newdisk/mailu/mail:/mail"
       - "/mnt/newdisk/mailu/overrides/dovecot:/overrides:ro"
     networks:
+      - haproxy_net
       - default
     depends_on:
       - front
@@ -196,6 +198,9 @@ services:
     logging:
       options:
         tag: mailu-smtp
+    networks:
+      - haproxy_net
+      - default
     volumes:
       - "/mnt/newdisk/mailu/mailqueue:/queue"
       - "/mnt/newdisk/mailu/overrides/postfix:/overrides:ro"

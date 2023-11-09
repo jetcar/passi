@@ -132,7 +132,7 @@ services:
       - default
       - haproxy_net
     volumes:
-      - "/mnt/newdisk/mailu/certs:/certs"
+      - ../passi_cert:/certs
       - "/mnt/newdisk/mailu/overrides/nginx:/overrides:ro"
     depends_on:
       - resolver

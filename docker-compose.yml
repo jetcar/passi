@@ -6,6 +6,8 @@ services:
     container_name: postgres
     logging:
       driver: gcplogs
+      options:
+        label: postgres      
     networks:
       - database_net
     env_file:
@@ -122,6 +124,8 @@ services:
       - ../passi_config/dev.env
     logging:
       driver: gcplogs
+      options:
+        label: mailu-front      
     ports:
       - "25"
       - "465:465"
@@ -158,6 +162,8 @@ services:
       - ../passi_config/dev.env
     logging:
       driver: gcplogs
+      options:
+        label: mailu-admin      
     volumes:
       - "/mnt/newdisk/mailu/data:/data"
       - "/mnt/newdisk/mailu/dkim:/dkim"
@@ -178,6 +184,8 @@ services:
       - ../passi_config/dev.env
     logging:
       driver: gcplogs
+      options:
+        label: mailu-imap      
     volumes:
       - "/mnt/newdisk/mailu/mail:/mail"
       - "/mnt/newdisk/mailu/overrides/dovecot:/overrides:ro"
@@ -197,6 +205,8 @@ services:
       - ../passi_config/dev.env
     logging:
       driver: gcplogs
+      options:
+        label: mailu-smtp      
     networks:
       - haproxy_net
       - default
@@ -217,6 +227,8 @@ services:
       - ../passi_config/dev.env
     logging:
       driver: gcplogs
+      options:
+        label: mailu-antispam      
     volumes:
       - "/mnt/newdisk/mailu/filter:/var/lib/rspamd"
       - "/mnt/newdisk/mailu/overrides/rspamd:/overrides:ro"

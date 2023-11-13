@@ -9,6 +9,8 @@ services:
 
 
   database:
+    logging:
+      driver: json-file
     ports:
       - "5432:5432"
     networks:
@@ -97,6 +99,8 @@ services:
       - common_image
 
   front:
+    logging:
+      driver: json-file
     env_file:
     - ./configs/variables/dev.env
 
@@ -105,20 +109,28 @@ services:
     - ./configs/variables/dev.env
   
   admin:
+    logging:
+      driver: json-file
     ports:
     - "8080:8080"
     env_file:
     - ./configs/variables/dev.env
 
   imap:
+    logging:
+      driver: json-file
     env_file:
     - ./configs/variables/dev.env
   
   smtp:
+    logging:
+      driver: json-file
     env_file:
     - ./configs/variables/dev.env
   
   antispam:
+    logging:
+      driver: json-file
     env_file:
     - ./configs/variables/dev.env
   

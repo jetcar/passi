@@ -123,13 +123,14 @@ services:
     logging:
       driver: gcplogs
     ports:
-      - "25"
+      - "25:25"
       - "465:465"
       - "587:587"
       - "110:110"
       - "995:995"
       - "143:143"
       - "993:993"
+      - "10025:10025"
     networks:
       - default
       - haproxy_net

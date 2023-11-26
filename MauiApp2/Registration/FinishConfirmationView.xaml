@@ -1,0 +1,61 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<mauiApp21:BaseContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                          xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                          xmlns:mauiApp2="clr-namespace:MauiApp2"
+                          xmlns:registration1="clr-namespace:MauiApp2.Registration"
+                          xmlns:mauiApp21="clr-namespace:MauiApp2"
+                          xmlns:tools="clr-namespace:MauiApp2.Tools"
+                          BackgroundColor="#FAFAFA"
+                          x:Class="MauiApp2.Registration.FinishConfirmationView"
+                          x:DataType="registration1:FinishConfirmationView"
+>
+    <mauiApp2:BaseContentPage.Content>
+
+        <StackLayout VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand">
+            <Label TextColor="Black" HorizontalOptions="Center" Text="{ Binding Path=ResponseError}" />
+            <Label TextColor="Black" HorizontalOptions="Center" Text="Secure account by pin." />
+            <Label TextColor="Black" Text="{Binding Path=Pin1Error.Text}" HorizontalTextAlignment="Center"></Label>
+            <Label TextColor="Black" Text="Pin" HorizontalTextAlignment="Center"></Label>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <Label Text="{Binding Path=Pin1Masked}" FontSize="15" VerticalTextAlignment="Center" HorizontalTextAlignment="Center" HorizontalOptions="FillAndExpand" FontAttributes="Bold" TextColor="Black" BackgroundColor="{Binding Path=Pin1Color}">
+                    <Label.Triggers>
+                        <DataTrigger  Binding="{Binding Path=Pin1Error.HasError}" TargetType="Label" Value="true">
+                            <Setter Property="Label.BackgroundColor"
+                              Value="Red" />
+                        </DataTrigger>
+                    </Label.Triggers>
+                </Label>
+                <Button Background="transparent" CornerRadius="100"  Text="X" Padding="0" Margin="0" HorizontalOptions="End" Clicked="ClearPin1_OnClicked"></Button>
+            </Grid>
+            <Label TextColor="Black" Text="{Binding Path=Pin2Error.Text}" HorizontalTextAlignment="Center"></Label>
+            <Label TextColor="Black" Text="Pin confirmation" HorizontalTextAlignment="Center" ></Label>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <Label Text="{Binding Path=Pin2Masked}" FontSize="15" VerticalTextAlignment="Center" HorizontalTextAlignment="Center"
+                                                                HorizontalOptions="FillAndExpand" FontAttributes="Bold" TextColor="Black" BackgroundColor="{Binding Path=Pin2Color}">
+                    <Label.Triggers>
+                        <DataTrigger  Binding="{Binding Path=Pin2Error.HasError}" TargetType="Label" Value="true">
+                            <Setter Property="Label.BackgroundColor"
+                          Value="Red" />
+                        </DataTrigger>
+                    </Label.Triggers>
+                </Label>
+                <Button Background="transparent" CornerRadius="100"  Text="X" Padding="0" Margin="0" Clicked="ClearPin2_OnClicked" HorizontalOptions="End"></Button>
+            </Grid>
+
+            <tools:NumbersPad  NumberClicked="NumbersPad_OnNumberClicked"></tools:NumbersPad>
+            <Button BackgroundColor="White" TextColor="Black" CornerRadius="100"  Clicked="SkipButton_OnClicked" Text="Skip"></Button>
+        </StackLayout>
+    </mauiApp2:BaseContentPage.Content>
+</mauiApp21:BaseContentPage>

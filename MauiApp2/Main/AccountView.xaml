@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<mauiApp2:BaseContentPage  xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                               xmlns:mauiApp2="clr-namespace:MauiApp2"
+                               BackgroundColor="#FAFAFA"
+                               xmlns:main1="clr-namespace:MauiApp2.Main"
+                               xmlns:admin="clr-namespace:MauiApp2.Admin"
+                               x:DataType="main1:AccountView"
+                               x:Class="MauiApp2.Main.AccountView">
+    <StackLayout>
+
+        <admin:AdminButton BindingContext="{Binding Path=AccountDb}"></admin:AdminButton>
+        <StackLayout VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand">
+            <Label HorizontalTextAlignment="Center" TextColor="Black" Margin="10" Text="{Binding Path=Message}"></Label>
+
+            <Label TextColor="Black" HorizontalOptions="Center" Text="Current user:" />
+            <Label TextColor="Black" HorizontalOptions="Center" Text="{Binding Path=Email}" />
+            <Label TextColor="Black" HorizontalOptions="Center" Text="Certificate Thumbprint:" />
+            <Label TextColor="Black" HorizontalOptions="Center" Text="{Binding Path=Thumbprint}" />
+            <Label TextColor="Black" HorizontalOptions="Center" Text="Certificate valid from:" />
+            <Label TextColor="Black" HorizontalOptions="Center" Text="{Binding Path=ValidFrom}" />
+            <Label TextColor="Black" HorizontalOptions="Center" Text="Certificate valid to:" />
+            <Label TextColor="Black" HorizontalOptions="Center" Text="{Binding Path=ValidTo}" />
+            <Label TextColor="Black" HorizontalOptions="Center" Text="Identity provider:" />
+            <Label TextColor="Black" HorizontalOptions="Center" Text="{Binding Path=ProviderName}" />
+        </StackLayout>
+
+        <Button BackgroundColor="White" TextColor="Black" CornerRadius="100"  Text="Update Certificate" Clicked="UpdateCertificate_OnClicked"></Button>
+        <Button BackgroundColor="White" TextColor="Black" CornerRadius="100"  Text="Add Fingerprint" Clicked="AddBiometric_Button_OnClicked" ></Button>
+    </StackLayout>
+</mauiApp2:BaseContentPage>

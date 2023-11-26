@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:installLocation="internalOnly" package="com.companyname.mauiapp2" android:versionCode="1" android:versionName="1.0">
+	<application android:allowBackup="false" android:icon="@mipmap/appicon" android:supportsRtl="true" android:label="MauiApp2"></application>
+	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+	<uses-permission android:name="android.permission.INTERNET" />
+	<uses-sdk android:minSdkVersion="33" android:targetSdkVersion="33" />
+</manifest>

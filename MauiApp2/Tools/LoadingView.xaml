@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<mauiApp2:BaseContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                       xmlns:mauiApp2="clr-namespace:MauiApp2"
+                       BackgroundColor="#FAFAFA"
+                       x:Class="MauiApp2.Tools.LoadingView">
+    <mauiApp2:BaseContentPage.Content>
+        <Grid HorizontalOptions="Center" VerticalOptions="Center">
+            <ActivityIndicator IsRunning="true" />
+
+        </Grid>
+    </mauiApp2:BaseContentPage.Content>
+</mauiApp2:BaseContentPage>

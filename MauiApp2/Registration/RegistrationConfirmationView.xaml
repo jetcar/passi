@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<mauiApp2:BaseContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                              xmlns:mauiApp2="clr-namespace:MauiApp2"
+                              xmlns:tools="clr-namespace:MauiApp2.Tools"
+                              xmlns:registration1="clr-namespace:MauiApp2.Registration"
+                              BackgroundColor="#FAFAFA"
+                              x:DataType="registration1:RegistrationConfirmationView"
+                              x:Class="MauiApp2.Registration.RegistrationConfirmationView">
+    <StackLayout VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand">
+
+        <Label TextColor="Black" HorizontalOptions="Center" Text="{ Binding Path=ResponseError}" />
+
+        <Label TextColor="Black" HorizontalOptions="Center" Text="{Binding Path=Email}" />
+
+        <Label TextColor="Black" HorizontalOptions="Center" Text="Confirmation Code" />
+        <Label HorizontalTextAlignment="Center" Margin="5" TextColor="Black" FontAttributes="Bold" HorizontalOptions="Fill" Text="{Binding Path=Code}"></Label>
+        <tools:NumbersPad  NumberClicked="NumbersPad_OnNumberClicked"></tools:NumbersPad>
+        <Button BackgroundColor="White" TextColor="Black" CornerRadius="100"  Clicked="CancelButton_OnClicked" Text="Cancel"></Button>
+    </StackLayout>
+</mauiApp2:BaseContentPage>

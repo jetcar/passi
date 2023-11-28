@@ -15,6 +15,8 @@ using WebApp.Models;
 namespace WebApp.Controllers
 {
     [Profile(AttributeTargetElements = MulticastTargets.Method)]
+    [ApiController]
+    [Route("api/[controller]")]
     public class HomeController : Controller
     {
         private AppSetting _appSetting;
@@ -29,9 +31,14 @@ namespace WebApp.Controllers
         }
 
         [Authorize]
-        public IActionResult UserInfo()
+        public UserInfoModel UserInfo()
         {
-            return View(UserInfoModel.Create(HttpContext.User.Identity as ClaimsIdentity));
+            return UserInfoModel.Create(HttpContext.User.Identity as ClaimsIdentity);
+        }
+        [Authorize]
+        public bool UserLoggedIn()
+        {
+            return true;
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
@@ -47,30 +54,6 @@ namespace WebApp.Controllers
             });
         }
 
-        private async Task<string> CallThirdPartyServiceAsync(string url)
-        {
-            var accessToken = await HttpContext.GetTokenAsync("access_token");
-
-            using (var httpClientHandler = new HttpClientHandler())
-            {
-                //hack to get around self-signed cert errors in dev
-                httpClientHandler.ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true;
-
-                using (var httpClient = new HttpClient(httpClientHandler))
-                {
-                    httpClient.SetBearerToken(accessToken);
-                    try
-                    {
-                        var content = await httpClient.GetStringAsync(url);
-                        return content;
-                    }
-                    catch (Exception e)
-                    {
-                        return "tilt: " + e;
-                    }
-                }
-            }
-        }
 
         public IActionResult DevTools()
         {

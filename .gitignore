@@ -53,7 +53,8 @@ obj
 publish
 .vs
 *.user
-
+dist
+.vscode
 /identityserver.txt
 /passi.txt
 /webapp.txt

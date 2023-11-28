@@ -15,8 +15,72 @@
 
 	</PropertyGroup>
 
+	<ItemGroup>
+	  <Content Remove="C:\Users\user\.nuget\packages\bootstrap\5.3.2\contentFiles\any\any\wwwroot\css\bootstrap-grid.css" />
+	  <Content Remove="C:\Users\user\.nuget\packages\bootstrap\5.3.2\contentFiles\any\any\wwwroot\css\bootstrap-grid.css.map" />
+	  <Content Remove="C:\Users\user\.nuget\packages\bootstrap\5.3.2\contentFiles\any\any\wwwroot\css\bootstrap-grid.min.css" />
+	  <Content Remove="C:\Users\user\.nuget\packages\bootstrap\5.3.2\contentFiles\any\any\wwwroot\css\bootstrap-grid.min.css.map" />
+	  <Content Remove="C:\Users\user\.nuget\packages\bootstrap\5.3.2\contentFiles\any\any\wwwroot\css\bootstrap-grid.rtl.css" />
+	  <Content Remove="C:\Users\user\.nuget\packages\bootstrap\5.3.2\contentFiles\any\any\wwwroot\css\bootstrap-grid.rtl.css.map" />
+	  <Content Remove="C:\Users\user\.nuget\packages\bootstrap\5.3.2\contentFiles\any\any\wwwroot\css\bootstrap-grid.rtl.min.css" />
+	  <Content Remove="C:\Users\user\.nuget\packages\bootstrap\5.3.2\contentFiles\any\any\wwwroot\css\bootstrap-grid.rtl.min.css.map" />
+	  <Content Remove="C:\Users\user\.nuget\packages\bootstrap\5.3.2\contentFiles\any\any\wwwroot\css\bootstrap-reboot.css" />
+	  <Content Remove="C:\Users\user\.nuget\packages\bootstrap\5.3.2\contentFiles\any\any\wwwroot\css\bootstrap-reboot.css.map" />
+	  <Content Remove="C:\Users\user\.nuget\packages\bootstrap\5.3.2\contentFiles\any\any\wwwroot\css\bootstrap-reboot.min.css" />
+	  <Content Remove="C:\Users\user\.nuget\packages\bootstrap\5.3.2\contentFiles\any\any\wwwroot\css\bootstrap-reboot.min.css.map" />
+	  <Content Remove="C:\Users\user\.nuget\packages\bootstrap\5.3.2\contentFiles\any\any\wwwroot\css\bootstrap-reboot.rtl.css" />
+	  <Content Remove="C:\Users\user\.nuget\packages\bootstrap\5.3.2\contentFiles\any\any\wwwroot\css\bootstrap-reboot.rtl.css.map" />
+	  <Content Remove="C:\Users\user\.nuget\packages\bootstrap\5.3.2\contentFiles\any\any\wwwroot\css\bootstrap-reboot.rtl.min.css" />
+	  <Content Remove="C:\Users\user\.nuget\packages\bootstrap\5.3.2\contentFiles\any\any\wwwroot\css\bootstrap-reboot.rtl.min.css.map" />
+	  <Content Remove="C:\Users\user\.nuget\packages\bootstrap\5.3.2\contentFiles\any\any\wwwroot\css\bootstrap-utilities.css" />
+	  <Content Remove="C:\Users\user\.nuget\packages\bootstrap\5.3.2\contentFiles\any\any\wwwroot\css\bootstrap-utilities.css.map" />
+	  <Content Remove="C:\Users\user\.nuget\packages\bootstrap\5.3.2\contentFiles\any\any\wwwroot\css\bootstrap-utilities.min.css" />
+	  <Content Remove="C:\Users\user\.nuget\packages\bootstrap\5.3.2\contentFiles\any\any\wwwroot\css\bootstrap-utilities.min.css.map" />
+	  <Content Remove="C:\Users\user\.nuget\packages\bootstrap\5.3.2\contentFiles\any\any\wwwroot\css\bootstrap-utilities.rtl.css" />
+	  <Content Remove="C:\Users\user\.nuget\packages\bootstrap\5.3.2\contentFiles\any\any\wwwroot\css\bootstrap-utilities.rtl.css.map" />
+	  <Content Remove="C:\Users\user\.nuget\packages\bootstrap\5.3.2\contentFiles\any\any\wwwroot\css\bootstrap-utilities.rtl.min.css" />
+	  <Content Remove="C:\Users\user\.nuget\packages\bootstrap\5.3.2\contentFiles\any\any\wwwroot\css\bootstrap-utilities.rtl.min.css.map" />
+	  <Content Remove="C:\Users\user\.nuget\packages\bootstrap\5.3.2\contentFiles\any\any\wwwroot\css\bootstrap.css" />
+	  <Content Remove="C:\Users\user\.nuget\packages\bootstrap\5.3.2\contentFiles\any\any\wwwroot\css\bootstrap.css.map" />
+	  <Content Remove="C:\Users\user\.nuget\packages\bootstrap\5.3.2\contentFiles\any\any\wwwroot\css\bootstrap.min.css" />
+	  <Content Remove="C:\Users\user\.nuget\packages\bootstrap\5.3.2\contentFiles\any\any\wwwroot\css\bootstrap.min.css.map" />
+	  <Content Remove="C:\Users\user\.nuget\packages\bootstrap\5.3.2\contentFiles\any\any\wwwroot\css\bootstrap.rtl.css" />
+	  <Content Remove="C:\Users\user\.nuget\packages\bootstrap\5.3.2\contentFiles\any\any\wwwroot\css\bootstrap.rtl.css.map" />
+	  <Content Remove="C:\Users\user\.nuget\packages\bootstrap\5.3.2\contentFiles\any\any\wwwroot\css\bootstrap.rtl.min.css" />
+	  <Content Remove="C:\Users\user\.nuget\packages\bootstrap\5.3.2\contentFiles\any\any\wwwroot\css\bootstrap.rtl.min.css.map" />
+	  <Content Remove="C:\Users\user\.nuget\packages\bootstrap\5.3.2\contentFiles\any\any\wwwroot\js\bootstrap.bundle.js" />
+	  <Content Remove="C:\Users\user\.nuget\packages\bootstrap\5.3.2\contentFiles\any\any\wwwroot\js\bootstrap.bundle.js.map" />
+	  <Content Remove="C:\Users\user\.nuget\packages\bootstrap\5.3.2\contentFiles\any\any\wwwroot\js\bootstrap.bundle.min.js" />
+	  <Content Remove="C:\Users\user\.nuget\packages\bootstrap\5.3.2\contentFiles\any\any\wwwroot\js\bootstrap.bundle.min.js.map" />
+	  <Content Remove="C:\Users\user\.nuget\packages\bootstrap\5.3.2\contentFiles\any\any\wwwroot\js\bootstrap.esm.js" />
+	  <Content Remove="C:\Users\user\.nuget\packages\bootstrap\5.3.2\contentFiles\any\any\wwwroot\js\bootstrap.esm.js.map" />
+	  <Content Remove="C:\Users\user\.nuget\packages\bootstrap\5.3.2\contentFiles\any\any\wwwroot\js\bootstrap.esm.min.js" />
+	  <Content Remove="C:\Users\user\.nuget\packages\bootstrap\5.3.2\contentFiles\any\any\wwwroot\js\bootstrap.esm.min.js.map" />
+	  <Content Remove="C:\Users\user\.nuget\packages\bootstrap\5.3.2\contentFiles\any\any\wwwroot\js\bootstrap.js" />
+	  <Content Remove="C:\Users\user\.nuget\packages\bootstrap\5.3.2\contentFiles\any\any\wwwroot\js\bootstrap.js.map" />
+	  <Content Remove="C:\Users\user\.nuget\packages\bootstrap\5.3.2\contentFiles\any\any\wwwroot\js\bootstrap.min.js" />
+	  <Content Remove="C:\Users\user\.nuget\packages\bootstrap\5.3.2\contentFiles\any\any\wwwroot\js\bootstrap.min.js.map" />
+	  <Content Remove="wwwroot\assets\Contacts-997bd791.js" />
+	  <Content Remove="wwwroot\assets\HomeView-dc6aa5d0.js" />
+	  <Content Remove="wwwroot\assets\index-0449c8f0.css" />
+	  <Content Remove="wwwroot\assets\index-dedfcb6c.js" />
+	  <Content Remove="wwwroot\assets\PrivacyPolicy-f260cf86.js" />
+	  <Content Remove="wwwroot\assets\UserInfo-a0c82213.js" />
+	  <Content Remove="wwwroot\favicon.ico" />
+	  <Content Remove="wwwroot\img\en_badge_web_generic.png" />
+	  <Content Remove="wwwroot\img\google-play-badge.png" />
+	  <Content Remove="wwwroot\img\loginScheme.png" />
+	  <Content Remove="wwwroot\index.html" />
+	</ItemGroup>
+
 
 	<ItemGroup>
+		<PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.5.0" />
+		<PackageReference Include="Swashbuckle.AspNetCore.Newtonsoft" Version="6.5.0" />
+		<PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="6.5.0" />
+		<PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="6.5.0" />
+		<PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="6.5.0" />
+
 		<PackageReference Include="bootstrap" Version="5.3.2" />
 		<PackageReference Include="Google.Cloud.Diagnostics.AspNetCore" Version="4.4.0" />
 		<PackageReference Include="IdentityModelCore" Version="1.0.1" />
@@ -66,11 +130,30 @@
 
 	<ItemGroup>
 	  <_ContentIncludedByDefault Remove="Views\Home\Contacts.cshtml" />
+	  <_ContentIncludedByDefault Remove="wwwroot\assets\Contacts-997bd791.js" />
+	  <_ContentIncludedByDefault Remove="wwwroot\assets\HomeView-dc6aa5d0.js" />
+	  <_ContentIncludedByDefault Remove="wwwroot\assets\index-0449c8f0.css" />
+	  <_ContentIncludedByDefault Remove="wwwroot\assets\index-dedfcb6c.js" />
+	  <_ContentIncludedByDefault Remove="wwwroot\assets\PrivacyPolicy-f260cf86.js" />
+	  <_ContentIncludedByDefault Remove="wwwroot\assets\UserInfo-a0c82213.js" />
+	  <_ContentIncludedByDefault Remove="wwwroot\img\en_badge_web_generic.png" />
+	  <_ContentIncludedByDefault Remove="wwwroot\img\google-play-badge.png" />
+	  <_ContentIncludedByDefault Remove="wwwroot\img\loginScheme.png" />
 	</ItemGroup>
 
 
 	<ItemGroup>
+	  <None Include="wwwroot\assets\Contacts-997bd791.js" />
+	  <None Include="wwwroot\assets\HomeView-dc6aa5d0.js" />
+	  <None Include="wwwroot\assets\index-0449c8f0.css" />
+	  <None Include="wwwroot\assets\index-dedfcb6c.js" />
+	  <None Include="wwwroot\assets\PrivacyPolicy-f260cf86.js" />
+	  <None Include="wwwroot\assets\UserInfo-a0c82213.js" />
+	  <None Include="wwwroot\favicon.ico" />
+	  <None Include="wwwroot\img\en_badge_web_generic.png" />
+	  <None Include="wwwroot\img\google-play-badge.png" />
 	  <None Include="wwwroot\img\loginScheme.png" />
+	  <None Include="wwwroot\index.html" />
 	</ItemGroup>
 
 </Project>

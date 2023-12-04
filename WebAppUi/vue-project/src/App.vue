@@ -1,11 +1,27 @@
 <script>
     import { RouterLink, RouterView } from 'vue-router'
+    const API_URL = `/api/UserLoggedIn`
     export default {
         data()  {
             return {
                 IsLoggedIn: true
             }
-        }
+        },
+        created() {
+            // fetch on init
+            this.fetchData()
+          },
+
+        watch: {
+            // re-fetch whenever currentBranch changes
+            IsLoggedIn: 'fetchData'
+          },
+          methods: {
+              async fetchData() {
+                const url = `${API_URL}`
+                this.IsLoggedIn = await (await fetch(url)).json()
+              }
+            }
         }
 </script>
 
@@ -24,10 +40,10 @@
                             <RouterLink class="nav-link text-dark" to="/">Home</RouterLink>
                         </li>
                         <li class="nav-item" >
-                            <a class="nav-link text-dark" href="/Auth/Login">Login</a>
+                            <a class="nav-link text-dark" v-if="!IsLoggedIn" href="/Auth/Login">Login</a>
                         </li>
                         <li class="nav-item" >
-                            <RouterLink class="nav-link text-dark" to="/UserInfo">UserInfo</RouterLink>
+                            <RouterLink class="nav-link text-dark" v-if="IsLoggedIn" to="/UserInfo">UserInfo</RouterLink>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link text-dark" href="/Home/DevTools">Register your website</a>
@@ -39,7 +55,7 @@
                             <RouterLink class="nav-link text-dark" to="/PrivacyPolicy">Privacy Policy</RouterLink>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" href="/Auth/Logout">Logout</a>
+                            <a class="nav-link text-dark" v-if="IsLoggedIn" href="/Auth/Logout">Logout</a>
                         </li>
 
                     </ul>

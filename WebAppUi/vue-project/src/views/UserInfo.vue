@@ -13,13 +13,11 @@
         },
 
         created() {
-            // fetch on init
             this.fetchData()
         },
 
         watch: {
-            // re-fetch whenever currentBranch changes
-            currentBranch: 'fetchData'
+            Model: 'fetchData'
         },
 
         methods: {

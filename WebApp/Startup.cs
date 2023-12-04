@@ -125,6 +125,9 @@ namespace WebApp
                     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                     //applicationBuilder.UseHsts();
                 }
+
+                applicationBuilder.UseRouting();
+
                 applicationBuilder.UseForwardedHeaders();
                 applicationBuilder.UseCookiePolicy(
                             new CookiePolicyOptions
@@ -132,6 +135,7 @@ namespace WebApp
                                 Secure = CookieSecurePolicy.Always
                             });
 
+                applicationBuilder.UseDefaultFiles();
                 applicationBuilder.UseStaticFiles();
                 applicationBuilder.UseAuthentication();
                 applicationBuilder.UseSerilogRequestLogging(options =>
@@ -149,13 +153,22 @@ namespace WebApp
                                     diagnosticContext.Set("RequestScheme", httpContext.Request.Scheme);
                                 };
                             });
+                
                 applicationBuilder.UseHealthChecks("/health");
+                applicationBuilder.UseSwagger();
+                applicationBuilder.UseSwaggerUI(c => { c.SwaggerEndpoint("v1/swagger.json", "My API V1"); });
+
                 applicationBuilder.UseMvc(routes =>
                             {
                                 routes.MapRoute(
                                     name: "default",
                                     template: "{controller=Home}/{action=Index}/{id?}");
                             });
+                applicationBuilder.UseEndpoints(endpoints =>
+                {
+                    endpoints.MapFallbackToFile("/index.html");
+                });
+
             });
         }
     }

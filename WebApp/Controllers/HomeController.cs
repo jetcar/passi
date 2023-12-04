@@ -1,12 +1,5 @@
-﻿using System;
-using System.Diagnostics;
-using System.Net.Http;
-using System.Security.Claims;
-using System.Threading.Tasks;
+﻿using System.Diagnostics;
 using ConfigurationManager;
-using IdentityModel.Client;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using PostSharp.Extensibility;
@@ -15,8 +8,6 @@ using WebApp.Models;
 namespace WebApp.Controllers
 {
     [Profile(AttributeTargetElements = MulticastTargets.Method)]
-    [ApiController]
-    [Route("api/[controller]")]
     public class HomeController : Controller
     {
         private AppSetting _appSetting;
@@ -28,17 +19,6 @@ namespace WebApp.Controllers
         public IActionResult Index()
         {
             return View();
-        }
-
-        [Authorize]
-        public UserInfoModel UserInfo()
-        {
-            return UserInfoModel.Create(HttpContext.User.Identity as ClaimsIdentity);
-        }
-        [Authorize]
-        public bool UserLoggedIn()
-        {
-            return true;
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
@@ -53,22 +33,11 @@ namespace WebApp.Controllers
                 RequestPath = exceptionHandlerPathFeature?.Path
             });
         }
-
-
+        
         public IActionResult DevTools()
         {
             var url = _appSetting["IdentityUrl"] + _appSetting["ClientsPage"];
             return RedirectPermanent(url);
-        }
-
-        public IActionResult Contacts()
-        {
-            return View();
-        }
-
-        public IActionResult PrivacyPolicy()
-        {
-            return View();
         }
     }
 }

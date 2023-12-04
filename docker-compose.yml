@@ -149,8 +149,7 @@ services:
     networks:
       default:
         ipv4_address: 192.168.202.254
-
-
+        
   admin:
     image: ${DOCKER_ORG:-ghcr.io/mailu}/${DOCKER_PREFIX:-}admin:${MAILU_VERSION:-2.0}
     restart: always
@@ -229,9 +228,7 @@ services:
       - resolver
     dns:
       - 192.168.202.254
-  # Optional services
-  
-  # Webmail
+
   webmail:
     image: ${DOCKER_ORG:-ghcr.io/mailu}/${DOCKER_PREFIX:-}webmail:${MAILU_VERSION:-2.0}
     restart: always
@@ -246,7 +243,6 @@ services:
       - front
     dns:
       - 192.168.202.254
-
 
 networks:
   haproxy_net:

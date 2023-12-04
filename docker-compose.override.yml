@@ -49,7 +49,7 @@ services:
     networks:
       - haproxy_net
     build:
-      tags: 
+      tags:
         - webapp:1.0.10
       context: .
       dockerfile: WebApp/Dockerfile
@@ -57,11 +57,11 @@ services:
       - "5002:5002"
     env_file:
       - ./configs/variables/dev.env
+      - ../passi_config/sendgrid.env
     volumes:
       - ../creds:/home/creds
     depends_on:
       - common_image
-
 
   identityserver:
     networks:

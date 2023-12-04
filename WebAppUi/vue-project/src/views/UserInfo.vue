@@ -1,6 +1,6 @@
 <script>
 
-    const API_URL = `/home/UserInfo`
+    const API_URL = `/api/UserInfo`
 
     export default {
         data() {

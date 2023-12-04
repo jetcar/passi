@@ -1,4 +1,5 @@
 <template>
+<div class="container">
     <div class="text-center">
         <h1 class="display-4">Privacy Policy</h1>
         <p style="text-align: left">
@@ -81,6 +82,7 @@
             have your permission. We might do so if the law forces us. Your personal information will be
             used when we need to send you promotional materials if you agree to this privacy policy.
         </p>
+    </div>
     </div>
 </template>
 

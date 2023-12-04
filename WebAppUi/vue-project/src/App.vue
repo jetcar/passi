@@ -23,10 +23,10 @@
                         <li class="nav-item">
                             <RouterLink class="nav-link text-dark" to="/">Home</RouterLink>
                         </li>
-                        <li class="nav-item" v-if="!IsLoggedIn">
+                        <li class="nav-item" >
                             <a class="nav-link text-dark" href="/Auth/Login">Login</a>
                         </li>
-                        <li class="nav-item" v-if="IsLoggedIn">
+                        <li class="nav-item" >
                             <RouterLink class="nav-link text-dark" to="/UserInfo">UserInfo</RouterLink>
                         </li>
                         <li class="nav-item">
@@ -37,6 +37,9 @@
                         </li>
                         <li class="nav-item">
                             <RouterLink class="nav-link text-dark" to="/PrivacyPolicy">Privacy Policy</RouterLink>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" href="/Auth/Logout">Logout</a>
                         </li>
 
                     </ul>

@@ -5,25 +5,17 @@
     export default {
         data() {
            return {
-               Model: {
-                Identity: {
-                    Claims: []
-                }}
+               Claims: []
             }
         },
 
         created() {
             this.fetchData()
         },
-
-        watch: {
-            Model: 'fetchData'
-        },
-
         methods: {
             async fetchData() {
                 const url = `${API_URL}`
-                this.Model = await (await fetch(url)).json()
+                this.Claims = await (await fetch(url)).json()
             },
             
         }
@@ -35,10 +27,10 @@
     <div class="text-center">
         <h1 class="display-4">User Info</h1>
         <div class="form-group row">
-            <template v-for="claim in Model.Identity.Claims">
-                <label for="email" class="col-sm-2 col-form-label">{{claim.Type}}</label>
+            <template v-for="claim in Claims">
+                <label for="email" class="col-sm-2 col-form-label">{{claim.type}}</label>
                 <div class="col-sm-10">
-                    <input type="text" class="form-control" id="email" value="{{claim.Value}}" disabled="" />
+                    <input type="text" class="form-control" id="email" v-model="claim.value" disabled="" />
                 </div>
             </template>
         </div>

@@ -4,17 +4,12 @@
     export default {
         data()  {
             return {
-                IsLoggedIn: true
+                IsLoggedIn: false
             }
         },
         created() {
             // fetch on init
             this.fetchData()
-          },
-
-        watch: {
-            // re-fetch whenever currentBranch changes
-            IsLoggedIn: 'fetchData'
           },
           methods: {
               async fetchData() {

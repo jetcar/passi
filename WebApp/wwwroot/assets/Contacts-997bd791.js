@@ -1,1 +1,0 @@
-import{_ as t,o as e,c,b as o,a as s}from"./index-dedfcb6c.js";const a={},n={class:"text-center"},_=s("h1",{class:"display-4"},"Contacts",-1),l=s("br",null,null,-1),r=s("a",null,"admin@passi.cloud",-1);function d(i,u){return e(),c("div",n,[_,o(" Estonia, Tallinn"),l,r])}const h=t(a,[["render",d]]);export{h as default};

@@ -1,4 +1,6 @@
-﻿using System.Security.Claims;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
 using ConfigurationManager;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -14,15 +16,15 @@ namespace WebApp.Controllers
     {
 
         [HttpGet]
-        [Route("UserInfo")]
-        public UserInfoModel UserInfo()
+        [Route("userinfo")]
+        public List<ClaimDto> UserInfo()
         {
             if (HttpContext.User.Identity.IsAuthenticated)
-                return UserInfoModel.Create(HttpContext.User.Identity as ClaimsIdentity);
-            return null;
+                return (HttpContext.User.Identity as ClaimsIdentity).Claims.Select(x=>new ClaimDto(){Type = x.Type, Value = x.Value}).ToList();
+            return new List<ClaimDto>();
         }
         [HttpGet]
-        [Route("UserLoggedIn")]
+        [Route("userloggedin")]
         public bool UserLoggedIn()
         {
             return HttpContext.User.Identity.IsAuthenticated;

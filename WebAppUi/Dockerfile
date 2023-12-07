@@ -1,14 +1,8 @@
-#See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
-
-FROM node:18
-WORKDIR /app
-
-COPY WebAppUi/vue .
-WORKDIR /app/ClientApp
-
+FROM node:21 as vueWeb
+COPY WebAppUi /app
+WORKDIR /app/vue-project
 RUN npm install
+RUN npm run build
 
-EXPOSE 44481
 
-
-ENTRYPOINT ["npm", "start"]
+ENTRYPOINT ["sleep", "3600"]

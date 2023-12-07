@@ -12,9 +12,7 @@
 		<BaseOutputPath>publish</BaseOutputPath>
 		<RunAnalyzersDuringBuild>False</RunAnalyzersDuringBuild>
 		<RunAnalyzersDuringLiveAnalysis>False</RunAnalyzersDuringLiveAnalysis>
-
 	</PropertyGroup>
-
 
 	<ItemGroup>
 		<PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.5.0" />
@@ -22,8 +20,6 @@
 		<PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="6.5.0" />
 		<PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="6.5.0" />
 		<PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="6.5.0" />
-
-		<PackageReference Include="bootstrap" Version="5.3.2" />
 		<PackageReference Include="Google.Cloud.Diagnostics.AspNetCore" Version="4.4.0" />
 		<PackageReference Include="IdentityModelCore" Version="1.0.1" />
 		<PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.21.0" />
@@ -64,33 +60,5 @@
 	  <ProjectReference Include="..\WebApiDto\WebApiDto.csproj" />
 	</ItemGroup>
 
-
-	<ItemGroup>
-	  <UpToDateCheckInput Remove="Views\Home\Contacts.cshtml" />
-	</ItemGroup>
-
-
-	<ItemGroup>
-	  <_ContentIncludedByDefault Remove="Views\Home\Contacts.cshtml" />
-	</ItemGroup>
-
-
-	<ItemGroup>
-	  <None Include="wwwroot\assets\Contacts-4c261ab8.js" />
-	  <None Include="wwwroot\assets\Contacts-9ac3c0f4.js" />
-	  <None Include="wwwroot\assets\HomeView-8704c2a9.js" />
-	  <None Include="wwwroot\assets\HomeView-9fb2f900.js" />
-	  <None Include="wwwroot\assets\index-17155f51.js" />
-	  <None Include="wwwroot\assets\index-b42377e5.js" />
-	  <None Include="wwwroot\assets\PrivacyPolicy-9d2b76cc.js" />
-	  <None Include="wwwroot\assets\PrivacyPolicy-faf7d208.js" />
-	  <None Include="wwwroot\assets\UserInfo-04294781.js" />
-	  <None Include="wwwroot\assets\UserInfo-24b75927.js" />
-	  <None Include="wwwroot\favicon.ico" />
-	  <None Include="wwwroot\img\en_badge_web_generic.png" />
-	  <None Include="wwwroot\img\google-play-badge.png" />
-	  <None Include="wwwroot\img\loginScheme.png" />
-	  <None Include="wwwroot\index.html" />
-	</ItemGroup>
 
 </Project>

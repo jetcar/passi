@@ -60,3 +60,4 @@ dist
 /webapp.txt
 google-services.json
 *.keystore
+*/wwwroot/assets/*

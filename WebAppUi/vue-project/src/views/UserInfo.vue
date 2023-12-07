@@ -24,6 +24,8 @@
 </script>
 
 <template>
+    <main>
+        <div class="container">
     <div class="text-center">
         <h1 class="display-4">User Info</h1>
         <div class="form-group row">
@@ -35,7 +37,8 @@
             </template>
         </div>
     </div>
-
+  </div>
+  </main>
 
 
 </template>

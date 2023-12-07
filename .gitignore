@@ -60,4 +60,7 @@ dist
 /webapp.txt
 google-services.json
 *.keystore
+.vscode
+dist
+*/wwwroot/assets/*
 */wwwroot/assets/*

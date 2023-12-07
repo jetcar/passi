@@ -37,15 +37,7 @@ services:
     volumes:
       - ./configs/cert:/usr/local/etc/haproxy/cert
       - ./configs/haproxy:/usr/local/etc/haproxy
-
-
-  # common_image:
-  #   build:
-  #     tags: 
-  #       - common_image:latest
-  #     context: .
-  #     dockerfile: Dockerfile
-
+      
   webapp:
     networks:
       - haproxy_net

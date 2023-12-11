@@ -16,7 +16,7 @@ using OpenIdLib.OpenId;
 using System.Linq;
 using Models;
 using AutoMapper;
-using Google.Cloud.Diagnostics.AspNetCore;
+using Google.Cloud.Diagnostics.AspNetCore3;
 using passi_webapi.Dto;
 using NodaTime;
 using Google.Cloud.Diagnostics.Common;

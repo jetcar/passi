@@ -1,3 +1,4 @@
+
 FROM common_image:latest AS build
 
 FROM mcr.microsoft.com/dotnet/aspnet:7.0

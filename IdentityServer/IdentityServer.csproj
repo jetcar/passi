@@ -10,6 +10,7 @@
 		<BaseOutputPath>publish</BaseOutputPath>
 	</PropertyGroup>
 
+
 	<ItemGroup>
 		<_ContentIncludedByDefault Remove="Views\Client\Index.cshtml" />
 		<_ContentIncludedByDefault Remove="Views\Account\AccessDenied.cshtml" />
@@ -19,12 +20,11 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Google.Cloud.Diagnostics.AspNetCore" Version="4.4.0" />
+		<PackageReference Include="Google.Cloud.Diagnostics.AspNetCore3" Version="5.1.0" />
 		<PackageReference Include="Google.Cloud.Diagnostics.Common" Version="5.1.0" />
 		<PackageReference Include="IdentityModelCore" Version="1.0.1" />
 		<PackageReference Include="IdentityServer4Core" Version="1.0.2" />
 		<PackageReference Include="IdentityServer4Core.EntityFramework" Version="1.0.0" />
-		<PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.21.0" />
 		<PackageReference Include="Microsoft.AspNetCore.DataProtection.EntityFrameworkCore" Version="7.0.11" />
 
 
@@ -49,9 +49,7 @@
 		<PackageReference Include="Serilog.Enrichers.Thread" Version="3.1.0" />
 		<PackageReference Include="Serilog.Settings.Configuration" Version="7.0.1" />
 		<PackageReference Include="Serilog.Sinks.Console" Version="4.1.0" />
-		<PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
 		<PackageReference Include="Serilog.Sinks.GoogleCloudLogging" Version="5.0.0" />
-		<PackageReference Include="Serilog.Sinks.LogDNA" Version="1.0.3" />
 		<PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.5.0" />
 		<PackageReference Include="Swashbuckle.AspNetCore.Newtonsoft" Version="6.5.0" />
 		<PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="6.5.0" />
@@ -86,10 +84,6 @@
 	  <ProjectReference Include="..\GoogleTracer\GoogleTracer.csproj" />
 	  <ProjectReference Include="..\Services\Services.csproj" />
 	  <ProjectReference Include="..\WebApiDto\WebApiDto.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Folder Include="wwwroot\login\" />
 	</ItemGroup>
 
 </Project>

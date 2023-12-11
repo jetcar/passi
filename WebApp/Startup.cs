@@ -13,7 +13,7 @@ using Serilog.Events;
 using Services;
 using Google.Cloud.Diagnostics.Common;
 using System.Net.Http;
-using Google.Cloud.Diagnostics.AspNetCore;
+using Google.Cloud.Diagnostics.AspNetCore3;
 using GoogleTracer;
 using Microsoft.OpenApi.Models;
 using TraceServiceOptions = Google.Cloud.Diagnostics.Common.TraceServiceOptions;

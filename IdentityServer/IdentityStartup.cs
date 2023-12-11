@@ -11,7 +11,7 @@ using System.Net;
 using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
 using ConfigurationManager;
-using Google.Cloud.Diagnostics.AspNetCore;
+using Google.Cloud.Diagnostics.AspNetCore3;
 using Google.Cloud.Diagnostics.Common;
 using GoogleTracer;
 using IdentityModel;

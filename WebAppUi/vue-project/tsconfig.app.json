@@ -5,6 +5,7 @@
   "compilerOptions": {
     "composite": true,
     "allowJs": true,
+    "esModuleInterop": true,
     "baseUrl": ".",
     "paths": {
       "@/*": [ "./src/*" ]

@@ -51,9 +51,9 @@ namespace IdentityServer
         {
             var projectId = Environment.GetEnvironmentVariable("projectId") ?? Configuration.GetValue<string>("AppSetting:projectId");
             var identityCertPass = Environment.GetEnvironmentVariable("IdentityCertPassword") ?? Configuration.GetValue<string>("AppSetting:IdentityCertPassword");
-            services.AddControllersWithViews();
+            //services.AddControllersWithViews();
             services.AddSingleton<AppSetting>();
-            services.AddScoped<IMyRestClient,MyRestClient>();
+            services.AddScoped<IMyRestClient, MyRestClient>();
 
             services.AddScoped<IdentityDbContext>();
             services.AddScoped<IIdentityClientsRepository, IdentityClientsRepository>();
@@ -78,7 +78,7 @@ namespace IdentityServer
                 ServiceOptions = new TraceServiceOptions()
                 {
                     ProjectId = projectId,
-                    
+
                 }
             });
             services.AddSingleton<Action<HttpRequestMessage, ITraceContext>>(
@@ -90,7 +90,7 @@ namespace IdentityServer
                 // requests that are already being traced.
                 .AddOutgoingGoogleTraceHandler();
             byte[] certData = File.ReadAllBytes("/myapp/cert/your_certificate.pfx");
-            
+
             services.AddGoogleDiagnostics(projectId, "Identity");
             services.AddIdentityServer(options =>
                 {
@@ -100,7 +100,7 @@ namespace IdentityServer
                         CookieSlidingExpiration = true,
                     };
                 })
-                .AddSigningCredential(new X509Certificate2(certData,identityCertPass))
+                .AddSigningCredential(new X509Certificate2(certData, identityCertPass))
                 .AddProfileService<MyProfileService>()
                 .AddUserSession<UserSession>()
                 .AddConfigurationStore<IdentityDbContext>()
@@ -115,6 +115,8 @@ namespace IdentityServer
                 })
                 .PersistKeysToDbContext<IdentityDbContext>();
             services.AddHttpContextAccessor();
+            services.AddMvc(x => { x.EnableEndpointRouting = false; });
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
@@ -128,19 +130,12 @@ namespace IdentityServer
             app.Map(new PathString("/identity"), (applicationBuilder) =>
             {
                 Tracer.CurrentTracer = app.ApplicationServices.GetService<IManagedTracer>();
-                if (env.IsDevelopment())
-                {
-                    applicationBuilder.UseDeveloperExceptionPage();
-                }
-                else
-                {
-                    applicationBuilder.UseExceptionHandler("/Home/Error");
-                    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-                }
 
                 var appSetting = applicationBuilder.ApplicationServices.GetService<AppSetting>();
-                
+                applicationBuilder.UseRouting();
+
                 applicationBuilder.UseMiddleware<PublicFacingUrlMiddleware>(appSetting["IdentityUrlBase"]);
+                applicationBuilder.UseDefaultFiles();
                 applicationBuilder.UseStaticFiles(new StaticFileOptions()
                 {
                     OnPrepareResponse = (context) =>
@@ -154,21 +149,31 @@ namespace IdentityServer
                 /* app.UseForwardedHeaders(new ForwardedHeadersOptions {
                      ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedHost | ForwardedHeaders.XForwardedProto
                  });*/
-                applicationBuilder.UseRouting();
                 applicationBuilder.UseIdentityServer();
-                applicationBuilder.UseAuthorization();
-                applicationBuilder.UseCookiePolicy();
-                applicationBuilder.UseStaticFiles();
-                applicationBuilder.UseDefaultFiles();
-                applicationBuilder.UseEndpoints(endpoints =>
-                {
-                    endpoints.MapControllerRoute(
-                        name: "default",
-                        pattern: "{controller=Home}/{action=Index}/{id?}");
-                });
+                applicationBuilder.UseAuthentication();
+                applicationBuilder.UseCookiePolicy(
+                    new CookiePolicyOptions
+                    {
+                        Secure = CookieSecurePolicy.Always
+                    });
+                //applicationBuilder.UseEndpoints(endpoints =>
+                //{
+                //    endpoints.MapControllerRoute(
+                //        name: "default",
+                //        pattern: "{controller=Home}/{action=Index}/{id?}");
+                //});
                 applicationBuilder.UseSwagger();
                 applicationBuilder.UseSwaggerUI(c => { c.SwaggerEndpoint("v1/swagger.json", "My API V1"); });
-
+                applicationBuilder.UseMvc(routes =>
+                {
+                    routes.MapRoute(
+                        name: "default",
+                        template: "{controller}/{action}/{id?}");
+                });
+                applicationBuilder.UseEndpoints(endpoints =>
+                {
+                    endpoints.MapFallbackToFile("/index.html");
+                });
 
             });
         }

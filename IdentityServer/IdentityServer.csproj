@@ -10,13 +10,24 @@
 		<BaseOutputPath>publish</BaseOutputPath>
 	</PropertyGroup>
 
+	<ItemGroup>
+	  <None Include="vue-project\**" />
+	  <Compile Remove="Views\**" />
+	  <Content Remove="Views\**" />
+	  <EmbeddedResource Remove="Views\**" />
+	  <None Remove="Views\**" />
+	  <None Remove="vue-project\node_modules\**" />
+	  <None Remove="vue-project\.vscode\**" />
+	</ItemGroup>
 
 	<ItemGroup>
-		<_ContentIncludedByDefault Remove="Views\Client\Index.cshtml" />
-		<_ContentIncludedByDefault Remove="Views\Account\AccessDenied.cshtml" />
-		<_ContentIncludedByDefault Remove="Views\Account\LoggedOut.cshtml" />
-		<_ContentIncludedByDefault Remove="Views\Account\Login.cshtml" />
-		<_ContentIncludedByDefault Remove="Views\Account\Logout.cshtml" />
+	  <Compile Remove="Controllers\Account\AccountController.cs" />
+	  <Compile Remove="Controllers\LoginController.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Remove="vue-project\public\site.css" />
+	  <None Remove="vue-project\src\assets\site.css" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -60,30 +71,37 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<UpToDateCheckInput Remove="Views\Account\AccessDenied.cshtml" />
+	  <Content Include="vue-project\public\site.css">
+	    <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+	    <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+	  </Content>
+	  <Content Include="vue-project\src\assets\site.css">
+	    <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+	    <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+	  </Content>
 	</ItemGroup>
 
-	<ItemGroup>
-		<UpToDateCheckInput Remove="Views\Account\Logout.cshtml" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<UpToDateCheckInput Remove="Views\Account\Login.cshtml" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<UpToDateCheckInput Remove="Views\Account\LoggedOut.cshtml" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<UpToDateCheckInput Remove="Views\Client\Index.cshtml" />
-	</ItemGroup>
 
 	<ItemGroup>
 	  <ProjectReference Include="..\ConfigurationManager\ConfigurationManager.csproj" />
 	  <ProjectReference Include="..\GoogleTracer\GoogleTracer.csproj" />
 	  <ProjectReference Include="..\Services\Services.csproj" />
 	  <ProjectReference Include="..\WebApiDto\WebApiDto.csproj" />
+	</ItemGroup>
+
+
+	<ItemGroup>
+	  <Folder Include="vue-project\dist\" />
+	</ItemGroup>
+
+
+	<ItemGroup>
+	  <None Include="wwwroot\assets\ClientDetails-cd1b8efa.js" />
+	  <None Include="wwwroot\assets\ClientList-1d2a3c25.js" />
+	  <None Include="wwwroot\assets\CreateClient-1d2a3c25.js" />
+	  <None Include="wwwroot\assets\HomeView-22183e38.js" />
+	  <None Include="wwwroot\assets\index-3c354ec1.js" />
+	  <None Include="wwwroot\assets\LoginView-d7661656.js" />
 	</ItemGroup>
 
 </Project>

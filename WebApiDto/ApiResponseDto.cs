@@ -7,20 +7,18 @@ namespace WebApiDto
 
         public static ApiResponseDto<T> Fail(string errorMessage)
         {
-            return new ApiResponseDto<T> { Succeeded = false, Message = errorMessage };
+            return new ApiResponseDto<T> { Succeeded = false, errors = errorMessage };
         }
 
         public static ApiResponseDto<T> Success(T data)
         {
             return new ApiResponseDto<T> { Succeeded = true, Data = data };
         }
-
-        public object errors { get; set; }
     }
 
     public class ApiResponseDto
     {
-        public string Message { get; set; }
+        public string errors { get; set; }
     }
 
 }

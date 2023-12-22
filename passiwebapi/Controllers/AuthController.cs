@@ -74,7 +74,7 @@ namespace passi_webapi.Controllers
                 using (var transaction = _sessionsRepository.BeginTransaction())
                 {
                     if (!_userRepository.IsUsernameTaken(startLoginDto.Username))
-                        throw new KeyNotFoundException("username not found");
+                        throw new BadRequestException("username not found");
                     if (!_userRepository.IsUserFinished(startLoginDto.Username))
                         throw new BadRequestException("user not verified");
                     var user = _userRepository.GetUser(startLoginDto.Username);
@@ -156,7 +156,7 @@ namespace passi_webapi.Controllers
             if (sessionDb == null)
                 throw new BadRequestException("Session not found");
 
-            return new SessionMinDto() { SignedHash = sessionDb.SignedHashNew, PublicCert = sessionDb.User.Certificates.FirstOrDefault(x => x.Thumbprint == thumbprint)?.PublicCert };
+            return new SessionMinDto() { SignedHash = sessionDb.SignedHashNew, PublicCert = sessionDb.User.Certificates.FirstOrDefault(x => x.Thumbprint == thumbprint)?.PublicCert, ExpirationTime = sessionDb.ExpirationTime.ToDateTimeUtc() };
         }
 
 

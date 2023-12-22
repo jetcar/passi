@@ -49,7 +49,7 @@ namespace WebApp
             }); services.AddSingleton<AppSetting>();
             services.AddScoped<WebAppDbContext>();
             services.AddSingleton<IStartupFilter, MigrationStartupFilter<WebAppDbContext>>();
-            services.AddScoped<IMyRestClient,MyRestClient>();
+            services.AddScoped<IMyRestClient, MyRestClient>();
             services.AddDataProtection()
                 .SetApplicationName("WebApp")
                 .AddKeyManagementOptions(options =>
@@ -115,16 +115,6 @@ namespace WebApp
             app.Map(new PathString(""), (applicationBuilder) =>
             {
                 Tracer.CurrentTracer = app.ApplicationServices.GetService<IManagedTracer>();
-                if (Debugger.IsAttached)
-                {
-                    applicationBuilder.UseDeveloperExceptionPage();
-                }
-                else
-                {
-                    applicationBuilder.UseExceptionHandler("/Home/Error");
-                    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-                    //applicationBuilder.UseHsts();
-                }
 
                 applicationBuilder.UseRouting();
 
@@ -136,7 +126,16 @@ namespace WebApp
                             });
 
                 applicationBuilder.UseDefaultFiles();
-                applicationBuilder.UseStaticFiles();
+                applicationBuilder.UseStaticFiles(new StaticFileOptions()
+                {
+                    OnPrepareResponse = (context) =>
+                    {
+                        // Disable caching for all static files.
+                        context.Context.Response.Headers["Cache-Control"] = "no-cache, no-store";
+                        context.Context.Response.Headers["Pragma"] = "no-cache";
+                        context.Context.Response.Headers["Expires"] = "-1";
+                    }
+                });
                 applicationBuilder.UseAuthentication();
                 applicationBuilder.UseSerilogRequestLogging(options =>
                             {
@@ -153,7 +152,7 @@ namespace WebApp
                                     diagnosticContext.Set("RequestScheme", httpContext.Request.Scheme);
                                 };
                             });
-                
+
                 applicationBuilder.UseHealthChecks("/health");
                 applicationBuilder.UseSwagger();
                 applicationBuilder.UseSwaggerUI(c => { c.SwaggerEndpoint("v1/swagger.json", "My API V1"); });

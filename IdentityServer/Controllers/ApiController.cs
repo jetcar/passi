@@ -139,7 +139,6 @@ namespace IdentityServer.Controllers
             }
 
             return Ok(new {Redirect = false});
-
         }
         [HttpPost]
         [Route("login")]
@@ -158,14 +157,9 @@ namespace IdentityServer.Controllers
                     Color.red,
                     Color.yellow
                 };
-            var redirect_uri = model.ReturnUrl.Split('&').Select(x =>
-            {
-                var values = x.Split('=').Select(a => HttpUtility.UrlDecode(a)).ToArray();
-                if (values.Length >= 2)
-                    return new { Key = values[0], Value = values[1] };
-                return new { Key = "redirect_uri", Value = model.ReturnUrl };
-            }).Where(x => x.Key == "redirect_uri").Select(x => x.Value).FirstOrDefault();
-
+            var queryString = HttpUtility.ParseQueryString(model.ReturnUrl);
+            var redirect_uri = queryString.Get("redirect_uri");
+            var nonce = HttpUtility.ParseQueryString(model.ReturnUrl).Get("nonce");
             var index = new Random().Next(0, possibleCodes.Count - 1);
             var startLoginDto = new StartLoginDto()
             {
@@ -173,7 +167,7 @@ namespace IdentityServer.Controllers
                 ClientId = context?.Client.ClientId ?? "IdentityServer",
                 ReturnUrl = redirect_uri,
                 CheckColor = possibleCodes[index],
-                RandomString = model.Nonce ?? _randomGenerator.GetNumbersString(10)
+                RandomString = nonce ?? _randomGenerator.GetNumbersString(10)
             };
             request.AddJsonBody(startLoginDto);
             var result = _myRestClient.ExecuteAsync(request).Result;

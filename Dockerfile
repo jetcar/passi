@@ -1,14 +1,18 @@
 FROM node:21 as vueWeb
-COPY WebApp /app
-WORKDIR /app/vue-project
+COPY . /src
+WORKDIR /src/WebApp/vue-project
+RUN npm install
+RUN npm run build
+
+WORKDIR /src/IdentityServer/vue-project
 RUN npm install
 RUN npm run build
 
 
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /src
-COPY . .
-COPY --from=vueWeb /app/vue-project/dist ./WebApp/wwwroot
+COPY --from=vueWeb /src .
+
 
 RUN dotnet restore passi.sln
 RUN dotnet publish passi.sln -c Release /p:UseAppHost=false

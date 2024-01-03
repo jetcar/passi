@@ -1,7 +1,7 @@
 ﻿<script>
 
-    const API_URL = `/api/login`
-    const API_CHECK_URL = `/api/check`
+    const API_URL = `/identity/api/login`
+    const API_CHECK_URL = `/identity/api/check`
 
     export default {
         data() {
@@ -9,7 +9,6 @@
                 LoginInput: {
                     Username: "",
                     ReturnUrl: this.$route.query.returnUrl,
-                    Nonce: this.$route.query.nonce
                 },
                 LoginResponse: {
                     checkColor:"red"
@@ -26,6 +25,7 @@
             async handleCancelClick() { 
                 this.loginForm = true;
                 this.loading = false;
+
             },
             async handleCheckCancelClick() {
                 this.loginForm = true;

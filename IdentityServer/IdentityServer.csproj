@@ -13,9 +13,13 @@
 	<ItemGroup>
 	  <None Include="vue-project\**" />
 	  <Compile Remove="Views\**" />
+	  <Compile Remove="vue-project\dist\**" />
 	  <Content Remove="Views\**" />
+	  <Content Remove="vue-project\dist\**" />
 	  <EmbeddedResource Remove="Views\**" />
+	  <EmbeddedResource Remove="vue-project\dist\**" />
 	  <None Remove="Views\**" />
+	  <None Remove="vue-project\dist\**" />
 	  <None Remove="vue-project\node_modules\**" />
 	  <None Remove="vue-project\.vscode\**" />
 	</ItemGroup>
@@ -26,7 +30,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <None Remove="vue-project\public\site.css" />
 	  <None Remove="vue-project\src\assets\site.css" />
 	</ItemGroup>
 
@@ -71,10 +74,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Content Include="vue-project\public\site.css">
-	    <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-	    <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-	  </Content>
 	  <Content Include="vue-project\src\assets\site.css">
 	    <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 	    <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
@@ -91,17 +90,7 @@
 
 
 	<ItemGroup>
-	  <Folder Include="vue-project\dist\" />
-	</ItemGroup>
-
-
-	<ItemGroup>
-	  <None Include="wwwroot\assets\ClientDetails-cd1b8efa.js" />
-	  <None Include="wwwroot\assets\ClientList-1d2a3c25.js" />
-	  <None Include="wwwroot\assets\CreateClient-1d2a3c25.js" />
-	  <None Include="wwwroot\assets\HomeView-22183e38.js" />
-	  <None Include="wwwroot\assets\index-3c354ec1.js" />
-	  <None Include="wwwroot\assets\LoginView-d7661656.js" />
+	  <Folder Include="wwwroot\" />
 	</ItemGroup>
 
 </Project>

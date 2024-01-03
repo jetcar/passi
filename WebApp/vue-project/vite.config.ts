@@ -5,24 +5,24 @@ import vue from '@vitejs/plugin-vue'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [
-    vue(),
-  ],
-  resolve: {
-    alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url)),
-      vue: '@vue/compat',
+    plugins: [
+        vue(),
+    ],
+    resolve: {
+        alias: {
+            '@': fileURLToPath(new URL('./src', import.meta.url)),
+            vue: '@vue/compat',
 
-    }
-  },
+        }
+    },
     build: {
-    outDir: '../wwwroot'
-  },
+        outDir: '../wwwroot'
+    },
 
-  server: {
-      proxy: {
-        '/api': 'http://localhost:5002'
-      }
+    server: {
+        proxy: {
+            '/api': 'http://localhost:5002'
+        }
     }
 })
 

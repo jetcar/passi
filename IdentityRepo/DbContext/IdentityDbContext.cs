@@ -1,17 +1,14 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using ConfigurationManager;
-using IdentityServer.CompiledModel;
 using IdentityServer4.EntityFramework.Entities;
 using IdentityServer4.EntityFramework.Interfaces;
 using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Serilog;
+using Serilog.Core;
+using ILogger = Serilog.ILogger;
 
-namespace IdentityServer.DbContext
+namespace IdentityRepo.DbContext
 {
     public class IdentityDbContext : Microsoft.EntityFrameworkCore.DbContext, IConfigurationDbContext,
         IDataProtectionKeyContext, IPersistedGrantDbContext
@@ -19,6 +16,21 @@ namespace IdentityServer.DbContext
         private readonly AppSetting _appSetting;
         private ILogger _logger;
 
+        //public IdentityDbContext()
+        //{
+        //    var myConfiguration = new Dictionary<string, string>
+        //    {
+        //        {"AppSetting:IdentityDbName", "Identity"},
+        //        {"AppSetting:DbUser", "postgres"},
+        //        {"AppSetting:DbPassword", "q"},
+        //        {"AppSetting:DbHost", "localhost"},
+        //    };
+        //    var config = new ConfigurationBuilder().AddInMemoryCollection(myConfiguration).Build();
+        //    var appSetting = new AppSetting(config);
+        //    appSetting.PrefferAppsettingFile = true;
+        //    _logger = Logger.None;
+        //    _appSetting = appSetting;
+        //}
         public IdentityDbContext(AppSetting appSetting, ILogger logger)
         {
             _appSetting = appSetting;
@@ -44,7 +56,7 @@ namespace IdentityServer.DbContext
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseModel(IdentityDbContextModel.Instance);
+            //optionsBuilder.UseModel(IdentityDbContextModel.Instance);
             _logger.Debug("dbhost=" + _appSetting["DbHost"]);
             var trustMode = _appSetting["DbSslMode"] == "Require" ? "Trust Server Certificate=true;" : "";
             //optionsBuilder.AddInterceptors(new TaggedQueryCommandInterceptor(_logger));

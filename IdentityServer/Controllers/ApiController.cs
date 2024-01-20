@@ -22,6 +22,8 @@ using RestSharp;
 using Services;
 using WebApiDto;
 using WebApiDto.Auth;
+using IdentityServer.services;
+using Microsoft.Extensions.Logging;
 
 namespace IdentityServer.Controllers
 {
@@ -36,14 +38,16 @@ namespace IdentityServer.Controllers
         private IRandomGenerator _randomGenerator;
         private readonly IIdentityServerInteractionService _interaction;
         private readonly IEventService _events;
+        public ILogger<ApiController> Logger { get; set; }
 
-        public ApiController(IRandomGenerator randomGenerator, IMyRestClient myRestClient, AppSetting appSetting, IIdentityServerInteractionService interaction, IEventService events)
+        public ApiController(IRandomGenerator randomGenerator, IMyRestClient myRestClient, AppSetting appSetting, IIdentityServerInteractionService interaction, IEventService events, ILogger<ApiController> logger)
         {
             _randomGenerator = randomGenerator;
             _myRestClient = myRestClient;
             _appSetting = appSetting;
             _interaction = interaction;
             _events = events;
+            Logger = logger;
         }
 
 
@@ -111,7 +115,7 @@ namespace IdentityServer.Controllers
                                         ExpiresUtc =
                                             DateTimeOffset.UtcNow.AddMinutes(Convert.ToDouble(_appSetting["SessionLength"]))
                                     });
-                                return Ok(new {Redirect = model.ReturnUrl});
+                                return Ok(new { Redirect = model.ReturnUrl });
                             }
                             else
                             {
@@ -129,7 +133,7 @@ namespace IdentityServer.Controllers
 
             if (result.Content == null)
             {
-                return Ok(new {Redirect = false});
+                return Ok(new { Redirect = false });
             }
 
             if (result.Content != null && !result.Content.Contains("Waiting for response"))
@@ -138,7 +142,7 @@ namespace IdentityServer.Controllers
                 return BadRequest(new ApiResponseDto() { errors = errorResult.errors });
             }
 
-            return Ok(new {Redirect = false});
+            return Ok(new { Redirect = false });
         }
         [HttpPost]
         [Route("login")]
@@ -184,9 +188,10 @@ namespace IdentityServer.Controllers
                     RandomString = startLoginDto.RandomString
                 });
             }
+            Logger.LogDebug(result.Content);
             var errorResult = JsonConvert.DeserializeObject<ApiResponseDto>(result.Content);
 
-            return BadRequest(new ApiResponseDto(){errors = errorResult.errors});
+            return BadRequest(new ApiResponseDto() { errors = errorResult.errors });
         }
 
 

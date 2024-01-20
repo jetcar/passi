@@ -15,7 +15,7 @@ using Google.Cloud.Diagnostics.AspNetCore3;
 using Google.Cloud.Diagnostics.Common;
 using GoogleTracer;
 using IdentityModel;
-using IdentityServer.DbContext;
+using IdentityRepo.DbContext;
 using IdentityServer.services;
 using IdentityServer4.Configuration;
 using IdentityServer4.EntityFramework.Mappers;

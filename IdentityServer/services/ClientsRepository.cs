@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using IdentityModel;
-using IdentityServer.DbContext;
+using IdentityRepo.DbContext;
 using IdentityServer4.EntityFramework.Entities;
 using IdentityServer4.EntityFramework.Mappers;
 using Microsoft.EntityFrameworkCore;

@@ -23,7 +23,7 @@ namespace ConfigurationManagerTests
             var config = new ConfigurationBuilder().AddInMemoryCollection(myConfiguration).Build();
             var appSetting = new AppSetting(config);
             appSetting.PrefferAppsettingFile = true;
-            Assert.AreEqual("Passi", appSetting["DbName"]);
+            Assert.That("Passi" == appSetting["DbName"]);
         }
 
         //[Test]

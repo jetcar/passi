@@ -18,7 +18,8 @@ namespace Services
                 throw new BadRequestException("Certificate is missing");
             if (publicCert.NotAfter < DateTime.UtcNow || publicCert.NotBefore >= DateTime.UtcNow)
                 throw new BadRequestException("Certificate is expired");
-            if (publicCert.GetNameInfo(X509NameType.SimpleName, true) != email)
+            var nameInfo = publicCert.GetNameInfo(X509NameType.SimpleName, true);
+            if (nameInfo != email)
                 throw new BadRequestException("Certificate Email do not match");
         }
 

@@ -3,10 +3,14 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Storage;
 using Models;
 using NodaTime;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.Mapping;
 
 #pragma warning disable 219, 612, 618
 #nullable disable
@@ -28,7 +32,21 @@ namespace Repos.CompiledModels
                 propertyInfo: typeof(UserInvitationDb).GetProperty("Id", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
                 fieldInfo: typeof(UserInvitationDb).GetField("<Id>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly),
                 valueGenerated: ValueGenerated.OnAdd,
-                afterSaveBehavior: PropertySaveBehavior.Throw);
+                afterSaveBehavior: PropertySaveBehavior.Throw,
+                sentinel: 0L);
+            id.TypeMapping = LongTypeMapping.Default.Clone(
+                comparer: new ValueComparer<long>(
+                    (long v1, long v2) => v1 == v2,
+                    (long v) => v.GetHashCode(),
+                    (long v) => v),
+                keyComparer: new ValueComparer<long>(
+                    (long v1, long v2) => v1 == v2,
+                    (long v) => v.GetHashCode(),
+                    (long v) => v),
+                providerValueComparer: new ValueComparer<long>(
+                    (long v1, long v2) => v1 == v2,
+                    (long v) => v.GetHashCode(),
+                    (long v) => v));
             id.AddAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
             var code = runtimeEntityType.AddProperty(
@@ -38,124 +56,231 @@ namespace Repos.CompiledModels
                 fieldInfo: typeof(UserInvitationDb).GetField("<Code>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly),
                 nullable: true,
                 maxLength: 10);
+            code.TypeMapping = NpgsqlStringTypeMapping.Default.Clone(
+                comparer: new ValueComparer<string>(
+                    (string v1, string v2) => v1 == v2,
+                    (string v) => v.GetHashCode(),
+                    (string v) => v),
+                keyComparer: new ValueComparer<string>(
+                    (string v1, string v2) => v1 == v2,
+                    (string v) => v.GetHashCode(),
+                    (string v) => v),
+                providerValueComparer: new ValueComparer<string>(
+                    (string v1, string v2) => v1 == v2,
+                    (string v) => v.GetHashCode(),
+                    (string v) => v),
+                mappingInfo: new RelationalTypeMappingInfo(
+                    storeTypeName: "character varying(10)",
+                    size: 10));
+            code.TypeMapping = ((NpgsqlStringTypeMapping)code.TypeMapping).Clone(npgsqlDbType: NpgsqlTypes.NpgsqlDbType.Varchar);
+        code.AddAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.None);
 
-            var creationTime = runtimeEntityType.AddProperty(
-                "CreationTime",
-                typeof(Instant),
-                propertyInfo: typeof(BaseModel).GetProperty("CreationTime", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
-                fieldInfo: typeof(BaseModel).GetField("<CreationTime>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly));
-            creationTime.AddAnnotation("Relational:ColumnType", "timestamp without time zone");
+        var creationTime = runtimeEntityType.AddProperty(
+            "CreationTime",
+            typeof(Instant),
+            propertyInfo: typeof(BaseModel).GetProperty("CreationTime", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
+            fieldInfo: typeof(BaseModel).GetField("<CreationTime>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly),
+            sentinel: NodaTime.Instant.FromUnixTimeTicks(0L));
+        creationTime.TypeMapping = LegacyTimestampInstantMapping.Default.Clone(
+            comparer: new ValueComparer<Instant>(
+                (Instant v1, Instant v2) => v1.Equals(v2),
+                (Instant v) => v.GetHashCode(),
+                (Instant v) => v),
+            keyComparer: new ValueComparer<Instant>(
+                (Instant v1, Instant v2) => v1.Equals(v2),
+                (Instant v) => v.GetHashCode(),
+                (Instant v) => v),
+            providerValueComparer: new ValueComparer<Instant>(
+                (Instant v1, Instant v2) => v1.Equals(v2),
+                (Instant v) => v.GetHashCode(),
+                (Instant v) => v));
+        creationTime.AddAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.None);
+        creationTime.AddAnnotation("Relational:ColumnType", "timestamp without time zone");
 
-            var isConfirmed = runtimeEntityType.AddProperty(
-                "IsConfirmed",
-                typeof(bool),
-                propertyInfo: typeof(UserInvitationDb).GetProperty("IsConfirmed", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
-                fieldInfo: typeof(UserInvitationDb).GetField("<IsConfirmed>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly));
+        var isConfirmed = runtimeEntityType.AddProperty(
+            "IsConfirmed",
+            typeof(bool),
+            propertyInfo: typeof(UserInvitationDb).GetProperty("IsConfirmed", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
+            fieldInfo: typeof(UserInvitationDb).GetField("_isConfirmed", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly),
+            sentinel: false);
+        isConfirmed.TypeMapping = NpgsqlBoolTypeMapping.Default.Clone(
+            comparer: new ValueComparer<bool>(
+                (bool v1, bool v2) => v1 == v2,
+                (bool v) => v.GetHashCode(),
+                (bool v) => v),
+            keyComparer: new ValueComparer<bool>(
+                (bool v1, bool v2) => v1 == v2,
+                (bool v) => v.GetHashCode(),
+                (bool v) => v),
+            providerValueComparer: new ValueComparer<bool>(
+                (bool v1, bool v2) => v1 == v2,
+                (bool v) => v.GetHashCode(),
+                (bool v) => v));
+        isConfirmed.AddAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.None);
 
-            var modifiedById = runtimeEntityType.AddProperty(
-                "ModifiedById",
-                typeof(long?),
-                propertyInfo: typeof(BaseModel).GetProperty("ModifiedById", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
-                fieldInfo: typeof(BaseModel).GetField("<ModifiedById>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly),
-                nullable: true);
+        var modifiedById = runtimeEntityType.AddProperty(
+            "ModifiedById",
+            typeof(long?),
+            propertyInfo: typeof(BaseModel).GetProperty("ModifiedById", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
+            fieldInfo: typeof(BaseModel).GetField("<ModifiedById>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly),
+            nullable: true);
+        modifiedById.TypeMapping = LongTypeMapping.Default.Clone(
+            comparer: new ValueComparer<long?>(
+                (Nullable<long> v1, Nullable<long> v2) => v1.HasValue && v2.HasValue && (long)v1 == (long)v2 || !v1.HasValue && !v2.HasValue,
+                (Nullable<long> v) => v.HasValue ? ((long)v).GetHashCode() : 0,
+                (Nullable<long> v) => v.HasValue ? (Nullable<long>)(long)v : default(Nullable<long>)),
+            keyComparer: new ValueComparer<long?>(
+                (Nullable<long> v1, Nullable<long> v2) => v1.HasValue && v2.HasValue && (long)v1 == (long)v2 || !v1.HasValue && !v2.HasValue,
+                (Nullable<long> v) => v.HasValue ? ((long)v).GetHashCode() : 0,
+                (Nullable<long> v) => v.HasValue ? (Nullable<long>)(long)v : default(Nullable<long>)),
+            providerValueComparer: new ValueComparer<long?>(
+                (Nullable<long> v1, Nullable<long> v2) => v1.HasValue && v2.HasValue && (long)v1 == (long)v2 || !v1.HasValue && !v2.HasValue,
+                (Nullable<long> v) => v.HasValue ? ((long)v).GetHashCode() : 0,
+                (Nullable<long> v) => v.HasValue ? (Nullable<long>)(long)v : default(Nullable<long>)));
+        modifiedById.AddAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.None);
 
-            var modifiedTime = runtimeEntityType.AddProperty(
-                "ModifiedTime",
-                typeof(Instant?),
-                propertyInfo: typeof(BaseModel).GetProperty("ModifiedTime", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
-                fieldInfo: typeof(BaseModel).GetField("<ModifiedTime>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly),
-                nullable: true);
-            modifiedTime.AddAnnotation("Relational:ColumnType", "timestamp without time zone");
+        var modifiedTime = runtimeEntityType.AddProperty(
+            "ModifiedTime",
+            typeof(Instant?),
+            propertyInfo: typeof(BaseModel).GetProperty("ModifiedTime", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
+            fieldInfo: typeof(BaseModel).GetField("<ModifiedTime>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly),
+            nullable: true);
+        modifiedTime.TypeMapping = LegacyTimestampInstantMapping.Default.Clone(
+            comparer: new ValueComparer<Instant?>(
+                (Nullable<Instant> v1, Nullable<Instant> v2) => v1.HasValue && v2.HasValue && ((Instant)v1).Equals((Instant)v2) || !v1.HasValue && !v2.HasValue,
+                (Nullable<Instant> v) => v.HasValue ? ((Instant)v).GetHashCode() : 0,
+                (Nullable<Instant> v) => v.HasValue ? (Nullable<Instant>)(Instant)v : default(Nullable<Instant>)),
+            keyComparer: new ValueComparer<Instant?>(
+                (Nullable<Instant> v1, Nullable<Instant> v2) => v1.HasValue && v2.HasValue && ((Instant)v1).Equals((Instant)v2) || !v1.HasValue && !v2.HasValue,
+                (Nullable<Instant> v) => v.HasValue ? ((Instant)v).GetHashCode() : 0,
+                (Nullable<Instant> v) => v.HasValue ? (Nullable<Instant>)(Instant)v : default(Nullable<Instant>)),
+            providerValueComparer: new ValueComparer<Instant?>(
+                (Nullable<Instant> v1, Nullable<Instant> v2) => v1.HasValue && v2.HasValue && ((Instant)v1).Equals((Instant)v2) || !v1.HasValue && !v2.HasValue,
+                (Nullable<Instant> v) => v.HasValue ? ((Instant)v).GetHashCode() : 0,
+                (Nullable<Instant> v) => v.HasValue ? (Nullable<Instant>)(Instant)v : default(Nullable<Instant>)));
+        modifiedTime.AddAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.None);
+        modifiedTime.AddAnnotation("Relational:ColumnType", "timestamp without time zone");
 
-            var tryCount = runtimeEntityType.AddProperty(
-                "TryCount",
-                typeof(int?),
-                propertyInfo: typeof(UserInvitationDb).GetProperty("TryCount", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
-                fieldInfo: typeof(UserInvitationDb).GetField("<TryCount>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly),
-                nullable: true);
+        var tryCount = runtimeEntityType.AddProperty(
+            "TryCount",
+            typeof(int?),
+            propertyInfo: typeof(UserInvitationDb).GetProperty("TryCount", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
+            fieldInfo: typeof(UserInvitationDb).GetField("<TryCount>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly),
+            nullable: true);
+        tryCount.TypeMapping = IntTypeMapping.Default.Clone(
+            comparer: new ValueComparer<int?>(
+                (Nullable<int> v1, Nullable<int> v2) => v1.HasValue && v2.HasValue && (int)v1 == (int)v2 || !v1.HasValue && !v2.HasValue,
+                (Nullable<int> v) => v.HasValue ? (int)v : 0,
+                (Nullable<int> v) => v.HasValue ? (Nullable<int>)(int)v : default(Nullable<int>)),
+            keyComparer: new ValueComparer<int?>(
+                (Nullable<int> v1, Nullable<int> v2) => v1.HasValue && v2.HasValue && (int)v1 == (int)v2 || !v1.HasValue && !v2.HasValue,
+                (Nullable<int> v) => v.HasValue ? (int)v : 0,
+                (Nullable<int> v) => v.HasValue ? (Nullable<int>)(int)v : default(Nullable<int>)),
+            providerValueComparer: new ValueComparer<int?>(
+                (Nullable<int> v1, Nullable<int> v2) => v1.HasValue && v2.HasValue && (int)v1 == (int)v2 || !v1.HasValue && !v2.HasValue,
+                (Nullable<int> v) => v.HasValue ? (int)v : 0,
+                (Nullable<int> v) => v.HasValue ? (Nullable<int>)(int)v : default(Nullable<int>)),
+            mappingInfo: new RelationalTypeMappingInfo(
+                storeTypeName: "integer"));
+        tryCount.AddAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.None);
 
-            var userId = runtimeEntityType.AddProperty(
-                "UserId",
-                typeof(long),
-                propertyInfo: typeof(UserInvitationDb).GetProperty("UserId", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
-                fieldInfo: typeof(UserInvitationDb).GetField("<UserId>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly));
+        var userId = runtimeEntityType.AddProperty(
+            "UserId",
+            typeof(long),
+            propertyInfo: typeof(UserInvitationDb).GetProperty("UserId", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
+            fieldInfo: typeof(UserInvitationDb).GetField("<UserId>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly),
+            sentinel: 0L);
+        userId.TypeMapping = LongTypeMapping.Default.Clone(
+            comparer: new ValueComparer<long>(
+                (long v1, long v2) => v1 == v2,
+                (long v) => v.GetHashCode(),
+                (long v) => v),
+            keyComparer: new ValueComparer<long>(
+                (long v1, long v2) => v1 == v2,
+                (long v) => v.GetHashCode(),
+                (long v) => v),
+            providerValueComparer: new ValueComparer<long>(
+                (long v1, long v2) => v1 == v2,
+                (long v) => v.GetHashCode(),
+                (long v) => v));
+        userId.AddAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.None);
 
-            var key = runtimeEntityType.AddKey(
-                new[] { id });
-            runtimeEntityType.SetPrimaryKey(key);
+        var key = runtimeEntityType.AddKey(
+            new[] { id });
+        runtimeEntityType.SetPrimaryKey(key);
 
-            var iX_Invitations_ModifiedById = runtimeEntityType.AddIndex(
-                new[] { modifiedById },
-                name: "IX_Invitations_ModifiedById");
+        var iX_Invitations_ModifiedById = runtimeEntityType.AddIndex(
+            new[] { modifiedById },
+            name: "IX_Invitations_ModifiedById");
 
-            var iX_Invitations_UserId = runtimeEntityType.AddIndex(
-                new[] { userId },
-                name: "IX_Invitations_UserId");
+        var iX_Invitations_UserId = runtimeEntityType.AddIndex(
+            new[] { userId },
+            name: "IX_Invitations_UserId");
 
-            return runtimeEntityType;
-        }
-
-        public static RuntimeForeignKey CreateForeignKey1(RuntimeEntityType declaringEntityType, RuntimeEntityType principalEntityType)
-        {
-            var runtimeForeignKey = declaringEntityType.AddForeignKey(new[] { declaringEntityType.FindProperty("ModifiedById") },
-                principalEntityType.FindKey(new[] { principalEntityType.FindProperty("Id") }),
-                principalEntityType,
-                deleteBehavior: DeleteBehavior.Restrict);
-
-            var modifiedBy = declaringEntityType.AddNavigation("ModifiedBy",
-                runtimeForeignKey,
-                onDependent: true,
-                typeof(UserDb),
-                propertyInfo: typeof(BaseModel).GetProperty("ModifiedBy", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
-                fieldInfo: typeof(BaseModel).GetField("<ModifiedBy>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly));
-
-            var invitationModifiedBies = principalEntityType.AddNavigation("InvitationModifiedBies",
-                runtimeForeignKey,
-                onDependent: false,
-                typeof(ICollection<UserInvitationDb>),
-                propertyInfo: typeof(UserDb).GetProperty("InvitationModifiedBies", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
-                fieldInfo: typeof(UserDb).GetField("<InvitationModifiedBies>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly));
-
-            return runtimeForeignKey;
-        }
-
-        public static RuntimeForeignKey CreateForeignKey2(RuntimeEntityType declaringEntityType, RuntimeEntityType principalEntityType)
-        {
-            var runtimeForeignKey = declaringEntityType.AddForeignKey(new[] { declaringEntityType.FindProperty("UserId") },
-                principalEntityType.FindKey(new[] { principalEntityType.FindProperty("Id") }),
-                principalEntityType,
-                deleteBehavior: DeleteBehavior.Cascade,
-                required: true);
-
-            var user = declaringEntityType.AddNavigation("User",
-                runtimeForeignKey,
-                onDependent: true,
-                typeof(UserDb),
-                propertyInfo: typeof(UserInvitationDb).GetProperty("User", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
-                fieldInfo: typeof(UserInvitationDb).GetField("<User>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly));
-
-            var invitations = principalEntityType.AddNavigation("Invitations",
-                runtimeForeignKey,
-                onDependent: false,
-                typeof(ICollection<UserInvitationDb>),
-                propertyInfo: typeof(UserDb).GetProperty("Invitations", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
-                fieldInfo: typeof(UserDb).GetField("<Invitations>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly));
-
-            return runtimeForeignKey;
-        }
-
-        public static void CreateAnnotations(RuntimeEntityType runtimeEntityType)
-        {
-            runtimeEntityType.AddAnnotation("Relational:FunctionName", null);
-            runtimeEntityType.AddAnnotation("Relational:Schema", null);
-            runtimeEntityType.AddAnnotation("Relational:SqlQuery", null);
-            runtimeEntityType.AddAnnotation("Relational:TableName", "Invitations");
-            runtimeEntityType.AddAnnotation("Relational:ViewName", null);
-            runtimeEntityType.AddAnnotation("Relational:ViewSchema", null);
-
-            Customize(runtimeEntityType);
-        }
-
-        static partial void Customize(RuntimeEntityType runtimeEntityType);
+        return runtimeEntityType;
     }
+
+    public static RuntimeForeignKey CreateForeignKey1(RuntimeEntityType declaringEntityType, RuntimeEntityType principalEntityType)
+    {
+        var runtimeForeignKey = declaringEntityType.AddForeignKey(new[] { declaringEntityType.FindProperty("ModifiedById") },
+            principalEntityType.FindKey(new[] { principalEntityType.FindProperty("Id") }),
+            principalEntityType,
+            deleteBehavior: DeleteBehavior.Restrict);
+
+        var modifiedBy = declaringEntityType.AddNavigation("ModifiedBy",
+            runtimeForeignKey,
+            onDependent: true,
+            typeof(UserDb),
+            propertyInfo: typeof(BaseModel).GetProperty("ModifiedBy", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
+            fieldInfo: typeof(BaseModel).GetField("<ModifiedBy>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly));
+
+        var invitationModifiedBies = principalEntityType.AddNavigation("InvitationModifiedBies",
+            runtimeForeignKey,
+            onDependent: false,
+            typeof(ICollection<UserInvitationDb>),
+            propertyInfo: typeof(UserDb).GetProperty("InvitationModifiedBies", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
+            fieldInfo: typeof(UserDb).GetField("<InvitationModifiedBies>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly));
+
+        return runtimeForeignKey;
+    }
+
+    public static RuntimeForeignKey CreateForeignKey2(RuntimeEntityType declaringEntityType, RuntimeEntityType principalEntityType)
+    {
+        var runtimeForeignKey = declaringEntityType.AddForeignKey(new[] { declaringEntityType.FindProperty("UserId") },
+            principalEntityType.FindKey(new[] { principalEntityType.FindProperty("Id") }),
+            principalEntityType,
+            deleteBehavior: DeleteBehavior.Cascade,
+            required: true);
+
+        var user = declaringEntityType.AddNavigation("User",
+            runtimeForeignKey,
+            onDependent: true,
+            typeof(UserDb),
+            propertyInfo: typeof(UserInvitationDb).GetProperty("User", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
+            fieldInfo: typeof(UserInvitationDb).GetField("<User>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly));
+
+        var invitations = principalEntityType.AddNavigation("Invitations",
+            runtimeForeignKey,
+            onDependent: false,
+            typeof(ICollection<UserInvitationDb>),
+            propertyInfo: typeof(UserDb).GetProperty("Invitations", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
+            fieldInfo: typeof(UserDb).GetField("<Invitations>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly));
+
+        return runtimeForeignKey;
+    }
+
+    public static void CreateAnnotations(RuntimeEntityType runtimeEntityType)
+    {
+        runtimeEntityType.AddAnnotation("Relational:FunctionName", null);
+        runtimeEntityType.AddAnnotation("Relational:Schema", null);
+        runtimeEntityType.AddAnnotation("Relational:SqlQuery", null);
+        runtimeEntityType.AddAnnotation("Relational:TableName", "Invitations");
+        runtimeEntityType.AddAnnotation("Relational:ViewName", null);
+        runtimeEntityType.AddAnnotation("Relational:ViewSchema", null);
+
+        Customize(runtimeEntityType);
+    }
+
+    static partial void Customize(RuntimeEntityType runtimeEntityType);
+}
 }

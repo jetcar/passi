@@ -26,6 +26,7 @@ namespace passi_webapi.Controllers
         [HttpPost, Route("signup")]
         public IActionResult SignUp([FromBody] SignupDto signupDto)
         {
+            signupDto.Email = signupDto.Email.Trim();
             var strategy = _userRepository.GetExecutionStrategy();
             strategy.Execute(() =>
             {
@@ -49,6 +50,7 @@ namespace passi_webapi.Controllers
         [HttpPost, Route("confirm")]
         public IActionResult Confirm([FromBody] SignupConfirmationDto signupConfirmationDto)
         {
+            signupConfirmationDto.Email = signupConfirmationDto.Email.Trim();
             var strategy = _userRepository.GetExecutionStrategy();
             strategy.Execute(() =>
             {
@@ -75,6 +77,7 @@ namespace passi_webapi.Controllers
         [HttpPost, Route("check")]
         public IActionResult Check([FromBody] SignupCheckDto confirmationDto)
         {
+            confirmationDto.Email = confirmationDto.Email.Trim();
             if (!_userRepository.ValidateConfirmationCode(confirmationDto.Email, confirmationDto.Code))
                 throw new BadRequestException("Code not found");
 

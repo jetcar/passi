@@ -244,6 +244,34 @@ services:
     dns:
       - 192.168.202.254
 
+  wireguard:
+    image: lscr.io/linuxserver/wireguard
+    container_name: wireguard
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/London
+      - SERVERURL=auto #optional
+      - SERVERPORT=51820 #optional
+      - PEERS=4 #optional
+      - PEERDNS=auto #optional
+      - INTERNAL_SUBNET=192.168.0.0 #optional
+      - ALLOWEDIPS=0.0.0.0/0 #optional
+    volumes:
+      - ../wireguard/config:/config
+      - /lib/modules:/lib/modules
+    networks:
+      - haproxy_net
+      - database_net
+    ports:
+      - 51820:51820/udp
+    sysctls:
+      - net.ipv4.conf.all.src_valid_mark=1
+    restart: unless-stopped
+
 networks:
   haproxy_net:
     driver: bridge

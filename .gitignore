@@ -53,9 +53,14 @@ obj
 publish
 .vs
 *.user
-
+dist
+.vscode
 /identityserver.txt
 /passi.txt
 /webapp.txt
 google-services.json
 *.keystore
+.vscode
+dist
+*/wwwroot/assets/*
+*/wwwroot/assets/*

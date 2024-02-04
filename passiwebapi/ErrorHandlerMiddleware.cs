@@ -34,7 +34,7 @@ namespace passi_webapi
                 {
                     case BadRequestException e:
                         // custom application error
-                        responseModel.Message = e.Message;
+                        responseModel.errors = e.Message;
                         response.StatusCode = (int)HttpStatusCode.BadRequest;
                         break;
                     case KeyNotFoundException e:
@@ -43,7 +43,7 @@ namespace passi_webapi
                         break;
                     default:
                         // unhandled error
-                        responseModel.Message = error.Message;
+                        responseModel.errors = error.Message;
                         response.StatusCode = (int)HttpStatusCode.InternalServerError;
                         break;
                 }

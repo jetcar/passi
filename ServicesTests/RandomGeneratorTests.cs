@@ -19,7 +19,7 @@ namespace ServicesTests
                 for (int j = 0; j < 10; j++)
                 {
                     var str = randomGenerator.GetNumbersString(i);
-                    Assert.AreEqual(i,str.Length);
+                    Assert.That(i == str.Length);
                 }
             }
         }

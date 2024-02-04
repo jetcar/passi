@@ -13,8 +13,9 @@ using Serilog.Events;
 using Services;
 using Google.Cloud.Diagnostics.Common;
 using System.Net.Http;
-using Google.Cloud.Diagnostics.AspNetCore;
+using Google.Cloud.Diagnostics.AspNetCore3;
 using GoogleTracer;
+using Microsoft.OpenApi.Models;
 using TraceServiceOptions = Google.Cloud.Diagnostics.Common.TraceServiceOptions;
 
 namespace WebApp
@@ -48,7 +49,7 @@ namespace WebApp
             }); services.AddSingleton<AppSetting>();
             services.AddScoped<WebAppDbContext>();
             services.AddSingleton<IStartupFilter, MigrationStartupFilter<WebAppDbContext>>();
-            services.AddScoped<IMyRestClient,MyRestClient>();
+            services.AddScoped<IMyRestClient, MyRestClient>();
             services.AddDataProtection()
                 .SetApplicationName("WebApp")
                 .AddKeyManagementOptions(options =>
@@ -101,6 +102,11 @@ namespace WebApp
             services.AddHttpClient();
             services.AddHealthChecks();
             services.AddMvc(x => { x.EnableEndpointRouting = false; });
+
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -109,16 +115,9 @@ namespace WebApp
             app.Map(new PathString(""), (applicationBuilder) =>
             {
                 Tracer.CurrentTracer = app.ApplicationServices.GetService<IManagedTracer>();
-                if (Debugger.IsAttached)
-                {
-                    applicationBuilder.UseDeveloperExceptionPage();
-                }
-                else
-                {
-                    applicationBuilder.UseExceptionHandler("/Home/Error");
-                    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-                    //applicationBuilder.UseHsts();
-                }
+
+                applicationBuilder.UseRouting();
+
                 applicationBuilder.UseForwardedHeaders();
                 applicationBuilder.UseCookiePolicy(
                             new CookiePolicyOptions
@@ -126,7 +125,17 @@ namespace WebApp
                                 Secure = CookieSecurePolicy.Always
                             });
 
-                applicationBuilder.UseStaticFiles();
+                applicationBuilder.UseDefaultFiles();
+                applicationBuilder.UseStaticFiles(new StaticFileOptions()
+                {
+                    OnPrepareResponse = (context) =>
+                    {
+                        // Disable caching for all static files.
+                        context.Context.Response.Headers["Cache-Control"] = "no-cache, no-store";
+                        context.Context.Response.Headers["Pragma"] = "no-cache";
+                        context.Context.Response.Headers["Expires"] = "-1";
+                    }
+                });
                 applicationBuilder.UseAuthentication();
                 applicationBuilder.UseSerilogRequestLogging(options =>
                             {
@@ -143,13 +152,22 @@ namespace WebApp
                                     diagnosticContext.Set("RequestScheme", httpContext.Request.Scheme);
                                 };
                             });
+
                 applicationBuilder.UseHealthChecks("/health");
+                applicationBuilder.UseSwagger();
+                applicationBuilder.UseSwaggerUI(c => { c.SwaggerEndpoint("v1/swagger.json", "My API V1"); });
+
                 applicationBuilder.UseMvc(routes =>
                             {
                                 routes.MapRoute(
                                     name: "default",
-                                    template: "{controller=Home}/{action=Index}/{id?}");
+                                    template: "{controller}/{action}/{id?}");
                             });
+                applicationBuilder.UseEndpoints(endpoints =>
+                {
+                    endpoints.MapFallbackToFile("/index.html");
+                });
+
             });
         }
     }

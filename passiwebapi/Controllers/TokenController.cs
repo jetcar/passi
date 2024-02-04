@@ -12,13 +12,10 @@ namespace passi_webapi.Controllers
     [Profile(AttributeTargetElements = MulticastTargets.Method)]
     public class TokenController : ControllerBase
     {
-
         IUserRepository _userRepository;
-        IUserService _userService;
-        public TokenController(IUserRepository userRepository, IUserService userService)
+        public TokenController(IUserRepository userRepository)
         {
             _userRepository = userRepository;
-            _userService = userService;
         }
 
         [HttpPost, Route("update")]

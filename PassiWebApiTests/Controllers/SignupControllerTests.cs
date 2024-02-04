@@ -25,8 +25,7 @@ namespace PassiWebApiTests.Controllers
                 UserGuid = Guid.NewGuid()
             };
             controller.SignUp(signupDto);
-            Assert.IsNotNull(controller);
-            Assert.IsNotNull(TestEmailSender.Code);
+            Assert.That(TestEmailSender.Code != null);
         }
 
         [Test]
@@ -61,8 +60,7 @@ namespace PassiWebApiTests.Controllers
                 Guid = signupDto.UserGuid.ToString(),
                 PublicCert = certificate
             });
-            Assert.IsNotNull(controller);
-            Assert.IsNotNull(TestEmailSender.Code);
+            Assert.That(TestEmailSender.Code != null);
         }
         [Test]
         public void SignUpAndConfirmInvalidCodeTest()
@@ -81,7 +79,7 @@ namespace PassiWebApiTests.Controllers
             var ecdsa = ECDsa.Create(); // generate asymmetric key pair
             var req = new CertificateRequest($"cn={signupDto.Email}", ecdsa, HashAlgorithmName.SHA256);
             var dateTime = DateTime.UtcNow.AddDays(-1);
-            
+
             var cert = req.CreateSelfSigned(dateTime, dateTime.AddYears(1));
 
             var certificate = Convert.ToBase64String(cert.GetRawCertData());
@@ -109,7 +107,7 @@ namespace PassiWebApiTests.Controllers
             signupConfirmationDto.Code = TestEmailSender.Code;
             controller = ServiceProvider.GetService<SignUpController>();
             var exception = Assert.Throws<BadRequestException>(() => controller.Confirm(signupConfirmationDto));
-            Assert.AreEqual(exception.Message,"Code not found");
+            Assert.That(exception.Message == "Code not found");
         }
 
     }

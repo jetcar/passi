@@ -31,7 +31,7 @@ namespace Repos
             {
                 {"AppSetting:DbName", "Passi"},
                 {"AppSetting:DbUser", "postgres"},
-                {"AppSetting:DbPassword", "q"},
+                {"AppSetting:DbPassword", "test1"},
                 {"AppSetting:DbHost", "localhost"},
                 {"AppSetting:DbSslMode", "prefer"},
             };
@@ -90,7 +90,7 @@ namespace Repos
                 o.UseNodaTime();
                 o.EnableRetryOnFailure(30, TimeSpan.FromSeconds(2), null);
             });
-            //optionsBuilder.UseModel(PassiDbContextModel.Instance);
+            optionsBuilder.UseModel(PassiDbContextModel.Instance);
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -140,6 +140,8 @@ namespace Repos
 
             modelBuilder.Entity<DeviceDb>(entity =>
             {
+                entity.HasKey(x => x.Id);
+                entity.Property(x => x.Id).ValueGeneratedOnAdd().UseIdentityColumn();;
                 entity.HasIndex(e => new { e.DeviceId, e.Platform }, "IX_Devices_DeviceId_Platform")
                     .IsUnique();
 
@@ -168,6 +170,8 @@ namespace Repos
 
             modelBuilder.Entity<UserInvitationDb>(entity =>
             {
+                entity.HasKey(x => x.Id);
+                entity.Property(x => x.Id).ValueGeneratedOnAdd().UseIdentityColumn();;
                 entity.HasIndex(e => e.ModifiedById, "IX_Invitations_ModifiedById");
 
                 entity.HasIndex(e => e.UserId, "IX_Invitations_UserId");
@@ -221,6 +225,9 @@ namespace Repos
 
             modelBuilder.Entity<UserDb>(entity =>
             {
+                entity.HasKey(x => x.Id);
+                entity.Property(x => x.Id).ValueGeneratedOnAdd().UseIdentityColumn();;
+
                 entity.HasIndex(e => e.DeviceId, "IX_Users_DeviceId");
 
                 entity.HasIndex(e => e.EmailHash, "IX_Users_EmailHash")

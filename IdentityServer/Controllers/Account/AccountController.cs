@@ -180,7 +180,7 @@ namespace IdentityServer.Controllers.Account
             else
             {
                 var errorResult = JsonConvert.DeserializeObject<ApiResponseDto>(result.Content);
-                ModelState.AddModelError("error", errorResult.Message);
+                ModelState.AddModelError("error", errorResult.errors);
             }
 
             return View(new LoginViewModel()
@@ -279,7 +279,7 @@ namespace IdentityServer.Controllers.Account
             if (!result.Content.Contains("Waiting for response"))
             {
                 var errorResult = JsonConvert.DeserializeObject<ApiResponseDto<string>>(result.Content);
-                ModelState.AddModelError(errorResult.Message, errorResult.Message);
+                ModelState.AddModelError(errorResult.errors, errorResult.errors);
                 needRefresh = false;
             }
 
@@ -303,7 +303,7 @@ namespace IdentityServer.Controllers.Account
             {
                 return RedirectPermanent("/");
             }
-            if(model.ReturnUrl == "\"/identity/client\"")
+            if (model.ReturnUrl == "\"/identity/client\"")
                 return RedirectPermanent("/");
 
             var redirect_uri = model.ReturnUrl.Split('&').Select(x =>

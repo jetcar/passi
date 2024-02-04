@@ -3,10 +3,14 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Storage;
 using Models;
 using NodaTime;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.Mapping;
 
 #pragma warning disable 219, 612, 618
 #nullable disable
@@ -28,14 +32,43 @@ namespace Repos.CompiledModels
                 propertyInfo: typeof(DeviceDb).GetProperty("Id", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
                 fieldInfo: typeof(DeviceDb).GetField("<Id>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly),
                 valueGenerated: ValueGenerated.OnAdd,
-                afterSaveBehavior: PropertySaveBehavior.Throw);
+                afterSaveBehavior: PropertySaveBehavior.Throw,
+                sentinel: 0L);
+            id.TypeMapping = LongTypeMapping.Default.Clone(
+                comparer: new ValueComparer<long>(
+                    (long v1, long v2) => v1 == v2,
+                    (long v) => v.GetHashCode(),
+                    (long v) => v),
+                keyComparer: new ValueComparer<long>(
+                    (long v1, long v2) => v1 == v2,
+                    (long v) => v.GetHashCode(),
+                    (long v) => v),
+                providerValueComparer: new ValueComparer<long>(
+                    (long v1, long v2) => v1 == v2,
+                    (long v) => v.GetHashCode(),
+                    (long v) => v));
             id.AddAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
             var creationTime = runtimeEntityType.AddProperty(
                 "CreationTime",
                 typeof(Instant),
                 propertyInfo: typeof(BaseModel).GetProperty("CreationTime", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
-                fieldInfo: typeof(BaseModel).GetField("<CreationTime>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly));
+                fieldInfo: typeof(BaseModel).GetField("<CreationTime>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly),
+                sentinel: NodaTime.Instant.FromUnixTimeTicks(0L));
+            creationTime.TypeMapping = LegacyTimestampInstantMapping.Default.Clone(
+                comparer: new ValueComparer<Instant>(
+                    (Instant v1, Instant v2) => v1.Equals(v2),
+                    (Instant v) => v.GetHashCode(),
+                    (Instant v) => v),
+                keyComparer: new ValueComparer<Instant>(
+                    (Instant v1, Instant v2) => v1.Equals(v2),
+                    (Instant v) => v.GetHashCode(),
+                    (Instant v) => v),
+                providerValueComparer: new ValueComparer<Instant>(
+                    (Instant v1, Instant v2) => v1.Equals(v2),
+                    (Instant v) => v.GetHashCode(),
+                    (Instant v) => v));
+            creationTime.AddAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.None);
             creationTime.AddAnnotation("Relational:ColumnType", "timestamp without time zone");
 
             var deviceId = runtimeEntityType.AddProperty(
@@ -44,95 +77,177 @@ namespace Repos.CompiledModels
                 propertyInfo: typeof(DeviceDb).GetProperty("DeviceId", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
                 fieldInfo: typeof(DeviceDb).GetField("<DeviceId>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly),
                 maxLength: 256);
+            deviceId.TypeMapping = NpgsqlStringTypeMapping.Default.Clone(
+                comparer: new ValueComparer<string>(
+                    (string v1, string v2) => v1 == v2,
+                    (string v) => v.GetHashCode(),
+                    (string v) => v),
+                keyComparer: new ValueComparer<string>(
+                    (string v1, string v2) => v1 == v2,
+                    (string v) => v.GetHashCode(),
+                    (string v) => v),
+                providerValueComparer: new ValueComparer<string>(
+                    (string v1, string v2) => v1 == v2,
+                    (string v) => v.GetHashCode(),
+                    (string v) => v),
+                mappingInfo: new RelationalTypeMappingInfo(
+                    storeTypeName: "character varying(256)",
+                    size: 256));
+            deviceId.TypeMapping = ((NpgsqlStringTypeMapping)deviceId.TypeMapping).Clone(npgsqlDbType: NpgsqlTypes.NpgsqlDbType.Varchar);
+        deviceId.AddAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.None);
 
-            var modifiedById = runtimeEntityType.AddProperty(
-                "ModifiedById",
-                typeof(long?),
-                propertyInfo: typeof(BaseModel).GetProperty("ModifiedById", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
-                fieldInfo: typeof(BaseModel).GetField("<ModifiedById>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly),
-                nullable: true);
+        var modifiedById = runtimeEntityType.AddProperty(
+            "ModifiedById",
+            typeof(long?),
+            propertyInfo: typeof(BaseModel).GetProperty("ModifiedById", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
+            fieldInfo: typeof(BaseModel).GetField("<ModifiedById>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly),
+            nullable: true);
+        modifiedById.TypeMapping = LongTypeMapping.Default.Clone(
+            comparer: new ValueComparer<long?>(
+                (Nullable<long> v1, Nullable<long> v2) => v1.HasValue && v2.HasValue && (long)v1 == (long)v2 || !v1.HasValue && !v2.HasValue,
+                (Nullable<long> v) => v.HasValue ? ((long)v).GetHashCode() : 0,
+                (Nullable<long> v) => v.HasValue ? (Nullable<long>)(long)v : default(Nullable<long>)),
+            keyComparer: new ValueComparer<long?>(
+                (Nullable<long> v1, Nullable<long> v2) => v1.HasValue && v2.HasValue && (long)v1 == (long)v2 || !v1.HasValue && !v2.HasValue,
+                (Nullable<long> v) => v.HasValue ? ((long)v).GetHashCode() : 0,
+                (Nullable<long> v) => v.HasValue ? (Nullable<long>)(long)v : default(Nullable<long>)),
+            providerValueComparer: new ValueComparer<long?>(
+                (Nullable<long> v1, Nullable<long> v2) => v1.HasValue && v2.HasValue && (long)v1 == (long)v2 || !v1.HasValue && !v2.HasValue,
+                (Nullable<long> v) => v.HasValue ? ((long)v).GetHashCode() : 0,
+                (Nullable<long> v) => v.HasValue ? (Nullable<long>)(long)v : default(Nullable<long>)));
+        modifiedById.AddAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.None);
 
-            var modifiedTime = runtimeEntityType.AddProperty(
-                "ModifiedTime",
-                typeof(Instant?),
-                propertyInfo: typeof(BaseModel).GetProperty("ModifiedTime", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
-                fieldInfo: typeof(BaseModel).GetField("<ModifiedTime>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly),
-                nullable: true);
-            modifiedTime.AddAnnotation("Relational:ColumnType", "timestamp without time zone");
+        var modifiedTime = runtimeEntityType.AddProperty(
+            "ModifiedTime",
+            typeof(Instant?),
+            propertyInfo: typeof(BaseModel).GetProperty("ModifiedTime", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
+            fieldInfo: typeof(BaseModel).GetField("<ModifiedTime>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly),
+            nullable: true);
+        modifiedTime.TypeMapping = LegacyTimestampInstantMapping.Default.Clone(
+            comparer: new ValueComparer<Instant?>(
+                (Nullable<Instant> v1, Nullable<Instant> v2) => v1.HasValue && v2.HasValue && ((Instant)v1).Equals((Instant)v2) || !v1.HasValue && !v2.HasValue,
+                (Nullable<Instant> v) => v.HasValue ? ((Instant)v).GetHashCode() : 0,
+                (Nullable<Instant> v) => v.HasValue ? (Nullable<Instant>)(Instant)v : default(Nullable<Instant>)),
+            keyComparer: new ValueComparer<Instant?>(
+                (Nullable<Instant> v1, Nullable<Instant> v2) => v1.HasValue && v2.HasValue && ((Instant)v1).Equals((Instant)v2) || !v1.HasValue && !v2.HasValue,
+                (Nullable<Instant> v) => v.HasValue ? ((Instant)v).GetHashCode() : 0,
+                (Nullable<Instant> v) => v.HasValue ? (Nullable<Instant>)(Instant)v : default(Nullable<Instant>)),
+            providerValueComparer: new ValueComparer<Instant?>(
+                (Nullable<Instant> v1, Nullable<Instant> v2) => v1.HasValue && v2.HasValue && ((Instant)v1).Equals((Instant)v2) || !v1.HasValue && !v2.HasValue,
+                (Nullable<Instant> v) => v.HasValue ? ((Instant)v).GetHashCode() : 0,
+                (Nullable<Instant> v) => v.HasValue ? (Nullable<Instant>)(Instant)v : default(Nullable<Instant>)));
+        modifiedTime.AddAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.None);
+        modifiedTime.AddAnnotation("Relational:ColumnType", "timestamp without time zone");
 
-            var notificationToken = runtimeEntityType.AddProperty(
-                "NotificationToken",
-                typeof(string),
-                propertyInfo: typeof(DeviceDb).GetProperty("NotificationToken", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
-                fieldInfo: typeof(DeviceDb).GetField("<NotificationToken>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly),
-                nullable: true,
-                maxLength: 1024);
+        var notificationToken = runtimeEntityType.AddProperty(
+            "NotificationToken",
+            typeof(string),
+            propertyInfo: typeof(DeviceDb).GetProperty("NotificationToken", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
+            fieldInfo: typeof(DeviceDb).GetField("<NotificationToken>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly),
+            nullable: true,
+            maxLength: 1024);
+        notificationToken.TypeMapping = NpgsqlStringTypeMapping.Default.Clone(
+            comparer: new ValueComparer<string>(
+                (string v1, string v2) => v1 == v2,
+                (string v) => v.GetHashCode(),
+                (string v) => v),
+            keyComparer: new ValueComparer<string>(
+                (string v1, string v2) => v1 == v2,
+                (string v) => v.GetHashCode(),
+                (string v) => v),
+            providerValueComparer: new ValueComparer<string>(
+                (string v1, string v2) => v1 == v2,
+                (string v) => v.GetHashCode(),
+                (string v) => v),
+            mappingInfo: new RelationalTypeMappingInfo(
+                storeTypeName: "character varying(1024)",
+                size: 1024));
+        notificationToken.TypeMapping = ((NpgsqlStringTypeMapping)notificationToken.TypeMapping).Clone(npgsqlDbType: NpgsqlTypes.NpgsqlDbType.Varchar);
+    notificationToken.AddAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.None);
 
-            var platform = runtimeEntityType.AddProperty(
-                "Platform",
-                typeof(string),
-                propertyInfo: typeof(DeviceDb).GetProperty("Platform", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
-                fieldInfo: typeof(DeviceDb).GetField("<Platform>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly),
-                nullable: true,
-                maxLength: 256);
+    var platform = runtimeEntityType.AddProperty(
+        "Platform",
+        typeof(string),
+        propertyInfo: typeof(DeviceDb).GetProperty("Platform", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
+        fieldInfo: typeof(DeviceDb).GetField("<Platform>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly),
+        nullable: true,
+        maxLength: 256);
+    platform.TypeMapping = NpgsqlStringTypeMapping.Default.Clone(
+        comparer: new ValueComparer<string>(
+            (string v1, string v2) => v1 == v2,
+            (string v) => v.GetHashCode(),
+            (string v) => v),
+        keyComparer: new ValueComparer<string>(
+            (string v1, string v2) => v1 == v2,
+            (string v) => v.GetHashCode(),
+            (string v) => v),
+        providerValueComparer: new ValueComparer<string>(
+            (string v1, string v2) => v1 == v2,
+            (string v) => v.GetHashCode(),
+            (string v) => v),
+        mappingInfo: new RelationalTypeMappingInfo(
+            storeTypeName: "character varying(256)",
+            size: 256));
+    platform.TypeMapping = ((NpgsqlStringTypeMapping)platform.TypeMapping).Clone(npgsqlDbType: NpgsqlTypes.NpgsqlDbType.Varchar);
+platform.AddAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.None);
 
-            var key = runtimeEntityType.AddKey(
-                new[] { id });
-            runtimeEntityType.SetPrimaryKey(key);
+var key = runtimeEntityType.AddKey(
+    new[] { id });
+runtimeEntityType.SetPrimaryKey(key);
 
-            var iX_Devices_DeviceId_Platform = runtimeEntityType.AddIndex(
-                new[] { deviceId, platform },
-                name: "IX_Devices_DeviceId_Platform",
-                unique: true);
+var iX_Devices_DeviceId_Platform = runtimeEntityType.AddIndex(
+    new[] { deviceId, platform },
+    name: "IX_Devices_DeviceId_Platform",
+    unique: true);
 
-            var iX_Devices_ModifiedById = runtimeEntityType.AddIndex(
-                new[] { modifiedById },
-                name: "IX_Devices_ModifiedById");
+var iX_Devices_ModifiedById = runtimeEntityType.AddIndex(
+    new[] { modifiedById },
+    name: "IX_Devices_ModifiedById");
 
-            var iX_Devices_NotificationToken = runtimeEntityType.AddIndex(
-                new[] { notificationToken },
-                name: "IX_Devices_NotificationToken",
-                unique: true);
+var iX_Devices_NotificationToken = runtimeEntityType.AddIndex(
+    new[] { notificationToken },
+    name: "IX_Devices_NotificationToken",
+    unique: true);
 
-            return runtimeEntityType;
-        }
+return runtimeEntityType;
+}
 
-        public static RuntimeForeignKey CreateForeignKey1(RuntimeEntityType declaringEntityType, RuntimeEntityType principalEntityType)
-        {
-            var runtimeForeignKey = declaringEntityType.AddForeignKey(new[] { declaringEntityType.FindProperty("ModifiedById") },
-                principalEntityType.FindKey(new[] { principalEntityType.FindProperty("Id") }),
-                principalEntityType,
-                deleteBehavior: DeleteBehavior.Restrict);
+public static RuntimeForeignKey CreateForeignKey1(RuntimeEntityType declaringEntityType, RuntimeEntityType principalEntityType)
+{
+    var runtimeForeignKey = declaringEntityType.AddForeignKey(new[] { declaringEntityType.FindProperty("ModifiedById") },
+        principalEntityType.FindKey(new[] { principalEntityType.FindProperty("Id") }),
+        principalEntityType,
+        deleteBehavior: DeleteBehavior.Restrict);
 
-            var modifiedBy = declaringEntityType.AddNavigation("ModifiedBy",
-                runtimeForeignKey,
-                onDependent: true,
-                typeof(UserDb),
-                propertyInfo: typeof(BaseModel).GetProperty("ModifiedBy", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
-                fieldInfo: typeof(BaseModel).GetField("<ModifiedBy>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly));
+    var modifiedBy = declaringEntityType.AddNavigation("ModifiedBy",
+        runtimeForeignKey,
+        onDependent: true,
+        typeof(UserDb),
+        propertyInfo: typeof(BaseModel).GetProperty("ModifiedBy", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
+        fieldInfo: typeof(BaseModel).GetField("<ModifiedBy>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly));
 
-            var devices = principalEntityType.AddNavigation("Devices",
-                runtimeForeignKey,
-                onDependent: false,
-                typeof(ICollection<DeviceDb>),
-                propertyInfo: typeof(UserDb).GetProperty("Devices", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
-                fieldInfo: typeof(UserDb).GetField("<Devices>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly));
+    var devices = principalEntityType.AddNavigation("Devices",
+        runtimeForeignKey,
+        onDependent: false,
+        typeof(ICollection<DeviceDb>),
+        propertyInfo: typeof(UserDb).GetProperty("Devices", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
+        fieldInfo: typeof(UserDb).GetField("<Devices>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly));
 
-            return runtimeForeignKey;
-        }
+    return runtimeForeignKey;
+}
 
-        public static void CreateAnnotations(RuntimeEntityType runtimeEntityType)
-        {
-            runtimeEntityType.AddAnnotation("Relational:FunctionName", null);
-            runtimeEntityType.AddAnnotation("Relational:Schema", null);
-            runtimeEntityType.AddAnnotation("Relational:SqlQuery", null);
-            runtimeEntityType.AddAnnotation("Relational:TableName", "Devices");
-            runtimeEntityType.AddAnnotation("Relational:ViewName", null);
-            runtimeEntityType.AddAnnotation("Relational:ViewSchema", null);
+public static void CreateAnnotations(RuntimeEntityType runtimeEntityType)
+{
+    runtimeEntityType.AddAnnotation("Relational:FunctionName", null);
+    runtimeEntityType.AddAnnotation("Relational:Schema", null);
+    runtimeEntityType.AddAnnotation("Relational:SqlQuery", null);
+    runtimeEntityType.AddAnnotation("Relational:TableName", "Devices");
+    runtimeEntityType.AddAnnotation("Relational:ViewName", null);
+    runtimeEntityType.AddAnnotation("Relational:ViewSchema", null);
 
-            Customize(runtimeEntityType);
-        }
+    Customize(runtimeEntityType);
+}
 
-        static partial void Customize(RuntimeEntityType runtimeEntityType);
-    }
+static partial void Customize(RuntimeEntityType runtimeEntityType);
+}
 }

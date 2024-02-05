@@ -1,6 +1,6 @@
-﻿using System;
-using AppCommon;
+﻿using AppCommon;
 using passi_android.Main;
+using System;
 using Xamarin.Forms;
 using Application = Xamarin.Forms.Application;
 
@@ -38,7 +38,5 @@ namespace passi_android
         protected override void OnResume()
         {
         }
-
-       
     }
 }

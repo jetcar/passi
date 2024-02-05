@@ -1,11 +1,10 @@
-﻿using System.Threading;
-using Android.App;
-using Android.Gms.Tasks;
+﻿using Android.App;
 using Android.Util;
 using Firebase.Messaging;
 using Microsoft.Extensions.DependencyInjection;
 using passi_android.utils;
 using passi_android.utils.Services;
+using System.Threading;
 using WebApiDto;
 
 namespace passi_android.Droid.Notifications
@@ -51,7 +50,6 @@ namespace passi_android.Droid.Notifications
                         mySecureStorage.SetAsync(StorageKeys.NotificationToken, token);
                     }
                 });
-
             }
         }
     }

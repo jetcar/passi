@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <passiAndroid:BaseContentPage xmlns="http://xamarin.com/schemas/2014/forms"
-                 xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-                 xmlns:notifications="clr-namespace:passi_android.Notifications"
-                 xmlns:passiAndroid="clr-namespace:passi_android;assembly=passi android"
-                 x:DataType="notifications:NotificationVerifyRequestView"
+                              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                              xmlns:notifications="clr-namespace:passi_android.Notifications"
+                              xmlns:passiAndroid="clr-namespace:passi_android;assembly=passi android"
+                              x:DataType="notifications:NotificationVerifyRequestView"
                  BackgroundColor="#FAFAFA"
                  x:Class="passi_android.Notifications.NotificationVerifyRequestView">
     <StackLayout HorizontalOptions="CenterAndExpand" VerticalOptions="Center">

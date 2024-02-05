@@ -1,7 +1,5 @@
-﻿
-using MauiApp2.StorageModels;
+﻿using MauiApp2.StorageModels;
 using MauiApp2.utils.Services.Certificate;
-
 
 namespace MauiApp2.FingerPrint
 {
@@ -78,7 +76,6 @@ namespace MauiApp2.FingerPrint
                         Pin1Error.Text = error;
                     }
                 });
-
             }
         }
 

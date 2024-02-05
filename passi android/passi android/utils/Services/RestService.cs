@@ -1,6 +1,6 @@
-﻿using System.Threading.Tasks;
-using passi_android.StorageModels;
+﻿using passi_android.StorageModels;
 using RestSharp;
+using System.Threading.Tasks;
 
 namespace passi_android.utils.Services
 {
@@ -35,7 +35,7 @@ namespace passi_android.utils.Services
             var client = GetClient(provider);
             var request = new RestRequest(requestUri, Method.Post);
             request.Timeout = 3000;
-            
+
             request.AddJsonBody(item);
             return client.ExecuteAsync(request);
         }

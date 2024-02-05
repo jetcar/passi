@@ -1,9 +1,9 @@
-using System.Threading;
 using AndroidTests.Tools;
 using NUnit.Framework;
 using passi_android;
 using passi_android.Main;
 using passi_android.ViewModels;
+using System.Threading;
 using Xamarin.Forms;
 
 namespace AndroidTests.TestClasses;
@@ -24,6 +24,7 @@ public class MainTestClass
 
         return page;
     }
+
     public static TermsAgreementsView ClickAddAccount(MainView view)
     {
         view.Button_AddAccount(null, null);

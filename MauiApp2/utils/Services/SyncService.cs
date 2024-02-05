@@ -1,9 +1,9 @@
 ﻿using System.Collections.ObjectModel;
-using Newtonsoft.Json;
+using MauiApp2.Notifications;
 using MauiApp2.ViewModels;
+using Newtonsoft.Json;
 using WebApiDto;
 using WebApiDto.Auth;
-using MauiApp2.Notifications;
 
 namespace MauiApp2.utils.Services
 {
@@ -14,6 +14,7 @@ namespace MauiApp2.utils.Services
         private INavigationService _navigationService;
         private ISecureRepository _secureRepository;
         private IRestService _restService;
+
         public SyncService(IMainThreadService mainThreadService, INavigationService navigationService, ISecureRepository secureRepository, IRestService restService)
         {
             _mainThreadService = mainThreadService;
@@ -24,20 +25,19 @@ namespace MauiApp2.utils.Services
 
         public void PollNotifications()
         {
-           if (PollingTask?.IsCompleted != false)
+            if (PollingTask?.IsCompleted != false)
                 PollingTask = Task.Run(() =>
                 {
                     lock (locker)
                     {
-
                         var accounts = new ObservableCollection<AccountViewModel>();
                         _secureRepository.LoadAccountIntoList(accounts);
                         var providers = _secureRepository.LoadProviders();
                         var groupedAccounts = accounts.GroupBy(x => x.ProviderGuid);
                         foreach (var groupedAccount in groupedAccounts)
                         {
-                            var providerGuid = groupedAccount.ToList().First().ProviderGuid ?? providers.First(x => x.IsDefault).Guid;
-                            var provider = _secureRepository.LoadProviders().First(x => x.Guid == providerGuid);
+                            var providerGuid = groupedAccount.ToList().First().ProviderGuid ?? providers.Result.First(x => x.IsDefault).Guid;
+                            var provider = providers.Result.First(x => x.Guid == providerGuid);
                             var getAllSessionDto = new GetAllSessionDto()
                             {
                                 DeviceId = _secureRepository.GetDeviceId()
@@ -89,9 +89,7 @@ namespace MauiApp2.utils.Services
                                 }
                             }
                         }
-
                     }
-
                 });
         }
 
@@ -101,6 +99,7 @@ namespace MauiApp2.utils.Services
     public interface ISyncService
     {
         void PollNotifications();
+
         Task PollingTask { get; }
     }
 }

@@ -5,8 +5,8 @@
         public const string NotificationToken = "NotificationToken";
         public const string AllAccounts = "allAccounts";
         public const string ProvidersKey = "providers";
-
     }
+
     public static class StringExt
     {
         public static string Truncate(this string variable, int Length)

@@ -1,13 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <passiAndroid:BaseContentPage xmlns="http://xamarin.com/schemas/2014/forms"
-                 xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-                 xmlns:passiAndroid="clr-namespace:passi_android;assembly=passi android"
-                 BackgroundColor="#FAFAFA"
+                              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                              xmlns:passiAndroid="clr-namespace:passi_android;assembly=passi android"
+                              BackgroundColor="#FAFAFA"
                  x:Class="passi_android.Tools.LoadingView">
     <passiAndroid:BaseContentPage.Content>
         <Grid HorizontalOptions="Center" VerticalOptions="Center">
             <ActivityIndicator IsRunning="true" />
-
         </Grid>
     </passiAndroid:BaseContentPage.Content>
 </passiAndroid:BaseContentPage>

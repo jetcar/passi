@@ -1,13 +1,11 @@
-﻿using System;
-using Newtonsoft.Json;
-using passi_android.utils;
-using System.Net;
+﻿using Newtonsoft.Json;
 using passi_android.Tools;
+using passi_android.utils;
+using System;
+using System.Net;
 using WebApiDto;
 using WebApiDto.SignUp;
-using Xamarin.Essentials;
 using Xamarin.Forms.Xaml;
-using passi_android.utils.Services;
 
 namespace passi_android.Registration
 {
@@ -17,6 +15,7 @@ namespace passi_android.Registration
         private string _code = "";
         private string _responseError;
         private string _email;
+
         public RegistrationConfirmationView(AccountDb account)
         {
             Account = account;
@@ -110,14 +109,13 @@ namespace passi_android.Registration
                         else if (!response.Result.IsSuccessful &&
                                  response.Result.StatusCode == HttpStatusCode.BadRequest)
                         {
-
                             _mainThreadService.BeginInvokeOnMainThread(() =>
                             {
                                 _navigationService.PopModal().ContinueWith((task =>
                                 {
                                     var resultContent = response.Result.Content ?? "{\"Message\":\"Network error. Try again\"}";
                                     ResponseError = JsonConvert
-                                        .DeserializeObject<ApiResponseDto<string>>(resultContent).Message;
+                                        .DeserializeObject<ApiResponseDto<string>>(resultContent).errors;
                                     Code = "";
                                 }));
                             });
@@ -129,7 +127,6 @@ namespace passi_android.Registration
                                 _navigationService.PopModal().ContinueWith((task =>
                                 {
                                     ResponseError = "Network error. Try again";
-
                                 }));
                             });
                         }

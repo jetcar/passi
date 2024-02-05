@@ -2,7 +2,6 @@
 
 namespace MauiApp2.Menu
 {
-
     public partial class ProviderView : BaseContentPage
     {
         public ProviderDb Provider { get; set; }
@@ -13,7 +12,6 @@ namespace MauiApp2.Menu
             if (!App.IsTest)
                 InitializeComponent();
             BindingContext = this;
-
         }
 
         private void EditButton_OnClicked(object sender, EventArgs e)
@@ -24,6 +22,5 @@ namespace MauiApp2.Menu
             _navigationService.PushModalSinglePage(new EditProviderView(Provider));
             button.IsEnabled = true;
         }
-
     }
 }

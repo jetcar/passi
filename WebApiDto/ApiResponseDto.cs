@@ -20,5 +20,4 @@ namespace WebApiDto
     {
         public string errors { get; set; }
     }
-
 }

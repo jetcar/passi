@@ -3,17 +3,16 @@ using Newtonsoft.Json;
 
 namespace MauiApp2.Menu
 {
-
     public partial class EditProviderView : BaseContentPage
     {
         public ProviderDb Provider { get; set; }
+
         public EditProviderView(ProviderDb provider)
         {
             Provider = JsonConvert.DeserializeObject<ProviderDb>(JsonConvert.SerializeObject(provider));
             if (!App.IsTest)
                 InitializeComponent();
             BindingContext = this;
-
         }
 
         private void SaveButton_OnClicked(object sender, EventArgs e)
@@ -25,6 +24,5 @@ namespace MauiApp2.Menu
             button.IsEnabled = true;
             _navigationService.PopModal();
         }
-
     }
 }

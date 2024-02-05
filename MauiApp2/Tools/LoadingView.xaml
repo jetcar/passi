@@ -7,7 +7,6 @@
     <mauiApp2:BaseContentPage.Content>
         <Grid HorizontalOptions="Center" VerticalOptions="Center">
             <ActivityIndicator IsRunning="true" />
-
         </Grid>
     </mauiApp2:BaseContentPage.Content>
 </mauiApp2:BaseContentPage>

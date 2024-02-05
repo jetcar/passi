@@ -34,7 +34,7 @@ namespace MauiApp2.utils.Services
             var client = GetClient(provider);
             var request = new RestRequest(requestUri, Method.Post);
             request.Timeout = 3000;
-            
+
             request.AddJsonBody(item);
             return client.ExecuteAsync(request);
         }

@@ -2,15 +2,14 @@
 
 namespace MauiApp2.Menu
 {
-
     public partial class AddProviderView : BaseContentPage
     {
         public ProviderDb Provider { get; set; }
+
         public AddProviderView()
         {
-
             Provider = new ProviderDb();
-            var defaultProfider = _secureRepository.LoadProviders().First(x => x.IsDefault);
+            var defaultProfider = _secureRepository.LoadProviders().Result.First(x => x.IsDefault);
             _secureRepository.CopyAll(defaultProfider, Provider);
             Provider.IsDefault = false;
             Provider.Guid = Guid.NewGuid();
@@ -19,7 +18,6 @@ namespace MauiApp2.Menu
             if (!App.IsTest)
                 InitializeComponent();
             BindingContext = this;
-
         }
 
         private void SaveButton_OnClicked(object sender, EventArgs e)
@@ -31,8 +29,6 @@ namespace MauiApp2.Menu
             //save
             button.IsEnabled = true;
             _navigationService.PopModal();
-
         }
-
     }
 }

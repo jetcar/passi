@@ -1,15 +1,14 @@
-﻿using System.Collections.Generic;
-using Android.App;
+﻿using Android.App;
 using Android.Content;
 using Android.Content.PM;
 using Android.Graphics;
 using Android.OS;
-using Android.Support.V4.App;
 using Android.Util;
 using AndroidX.Core.App;
 using Firebase.Messaging;
 using Java.Util;
 using Newtonsoft.Json;
+using System.Collections.Generic;
 using WebApiDto;
 
 namespace passi_android.Droid.Notifications

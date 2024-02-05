@@ -3,13 +3,13 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
-using passi_android.utils.Services;
 
 namespace passi_android.utils.Services.Certificate
 {
     public class CertHelper : ICertHelper
     {
         private ISecureRepository _secureRepository;
+
         public CertHelper(ISecureRepository secureRepository)
         {
             _secureRepository = secureRepository;
@@ -76,9 +76,13 @@ namespace passi_android.utils.Services.Certificate
     public interface ICertHelper
     {
         PublicCert ConvertToPublicCertificate(X509Certificate2 cert);
+
         bool VerifyData(string data, string signedData, string base64PublicCert);
+
         Task<string> Sign(Guid accountGuid, MySecureString pin, string dataForSigning);
+
         string GetSignedData(string messageToSign, X509Certificate2 certificate);
+
         Task<string> SignByFingerPrint(string dataForSigning, X509Certificate2 privatecertificate);
     }
 

@@ -1,6 +1,5 @@
 ﻿namespace WebApiDto.Auth
 {
-
     public enum Color
     {
         blue = 1,

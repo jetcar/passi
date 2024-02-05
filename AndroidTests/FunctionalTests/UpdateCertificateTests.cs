@@ -1,28 +1,17 @@
-using System;
-using System.Linq;
-using System.Net;
-using System.Threading;
 using AndroidTests.TestClasses;
 using AndroidTests.Tools;
 using AppConfig;
-using Microsoft.Extensions.DependencyInjection;
-using Newtonsoft.Json;
 using NUnit.Framework;
-using passi_android;
 using passi_android.Main;
-using passi_android.Registration;
 using passi_android.Tools;
-using passi_android.utils.Services;
-using RestSharp;
+using System.Threading;
 using Xamarin.Forms;
-using Color = WebApiDto.Auth.Color;
 
 namespace AndroidTests.FunctionalTests
 {
     public class UpdateCertificateTests : TestBase
     {
-
-        [Test,Timeout(10000)]
+        [Test, Timeout(10000)]
         public void UpdateCertificateWithPin()
         {
             var mainView = MainTestClass.OpenMainPage();
@@ -43,7 +32,7 @@ namespace AndroidTests.FunctionalTests
             Assert.AreEqual(mainPage.Accounts.Count, 1);
 
             var accountView = MainTestClass.OpenAccount(mainPage, mainPage.Accounts[0]);
-            accountView.UpdateCertificate_OnClicked(new Button(),null);
+            accountView.UpdateCertificate_OnClicked(new Button(), null);
             while (!CurrentView.Appeared || !(CurrentView is UpdateCertificateView))
             {
                 Thread.Sleep(1);
@@ -95,7 +84,8 @@ namespace AndroidTests.FunctionalTests
             }
             Assert.IsTrue(CurrentView is MainView);
         }
-        [Test,Timeout(10000)]
+
+        [Test, Timeout(10000)]
         public void UpdateCertificateNoPin()
         {
             var mainView = MainTestClass.OpenMainPage();
@@ -117,7 +107,7 @@ namespace AndroidTests.FunctionalTests
 
             var accountView = MainTestClass.OpenAccount(mainPage, mainPage.Accounts[0]);
             TestRestService.Result[ConfigSettings.UpdateCertificate] = TestBase.SuccesfullResponce();
-            accountView.UpdateCertificate_OnClicked(new Button(),null);
+            accountView.UpdateCertificate_OnClicked(new Button(), null);
 
             Assert.IsTrue(CurrentView is LoadingView);
             while (!(CurrentView is MainView) || !CurrentView.Appeared)
@@ -125,8 +115,9 @@ namespace AndroidTests.FunctionalTests
                 Thread.Sleep(1);
             }
             Assert.IsTrue(CurrentView is MainView);
-        } 
-        [Test,Timeout(10000)]
+        }
+
+        [Test, Timeout(10000)]
         public void UpdateCertificateNoPinFingerprint()
         {
             var mainView = MainTestClass.OpenMainPage();
@@ -159,7 +150,7 @@ namespace AndroidTests.FunctionalTests
 
             accountView = MainTestClass.OpenAccount(mainPage, mainPage.Accounts[0]);
             TestRestService.Result[ConfigSettings.UpdateCertificate] = TestBase.SuccesfullResponce();
-            accountView.UpdateCertificate_OnClicked(new Button(),null);
+            accountView.UpdateCertificate_OnClicked(new Button(), null);
             TestBase.TouchFingerPrintWithGoodResult();
             while (!(CurrentView is LoadingView) || !CurrentView.Appeared)
             {

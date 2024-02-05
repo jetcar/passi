@@ -1,17 +1,12 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using passi_android.Tools;
+using passi_android.utils;
+using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Timers;
-using AppCommon;
-using Newtonsoft.Json;
-using passi_android.Tools;
-using passi_android.utils;
-using passi_android.utils.Services;
-using passi_android.utils.Services.Certificate;
 using WebApiDto;
 using WebApiDto.Auth;
-using Xamarin.Essentials;
-using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using Color = WebApiDto.Auth.Color;
 
@@ -306,7 +301,7 @@ namespace passi_android.Notifications
                                         _navigationService.PopModal().ContinueWith((task =>
                                         {
                                             ResponseError = JsonConvert
-                                                .DeserializeObject<ApiResponseDto<string>>(response.Result.Content).Message;
+                                                .DeserializeObject<ApiResponseDto<string>>(response.Result.Content).errors;
                                         }));
                                     });
                                 }
@@ -328,7 +323,7 @@ namespace passi_android.Notifications
 
             if (_account.pinLength == 0 && _account.HaveFingerprint)
             {
-                _fingerPrintService.StartReadingConfirmRequest(Message,_account, (error) =>
+                _fingerPrintService.StartReadingConfirmRequest(Message, _account, (error) =>
                 {
                     ResponseError = error;
                 });

@@ -1,18 +1,10 @@
-using System;
-using System.Linq;
-using System.Net;
-using System.Threading;
 using AndroidTests.TestClasses;
 using AndroidTests.Tools;
 using AppConfig;
-using Microsoft.Extensions.DependencyInjection;
-using Newtonsoft.Json;
 using NUnit.Framework;
-using passi_android;
 using passi_android.Main;
-using passi_android.Tools;
-using passi_android.utils.Services;
-using RestSharp;
+using System;
+using System.Threading;
 using Xamarin.Forms;
 using Color = WebApiDto.Auth.Color;
 
@@ -20,7 +12,6 @@ namespace AndroidTests.FunctionalTests
 {
     public class NotificationTests : TestBase
     {
-
         [Test]
         public void NotificationAccountWithPin()
         {
@@ -46,6 +37,7 @@ namespace AndroidTests.FunctionalTests
             var mainPage2 = ConfirmByPinTestClass.ConfirmByPin(confirmByPinView);
             Assert.IsNotNull(mainPage2);
         }
+
         [Test]
         public void NotificationAccountWithInvalidPin()
         {
@@ -73,6 +65,7 @@ namespace AndroidTests.FunctionalTests
             Assert.IsNotEmpty(confirmByPinView.Pin1Error.Text);
             Assert.IsTrue(confirmByPinView.Pin1Error.HasError);
         }
+
         [Test]
         public void NotificationAccountBadResponse()
         {
@@ -99,6 +92,7 @@ namespace AndroidTests.FunctionalTests
             Assert.IsNotNull(confirmByPinView);
             Assert.IsNotEmpty(confirmByPinView.ResponseError);
         }
+
         [Test]
         public void NotificationAccountNetworkError()
         {
@@ -125,6 +119,7 @@ namespace AndroidTests.FunctionalTests
             Assert.IsNotNull(confirmByPinView);
             Assert.IsNotEmpty(confirmByPinView.ResponseError);
         }
+
         [Test]
         public void NotificationAccountWithFingerPrintAndPin()
         {
@@ -148,8 +143,6 @@ namespace AndroidTests.FunctionalTests
             var fingerPrintConfirmByPinView = FingerPrintTestClass.AddFingerPrint(accountView);
             FingerPrintPinViewClass.FinishFingerPrintAdding(fingerPrintConfirmByPinView);
 
-
-
             var notificationPage =
                 NofiticationViewTestClass.PollOpenSessions(mainPage.Accounts[0], Color.blue, 10);
             Assert.AreEqual(notificationPage.TimeLeft, "9");
@@ -159,6 +152,7 @@ namespace AndroidTests.FunctionalTests
             var mainPage2 = ConfirmByPinTestClass.ConfirmByFingerprint(confirmByPinView);
             Assert.IsNotNull(mainPage2);
         }
+
         [Test]
         public void NotificationAccountWithFingerPrintNoPin()
         {
@@ -185,13 +179,14 @@ namespace AndroidTests.FunctionalTests
                 NofiticationViewTestClass.PollOpenSessions(mainPage.Accounts[0], Color.blue, 10);
             Assert.AreEqual(notificationPage.TimeLeft, "9");
 
-            TestNavigationService.navigationsCount = 0; 
+            TestNavigationService.navigationsCount = 0;
             var mainPage2 = NofiticationViewTestClass.ChooseColorWithoutPin(notificationPage, Xamarin.Forms.Color.Blue);
             TestBase.TouchFingerPrintWithGoodResult();
             Assert.AreEqual(2, TestNavigationService.navigationsCount);
 
             Assert.IsNotNull(mainPage2);
         }
+
         [Test]
         public void CancelClickConfirmByPin()
         {
@@ -220,8 +215,8 @@ namespace AndroidTests.FunctionalTests
             }
             var mainPage2 = CurrentView as MainView;
             Assert.IsNotNull(mainPage2);
-
         }
+
         [Test]
         public void CancelNotification()
         {
@@ -249,8 +244,8 @@ namespace AndroidTests.FunctionalTests
             }
             var mainPage2 = CurrentView as MainView;
             Assert.IsNotNull(mainPage2);
-
         }
+
         [Test]
         public void ConfirmByPinTimeout()
         {
@@ -281,7 +276,6 @@ namespace AndroidTests.FunctionalTests
             Assert.IsNotNull(mainPage2);
         }
 
-
         [Test]
         public void NotificatioAccountWithoutPin()
         {
@@ -303,12 +297,11 @@ namespace AndroidTests.FunctionalTests
                 NofiticationViewTestClass.PollOpenSessions(mainPage.Accounts[0], Color.blue, 10);
             //Assert.AreEqual(notificationPage.TimeLeft, "9");
 
-            TestNavigationService.navigationsCount = 0; 
+            TestNavigationService.navigationsCount = 0;
             var mainPage2 = NofiticationViewTestClass.ChooseColorWithoutPin(notificationPage, Xamarin.Forms.Color.Blue);
             Assert.AreEqual(2, TestNavigationService.navigationsCount);
 
             Assert.IsNotNull(mainPage2);
-
         }
 
         [Test]
@@ -332,7 +325,7 @@ namespace AndroidTests.FunctionalTests
             var notificationPage =
                 NofiticationViewTestClass.PollOpenSessions(mainPage.Accounts[0], Color.blue, 10, newGuid);
 
-            TestNavigationService.navigationsCount = 0; 
+            TestNavigationService.navigationsCount = 0;
             var mainPage2 = NofiticationViewTestClass.ChooseColorWithoutPin(notificationPage, Xamarin.Forms.Color.Blue);
             Assert.AreEqual(2, TestNavigationService.navigationsCount);
 
@@ -340,10 +333,7 @@ namespace AndroidTests.FunctionalTests
 
             var mainPage3 =
                 NofiticationViewTestClass.PollExistingSessionId(mainPage.Accounts[0], Color.blue, 10, newGuid);
-
-
         }
-
 
         [Test]
         public void NotificationTimeoutTest()
@@ -372,7 +362,6 @@ namespace AndroidTests.FunctionalTests
             }
             var mainPage2 = CurrentView as MainView;
             Assert.IsNotNull(mainPage2);
-
         }
     }
 }

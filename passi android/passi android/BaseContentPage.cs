@@ -8,7 +8,6 @@ namespace passi_android
 {
     public class BaseContentPage : ContentPage
     {
-
         protected INavigationService _navigationService;
         protected IMainThreadService _mainThreadService;
         protected ISecureRepository _secureRepository;
@@ -32,15 +31,14 @@ namespace passi_android
             _dateTimeService = App.Services.GetService<IDateTimeService>();
             _fingerPrintService = App.Services.GetService<IFingerPrintService>();
             _syncService = App.Services.GetService<ISyncService>();
-
         }
 
         public bool Appeared { get; private set; }
+
         protected override void OnAppearing()
         {
             base.OnAppearing();
             Appeared = true;
-
         }
 
         protected override void OnDisappearing()

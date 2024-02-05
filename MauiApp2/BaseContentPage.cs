@@ -6,8 +6,7 @@ namespace MauiApp2
 {
     public class BaseContentPage : ContentPage
     {
-
-        protected INavigationService _navigationService;
+        public static INavigationService _navigationService;
         protected IMainThreadService _mainThreadService;
         protected ISecureRepository _secureRepository;
         protected IRestService _restService;
@@ -30,15 +29,14 @@ namespace MauiApp2
             _dateTimeService = App.Services.GetService<IDateTimeService>();
             _fingerPrintService = App.Services.GetService<IFingerPrintService>();
             _syncService = App.Services.GetService<ISyncService>();
-
         }
 
         public bool Appeared { get; private set; }
+
         protected override void OnAppearing()
         {
             base.OnAppearing();
             Appeared = true;
-
         }
 
         protected override void OnDisappearing()

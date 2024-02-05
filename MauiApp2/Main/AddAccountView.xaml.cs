@@ -1,22 +1,22 @@
 ﻿using System.Diagnostics;
 using System.Net;
 using System.Net.Mail;
-using Newtonsoft.Json;
 using MauiApp2.Registration;
 using MauiApp2.StorageModels;
 using MauiApp2.Tools;
+using Newtonsoft.Json;
 using WebApiDto;
 using WebApiDto.SignUp;
 
 namespace MauiApp2.Main
 {
-
     public partial class AddAccountView : BaseContentPage
     {
         private string _emailText = "";
         private ValidationError _emailError;
         private string _responseError;
         private ProviderDb _currentProvider;
+
         public string EmailText
         {
             get
@@ -55,7 +55,7 @@ namespace MauiApp2.Main
         {
             get
             {
-                return _secureRepository.LoadProviders();
+                return _secureRepository.LoadProviders().Result;
             }
         }
 
@@ -111,7 +111,7 @@ namespace MauiApp2.Main
                             _navigationService.PopModal().ContinueWith((task =>
                             {
                                 var responseError = JsonConvert.DeserializeObject<ApiResponseDto<string>>(response.Result.Content);
-                                ResponseError = responseError.Message;
+                                ResponseError = responseError.errors;
                             }));
                         });
                     }

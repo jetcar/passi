@@ -1,8 +1,8 @@
 ﻿using System.Net;
 using System.Timers;
 using MauiApp2.StorageModels;
-using Newtonsoft.Json;
 using MauiApp2.Tools;
+using Newtonsoft.Json;
 using WebApiDto;
 using WebApiDto.Auth;
 using Color = Microsoft.Maui.Graphics.Color;
@@ -10,7 +10,6 @@ using Timer = System.Timers.Timer;
 
 namespace MauiApp2.Notifications
 {
-
     public partial class NotificationVerifyRequestView : BaseContentPage
     {
         private List<WebApiDto.Auth.Color> possibleCodes = null;
@@ -299,7 +298,7 @@ namespace MauiApp2.Notifications
                                         _navigationService.PopModal().ContinueWith((task =>
                                         {
                                             ResponseError = JsonConvert
-                                                .DeserializeObject<ApiResponseDto<string>>(response.Result.Content).Message;
+                                                .DeserializeObject<ApiResponseDto<string>>(response.Result.Content).errors;
                                         }));
                                     });
                                 }
@@ -321,7 +320,7 @@ namespace MauiApp2.Notifications
 
             if (_account.pinLength == 0 && _account.HaveFingerprint)
             {
-                _fingerPrintService.StartReadingConfirmRequest(Message,_account, (error) =>
+                _fingerPrintService.StartReadingConfirmRequest(Message, _account, (error) =>
                 {
                     ResponseError = error;
                 });

@@ -1,10 +1,9 @@
-using System.Threading;
 using AndroidTests.TestClasses;
 using AndroidTests.Tools;
 using AppConfig;
 using NUnit.Framework;
-using passi_android;
 using passi_android.Main;
+using System.Threading;
 
 namespace AndroidTests.FunctionalTests
 {
@@ -30,6 +29,7 @@ namespace AndroidTests.FunctionalTests
             }
             Assert.AreEqual(mainPage.Accounts.Count, 1);
         }
+
         [Test]
         public void CancelCodeConfirmPage()
         {
@@ -60,6 +60,7 @@ namespace AndroidTests.FunctionalTests
             }
             Assert.AreEqual(mainPage.Accounts.Count, 0);
         }
+
         [Test]
         public void AddAccountWithPinAndFingerPrint()
         {
@@ -89,6 +90,7 @@ namespace AndroidTests.FunctionalTests
 
             Assert.IsTrue(CurrentView is MainView);
         }
+
         [Test]
         public void AddAccountWithPinAndFingerPrintInvalidPin()
         {
@@ -110,11 +112,10 @@ namespace AndroidTests.FunctionalTests
 
             var fingerPrintConfirmByPinView = FingerPrintTestClass.AddFingerPrint(accountView);
             fingerPrintConfirmByPinView = FingerPrintPinViewClass.FinishFingerPrintAddingIncorrectPin(fingerPrintConfirmByPinView);
-            
+
             Assert.IsNotEmpty(fingerPrintConfirmByPinView.Pin1Error.Text);
             Assert.IsTrue(fingerPrintConfirmByPinView.Pin1Error.HasError);
         }
-
 
         [Test]
         public void AddAccountWithoutPin()

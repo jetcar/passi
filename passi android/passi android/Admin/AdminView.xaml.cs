@@ -1,18 +1,15 @@
-﻿using System;
-using System.Threading;
-using AppCommon;
+﻿using AppCommon;
 using passi_android.Main;
 using passi_android.Notifications;
 using passi_android.Registration;
+using passi_android.StorageModels;
 using passi_android.Tools;
 using passi_android.utils;
+using System;
+using System.Threading;
 using WebApiDto;
-using Xamarin.Essentials;
-using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using Color = WebApiDto.Auth.Color;
-using passi_android.utils.Services;
-using passi_android.StorageModels;
 
 namespace passi_android.Admin
 {
@@ -25,6 +22,7 @@ namespace passi_android.Admin
         private string _isFinished;
         private string _notificationToken;
         private string _deviceId;
+
         public AdminView(AccountDb account)
         {
             this.Account = account;

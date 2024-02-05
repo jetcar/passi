@@ -1,12 +1,10 @@
-using System.Threading;
 using AndroidTests.Tools;
-using AppCommon;
 using AppConfig;
 using NUnit.Framework;
-using passi_android;
 using passi_android.Main;
 using passi_android.Notifications;
 using passi_android.Tools;
+using System.Threading;
 
 namespace AndroidTests.TestClasses;
 
@@ -61,7 +59,6 @@ public class ConfirmByPinTestClass
                 Thread.Sleep(1);
             }
         return mainPage;
-
     }
 
     public static ConfirmByPinView ConfirmByIncorrectPin(ConfirmByPinView confirmByPinView)
@@ -80,7 +77,7 @@ public class ConfirmByPinTestClass
 
         Assert.IsTrue(TestBase.CurrentView is ConfirmByPinView);
         var pinView = TestBase.CurrentView as ConfirmByPinView;
-        
+
         return pinView;
     }
 

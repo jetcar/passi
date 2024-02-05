@@ -1,10 +1,6 @@
-﻿using System;
-using System.Linq;
-using passi_android.Tools;
-using passi_android.utils;
-using passi_android.utils.Services;
+﻿using passi_android.utils;
 using passi_android.utils.Services.Certificate;
-using Xamarin.Essentials;
+using System;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -84,7 +80,6 @@ namespace passi_android.FingerPrint
                         Pin1Error.Text = error;
                     }
                 });
-
             }
         }
 

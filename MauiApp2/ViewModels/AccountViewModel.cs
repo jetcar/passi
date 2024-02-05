@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using Newtonsoft.Json;
 using MauiApp2.StorageModels;
+using Newtonsoft.Json;
 
 namespace MauiApp2.ViewModels
 {
@@ -16,9 +16,12 @@ namespace MauiApp2.ViewModels
         private DateTime _validTo;
         private bool _isDeleteVisible;
         private bool _inactive;
+
         [JsonIgnore]
         public ProviderDb Provider { get; set; }
+
         public Guid? ProviderGuid { get; set; }
+
         public Guid Guid
         {
             get => _guid;

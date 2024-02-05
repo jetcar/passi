@@ -1,6 +1,5 @@
 using AndroidTests.Tools;
 using NUnit.Framework;
-using passi_android;
 using passi_android.Main;
 using Xamarin.Forms;
 

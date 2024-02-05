@@ -3,7 +3,6 @@ using MauiApp2.StorageModels;
 
 namespace MauiApp2.Main
 {
-
     public partial class AccountView : BaseContentPage
     {
         public AccountDb AccountDb { get; set; }
@@ -123,7 +122,6 @@ namespace MauiApp2.Main
                                     App.StartFingerPrintReading();
                                 }));
                             });
-
                         });
                     }
                     else
@@ -149,7 +147,6 @@ namespace MauiApp2.Main
         {
             var button = sender as VisualElement;
             button.IsEnabled = false;
-
 
             App.FingerPrintReadingResult = (result) =>
             {
@@ -189,7 +186,5 @@ namespace MauiApp2.Main
             App.FingerPrintReadingResult = null;
             base.OnDisappearing();
         }
-
-      
     }
 }

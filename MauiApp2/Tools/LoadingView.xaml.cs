@@ -3,7 +3,6 @@ using Timer = System.Timers.Timer;
 
 namespace MauiApp2.Tools
 {
-
     public partial class LoadingView : BaseContentPage
     {
         private readonly Action _callBack;

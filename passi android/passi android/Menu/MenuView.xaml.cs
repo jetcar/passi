@@ -1,8 +1,7 @@
-﻿using System;
+﻿using passi_android.StorageModels;
+using System;
 using System.Collections.ObjectModel;
 using System.Linq;
-using passi_android.StorageModels;
-using passi_android.utils.Services;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -13,13 +12,13 @@ namespace passi_android.Menu
     {
         private ObservableCollection<ProviderDb> _provider;
         private bool _isDeleteVisible;
+
         public MenuView()
         {
             if (!App.IsTest)
                 InitializeComponent();
             BindingContext = this;
             Providers = new ObservableCollection<ProviderDb>(_secureRepository.LoadProviders());
-
         }
 
         public ObservableCollection<ProviderDb> Providers
@@ -48,7 +47,6 @@ namespace passi_android.Menu
                 return;
             _secureRepository.DeleteProvider(provider);
             Providers.Remove(provider);
-
         }
 
         private void Cell_OnTapped(object sender, EventArgs e)
@@ -86,6 +84,5 @@ namespace passi_android.Menu
                 OnPropertyChanged();
             }
         }
-
     }
 }

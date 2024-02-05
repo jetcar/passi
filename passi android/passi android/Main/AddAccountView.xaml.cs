@@ -1,14 +1,14 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using passi_android.Registration;
+using passi_android.StorageModels;
+using passi_android.Tools;
+using passi_android.utils;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Mail;
-using Newtonsoft.Json;
-using passi_android.Registration;
-using passi_android.StorageModels;
-using passi_android.Tools;
-using passi_android.utils;
 using WebApiDto;
 using WebApiDto.SignUp;
 using Xamarin.Forms;
@@ -23,6 +23,7 @@ namespace passi_android.Main
         private ValidationError _emailError;
         private string _responseError;
         private ProviderDb _currentProvider;
+
         public string EmailText
         {
             get
@@ -117,7 +118,7 @@ namespace passi_android.Main
                             _navigationService.PopModal().ContinueWith((task =>
                             {
                                 var responseError = JsonConvert.DeserializeObject<ApiResponseDto<string>>(response.Result.Content);
-                                ResponseError = responseError.Message;
+                                ResponseError = responseError.errors;
                             }));
                         });
                     }

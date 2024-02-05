@@ -1,5 +1,5 @@
-﻿using System.Threading.Tasks;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
+using System.Threading.Tasks;
 using Xamarin.Essentials;
 
 namespace passi_android.utils.Services

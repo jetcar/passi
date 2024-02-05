@@ -1,10 +1,9 @@
-using System.Threading;
 using AndroidTests.Tools;
 using NUnit.Framework;
-using passi_android;
 using passi_android.FingerPrint;
 using passi_android.Main;
 using passi_android.Tools;
+using System.Threading;
 
 namespace AndroidTests.TestClasses;
 
@@ -32,6 +31,7 @@ public class FingerPrintPinViewClass
         }
         Assert.IsTrue(TestBase.CurrentView is MainView);
     }
+
     public static FingerPrintConfirmByPinView FinishFingerPrintAddingIncorrectPin(FingerPrintConfirmByPinView fingerPrintConfirmByPinView)
     {
         fingerPrintConfirmByPinView.NumbersPad_OnNumberClicked("1");

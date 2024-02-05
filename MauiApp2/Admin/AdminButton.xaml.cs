@@ -6,7 +6,8 @@ namespace MauiApp2.Admin
 {
     public partial class AdminButton : ContentView
     {
-        INavigationService _navigationService;
+        private INavigationService _navigationService;
+
         public AdminButton()
         {
             _navigationService = App.Services.GetService<INavigationService>();

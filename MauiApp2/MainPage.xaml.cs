@@ -42,7 +42,7 @@ namespace MauiApp2
             if (!App.IsTest)
                 InitializeComponent();
             BindingContext = this;
-
+            App.FirstPage = this;
             this.Version = App.Version;
         }
 
@@ -57,11 +57,8 @@ namespace MauiApp2
             });
             base.OnAppearing();
             _syncService.PollNotifications();
-
-
         }
 
-        
         private void AccountSyncCallback()
         {
             _mainThreadService.BeginInvokeOnMainThread(() =>
@@ -78,7 +75,8 @@ namespace MauiApp2
         {
             _navigationService.PushModalSinglePage(new TermsAgreementsView());
         }
-  public void Button_DeleteAccount(object sender, EventArgs e)
+
+        public void Button_DeleteAccount(object sender, EventArgs e)
         {
             var account = (AccountViewModel)((Button)sender).BindingContext;
             _secureRepository.DeleteAccount(account, () =>
@@ -149,9 +147,6 @@ namespace MauiApp2
         private void Menu_button(object sender, EventArgs e)
         {
             _navigationService.PushModalSinglePage(new Menu.MenuView());
-
         }
-
-       
     }
 }

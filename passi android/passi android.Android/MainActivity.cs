@@ -1,20 +1,20 @@
-﻿using System;
-using System.Threading.Tasks;
-using Android.App;
+﻿using Android.App;
 using Android.Content;
 using Android.Content.PM;
 using Android.Gms.Common;
-using Android.Runtime;
+using Android.Gms.Extensions;
 using Android.OS;
+using Android.Runtime;
+using AppCommon;
 using Firebase.Messaging;
+using Microsoft.Extensions.DependencyInjection;
 using passi_android.Droid.FingerPrint;
 using passi_android.Droid.Notifications;
-using Xamarin.Essentials;
-using Android.Gms.Extensions;
-using AppCommon;
-using Microsoft.Extensions.DependencyInjection;
 using passi_android.utils.Services;
 using passi_android.utils.Services.Certificate;
+using System;
+using System.Threading.Tasks;
+using Xamarin.Essentials;
 
 namespace passi_android.Droid
 {
@@ -61,7 +61,6 @@ namespace passi_android.Droid
             CreateNotificationChannel();
 
             App.Services = ConfigureServices();
-
 
             App = new App();
             Instance = this;
@@ -118,8 +117,6 @@ namespace passi_android.Droid
             var biometricHelper = App.Services.GetService<IBiometricHelper>();
             biometricHelper.RegisterOrAuthenticate();
         }
-
-
 
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
         {

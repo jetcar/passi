@@ -4,14 +4,18 @@ namespace WebApiDto.Auth
 {
     public class StartLoginDto
     {
-        [Required] 
+        [Required]
         public string Username { get; set; }
-        [Required] 
+
+        [Required]
         public string ClientId { get; set; }
-        [Required] 
+
+        [Required]
         public Color CheckColor { get; set; }
-        [Required] 
+
+        [Required]
         public string RandomString { get; set; }
+
         [Required]
         public string ReturnUrl { get; set; }
     }

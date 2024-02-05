@@ -1,7 +1,6 @@
-﻿using System;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using passi_android.StorageModels;
-using passi_android.utils.Services;
+using System;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -11,13 +10,13 @@ namespace passi_android.Menu
     public partial class EditProviderView : BaseContentPage
     {
         public ProviderDb Provider { get; set; }
+
         public EditProviderView(ProviderDb provider)
         {
             Provider = JsonConvert.DeserializeObject<ProviderDb>(JsonConvert.SerializeObject(provider));
-            if(!App.IsTest)
-            InitializeComponent();
+            if (!App.IsTest)
+                InitializeComponent();
             BindingContext = this;
-
         }
 
         private void SaveButton_OnClicked(object sender, EventArgs e)
@@ -29,6 +28,5 @@ namespace passi_android.Menu
             button.IsEnabled = true;
             _navigationService.PopModal();
         }
-
     }
 }

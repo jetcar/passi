@@ -1,17 +1,13 @@
-﻿using System;
-using System.Net;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using passi_android.Tools;
 using passi_android.utils;
-using passi_android.utils.Services;
 using passi_android.utils.Services.Certificate;
+using System;
+using System.Net;
+using System.Threading.Tasks;
 using WebApiDto;
 using WebApiDto.SignUp;
-using Xamarin.Essentials;
-using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
-using CertHelper = passi_android.utils.Services.Certificate.CertHelper;
 using Color = Xamarin.Forms.Color;
 
 namespace passi_android.Registration
@@ -31,6 +27,7 @@ namespace passi_android.Registration
         private ValidationError _pin2Error = new ValidationError();
 
         private readonly int MinPinLenght = 4;
+
         public FinishConfirmationView()
         {
             if (!App.IsTest)
@@ -125,7 +122,7 @@ namespace passi_android.Registration
                                 _navigationService.PopModal().ContinueWith((task =>
                                 {
                                     ResponseError = JsonConvert
-                                        .DeserializeObject<ApiResponseDto<string>>(response.Result.Content).Message;
+                                        .DeserializeObject<ApiResponseDto<string>>(response.Result.Content).errors;
                                 }));
                             });
                         }

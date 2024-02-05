@@ -1,6 +1,6 @@
-﻿using System;
-using passi_android.utils;
+﻿using passi_android.utils;
 using passi_android.utils.Services.Certificate;
+using System;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using Color = Xamarin.Forms.Color;
@@ -25,9 +25,9 @@ namespace passi_android.Main
         private ValidationError _pinOldError = new ValidationError();
 
         private readonly int MinPinLenght = 4;
+
         public UpdateCertificateView()
         {
-
             if (!App.IsTest)
                 InitializeComponent();
             BindingContext = this;
@@ -195,8 +195,6 @@ namespace passi_android.Main
 
         public AccountDb Account { get; set; }
 
-
-
         public void NumbersPad_OnNumberClicked(string value)
         {
             if (value == "confirm")
@@ -247,7 +245,6 @@ namespace passi_android.Main
                                 }
                             }));
                         });
-
                     });
                     return;
                 }
@@ -294,8 +291,6 @@ namespace passi_android.Main
                 Pin2Masked = Pin2.GetMasked("*");
             }
         }
-
-
 
         public void ClearPin1_OnClicked(object sender, EventArgs e)
         {

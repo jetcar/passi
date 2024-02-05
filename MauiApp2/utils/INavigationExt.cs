@@ -7,7 +7,7 @@ namespace MauiApp2.utils
         public static async Task NavigateTop(this INavigation navigator)
         {
             var modalStackCount = navigator.NavigationStack.Count;
-            for (int i = modalStackCount-1; i > 1; i--)
+            for (int i = modalStackCount - 1; i > 1; i--)
             {
                 navigator.RemovePage(navigator.NavigationStack[i]);
             }

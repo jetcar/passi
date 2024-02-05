@@ -1,18 +1,18 @@
-﻿using Newtonsoft.Json;
-using System.Net;
+﻿using System.Net;
 using MauiApp2.StorageModels;
 using MauiApp2.Tools;
+using Newtonsoft.Json;
 using WebApiDto;
 using WebApiDto.SignUp;
 
 namespace MauiApp2.Registration
 {
-
     public partial class RegistrationConfirmationView : BaseContentPage
     {
         private string _code = "";
         private string _responseError;
         private string _email;
+
         public RegistrationConfirmationView(AccountDb account)
         {
             Account = account;
@@ -106,14 +106,13 @@ namespace MauiApp2.Registration
                         else if (!response.Result.IsSuccessful &&
                                  response.Result.StatusCode == HttpStatusCode.BadRequest)
                         {
-
                             _mainThreadService.BeginInvokeOnMainThread(() =>
                             {
                                 _navigationService.PopModal().ContinueWith((task =>
                                 {
                                     var resultContent = response.Result.Content ?? "{\"Message\":\"Network error. Try again\"}";
                                     ResponseError = JsonConvert
-                                        .DeserializeObject<ApiResponseDto<string>>(resultContent).Message;
+                                        .DeserializeObject<ApiResponseDto>(resultContent).errors;
                                     Code = "";
                                 }));
                             });
@@ -125,7 +124,6 @@ namespace MauiApp2.Registration
                                 _navigationService.PopModal().ContinueWith((task =>
                                 {
                                     ResponseError = "Network error. Try again";
-
                                 }));
                             });
                         }

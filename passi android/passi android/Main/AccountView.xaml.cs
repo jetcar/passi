@@ -1,7 +1,6 @@
-﻿using System;
-using System.Net.NetworkInformation;
-using passi_android.FingerPrint;
+﻿using passi_android.FingerPrint;
 using passi_android.utils;
+using System;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -127,7 +126,6 @@ namespace passi_android.Main
                                     App.StartFingerPrintReading();
                                 }));
                             });
-
                         });
                     }
                     else
@@ -153,7 +151,6 @@ namespace passi_android.Main
         {
             var button = sender as VisualElement;
             button.IsEnabled = false;
-
 
             App.FingerPrintReadingResult = (result) =>
             {
@@ -193,7 +190,5 @@ namespace passi_android.Main
             App.FingerPrintReadingResult = null;
             base.OnDisappearing();
         }
-
-      
     }
 }

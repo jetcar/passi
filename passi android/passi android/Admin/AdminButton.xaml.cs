@@ -1,7 +1,7 @@
-﻿using System;
-using System.Diagnostics;
-using passi_android.utils;
+﻿using passi_android.utils;
 using passi_android.utils.Services;
+using System;
+using System.Diagnostics;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -10,7 +10,8 @@ namespace passi_android.Admin
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class AdminButton : ContentView
     {
-        INavigationService _navigationService;
+        private INavigationService _navigationService;
+
         public AdminButton()
         {
             _navigationService = App.Services.GetService<INavigationService>();

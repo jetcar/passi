@@ -1,5 +1,4 @@
-﻿
-namespace MauiApp2.utils.Services
+﻿namespace MauiApp2.utils.Services
 {
     public class MainThreadService : IMainThreadService
     {

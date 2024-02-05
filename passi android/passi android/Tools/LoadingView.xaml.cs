@@ -1,10 +1,7 @@
-﻿using passi_android.utils.Services;
-using System;
+﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
-using Xamarin.Essentials;
-using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using Timer = System.Timers.Timer;
 

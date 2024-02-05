@@ -1,19 +1,14 @@
-﻿using System;
-using System.Linq;
-using System.Net;
-using System.Timers;
-using AppCommon;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using passi_android.Tools;
 using passi_android.utils;
-using passi_android.utils.Services;
 using passi_android.utils.Services.Certificate;
+using System;
+using System.Net;
+using System.Timers;
 using WebApiDto;
 using WebApiDto.Auth;
-using Xamarin.Essentials;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
-using CertHelper = passi_android.utils.Services.Certificate.CertHelper;
 
 namespace passi_android.Notifications
 {
@@ -31,9 +26,9 @@ namespace passi_android.Notifications
         private ValidationError _pin1Error = new ValidationError();
         private AccountDb _accountDb;
         private string _email;
+
         public ConfirmByPinView()
         {
-
             if (!App.IsTest)
                 InitializeComponent();
             BindingContext = this;
@@ -99,7 +94,6 @@ namespace passi_android.Notifications
                 {
                     ResponseError = error;
                 });
-
             }
             base.OnAppearing();
         }
@@ -223,7 +217,7 @@ namespace passi_android.Notifications
                                 _navigationService.PopModal().ContinueWith((task =>
                                 {
                                     ResponseError = JsonConvert
-                                        .DeserializeObject<ApiResponseDto<string>>(response.Result.Content).Message;
+                                        .DeserializeObject<ApiResponseDto<string>>(response.Result.Content).errors;
                                 }));
                             });
                         }

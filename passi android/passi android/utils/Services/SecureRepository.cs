@@ -1,25 +1,22 @@
-﻿using System;
+﻿using AppConfig;
+using passi_android.StorageModels;
+using passi_android.utils.Services.Certificate;
+using passi_android.ViewModels;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
-using AppConfig;
-using Newtonsoft.Json;
-using passi_android.StorageModels;
-using passi_android.utils.Services.Certificate;
-using passi_android.ViewModels;
-using Xamarin.Essentials;
-using Xamarin.Forms;
 
 namespace passi_android.utils.Services
 {
     public class SecureRepository : ISecureRepository
     {
         private static object _locker = new object();
-        List<ProviderDb> Providers { get; set; }
-        List<AccountDb> Accounts { get; set; }
+        private List<ProviderDb> Providers { get; set; }
+        private List<AccountDb> Accounts { get; set; }
 
         private IMySecureStorage _mySecureStorage;
 
@@ -74,7 +71,6 @@ namespace passi_android.utils.Services
                     existingAccount.ProviderGuid = account.Provider?.Guid ?? account.ProviderGuid;
                 }
                 _mySecureStorage.SetAsync(StorageKeys.AllAccounts, Accounts).GetAwaiter().GetResult();
-
             }
         }
 
@@ -152,7 +148,6 @@ namespace passi_android.utils.Services
 
         public bool CheckSessionKey(Guid msgSessionId)
         {
-
             lock (locker)
             {
                 if (locked)
@@ -173,6 +168,7 @@ namespace passi_android.utils.Services
                 return true;
             }
         }
+
         public void ReleaseSessionKey(Guid msgSessionId)
         {
             lock (locker)
@@ -191,6 +187,7 @@ namespace passi_android.utils.Services
             }
             return deviceId;
         }
+
         public string GetReplyId()
         {
             var deviceId = _mySecureStorage.GetAsync("replyId").Result;
@@ -201,6 +198,7 @@ namespace passi_android.utils.Services
             }
             return deviceId;
         }
+
         public string SetReplyId()
         {
             var deviceId = Guid.NewGuid().ToString();
@@ -235,8 +233,6 @@ namespace passi_android.utils.Services
                         TokenUpdate = ConfigSettings.TokenUpdate,
                         UpdateCertificate = ConfigSettings.UpdateCertificate,
                         IsDefault = true
-
-
                     });
                 if (Debugger.IsAttached && Providers.All(x => x.WebApiUrl != ConfigSettings.WebApiUrlLocal))
                     Providers.Add(new ProviderDb()
@@ -261,7 +257,6 @@ namespace passi_android.utils.Services
             }
         }
 
-
         public void DeleteProvider(ProviderDb provider)
         {
             if (Providers == null)
@@ -271,7 +266,6 @@ namespace passi_android.utils.Services
 
             Providers.Remove(Providers.First(x => x.Guid == provider.Guid));
             _mySecureStorage.SetAsync(StorageKeys.ProvidersKey, Providers).GetAwaiter().GetResult();
-
         }
 
         public void UpdateProvider(ProviderDb provider)
@@ -285,7 +279,6 @@ namespace passi_android.utils.Services
             CopyAll(provider, existingProvider);
 
             _mySecureStorage.SetAsync(StorageKeys.ProvidersKey, Providers).GetAwaiter().GetResult();
-
         }
 
         public void CopyAll<T, R>(T source, R destination)
@@ -321,7 +314,6 @@ namespace passi_android.utils.Services
             Providers.Add(provider);
 
             _mySecureStorage.SetAsync(StorageKeys.ProvidersKey, Providers).GetAwaiter().GetResult();
-
         }
 
         public ProviderDb GetProvider(Guid? guid)
@@ -332,7 +324,6 @@ namespace passi_android.utils.Services
             }
 
             return Providers.First(x => x.Guid == guid);
-
         }
     }
 
@@ -341,24 +332,39 @@ namespace passi_android.utils.Services
         X509Certificate2 GetCertificateWithKey(MySecureString pin, AccountDb account);
 
         void AddAccount(AccountDb account);
+
         AccountDb GetAccount(Guid accountGuid);
+
         void UpdateAccount(AccountDb account);
+
         void LoadAccountIntoList(ObservableCollection<AccountViewModel> accounts);
+
         void DeleteAccount(AccountViewModel account, Action callback);
+
         Task SaveFingerPrintKey(AccountDb account, X509Certificate2 cert);
+
         X509Certificate2 GetCertificateWithFingerPrint(AccountDb account);
+
         bool CheckSessionKey(Guid msgSessionId);
+
         void ReleaseSessionKey(Guid msgSessionId);
+
         string GetDeviceId();
+
         List<ProviderDb> LoadProviders();
+
         void DeleteProvider(ProviderDb provider);
+
         void UpdateProvider(ProviderDb provider);
+
         void CopyAll<T, R>(T source, R destination);
+
         void AddProvider(ProviderDb provider);
+
         ProviderDb GetProvider(Guid? guid);
+
         string GetReplyId();
+
         string SetReplyId();
     }
-
-
 }

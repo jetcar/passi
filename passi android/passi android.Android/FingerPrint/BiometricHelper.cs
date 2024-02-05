@@ -1,7 +1,4 @@
-﻿using System;
-using System.Text;
-using Android.App;
-using Android.Content.PM;
+﻿using Android.Content.PM;
 using Android.Hardware.Biometrics;
 using Android.OS;
 using Android.Runtime;
@@ -12,6 +9,8 @@ using Java.Lang;
 using Java.Security;
 using Java.Security.Spec;
 using passi_android.utils.Services;
+using System;
+using System.Text;
 using Signature = Java.Security.Signature;
 
 namespace passi_android.Droid.FingerPrint
@@ -27,12 +26,12 @@ namespace passi_android.Droid.FingerPrint
         private string signatureMessage;
         private ISecureRepository _secureRepository;
         private MainActivity _activity;
+
         public BiometricHelper(ISecureRepository secureRepository)
         {
             _secureRepository = secureRepository;
             _activity = MainActivity.Instance;
             REPLAY_ID = _secureRepository.GetReplyId();
-
         }
 
         public void RegisterOrAuthenticate()
@@ -115,7 +114,7 @@ namespace passi_android.Droid.FingerPrint
             var authenticationCallback = GetAuthenticationCallback();
             biometricPrompt.Authenticate(new BiometricPrompt.CryptoObject(signature), cancellationSignal, activity.MainExecutor, authenticationCallback);
         }
-        
+
         public BiometricPrompt.AuthenticationCallback GetAuthenticationCallback()
         {
             // Callback for biometric authentication result
@@ -197,6 +196,7 @@ namespace passi_android.Droid.FingerPrint
          * Before generating a key pair with biometric prompt, we need to check that the device supports fingerprint, iris, or face.
          * Currently, there are no FEATURE_IRIS or FEATURE_FACE constants on PackageManager.
          */
+
         private bool IsSupported
         {
             get
@@ -206,7 +206,7 @@ namespace passi_android.Droid.FingerPrint
             }
         }
 
-        class BiometricAuthenticationCallback : BiometricPrompt.AuthenticationCallback
+        private class BiometricAuthenticationCallback : BiometricPrompt.AuthenticationCallback
         {
             public Action<BiometricPrompt.AuthenticationResult> Success;
             public Action Failed;

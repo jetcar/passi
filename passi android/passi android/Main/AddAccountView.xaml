@@ -1,10 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <passiAndroid:BaseContentPage xmlns="http://xamarin.com/schemas/2014/forms"
-                 xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-                 BackgroundColor="#FAFAFA"
-                 xmlns:passiAndroid="clr-namespace:passi_android;assembly=passi android"
-                 xmlns:main="clr-namespace:passi_android.Main;assembly=passi android"
-                 x:DataType="main:AddAccountView"
+                              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                              xmlns:main="clr-namespace:passi_android.Main;assembly=passi android"
+                              xmlns:passiAndroid="clr-namespace:passi_android;assembly=passi android"
+                              BackgroundColor="#FAFAFA"
+                              x:DataType="main:AddAccountView"
                  x:Class="passi_android.Main.AddAccountView">
     <StackLayout VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand">
         <StackLayout VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand">

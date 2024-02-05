@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Threading;
 using AndroidTests.Tools;
 using AppConfig;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,10 +5,11 @@ using NUnit.Framework;
 using passi_android;
 using passi_android.Main;
 using passi_android.Notifications;
-using passi_android.Tools;
 using passi_android.utils.Services;
 using passi_android.ViewModels;
-using RestSharp;
+using System;
+using System.Collections.Generic;
+using System.Threading;
 using WebApiDto;
 using WebApiDto.Auth;
 using Xamarin.Forms;
@@ -41,7 +39,6 @@ public class NofiticationViewTestClass
             ReturnHost = "https://localhost",
             Sender = "localhost",
             SessionId = sessionid ?? Guid.NewGuid(),
-
         });
         var syncService = App.Services.GetService<ISyncService>();
         syncService.PollNotifications();
@@ -63,7 +60,7 @@ public class NofiticationViewTestClass
 
     public static MainView PollExistingSessionId(AccountViewModel accountViewModel, Color color, int timeoutSeconds, Guid? sessionid = null)
     {
-       // TestNavigationService.navigationsCount = 0;
+        // TestNavigationService.navigationsCount = 0;
         TestRestService.Result[ConfigSettings.SyncAccounts] = TestBase.SuccesfullResponce<List<AccountMinDto>>(new List<AccountMinDto>()
         {
             new AccountMinDto()
@@ -82,7 +79,6 @@ public class NofiticationViewTestClass
             ReturnHost = "https://localhost",
             Sender = "localhost",
             SessionId = sessionid ?? Guid.NewGuid(),
-
         });
         var syncService = App.Services.GetService<ISyncService>();
         syncService.PollNotifications();
@@ -90,7 +86,7 @@ public class NofiticationViewTestClass
         {
             Thread.Sleep(1);
         }
-       // Assert.AreEqual(1, TestNavigationService.navigationsCount);
+        // Assert.AreEqual(1, TestNavigationService.navigationsCount);
         var page = TestBase.CurrentView as MainView;
         return page;
     }
@@ -138,8 +134,5 @@ public class NofiticationViewTestClass
                 Thread.Sleep(1);
             }
         return mainPage;
-
     }
-
-
 }

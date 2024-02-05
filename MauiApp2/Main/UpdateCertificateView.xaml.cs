@@ -3,7 +3,6 @@ using MauiApp2.utils.Services.Certificate;
 
 namespace MauiApp2.Main
 {
-
     public partial class UpdateCertificateView : BaseContentPage
     {
         private string _pin1Masked;
@@ -21,9 +20,9 @@ namespace MauiApp2.Main
         private ValidationError _pinOldError = new ValidationError();
 
         private readonly int MinPinLenght = 4;
+
         public UpdateCertificateView()
         {
-
             if (!App.IsTest)
                 InitializeComponent();
             BindingContext = this;
@@ -191,8 +190,6 @@ namespace MauiApp2.Main
 
         public AccountDb Account { get; set; }
 
-
-
         public void NumbersPad_OnNumberClicked(string value)
         {
             if (value == "confirm")
@@ -243,7 +240,6 @@ namespace MauiApp2.Main
                                 }
                             }));
                         });
-
                     });
                     return;
                 }
@@ -290,8 +286,6 @@ namespace MauiApp2.Main
                 Pin2Masked = Pin2.GetMasked("*");
             }
         }
-
-
 
         public void ClearPin1_OnClicked(object sender, EventArgs e)
         {

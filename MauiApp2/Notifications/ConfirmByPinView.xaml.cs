@@ -1,16 +1,15 @@
 ﻿using System.Net;
 using System.Timers;
 using MauiApp2.StorageModels;
-using Newtonsoft.Json;
 using MauiApp2.Tools;
 using MauiApp2.utils.Services.Certificate;
+using Newtonsoft.Json;
 using WebApiDto;
 using WebApiDto.Auth;
 using Timer = System.Timers.Timer;
 
 namespace MauiApp2.Notifications
 {
-
     public partial class ConfirmByPinView : BaseContentPage
     {
         private string _requesterName;
@@ -24,9 +23,9 @@ namespace MauiApp2.Notifications
         private ValidationError _pin1Error = new ValidationError();
         private AccountDb _accountDb;
         private string _email;
+
         public ConfirmByPinView()
         {
-
             if (!App.IsTest)
                 InitializeComponent();
             BindingContext = this;
@@ -92,7 +91,6 @@ namespace MauiApp2.Notifications
                 {
                     ResponseError = error;
                 });
-
             }
             base.OnAppearing();
         }
@@ -216,7 +214,7 @@ namespace MauiApp2.Notifications
                                 _navigationService.PopModal().ContinueWith((task =>
                                 {
                                     ResponseError = JsonConvert
-                                        .DeserializeObject<ApiResponseDto<string>>(response.Result.Content).Message;
+                                        .DeserializeObject<ApiResponseDto<string>>(response.Result.Content).errors;
                                 }));
                             });
                         }

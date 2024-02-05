@@ -1,12 +1,10 @@
+using passi_android;
+using passi_android.utils.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using NUnit.Framework;
-using passi_android;
-using passi_android.utils.Services;
-using Xamarin.Forms;
 
 namespace AndroidTests.Tools;
 
@@ -14,6 +12,7 @@ internal class TestNavigationService : INavigationService
 {
     public static int navigationsCount = 0;
     private List<BaseContentPage> _pages = new List<BaseContentPage>();
+
     public async Task PushModalSinglePage(BaseContentPage page)
     {
         _pages.Add(page);
@@ -42,7 +41,6 @@ internal class TestNavigationService : INavigationService
         Console.WriteLine(page.ToString());
         Interlocked.Increment(ref navigationsCount);
         page.SendAppearing();
-
     }
 
     public async Task PopModal()

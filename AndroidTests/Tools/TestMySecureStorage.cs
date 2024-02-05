@@ -1,14 +1,15 @@
+using Newtonsoft.Json;
+using passi_android.utils.Services;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
-using passi_android.utils.Services;
 
 namespace AndroidTests.Tools;
 
 internal class TestMySecureStorage : IMySecureStorage
 {
     public Dictionary<string, string> _dict = new Dictionary<string, string>();
+
     public Task<T> GetAsync<T>(string keyName)
     {
         Console.WriteLine("get from storage " + keyName);

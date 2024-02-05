@@ -7,7 +7,7 @@
                                x:DataType="menu:AddProviderView"
                                x:Class="MauiApp2.Menu.AddProviderView">
     <StackLayout VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand">
-       
+
         <ScrollView>
             <StackLayout VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand">
                 <Label TextColor="Black" HorizontalOptions="Center" Text="Identity provider:" />

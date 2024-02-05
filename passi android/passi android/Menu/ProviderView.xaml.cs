@@ -1,6 +1,5 @@
-﻿using System;
-using passi_android.StorageModels;
-using passi_android.utils.Services;
+﻿using passi_android.StorageModels;
+using System;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -17,7 +16,6 @@ namespace passi_android.Menu
             if (!App.IsTest)
                 InitializeComponent();
             BindingContext = this;
-
         }
 
         private void EditButton_OnClicked(object sender, EventArgs e)
@@ -28,6 +26,5 @@ namespace passi_android.Menu
             _navigationService.PushModalSinglePage(new EditProviderView(Provider));
             button.IsEnabled = true;
         }
-
     }
 }

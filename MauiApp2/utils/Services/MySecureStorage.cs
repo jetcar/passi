@@ -18,12 +18,19 @@ namespace MauiApp2.utils.Services
 
         public async Task SetAsync<T>(string keyName, T item) where T : class
         {
-            await SecureStorage.SetAsync(keyName, JsonConvert.SerializeObject(item));
+            var serializeObject = JsonConvert.SerializeObject(item);
+            Task.Run(async () =>
+            {
+                await SecureStorage.SetAsync(keyName, serializeObject);
+            });
         }
 
         public async Task SetAsync(string keyName, string item)
         {
-            await SecureStorage.SetAsync(keyName, item);
+            Task.Run(async () =>
+            {
+                await SecureStorage.SetAsync(keyName, item);
+            });
         }
 
         public async Task Remove(string keyName)

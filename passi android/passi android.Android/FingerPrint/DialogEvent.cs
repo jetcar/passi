@@ -1,6 +1,6 @@
-﻿using System;
-using Android.Content;
+﻿using Android.Content;
 using Java.Interop;
+using System;
 
 namespace passi_android.Droid.FingerPrint;
 
@@ -14,6 +14,7 @@ public class DialogEvent : Java.Lang.Object, IDialogInterfaceOnClickListener
     {
         get { return base.Handle; }
     }
+
     public void SetJniIdentityHashCode(int value)
     {
     }
@@ -54,11 +55,17 @@ public class DialogEvent : Java.Lang.Object, IDialogInterfaceOnClickListener
             return base.PeerReference;
         }
     }
-    public JniPeerMembers JniPeerMembers { get
+
+    public JniPeerMembers JniPeerMembers
     {
-        return base.JniPeerMembers;
-    } }
+        get
+        {
+            return base.JniPeerMembers;
+        }
+    }
+
     public JniManagedPeerStates JniManagedPeerState { get; }
+
     public void OnClick(IDialogInterface dialog, int which)
     {
         //dialog.Cancel();

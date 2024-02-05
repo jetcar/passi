@@ -1,7 +1,3 @@
-using System;
-using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
 using NUnit.Framework;
 using passi_android.utils.Services.Certificate;
 
@@ -21,6 +17,7 @@ namespace AppCommonTests
             var str2 = new MySecureString("1111");
             Assert.IsTrue(str1.Equals(str2));
         }
+
         [Test]
         public void CompareSecurestringsNotEqual()
         {
@@ -28,7 +25,5 @@ namespace AppCommonTests
             var str2 = new MySecureString("1211");
             Assert.IsFalse(str1.Equals(str2));
         }
-
-        
     }
 }

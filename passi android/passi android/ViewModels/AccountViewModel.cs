@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using passi_android.StorageModels;
+using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using Newtonsoft.Json;
-using passi_android.StorageModels;
 
 namespace passi_android.ViewModels
 {
@@ -17,9 +17,12 @@ namespace passi_android.ViewModels
         private DateTime _validTo;
         private bool _isDeleteVisible;
         private bool _inactive;
+
         [JsonIgnore]
         public ProviderDb Provider { get; set; }
+
         public Guid? ProviderGuid { get; set; }
+
         public Guid Guid
         {
             get => _guid;

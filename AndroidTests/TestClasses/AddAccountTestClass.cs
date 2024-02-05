@@ -1,10 +1,9 @@
-using System.Threading;
 using AndroidTests.Tools;
 using NUnit.Framework;
-using passi_android;
 using passi_android.Main;
 using passi_android.Registration;
 using passi_android.Tools;
+using System.Threading;
 using Xamarin.Forms;
 
 namespace AndroidTests.TestClasses;

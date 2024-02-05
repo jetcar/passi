@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Security.Cryptography.X509Certificates;
 using MauiApp2.StorageModels;
+using MauiApp2.Tools;
 using Newtonsoft.Json;
 using Org.BouncyCastle.Asn1.X509;
 using Org.BouncyCastle.Crypto;
@@ -11,7 +12,6 @@ using Org.BouncyCastle.Pkcs;
 using Org.BouncyCastle.Security;
 using Org.BouncyCastle.Utilities;
 using Org.BouncyCastle.X509;
-using MauiApp2.Tools;
 using WebApiDto;
 using WebApiDto.Certificate;
 
@@ -19,7 +19,7 @@ namespace MauiApp2.utils.Services.Certificate
 {
     public class CertificatesService : ICertificatesService
     {
-        INavigationService _navigationService;
+        private INavigationService _navigationService;
         private ISecureRepository _secureRepository;
         private IMainThreadService _mainThreadService;
         private IRestService _restService;
@@ -107,10 +107,7 @@ namespace MauiApp2.utils.Services.Certificate
                         }));
                     });
                 }
-
-
             }));
-
         }
 
         public void UpdateCertificate(MySecureString pinNew, MySecureString pinOld, AccountDb accountDb, Action<string> errorAction)
@@ -149,7 +146,7 @@ namespace MauiApp2.utils.Services.Certificate
                             {
                                 _navigationService.PopModal().ContinueWith((task) =>
                                 {
-                                    errorAction.Invoke(JsonConvert.DeserializeObject<ApiResponseDto<string>>(response.Result.Content).Message);
+                                    errorAction.Invoke(JsonConvert.DeserializeObject<ApiResponseDto<string>>(response.Result.Content).errors);
                                 });
                             }
                             else
@@ -164,6 +161,7 @@ namespace MauiApp2.utils.Services.Certificate
                 });
             }));
         }
+
         public void UpdateCertificateFingerprint(AccountDb accountDb, Action<string> errorAction)
         {
             _navigationService.PushModalSinglePage(new LoadingView(() =>
@@ -197,7 +195,7 @@ namespace MauiApp2.utils.Services.Certificate
                             {
                                 _navigationService.PopModal().ContinueWith((task) =>
                                 {
-                                    errorAction.Invoke(JsonConvert.DeserializeObject<ApiResponseDto<string>>(response.Result.Content).Message);
+                                    errorAction.Invoke(JsonConvert.DeserializeObject<ApiResponseDto<string>>(response.Result.Content).errors);
                                 });
                             }
                             else
@@ -215,7 +213,6 @@ namespace MauiApp2.utils.Services.Certificate
 
         private async Task<Tuple<CertificateUpdateDto, X509Certificate2, string, byte[]>> GenerateCertFromOldCertificate(MySecureString pinNew, MySecureString pinOld, AccountDb Account, Action<string> callback)
         {
-
             var cert = new CertificateUpdateDto();
             cert.ParentCertThumbprint = Account.Thumbprint;
             return await GenerateCertificate(Account.Email, pinNew).ContinueWith(certificate =>
@@ -236,9 +233,9 @@ namespace MauiApp2.utils.Services.Certificate
                 return new Tuple<CertificateUpdateDto, X509Certificate2, string, byte[]>(cert, certificate.Result.Item1, certificate.Result.Item2, certificate.Result.Item3);
             });
         }
+
         private async Task<Tuple<CertificateUpdateDto, X509Certificate2, string, byte[]>> GenerateCertFromOldCertificateFingerPrint(AccountDb accountDb, Action<string> callback)
         {
-
             var cert = new CertificateUpdateDto();
             cert.ParentCertThumbprint = accountDb.Thumbprint;
             return await GenerateCertificate(accountDb.Email, null).ContinueWith(certificate =>
@@ -261,11 +258,15 @@ namespace MauiApp2.utils.Services.Certificate
             });
         }
     }
+
     public interface ICertificatesService
     {
         Task<Tuple<X509Certificate2, string, byte[]>> GenerateCertificate(string subject, MySecureString pin);
+
         void CreateFingerPrintCertificate(AccountDb accountDb, MySecureString pin1, Action<string> errorCallback);
+
         void UpdateCertificate(MySecureString pinNew, MySecureString pinOld, AccountDb accountDb, Action<string> errorAction);
+
         void UpdateCertificateFingerprint(AccountDb accountDb, Action<string> action);
     }
 }

@@ -7,19 +7,19 @@ using MauiApp2.utils.Services.Certificate;
 
 namespace MauiApp2
 {
-
-     [Activity(Label = "Passi", Icon = "@mipmap/appicon", Theme = "@style/Maui.SplashTheme", MainLauncher = true, DirectBootAware = true, Exported = true, LaunchMode = LaunchMode.SingleTop, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation | ConfigChanges.UiMode | ConfigChanges.ScreenLayout | ConfigChanges.SmallestScreenSize)]
+    [Activity(Label = "Passi", Icon = "@mipmap/appicon", Theme = "@style/Maui.SplashTheme", MainLauncher = true, DirectBootAware = true, Exported = true, LaunchMode = LaunchMode.SingleTop, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation | ConfigChanges.UiMode | ConfigChanges.ScreenLayout | ConfigChanges.SmallestScreenSize)]
     public class MainActivity : MauiAppCompatActivity
     {
+        internal static readonly string CHANNEL_ID = "passi_notification_channel_id";
 
-         internal static readonly string CHANNEL_ID = "passi_notification_channel_id";
-
-        public static App App;
         public static MainActivity Instance;
 
+        public MainActivity()
+        {
+            App.Services = ConfigureServices();
+        }
         private static IServiceProvider ConfigureServices()
         {
-
             var services = new ServiceCollection();
 
             services.AddSingleton<ISecureRepository, SecureRepository>();
@@ -35,7 +35,5 @@ namespace MauiApp2
 
             return services.BuildServiceProvider();
         }
-        
-
     }
 }

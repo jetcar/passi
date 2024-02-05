@@ -3,18 +3,17 @@ using MauiApp2.StorageModels;
 
 namespace MauiApp2.Menu
 {
-
     public partial class MenuView : BaseContentPage
     {
         private ObservableCollection<ProviderDb> _provider;
         private bool _isDeleteVisible;
+
         public MenuView()
         {
             if (!App.IsTest)
                 InitializeComponent();
             BindingContext = this;
-            Providers = new ObservableCollection<ProviderDb>(_secureRepository.LoadProviders());
-
+            Providers = new ObservableCollection<ProviderDb>(_secureRepository.LoadProviders().Result);
         }
 
         public ObservableCollection<ProviderDb> Providers
@@ -43,7 +42,6 @@ namespace MauiApp2.Menu
                 return;
             _secureRepository.DeleteProvider(provider);
             Providers.Remove(provider);
-
         }
 
         private void Cell_OnTapped(object sender, EventArgs e)
@@ -81,6 +79,5 @@ namespace MauiApp2.Menu
                 OnPropertyChanged();
             }
         }
-
     }
 }

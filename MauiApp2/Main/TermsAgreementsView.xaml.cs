@@ -1,6 +1,5 @@
 ﻿namespace MauiApp2.Main
 {
-
     public partial class TermsAgreementsView : BaseContentPage
     {
         public TermsAgreementsView()

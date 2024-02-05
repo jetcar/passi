@@ -1,6 +1,5 @@
 ﻿namespace MauiApp2.Tools
 {
-
     public partial class NumbersPad : ContentView
     {
         public NumbersPad()

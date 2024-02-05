@@ -1,10 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <passiAndroid:BaseContentPage xmlns="http://xamarin.com/schemas/2014/forms"
-                 xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-                 xmlns:passiAndroid="clr-namespace:passi_android"
-                 xmlns:menu="clr-namespace:passi_android.Menu;assembly=passi android"
-                 xmlns:admin="clr-namespace:passi_android.Admin;assembly=passi android"
-                 BackgroundColor="#FAFAFA"
+                              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                              xmlns:passiAndroid="clr-namespace:passi_android"
+                              xmlns:menu="clr-namespace:passi_android.Menu;assembly=passi android"
+                              BackgroundColor="#FAFAFA"
                  x:DataType="menu:ProviderView"
                  x:Class="passi_android.Menu.ProviderView">
     <StackLayout HorizontalOptions="FillAndExpand">

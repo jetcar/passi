@@ -1,9 +1,9 @@
-﻿using System;
-using System.Collections.ObjectModel;
-using System.Threading.Tasks;
-using passi_android.Registration;
+﻿using passi_android.Registration;
 using passi_android.ViewModels;
 using RestSharp;
+using System;
+using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -61,15 +61,12 @@ namespace passi_android.Main
             });
             base.OnAppearing();
             _syncService.PollNotifications();
-
-
         }
 
         protected override void OnDisappearing()
         {
             base.OnDisappearing();
         }
-
 
         private void AccountSyncCallback()
         {
@@ -159,7 +156,6 @@ namespace passi_android.Main
         private void Menu_button(object sender, EventArgs e)
         {
             _navigationService.PushModalSinglePage(new Menu.MenuView());
-
         }
     }
 }

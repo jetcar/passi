@@ -9,6 +9,7 @@ namespace WebApiDto
 
         [Required]
         public string DeviceId { get; set; }
+
         [Required]
         public string Platform { get; set; }
     }

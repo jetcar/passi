@@ -1,9 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Net;
-using System.Security.Cryptography.X509Certificates;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Org.BouncyCastle.Asn1.X509;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Generators;
@@ -14,15 +9,19 @@ using Org.BouncyCastle.Security;
 using Org.BouncyCastle.Utilities;
 using Org.BouncyCastle.X509;
 using passi_android.Tools;
+using System;
+using System.IO;
+using System.Net;
+using System.Security.Cryptography.X509Certificates;
+using System.Threading.Tasks;
 using WebApiDto;
 using WebApiDto.Certificate;
-using Xamarin.Forms.Xaml;
 
 namespace passi_android.utils.Services.Certificate
 {
     public class CertificatesService : ICertificatesService
     {
-        INavigationService _navigationService;
+        private INavigationService _navigationService;
         private ISecureRepository _secureRepository;
         private IMainThreadService _mainThreadService;
         private IRestService _restService;
@@ -110,10 +109,7 @@ namespace passi_android.utils.Services.Certificate
                         }));
                     });
                 }
-
-
             }));
-
         }
 
         public void UpdateCertificate(MySecureString pinNew, MySecureString pinOld, AccountDb accountDb, Action<string> errorAction)
@@ -152,7 +148,7 @@ namespace passi_android.utils.Services.Certificate
                             {
                                 _navigationService.PopModal().ContinueWith((task) =>
                                 {
-                                    errorAction.Invoke(JsonConvert.DeserializeObject<ApiResponseDto<string>>(response.Result.Content).Message);
+                                    errorAction.Invoke(JsonConvert.DeserializeObject<ApiResponseDto<string>>(response.Result.Content).errors);
                                 });
                             }
                             else
@@ -167,6 +163,7 @@ namespace passi_android.utils.Services.Certificate
                 });
             }));
         }
+
         public void UpdateCertificateFingerprint(AccountDb accountDb, Action<string> errorAction)
         {
             _navigationService.PushModalSinglePage(new LoadingView(() =>
@@ -200,7 +197,7 @@ namespace passi_android.utils.Services.Certificate
                             {
                                 _navigationService.PopModal().ContinueWith((task) =>
                                 {
-                                    errorAction.Invoke(JsonConvert.DeserializeObject<ApiResponseDto<string>>(response.Result.Content).Message);
+                                    errorAction.Invoke(JsonConvert.DeserializeObject<ApiResponseDto<string>>(response.Result.Content).errors);
                                 });
                             }
                             else
@@ -218,7 +215,6 @@ namespace passi_android.utils.Services.Certificate
 
         private async Task<Tuple<CertificateUpdateDto, X509Certificate2, string, byte[]>> GenerateCertFromOldCertificate(MySecureString pinNew, MySecureString pinOld, AccountDb Account, Action<string> callback)
         {
-
             var cert = new CertificateUpdateDto();
             cert.ParentCertThumbprint = Account.Thumbprint;
             return await GenerateCertificate(Account.Email, pinNew).ContinueWith(certificate =>
@@ -239,9 +235,9 @@ namespace passi_android.utils.Services.Certificate
                 return new Tuple<CertificateUpdateDto, X509Certificate2, string, byte[]>(cert, certificate.Result.Item1, certificate.Result.Item2, certificate.Result.Item3);
             });
         }
+
         private async Task<Tuple<CertificateUpdateDto, X509Certificate2, string, byte[]>> GenerateCertFromOldCertificateFingerPrint(AccountDb accountDb, Action<string> callback)
         {
-
             var cert = new CertificateUpdateDto();
             cert.ParentCertThumbprint = accountDb.Thumbprint;
             return await GenerateCertificate(accountDb.Email, null).ContinueWith(certificate =>
@@ -264,11 +260,15 @@ namespace passi_android.utils.Services.Certificate
             });
         }
     }
+
     public interface ICertificatesService
     {
         Task<Tuple<X509Certificate2, string, byte[]>> GenerateCertificate(string subject, MySecureString pin);
+
         void CreateFingerPrintCertificate(AccountDb accountDb, MySecureString pin1, Action<string> errorCallback);
+
         void UpdateCertificate(MySecureString pinNew, MySecureString pinOld, AccountDb accountDb, Action<string> errorAction);
+
         void UpdateCertificateFingerprint(AccountDb accountDb, Action<string> action);
     }
 }

@@ -1,9 +1,9 @@
+using NUnit.Framework;
+using passi_android.utils.Services.Certificate;
 using System;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
-using NUnit.Framework;
-using passi_android.utils.Services.Certificate;
 
 namespace AppCommonTests
 {
@@ -17,7 +17,7 @@ namespace AppCommonTests
         [Test]
         public void SignByCertAndVerify()
         {
-            var CertificatesService = new CertificatesService(null,null,null,null,null);
+            var CertificatesService = new CertificatesService(null, null, null, null, null);
             var task = CertificatesService.GenerateCertificate("test@mail.ee", new MySecureString("1234")).Result;
             string password = task.Item2;
             byte[] cert = task.Item3;
@@ -48,7 +48,7 @@ namespace AppCommonTests
         public void SignByCertAndVerify2()
         {
             var CertHelper = new CertHelper(null);
-            var CertificatesService = new CertificatesService(null, null, null,null,null);
+            var CertificatesService = new CertificatesService(null, null, null, null, null);
             var task = CertificatesService.GenerateCertificate("test@mail.ee", new MySecureString("1234")).Result;
             string password = task.Item2;
             byte[] cert = task.Item3;

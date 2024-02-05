@@ -21,6 +21,5 @@ namespace MauiApp2
         public static Action CloseApp { get; set; }
         public static Action CancelNotifications { get; set; }
         public static string Version { get; set; }
-
     }
 }

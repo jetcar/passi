@@ -1,11 +1,10 @@
-using System.Threading;
 using AndroidTests.Tools;
 using AppConfig;
 using NUnit.Framework;
-using passi_android;
 using passi_android.Main;
 using passi_android.Registration;
 using passi_android.Tools;
+using System.Threading;
 using Xamarin.Forms;
 
 namespace AndroidTests.TestClasses;
@@ -14,7 +13,6 @@ public class RegistrationConfirmationTestClass
 {
     public static FinishConfirmationView EnterCorrectCode(RegistrationConfirmationView registrationConfirmationView)
     {
-
         TestRestService.Result[ConfigSettings.SignupCheck] = TestBase.SuccesfullResponce();
         registrationConfirmationView.NumbersPad_OnNumberClicked("1");
         registrationConfirmationView.NumbersPad_OnNumberClicked("1");
@@ -52,7 +50,6 @@ public class RegistrationConfirmationTestClass
         var finishConfirmation = TestBase.CurrentView as MainView;
         Assert.AreEqual(1, TestNavigationService.navigationsCount);
         return finishConfirmation;
-
     }
 
     public static RegistrationConfirmationView EnterInCorrectCode(RegistrationConfirmationView registrationConfirmation)

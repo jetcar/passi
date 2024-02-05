@@ -1,8 +1,8 @@
-﻿using System;
-using System.Net;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using passi_android.Tools;
 using passi_android.utils.Services.Certificate;
+using System;
+using System.Net;
 using WebApiDto;
 using WebApiDto.Auth;
 
@@ -13,8 +13,9 @@ namespace passi_android.utils.Services
         private INavigationService _navigationService;
         private ISecureRepository _secureRepository;
         private ICertHelper _certHelper;
-        IRestService _restService;
+        private IRestService _restService;
         private IMainThreadService _mainThreadService;
+
         public FingerPrintService(INavigationService navigationService, ISecureRepository secureRepository, ICertHelper certHelper, IRestService restService, IMainThreadService mainThreadService)
         {
             _navigationService = navigationService;
@@ -26,7 +27,6 @@ namespace passi_android.utils.Services
 
         public void StartReadingConfirmRequest(NotificationDto message, AccountDb accountDb, Action<string> errorAction)
         {
-
             App.FingerPrintReadingResult = (fingerPrintResult) =>
             {
                 if (fingerPrintResult.ErrorMessage == null)
@@ -67,7 +67,7 @@ namespace passi_android.utils.Services
                                         {
                                             errorAction(JsonConvert
                                                 .DeserializeObject<ApiResponseDto<string>>(response.Result.Content)
-                                                .Message);
+                                                .errors);
                                         }));
                                     });
                                 }
@@ -92,7 +92,6 @@ namespace passi_android.utils.Services
                 }
             };
             App.StartFingerPrintReading();
-
         }
     }
 }

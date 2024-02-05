@@ -1,5 +1,3 @@
-using System;
-using System.Net;
 using AppCommon;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
@@ -9,14 +7,14 @@ using passi_android.utils;
 using passi_android.utils.Services;
 using passi_android.utils.Services.Certificate;
 using RestSharp;
+using System;
+using System.Net;
 using WebApiDto;
-using Xamarin.Forms;
 
 namespace AndroidTests.Tools;
 
 public class TestBase
 {
-
     [SetUp]
     public void Setup()
     {
@@ -31,6 +29,7 @@ public class TestBase
     }
 
     public static BaseContentPage CurrentView { get; set; }
+
     private static IServiceProvider ConfigureServices()
     {
         var services = new ServiceCollection();
@@ -48,6 +47,7 @@ public class TestBase
 
         return services.BuildServiceProvider();
     }
+
     public static INavigationService Navigation
     {
         get { return App.Services.GetService<INavigationService>(); }
@@ -64,13 +64,13 @@ public class TestBase
         App.FingerPrintReadingResult.Invoke(new FingerPrintResult());
     }
 
-
     public static RestResponse SuccesfullResponce()
     {
         Console.WriteLine("rest response ok");
         return new RestResponse()
         { IsSuccessStatusCode = true, StatusCode = HttpStatusCode.OK, ResponseStatus = ResponseStatus.Completed };
     }
+
     public static RestResponse BadResponce(string errorMessage)
     {
         Console.WriteLine("rest response Bad");
@@ -81,10 +81,11 @@ public class TestBase
             ResponseStatus = ResponseStatus.Completed,
             Content = JsonConvert.SerializeObject(new ApiResponseDto<string>()
             {
-                Message = errorMessage
+                errors = errorMessage
             })
         };
     }
+
     public static RestResponse SuccesfullResponce<T>(T value)
     {
         Console.WriteLine("rest response: " + JsonConvert.SerializeObject(value));
@@ -92,7 +93,8 @@ public class TestBase
         { IsSuccessStatusCode = true, StatusCode = HttpStatusCode.OK, ResponseStatus = ResponseStatus.Completed, Content = JsonConvert.SerializeObject(value) };
     }
 
-    static Random random = new Random();
+    private static Random random = new Random();
+
     public void CreateAccount(bool confirmed = true)
     {
         var certificatesService = App.Services.GetService<ICertificatesService>();
@@ -130,7 +132,6 @@ public class TestBase
         }
         return result.ToString();
     }
-
 
     public static RestResponse FailedResponce()
     {

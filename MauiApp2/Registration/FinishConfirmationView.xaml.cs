@@ -1,14 +1,13 @@
 ﻿using System.Net;
 using MauiApp2.StorageModels;
-using Newtonsoft.Json;
 using MauiApp2.Tools;
 using MauiApp2.utils.Services.Certificate;
+using Newtonsoft.Json;
 using WebApiDto;
 using WebApiDto.SignUp;
 
 namespace MauiApp2.Registration
 {
-
     public partial class FinishConfirmationView : BaseContentPage
     {
         private string _pin1Masked;
@@ -23,6 +22,7 @@ namespace MauiApp2.Registration
         private ValidationError _pin2Error = new ValidationError();
 
         private readonly int MinPinLenght = 4;
+
         public FinishConfirmationView()
         {
             if (!App.IsTest)
@@ -117,7 +117,7 @@ namespace MauiApp2.Registration
                                 _navigationService.PopModal().ContinueWith((task =>
                                 {
                                     ResponseError = JsonConvert
-                                        .DeserializeObject<ApiResponseDto<string>>(response.Result.Content).Message;
+                                        .DeserializeObject<ApiResponseDto<string>>(response.Result.Content).errors;
                                 }));
                             });
                         }

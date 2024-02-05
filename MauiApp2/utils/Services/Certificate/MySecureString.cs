@@ -8,22 +8,25 @@ namespace MauiApp2.utils.Services.Certificate
     {
         protected SecureString _string;
 
-        public int Length { get { return _string.Length; } }
+        public int Length
+        { get { return _string.Length; } }
 
         public MySecureString(string str)
         {
             _string = new NetworkCredential("", str).SecurePassword;
         }
+
         public MySecureString(MySecureString str)
         {
             _string = new NetworkCredential("", str.SecureStringToString()).SecurePassword;
         }
-       
+
         public MySecureString Append(MySecureString str)
         {
             _string.AppendChars(str._string);
             return this;
         }
+
         public MySecureString TrimEnd(int length)
         {
             for (int i = 0; i < length; i++)
@@ -51,17 +54,13 @@ namespace MauiApp2.utils.Services.Certificate
         {
             var secureString = obj as MySecureString;
             return _string.IsEqualTo(secureString._string);
-
         }
-
-
 
         public void AppendChar(string value)
         {
             foreach (var c in value.ToCharArray())
             {
                 _string.AppendChar(c);
-
             }
         }
 
@@ -76,9 +75,9 @@ namespace MauiApp2.utils.Services.Certificate
             return result;
         }
     }
+
     public static class SecureStringExtensions
     {
-
         public static bool IsEqualTo(this SecureString ss1, SecureString ss2)
         {
             IntPtr bstr1 = IntPtr.Zero;
@@ -107,6 +106,7 @@ namespace MauiApp2.utils.Services.Certificate
                 if (bstr1 != IntPtr.Zero) Marshal.ZeroFreeBSTR(bstr1);
             }
         }
+
         public static SecureString AppendChars(this SecureString str, SecureString chars)
         {
             foreach (var charValue in chars.SecureStringToString())

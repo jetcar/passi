@@ -1,11 +1,11 @@
-﻿using System;
-using System.Threading;
-using AppConfig;
+﻿using AppConfig;
 using RestSharp;
+using System;
+using System.Threading;
 
 namespace AppCommon
 {
-    public class DateTimeService :IDateTimeService
+    public class DateTimeService : IDateTimeService
     {
         private long serverTimeDiffirence = 0;
 
@@ -31,9 +31,8 @@ namespace AppCommon
                     Thread.Sleep(1);
                 }
             }).Start();
-            
-            
         }
+
         private long ConvertToTimestamp(DateTime value)
         {
             long epoch = (value.Ticks - 621355968000000000) / 10000000;
@@ -52,6 +51,7 @@ namespace AppCommon
     public interface IDateTimeService
     {
         DateTime UtcNow { get; }
+
         void Init();
     }
 }

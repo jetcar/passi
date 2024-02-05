@@ -5,9 +5,8 @@ using MauiApp2.StorageModels;
 using MauiApp2.Tools;
 using MauiApp2.utils;
 using WebApiDto;
-using Color = WebApiDto.Auth.Color;
-using RegistrationConfirmationView = MauiApp2.Registration.RegistrationConfirmationView;
 using FinishConfirmationView = MauiApp2.Registration.FinishConfirmationView;
+using RegistrationConfirmationView = MauiApp2.Registration.RegistrationConfirmationView;
 
 namespace MauiApp2.Admin
 {
@@ -19,6 +18,7 @@ namespace MauiApp2.Admin
         private string _isFinished;
         private string _notificationToken;
         private string _deviceId;
+
         public AdminView(AccountDb account)
         {
             this.Account = account;
@@ -133,7 +133,7 @@ namespace MauiApp2.Admin
             var message = new NotificationDto()
             {
                 Sender = "sender",
-                ConfirmationColor = Color.green,
+                ConfirmationColor = WebApiDto.Auth.Color.green,
                 RandomString = System.Guid.NewGuid().ToString(),
                 SessionId = System.Guid.NewGuid(),
                 ExpirationTime = DateTime.UtcNow.AddSeconds(90),
@@ -144,7 +144,7 @@ namespace MauiApp2.Admin
 
         private void ConfirmByPinView(object sender, EventArgs e)
         {
-            _navigationService.PushModalSinglePage(new ConfirmByPinView() { Message = new NotificationDto() { Sender = "sender", ConfirmationColor = Color.green, RandomString = System.Guid.NewGuid().ToString(), SessionId = System.Guid.NewGuid(), AccountGuid = Account.Guid, ExpirationTime = DateTime.UtcNow.AddSeconds(90), ReturnHost = "https://localhost" } });
+            _navigationService.PushModalSinglePage(new ConfirmByPinView() { Message = new NotificationDto() { Sender = "sender", ConfirmationColor = WebApiDto.Auth.Color.green, RandomString = System.Guid.NewGuid().ToString(), SessionId = System.Guid.NewGuid(), AccountGuid = Account.Guid, ExpirationTime = DateTime.UtcNow.AddSeconds(90), ReturnHost = "https://localhost" } });
         }
 
         private void FinishConfirmation(object sender, EventArgs e)

@@ -8,8 +8,8 @@
   </ui-application>
   <shortcut-list />
   <privileges>
-    <privilege>http://tizen.org/privilege/internet</privilege>
-  </privileges> 
+      <privilege>http://tizen.org/privilege/internet</privilege>
+  </privileges>
   <dependencies />
   <provides-appdefined-privileges />
 </manifest>

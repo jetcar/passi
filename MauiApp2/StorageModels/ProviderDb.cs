@@ -59,6 +59,5 @@ namespace MauiApp2.StorageModels
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
-
     }
 }

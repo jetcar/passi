@@ -1,13 +1,11 @@
-
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Threading;
 using AndroidTests.Tools;
 using AppConfig;
 using NUnit.Framework;
-using passi_android;
 using passi_android.Main;
 using passi_android.ViewModels;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Threading;
 using WebApiDto.Auth;
 using Xamarin.Forms;
 
@@ -15,8 +13,6 @@ namespace AndroidTests
 {
     public class MainPageTests : TestBase
     {
-
-
         [Test]
         public void OpenMainView()
         {
@@ -41,6 +37,7 @@ namespace AndroidTests
 
             Assert.AreEqual(page.Accounts.Count, 1);
         }
+
         [Test]
         public void OpenMainViewSyncButton()
         {

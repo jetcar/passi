@@ -1,27 +1,17 @@
-
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Threading;
-using System.Threading.Tasks;
 using AndroidTests.Tools;
-using AppConfig;
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
 using passi_android;
 using passi_android.Main;
-using passi_android.Menu;
 using passi_android.Tools;
 using passi_android.utils.Services;
-using passi_android.ViewModels;
-using WebApiDto.Auth;
-using Xamarin.Forms;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace AndroidTests
 {
     public class LoadingViewTests : TestBase
     {
-
-
         [Test, Timeout(100000)]
         public void LoadingViewExpired()
         {
@@ -41,8 +31,8 @@ namespace AndroidTests
             {
                 Thread.Sleep(1);
             }
-
         }
+
         [Test, Timeout(100000)]
         public void LoadingViewNavigateBack()
         {
@@ -56,10 +46,6 @@ namespace AndroidTests
             {
                 Thread.Sleep(1);
             }
-
         }
-
-
-
     }
 }

@@ -1,6 +1,6 @@
-﻿using System.Linq;
+﻿using passi_android.Tools;
+using System.Linq;
 using System.Threading.Tasks;
-using passi_android.Tools;
 using Xamarin.Forms;
 
 namespace passi_android.utils
@@ -10,7 +10,7 @@ namespace passi_android.utils
         public static async Task NavigateTop(this INavigation navigator)
         {
             var modalStackCount = navigator.NavigationStack.Count;
-            for (int i = modalStackCount-1; i > 1; i--)
+            for (int i = modalStackCount - 1; i > 1; i--)
             {
                 navigator.RemovePage(navigator.NavigationStack[i]);
             }

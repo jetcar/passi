@@ -1,10 +1,10 @@
+using passi_android.StorageModels;
+using passi_android.utils.Services;
+using RestSharp;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
-using passi_android.StorageModels;
-using passi_android.utils.Services;
-using RestSharp;
 
 namespace AndroidTests.Tools;
 
@@ -47,7 +47,6 @@ internal class TestRestService : IRestService
         Result.Remove(requestUri);
 
         return Task.FromResult(result ?? new RestResponse());
-
     }
 
     public Task<RestResponse> ExecutePostAsync<T>(ProviderDb provider, string requestUri, T item) where T : class

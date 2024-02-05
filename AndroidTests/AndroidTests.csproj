@@ -18,7 +18,5 @@
 	</ItemGroup>
 	<ItemGroup>
 	  <ProjectReference Include="..\passi android\passi android\passi android.csproj" />
-
-
 	</ItemGroup>
 </Project>

@@ -1,5 +1,6 @@
-﻿using MauiApp2.StorageModels;
-using MauiApp2.utils.Services.Certificate;
+﻿using MauiViewModels;
+using MauiViewModels.StorageModels;
+using MauiViewModels.utils.Services.Certificate;
 
 namespace MauiApp2.Main
 {

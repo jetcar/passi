@@ -1,4 +1,6 @@
-﻿namespace MauiApp2.utils.Services
+﻿using MauiViewModels.utils.Services;
+
+namespace MauiApp2.utils.Services
 {
     public class NavigationService : INavigationService
     {
@@ -9,6 +11,11 @@
             _pages.Add(page);
             var navigation = App.FirstPage.Navigation;
             await navigation.PushModalSinglePage(page);
+        }
+
+        public Task PushModalSinglePage(MauiViewModels.BaseContentPage page)
+        {
+            throw new NotImplementedException();
         }
 
         public async Task NavigateTop()
@@ -23,6 +30,11 @@
             _pages.RemoveAt(_pages.Count - 1);
             var navigation = App.FirstPage.Navigation;
             await navigation.PopModal();
+        }
+
+        public void DisplayAlert(string header, string content, string okText)
+        {
+            throw new NotImplementedException();
         }
     }
 }

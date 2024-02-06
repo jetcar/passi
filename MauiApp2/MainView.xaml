@@ -1,0 +1,59 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<mauiApp2:BaseContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:mauiApp2="clr-namespace:MauiApp2"
+             xmlns:viewModels2="clr-namespace:MauiViewModels;assembly=MauiViewModels"
+             xmlns:viewModels1="clr-namespace:MauiViewModels.ViewModels;assembly=MauiViewModels"
+             BackgroundColor="#FAFAFA"
+             x:Name="list"
+             x:DataType="viewModels2:MainView"
+             x:Class="MauiApp2.MainView">
+
+    <mauiApp2:BaseContentPage.Content>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="*"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
+            </Grid.RowDefinitions>
+            <StackLayout VerticalOptions="CenterAndExpand" BackgroundColor="#2196f3" HorizontalOptions="FillAndExpand">
+                <ImageButton  Margin="10,0,10,10" BackgroundColor="#2196f3" HorizontalOptions="End" Source="baseline_list_black_24.png" Clicked="Menu_button"></ImageButton>
+            </StackLayout>
+            <ListView Grid.Row="1"  ItemsSource="{Binding Path=Accounts}">
+                <ListView.ItemTemplate>
+                    <DataTemplate x:DataType="viewModels1:AccountViewModel">
+                        <ViewCell Tapped="Cell_OnTapped">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                    <ColumnDefinition Width="*"></ColumnDefinition>
+                                </Grid.ColumnDefinitions>
+                                <StackLayout Grid.Column="0" Padding="10" Orientation="Horizontal">
+                                    <ImageButton  Margin="10,0,10,0" BackgroundColor="#fafafa" IsVisible="{Binding Source={x:Reference list}, Path=BindingContext.IsDeleteVisible}" Source="baseline_remove_circle_outline_black_36.png" Clicked="Button_PreDeleteAccount" ></ImageButton>
+                                    <Label TextColor="Black" Text="{Binding Email}" IsEnabled="{Binding Active}"></Label>
+                                    <Label TextColor="Black" Text="REMOVED!" IsVisible="{Binding Inactive}"></Label>
+                                </StackLayout>
+                                <Button Grid.Column="1" Text="Delete" WidthRequest="50" TextColor="White" BackgroundColor="Red" Clicked="Button_DeleteAccount" IsVisible="{Binding IsDeleteVisible}"></Button>
+                            </Grid>
+                        </ViewCell>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+            <Grid Row="2" Padding="0,0,0,20" Margin="0"  BackgroundColor="#2196f3">
+                <Grid.RowDefinitions>
+                    <RowDefinition></RowDefinition>
+                    <RowDefinition></RowDefinition>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition></ColumnDefinition>
+                    <ColumnDefinition></ColumnDefinition>
+                    <ColumnDefinition></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <ImageButton Margin="10" Source="baseline_add_circle_black_36.png" Clicked="Button_AddAccount"></ImageButton>
+                <ImageButton Grid.Column="1" Margin="10" Source="baseline_delete_black_36.png" Clicked="Button_ShowDeleteAccount" ></ImageButton>
+                <ImageButton Grid.Column="2" Margin="10" Source="baseline_sync_black_36.png" Clicked="Button_Sync" ></ImageButton>
+                <Label Grid.Row="1" Grid.Column="2" TextColor="Black" HorizontalTextAlignment="End" Text="{Binding Path=Version}"></Label>
+            </Grid>
+        </Grid>
+    </mauiApp2:BaseContentPage.Content>
+</mauiApp2:BaseContentPage>

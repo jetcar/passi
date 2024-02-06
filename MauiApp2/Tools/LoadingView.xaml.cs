@@ -12,8 +12,7 @@ namespace MauiApp2.Tools
         public LoadingView(Action callBack, int timeout = 30000)
         {
             _callBack = callBack;
-            if (!App.IsTest)
-                InitializeComponent();
+            InitializeComponent();
             _timer = new Timer();
             _timer.Enabled = true;
             _timer.Interval = timeout;

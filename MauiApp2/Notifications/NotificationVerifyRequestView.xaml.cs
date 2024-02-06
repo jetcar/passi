@@ -1,7 +1,8 @@
 ﻿using System.Net;
 using System.Timers;
-using MauiApp2.StorageModels;
 using MauiApp2.Tools;
+using MauiViewModels;
+using MauiViewModels.StorageModels;
 using Newtonsoft.Json;
 using WebApiDto;
 using WebApiDto.Auth;

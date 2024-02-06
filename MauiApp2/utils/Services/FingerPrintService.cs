@@ -1,7 +1,8 @@
 ﻿using System.Net;
-using MauiApp2.StorageModels;
 using MauiApp2.Tools;
-using MauiApp2.utils.Services.Certificate;
+using MauiViewModels.StorageModels;
+using MauiViewModels.utils.Services;
+using MauiViewModels.utils.Services.Certificate;
 using Newtonsoft.Json;
 using WebApiDto;
 using WebApiDto.Auth;

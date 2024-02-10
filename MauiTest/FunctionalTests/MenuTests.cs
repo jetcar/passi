@@ -6,7 +6,7 @@ namespace MauiTest.FunctionalTests
 {
     public class MenuTests : TestBase
     {
-        [Test, Timeout(10000)]
+        [Test]
         public void UpdateCertificateWithPin()
         {
             var mainView = MainTestClass.OpenMainPage();

@@ -1,5 +1,6 @@
 using System;
 using System.Net;
+using System.Threading;
 using AppCommon;
 using AppConfig;
 using DotNet.Testcontainers.Builders;
@@ -31,6 +32,12 @@ public class TestBase
         TestNavigationService.navigationsCount = 0;
         TestNavigationService.AlertMessage = "";
         PrepareDockers();
+    }
+
+    [TearDown]
+    public void TearDown()
+    {
+        Thread.Sleep(1000);
     }
 
     private static IContainer _pgContainer;
@@ -82,7 +89,7 @@ public class TestBase
         if (_passiWebApi == null)
         {
             var containerBuilder = new ContainerBuilder()
-                    .WithImage("jetcar/passiwebapi:1.0.18")
+                    .WithImage("jetcar/passiwebapi:latest")
                     .WithPortBinding(5004, true)
                     .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(5004))
                     .WithEnvironment("DbHost", _pgContainer.IpAddress)
@@ -112,7 +119,7 @@ public class TestBase
         if (_identityServer == null)
         {
             var containerBuilder = new ContainerBuilder()
-                    .WithImage("jetcar/identityserver:1.0.18")
+                    .WithImage("jetcar/identityserver:latest")
                     .WithPortBinding(5003, true)
                     .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(5003))
                     .WithEnvironment("DbHost", _pgContainer.IpAddress)

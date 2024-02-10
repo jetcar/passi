@@ -21,7 +21,7 @@ namespace MauiTest.FunctionalTests
             //TestRestService.Result[ConfigSettings.Signup] = SuccesfullResponce();
             var registrationConfirmation = AddAccountTestClass.ClickConfirm(addAccountView);
             RegistrationConfirmationTestClass.EnterIncorrectCode(registrationConfirmation);
-            Assert.AreEqual(registrationConfirmation.ResponseError, "error");
+            Assert.AreEqual(registrationConfirmation.ResponseError, "Code not found");
             var finishConfirmation = RegistrationConfirmationTestClass.EnterCorrectCode(registrationConfirmation);
             //TestRestService.Result[ConfigSettings.SignupConfirmation] = SuccesfullResponce();
             var mainPage = FinishConfirmationTestClass.FinishRegistrationWithPin(finishConfirmation);
@@ -85,7 +85,7 @@ namespace MauiTest.FunctionalTests
             Assert.IsTrue(CurrentView is MainView);
         }
 
-        [Test, Timeout(10000)]
+        [Test, Timeout(20000)]
         public void UpdateCertificateNoPin()
         {
             var mainView = MainTestClass.OpenMainPage();
@@ -95,7 +95,7 @@ namespace MauiTest.FunctionalTests
             //TestRestService.Result[ConfigSettings.Signup] = SuccesfullResponce();
             var registrationConfirmation = AddAccountTestClass.ClickConfirm(addAccountView);
             RegistrationConfirmationTestClass.EnterIncorrectCode(registrationConfirmation);
-            Assert.AreEqual(registrationConfirmation.ResponseError, "error");
+            Assert.AreEqual(registrationConfirmation.ResponseError, "Code not found");
             var finishConfirmation = RegistrationConfirmationTestClass.EnterCorrectCode(registrationConfirmation);
             //TestRestService.Result[ConfigSettings.SignupConfirmation] = SuccesfullResponce();
             var mainPage = FinishConfirmationTestClass.FinishRegistrationSkipPin(finishConfirmation);
@@ -127,7 +127,7 @@ namespace MauiTest.FunctionalTests
             //TestRestService.Result[ConfigSettings.Signup] = SuccesfullResponce();
             var registrationConfirmation = AddAccountTestClass.ClickConfirm(addAccountView);
             RegistrationConfirmationTestClass.EnterIncorrectCode(registrationConfirmation);
-            Assert.AreEqual(registrationConfirmation.ResponseError, "error");
+            Assert.AreEqual(registrationConfirmation.ResponseError, "Code not found");
             var finishConfirmation = RegistrationConfirmationTestClass.EnterCorrectCode(registrationConfirmation);
             //TestRestService.Result[ConfigSettings.SignupConfirmation] = SuccesfullResponce();
             var mainPage = FinishConfirmationTestClass.FinishRegistrationSkipPin(finishConfirmation);

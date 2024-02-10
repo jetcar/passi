@@ -216,7 +216,7 @@ namespace passi_android.utils.Services
                     Providers = _mySecureStorage.GetAsync<List<ProviderDb>>(StorageKeys.ProvidersKey).Result ?? new List<ProviderDb>();
                 }
 
-                if (Providers.All(x => x.WebApiUrl != ConfigSettings.WebApiUrl))
+                if (Providers.All(x => x.WebApiUrl != ConfigSettings.PassiUrl))
                     Providers.Add(new ProviderDb()
                     {
                         Authorize = ConfigSettings.Authorize,
@@ -224,7 +224,7 @@ namespace passi_android.utils.Services
                         CheckForStartedSessions = ConfigSettings.CheckForStartedSessions,
                         DeleteAccount = ConfigSettings.DeleteAccount,
                         Name = "passi",
-                        WebApiUrl = ConfigSettings.WebApiUrl,
+                        WebApiUrl = ConfigSettings.PassiUrl,
                         SignupCheck = ConfigSettings.SignupCheck,
                         SignupConfirmation = ConfigSettings.SignupConfirmation,
                         SignupPath = ConfigSettings.Signup,

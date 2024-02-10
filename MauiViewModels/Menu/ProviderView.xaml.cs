@@ -3,7 +3,7 @@ using MauiViewModels.StorageModels;
 
 namespace MauiViewModels.Menu
 {
-    public class ProviderView : BaseContentPage
+    public class ProviderView : BaseViewModel
     {
         public ProviderDb Provider { get; set; }
 

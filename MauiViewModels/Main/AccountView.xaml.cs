@@ -4,7 +4,7 @@ using MauiViewModels.StorageModels;
 
 namespace MauiViewModels.Main
 {
-    public class AccountView : BaseContentPage
+    public class AccountView : BaseViewModel
     {
         public AccountDb AccountDb { get; set; }
         private string _email;

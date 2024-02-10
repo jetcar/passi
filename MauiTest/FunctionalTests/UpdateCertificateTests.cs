@@ -17,13 +17,13 @@ namespace MauiTest.FunctionalTests
             var mainView = MainTestClass.OpenMainPage();
             var tcView = MainTestClass.ClickAddAccount(mainView);
             var addAccountView = TermsAgreementsTestClass.ClickAgree(tcView);
-            addAccountView.EmailText = "test@test.ee";
-            TestRestService.Result[ConfigSettings.Signup] = SuccesfullResponce();
+            addAccountView.EmailText = $"{GetRandomString(6)}@test.ee";
+            //TestRestService.Result[ConfigSettings.Signup] = SuccesfullResponce();
             var registrationConfirmation = AddAccountTestClass.ClickConfirm(addAccountView);
-            RegistrationConfirmationTestClass.EnterInCorrectCode(registrationConfirmation);
+            RegistrationConfirmationTestClass.EnterIncorrectCode(registrationConfirmation);
             Assert.AreEqual(registrationConfirmation.ResponseError, "error");
             var finishConfirmation = RegistrationConfirmationTestClass.EnterCorrectCode(registrationConfirmation);
-            TestRestService.Result[ConfigSettings.SignupConfirmation] = SuccesfullResponce();
+            //TestRestService.Result[ConfigSettings.SignupConfirmation] = SuccesfullResponce();
             var mainPage = FinishConfirmationTestClass.FinishRegistrationWithPin(finishConfirmation);
             while (!mainView._loadAccountTask.IsCompleted)
             {
@@ -71,7 +71,7 @@ namespace MauiTest.FunctionalTests
             updateCertificateView.NumbersPad_OnNumberClicked("1");
             updateCertificateView.NumbersPad_OnNumberClicked("1");
 
-            TestRestService.Result[ConfigSettings.UpdateCertificate] = TestBase.SuccesfullResponce();
+            //TestRestService.Result[ConfigSettings.UpdateCertificate] = TestBase.SuccesfullResponce();
 
             updateCertificateView.NumbersPad_OnNumberClicked("confirm");
             Assert.AreEqual(4, updateCertificateView.Pin2.Length);
@@ -91,13 +91,13 @@ namespace MauiTest.FunctionalTests
             var mainView = MainTestClass.OpenMainPage();
             var tcView = MainTestClass.ClickAddAccount(mainView);
             var addAccountView = TermsAgreementsTestClass.ClickAgree(tcView);
-            addAccountView.EmailText = "test@test.ee";
-            TestRestService.Result[ConfigSettings.Signup] = SuccesfullResponce();
+            addAccountView.EmailText = $"{GetRandomString(6)}@test.ee";
+            //TestRestService.Result[ConfigSettings.Signup] = SuccesfullResponce();
             var registrationConfirmation = AddAccountTestClass.ClickConfirm(addAccountView);
-            RegistrationConfirmationTestClass.EnterInCorrectCode(registrationConfirmation);
+            RegistrationConfirmationTestClass.EnterIncorrectCode(registrationConfirmation);
             Assert.AreEqual(registrationConfirmation.ResponseError, "error");
             var finishConfirmation = RegistrationConfirmationTestClass.EnterCorrectCode(registrationConfirmation);
-            TestRestService.Result[ConfigSettings.SignupConfirmation] = SuccesfullResponce();
+            //TestRestService.Result[ConfigSettings.SignupConfirmation] = SuccesfullResponce();
             var mainPage = FinishConfirmationTestClass.FinishRegistrationSkipPin(finishConfirmation);
             while (!mainView._loadAccountTask.IsCompleted)
             {
@@ -106,7 +106,7 @@ namespace MauiTest.FunctionalTests
             Assert.AreEqual(mainPage.Accounts.Count, 1);
 
             var accountView = MainTestClass.OpenAccount(mainPage, mainPage.Accounts[0]);
-            TestRestService.Result[ConfigSettings.UpdateCertificate] = TestBase.SuccesfullResponce();
+            //TestRestService.Result[ConfigSettings.UpdateCertificate] = TestBase.SuccesfullResponce();
             accountView.UpdateCertificate_OnClicked();
 
             Assert.IsTrue(CurrentView is LoadingView);
@@ -123,13 +123,13 @@ namespace MauiTest.FunctionalTests
             var mainView = MainTestClass.OpenMainPage();
             var tcView = MainTestClass.ClickAddAccount(mainView);
             var addAccountView = TermsAgreementsTestClass.ClickAgree(tcView);
-            addAccountView.EmailText = "test@test.ee";
-            TestRestService.Result[ConfigSettings.Signup] = SuccesfullResponce();
+            addAccountView.EmailText = $"{GetRandomString(6)}@test.ee";
+            //TestRestService.Result[ConfigSettings.Signup] = SuccesfullResponce();
             var registrationConfirmation = AddAccountTestClass.ClickConfirm(addAccountView);
-            RegistrationConfirmationTestClass.EnterInCorrectCode(registrationConfirmation);
+            RegistrationConfirmationTestClass.EnterIncorrectCode(registrationConfirmation);
             Assert.AreEqual(registrationConfirmation.ResponseError, "error");
             var finishConfirmation = RegistrationConfirmationTestClass.EnterCorrectCode(registrationConfirmation);
-            TestRestService.Result[ConfigSettings.SignupConfirmation] = SuccesfullResponce();
+            //TestRestService.Result[ConfigSettings.SignupConfirmation] = SuccesfullResponce();
             var mainPage = FinishConfirmationTestClass.FinishRegistrationSkipPin(finishConfirmation);
             while (!mainView._loadAccountTask.IsCompleted)
             {
@@ -149,7 +149,7 @@ namespace MauiTest.FunctionalTests
             Assert.IsTrue(CurrentView is MainView);
 
             accountView = MainTestClass.OpenAccount(mainPage, mainPage.Accounts[0]);
-            TestRestService.Result[ConfigSettings.UpdateCertificate] = TestBase.SuccesfullResponce();
+            //TestRestService.Result[ConfigSettings.UpdateCertificate] = TestBase.SuccesfullResponce();
             accountView.UpdateCertificate_OnClicked();
             TestBase.TouchFingerPrintWithGoodResult();
             while (!(CurrentView is LoadingView) || !CurrentView.Appeared)

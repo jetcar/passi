@@ -1,6 +1,9 @@
 using System;
 using System.Net;
 using AppCommon;
+using AppConfig;
+using DotNet.Testcontainers.Builders;
+using DotNet.Testcontainers.Containers;
 using MauiViewModels;
 using MauiViewModels.StorageModels;
 using MauiViewModels.utils.Services;
@@ -26,9 +29,120 @@ public class TestBase
         App.CloseApp = () => { Console.WriteLine("close ap"); };
         App.StartFingerPrintReading = () => { Console.WriteLine("fingerprint reading started"); };
         TestNavigationService.navigationsCount = 0;
+        TestNavigationService.AlertMessage = "";
+        PrepareDockers();
     }
 
-    public static BaseContentPage CurrentView { get; set; }
+    private static IContainer _pgContainer;
+    private static IContainer _redisContainer;
+    private static IContainer _passiWebApi;
+    private static IContainer _identityServer;
+
+    private void PrepareDockers()
+    {
+        var dockerEndpoint = Environment.GetEnvironmentVariable("DOCKER_HOST");
+
+        var pgpassword = "1";
+        if (_pgContainer == null)
+        {
+            var containerBuilder = new ContainerBuilder()
+                .WithImage("postgres:15.5")
+                .WithPortBinding(5432, true)
+                .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(5432))
+                .WithEnvironment("POSTGRES_PASSWORD", pgpassword);
+            if (!string.IsNullOrEmpty(dockerEndpoint))
+                containerBuilder.WithDockerEndpoint(dockerEndpoint);
+            _pgContainer = containerBuilder
+                .Build();
+            Console.WriteLine("starting postgres container");
+            _pgContainer.StartAsync().ConfigureAwait(false).GetAwaiter().GetResult();
+        }
+
+        var pgPort = _pgContainer
+            .GetMappedPublicPort(5432).ToString();
+
+        if (_redisContainer == null)
+        {
+            var containerBuilder = new ContainerBuilder()
+                .WithImage("redis:latest")
+                .WithPortBinding(6379, true)
+                .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(6379));
+            if (!string.IsNullOrEmpty(dockerEndpoint))
+                containerBuilder.WithDockerEndpoint(dockerEndpoint);
+
+            _redisContainer = containerBuilder
+                .Build();
+            Console.WriteLine("starting redis container");
+
+            _redisContainer.StartAsync().ConfigureAwait(false).GetAwaiter().GetResult();
+        }
+        var redisport = _redisContainer
+            .GetMappedPublicPort(6379).ToString();
+
+        if (_passiWebApi == null)
+        {
+            var containerBuilder = new ContainerBuilder()
+                    .WithImage("jetcar/passiwebapi:1.0.18")
+                    .WithPortBinding(5004, true)
+                    .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(5004))
+                    .WithEnvironment("DbHost", _pgContainer.IpAddress)
+                    .WithEnvironment("DbPort", pgPort)
+                    .WithEnvironment("DoNotSendMail", "true")
+                    .WithEnvironment("DbPassword", pgpassword)
+                    .WithEnvironment("redis", _redisContainer.IpAddress)
+                    .WithEnvironment("redisPort", redisport)
+                    .WithEnvironment("GOOGLE_APPLICATION_CREDENTIALS", "/home/creds/passi-dev.json")
+                    .WithBindMount("d:/home/creds/", "/home/creds/")
+                ;
+
+            if (!string.IsNullOrEmpty(dockerEndpoint))
+                containerBuilder.WithDockerEndpoint(dockerEndpoint);
+
+            _passiWebApi = containerBuilder
+                .Build();
+            Console.WriteLine("starting passiapi container");
+
+            _passiWebApi.StartAsync().ConfigureAwait(false).GetAwaiter().GetResult();
+        }
+
+        var passiapiport = _passiWebApi.GetMappedPublicPort(5004).ToString();
+        var passiInternalUrl = $"http://{_passiWebApi.IpAddress}:{5004}/passiapi";
+        ConfigSettings.PassiUrl = $"http://{_passiWebApi.Hostname}:{passiapiport}/passiapi";
+
+        if (_identityServer == null)
+        {
+            var containerBuilder = new ContainerBuilder()
+                    .WithImage("jetcar/identityserver:1.0.18")
+                    .WithPortBinding(5003, true)
+                    .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(5003))
+                    .WithEnvironment("DbHost", _pgContainer.IpAddress)
+                    .WithEnvironment("DbPort", pgPort)
+                    .WithEnvironment("DoNotSendMail", "true")
+                    .WithEnvironment("DbPassword", pgpassword)
+                    .WithEnvironment("PassiUrl", passiInternalUrl)
+                    .WithEnvironment("GOOGLE_APPLICATION_CREDENTIALS", "/home/creds/passi-dev.json")
+                    .WithBindMount("d:/home/creds/", "/home/creds/")
+                    .WithBindMount("d:/repo/passi/configs/identity", "/myapp/cert")
+                ;
+
+            if (!string.IsNullOrEmpty(dockerEndpoint))
+                containerBuilder.WithDockerEndpoint(dockerEndpoint);
+
+            _identityServer = containerBuilder
+                .Build();
+            Console.WriteLine("starting identity container");
+
+            _identityServer.StartAsync().ConfigureAwait(false).GetAwaiter().GetResult();
+        }
+        var identityport = _identityServer.GetMappedPublicPort(5003).ToString();
+
+        ConfigSettings.IdentityUrl = $"http://{_identityServer.Hostname}:{identityport}/identity";
+        //ConfigSettings.PassiUrl = $"http://localhost:5004/passiapi";
+        //ConfigSettings.IdentityUrl = $"http://localhost:5003/identity";
+        Console.WriteLine("all containers are started");
+    }
+
+    public static BaseViewModel CurrentView { get; set; }
 
     private static IServiceProvider ConfigureServices()
     {
@@ -40,7 +154,7 @@ public class TestBase
         services.AddSingleton<ICertHelper, CertHelper>();
         services.AddSingleton<ISyncService, SyncService>();
         services.AddSingleton<IMySecureStorage, TestMySecureStorage>();
-        services.AddSingleton<IRestService, TestRestService>();
+        services.AddSingleton<IRestService, RestService>();
         services.AddSingleton<INavigationService, TestNavigationService>();
         services.AddSingleton<IMainThreadService, TestMainThreadService>();
         services.AddSingleton<IFingerPrintService, FingerPrintService>();
@@ -100,7 +214,7 @@ public class TestBase
         var certificatesService = App.Services.GetService<ICertificatesService>();
         var secureRepository = App.Services.GetService<ISecureRepository>();
         var certHelper = App.Services.GetService<ICertHelper>();
-        var providers = secureRepository.LoadProviders();
+        var providers = secureRepository.LoadProviders().Result;
         var mail = GetRandomString(6) + "@test.test";
         var cert = certificatesService.GenerateCertificate(mail, new MySecureString("1111"));
         var publicCertHelper = certHelper.ConvertToPublicCertificate(cert.Result.Item1);

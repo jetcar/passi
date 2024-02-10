@@ -15,13 +15,13 @@ namespace MauiTest.FunctionalTests
             var page = MainTestClass.OpenMainPage();
             var tcView = MainTestClass.ClickAddAccount(page);
             var addAccountView = TermsAgreementsTestClass.ClickAgree(tcView);
-            addAccountView.EmailText = "test@test.ee";
-            TestRestService.Result[ConfigSettings.Signup] = SuccesfullResponce();
+            addAccountView.EmailText = $"{GetRandomString(6)}@test.ee";
+            // TestRestService.Result[ConfigSettings.Signup] = SuccesfullResponce();
             var registrationConfirmation = AddAccountTestClass.ClickConfirm(addAccountView);
-            RegistrationConfirmationTestClass.EnterInCorrectCode(registrationConfirmation);
-            Assert.AreEqual(registrationConfirmation.ResponseError, "error");
+            RegistrationConfirmationTestClass.EnterIncorrectCode(registrationConfirmation);
+            Assert.AreEqual(registrationConfirmation.ResponseError, "Code not found");
             var finishConfirmation = RegistrationConfirmationTestClass.EnterCorrectCode(registrationConfirmation);
-            TestRestService.Result[ConfigSettings.SignupConfirmation] = SuccesfullResponce();
+            // TestRestService.Result[ConfigSettings.SignupConfirmation] = SuccesfullResponce();
             var mainPage = FinishConfirmationTestClass.FinishRegistrationWithPin(finishConfirmation);
             while (!page._loadAccountTask.IsCompleted)
             {
@@ -36,8 +36,8 @@ namespace MauiTest.FunctionalTests
             var page = MainTestClass.OpenMainPage();
             var tcView = MainTestClass.ClickAddAccount(page);
             var addAccountView = TermsAgreementsTestClass.ClickAgree(tcView);
-            addAccountView.EmailText = "test@test.ee";
-            TestRestService.Result[ConfigSettings.Signup] = SuccesfullResponce();
+            addAccountView.EmailText = $"{GetRandomString(6)}@test.ee";
+            // TestRestService.Result[ConfigSettings.Signup] = SuccesfullResponce();
             var registrationConfirmation = AddAccountTestClass.ClickConfirm(addAccountView);
             var mainPage = RegistrationConfirmationTestClass.CancelClick(registrationConfirmation);
             while (!page._loadAccountTask.IsCompleted)
@@ -67,11 +67,11 @@ namespace MauiTest.FunctionalTests
             var page = MainTestClass.OpenMainPage();
             var tcView = MainTestClass.ClickAddAccount(page);
             var addAccountView = TermsAgreementsTestClass.ClickAgree(tcView);
-            addAccountView.EmailText = "test@test.ee";
-            TestRestService.Result[ConfigSettings.Signup] = SuccesfullResponce();
+            addAccountView.EmailText = $"{GetRandomString(6)}@test.ee";
+            // TestRestService.Result[ConfigSettings.Signup] = SuccesfullResponce();
             var registrationConfirmation = AddAccountTestClass.ClickConfirm(addAccountView);
             var finishConfirmation = RegistrationConfirmationTestClass.EnterCorrectCode(registrationConfirmation);
-            TestRestService.Result[ConfigSettings.SignupConfirmation] = SuccesfullResponce();
+            // TestRestService.Result[ConfigSettings.SignupConfirmation] = SuccesfullResponce();
             var mainPage = FinishConfirmationTestClass.FinishRegistrationWithPin(finishConfirmation);
             while (page.Accounts.Count == 0)
             {
@@ -97,11 +97,11 @@ namespace MauiTest.FunctionalTests
             var page = MainTestClass.OpenMainPage();
             var tcView = MainTestClass.ClickAddAccount(page);
             var addAccountView = TermsAgreementsTestClass.ClickAgree(tcView);
-            addAccountView.EmailText = "test@test.ee";
-            TestRestService.Result[ConfigSettings.Signup] = SuccesfullResponce();
+            addAccountView.EmailText = $"{GetRandomString(6)}@test.ee";
+            // TestRestService.Result[ConfigSettings.Signup] = SuccesfullResponce();
             var registrationConfirmation = AddAccountTestClass.ClickConfirm(addAccountView);
             var finishConfirmation = RegistrationConfirmationTestClass.EnterCorrectCode(registrationConfirmation);
-            TestRestService.Result[ConfigSettings.SignupConfirmation] = SuccesfullResponce();
+            //TestRestService.Result[ConfigSettings.SignupConfirmation] = SuccesfullResponce();
             var mainPage = FinishConfirmationTestClass.FinishRegistrationWithPin(finishConfirmation);
             while (page.Accounts.Count == 0)
             {
@@ -123,11 +123,11 @@ namespace MauiTest.FunctionalTests
             var page = MainTestClass.OpenMainPage();
             var tcView = MainTestClass.ClickAddAccount(page);
             var addAccountView = TermsAgreementsTestClass.ClickAgree(tcView);
-            addAccountView.EmailText = "test@test.ee";
-            TestRestService.Result[ConfigSettings.Signup] = SuccesfullResponce();
+            addAccountView.EmailText = $"{GetRandomString(6)}@test.ee";
+            //TestRestService.Result[ConfigSettings.Signup] = SuccesfullResponce();
             var registrationConfirmation = AddAccountTestClass.ClickConfirm(addAccountView);
             var finishConfirmation = RegistrationConfirmationTestClass.EnterCorrectCode(registrationConfirmation);
-            TestRestService.Result[ConfigSettings.SignupConfirmation] = SuccesfullResponce();
+            //TestRestService.Result[ConfigSettings.SignupConfirmation] = SuccesfullResponce();
             var mainPage = FinishConfirmationTestClass.FinishRegistrationSkipPin(finishConfirmation);
             while (page.Accounts.Count == 0)
             {

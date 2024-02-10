@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using ConfigurationManager;
 using Google.Cloud.Diagnostics.Common;
+using Newtonsoft.Json;
 using Serilog;
 using Polly;
 using Polly.Retry;
@@ -16,7 +18,7 @@ namespace Services;
 [Profile(AttributeTargetElements = MulticastTargets.Method)]
 public class MyRestClient : IMyRestClient
 {
-    private readonly RestClient _client;
+    private static RestClient _client;
     private AppSetting _appSetting;
     private IManagedTracer _tracer;
     private readonly ILogger _logger;
@@ -45,14 +47,15 @@ public class MyRestClient : IMyRestClient
         var options = new RestClientOptions(passiUrl);
         if (Debugger.IsAttached)
             options.RemoteCertificateValidationCallback = (sender, certificate, chain, sslPolicyErrors) => true;
-        _client = new RestClient(options);
+        if (_client == null)
+            _client = new RestClient(options);
     }
 
     public Task<RestResponse> ExecuteAsync(RestRequest request)
     {
         var currentTraceId = _tracer.GetCurrentTraceId();
         request.AddHeader("custom_trace_id", currentTraceId);
-
+        _logger.Debug($"{_client.Options.BaseUrl} {request.Resource}: {JsonConvert.SerializeObject(request.Parameters)}");
         return _retryPolicy.ExecuteAsync(
             () => _client.ExecuteAsync(request));
     }

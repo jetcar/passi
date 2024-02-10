@@ -2,7 +2,6 @@
 using MauiApp2.Main;
 using MauiApp2.Registration;
 using MauiViewModels.ViewModels;
-using RestSharp;
 
 namespace MauiApp2
 {

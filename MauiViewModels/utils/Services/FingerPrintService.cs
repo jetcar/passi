@@ -1,13 +1,13 @@
-﻿using System.Net;
-using MauiApp2.Tools;
+﻿using System;
+using System.Net;
 using MauiViewModels.StorageModels;
-using MauiViewModels.utils.Services;
+using MauiViewModels.Tools;
 using MauiViewModels.utils.Services.Certificate;
 using Newtonsoft.Json;
 using WebApiDto;
 using WebApiDto.Auth;
 
-namespace MauiApp2.utils.Services
+namespace MauiViewModels.utils.Services
 {
     public class FingerPrintService : IFingerPrintService
     {

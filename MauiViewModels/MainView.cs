@@ -8,7 +8,7 @@ using RestSharp;
 
 namespace MauiViewModels;
 
-public class MainView : BaseContentPage
+public class MainView : BaseViewModel
 {
     private ObservableCollection<AccountViewModel> _accounts = new ObservableCollection<AccountViewModel>();
     private bool _isDeleteVisible;

@@ -13,7 +13,7 @@ namespace MauiApp2.utils.Services
             await navigation.PushModalSinglePage(page);
         }
 
-        public Task PushModalSinglePage(MauiViewModels.BaseContentPage page)
+        public Task PushModalSinglePage(MauiViewModels.BaseViewModel page)
         {
             throw new NotImplementedException();
         }

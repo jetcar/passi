@@ -13,7 +13,7 @@ using WebApiDto.SignUp;
 
 namespace MauiViewModels.Main
 {
-    public class AddAccountView : BaseContentPage
+    public class AddAccountView : BaseViewModel
     {
         private string _emailText = "";
         private ValidationError _emailError;

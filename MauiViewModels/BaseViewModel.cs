@@ -7,7 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace MauiViewModels;
 
-public class BaseContentPage : INotifyPropertyChanged
+public class BaseViewModel : INotifyPropertyChanged
 {
     public static INavigationService _navigationService;
     protected IMainThreadService _mainThreadService;
@@ -20,7 +20,7 @@ public class BaseContentPage : INotifyPropertyChanged
     protected IFingerPrintService _fingerPrintService;
     protected ISyncService _syncService;
 
-    public BaseContentPage()
+    public BaseViewModel()
     {
         _navigationService = App.Services.GetService<INavigationService>();
         _mainThreadService = App.Services.GetService<IMainThreadService>();

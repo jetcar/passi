@@ -4,7 +4,7 @@ namespace MauiViewModels.utils.Services;
 
 public interface INavigationService
 {
-    Task PushModalSinglePage(BaseContentPage page);
+    Task PushModalSinglePage(BaseViewModel page);
 
     Task NavigateTop();
 

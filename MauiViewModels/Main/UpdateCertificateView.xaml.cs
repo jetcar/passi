@@ -6,7 +6,7 @@ using Color = WebApiDto.Auth.Color;
 
 namespace MauiViewModels.Main
 {
-    public class UpdateCertificateView : BaseContentPage
+    public class UpdateCertificateView : BaseViewModel
     {
         private string _pin1Masked;
         private string _pin2Masked;

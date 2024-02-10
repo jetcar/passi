@@ -2,7 +2,7 @@
 
 namespace MauiViewModels.Main
 {
-    public class TermsAgreementsView : BaseContentPage
+    public class TermsAgreementsView : BaseViewModel
     {
         public TermsAgreementsView()
         {

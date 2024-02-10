@@ -11,7 +11,7 @@ using WebApiDto.SignUp;
 
 namespace MauiViewModels.Registration
 {
-    public class FinishConfirmationView : BaseContentPage
+    public class FinishConfirmationView : BaseViewModel
     {
         private string _pin1Masked;
         private string _pin2Masked;

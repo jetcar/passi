@@ -13,7 +13,7 @@ using Timer = System.Timers.Timer;
 
 namespace MauiViewModels.Notifications
 {
-    public class NotificationVerifyRequestView : BaseContentPage
+    public class NotificationVerifyRequestView : BaseViewModel
     {
         private List<WebApiDto.Auth.Color> possibleCodes = null;
         private Color _color1;
@@ -355,7 +355,7 @@ namespace MauiViewModels.Notifications
             }
         }
 
-        public void Cancel_OnClicked(object sender, EventArgs e)
+        public void Cancel_OnClicked()
         {
             var accountDb = _secureRepository.GetAccount(Message.AccountGuid);
             if (accountDb != null)

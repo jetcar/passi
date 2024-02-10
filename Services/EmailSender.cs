@@ -17,14 +17,17 @@ namespace Services
         {
             _appSetting = appSetting;
             var apiKey = _appSetting["SendgridApiKey"];
-            this.client = new SendGridClient(new HttpClient(new HttpClientHandler()),
-                apiKey);
+            if (!Convert.ToBoolean(_appSetting["DoNotSendMail"]) || !string.IsNullOrEmpty(apiKey))
+                this.client = new SendGridClient(new HttpClient(new HttpClientHandler()),
+                    apiKey);
         }
 
         public string SendInvitationEmail(string email, string code)
         {
             if (Convert.ToBoolean(_appSetting["DoNotSendMail"]))
                 email = _appSetting["testMail"];
+            if (email == null)
+                return "ok";
             var message = MailHelper.CreateSingleTemplateEmail(new EmailAddress(_appSetting["EmailFrom"]), new EmailAddress(email),
                 "d-b6873d40e5c74e6bab695b5bf12a636e", new { code = code });
             var responce = client.SendEmailAsync(message).Result;

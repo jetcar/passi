@@ -12,7 +12,7 @@ using RegistrationConfirmationView = MauiViewModels.Registration.RegistrationCon
 
 namespace MauiViewModels.Admin
 {
-    public class AdminView : BaseContentPage
+    public class AdminView : BaseViewModel
     {
         private string _cert64;
         private string _salt;

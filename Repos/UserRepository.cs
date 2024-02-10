@@ -10,11 +10,9 @@ namespace Repos
     [ReposProfile(AttributeTargetElements = MulticastTargets.Method)]
     public class UserRepository : BaseRepo<PassiDbContext>, IUserRepository
     {
-
         public UserRepository(PassiDbContext dbContext) : base(dbContext)
         {
         }
-
 
         public bool IsUsernameTaken(string username)
         {
@@ -36,7 +34,6 @@ namespace Repos
 
         public bool ValidateConfirmationCode(string email, string code)
         {
-            _dbContext.Invitations.Load();
             var validateConfirmationCode = _dbContext.Invitations.FirstOrDefault(x => x.User.EmailHash == email && x.Code == code && x.IsConfirmed == false);
             return validateConfirmationCode != null && validateConfirmationCode.TryCount < 10;
         }
@@ -127,12 +124,16 @@ namespace Repos
             var invitations = _dbContext.Invitations.Where(x => x.User.EmailHash == email).ToList();
             foreach (var userInvitationDb in invitations)
             {
-
                 userInvitationDb.TryCount++;
             }
 
             _dbContext.SaveChanges();
+        }
 
+        public string GetCode(string email)
+        {
+            return _dbContext.Invitations.Where(x => x.User.EmailHash == email && x.IsConfirmed == false && x.TryCount < 10)
+                .OrderByDescending(x => x.Id).Select(x => x.Code).FirstOrDefault();
         }
     }
 
@@ -155,6 +156,9 @@ namespace Repos
         void AddInvitation(UserInvitationDb userInvitationDb);
 
         void DeleteAccount(Guid accountGuid, string thumbprint);
+
         void IncreaseFailedRetryCount(string email);
+
+        string GetCode(string email);
     }
 }

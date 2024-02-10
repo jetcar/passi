@@ -17,7 +17,7 @@ public class ConfirmByPinTestClass
         confirmByPinView.NumbersPad_OnNumberClicked("del");
         confirmByPinView.NumbersPad_OnNumberClicked("1");
         confirmByPinView.NumbersPad_OnNumberClicked("1");
-        TestRestService.Result[ConfigSettings.Authorize] = TestBase.SuccesfullResponce();
+        //TestRestService.Result[ConfigSettings.Authorize] = TestBase.SuccesfullResponce();
         TestNavigationService.navigationsCount = 0;
         confirmByPinView.NumbersPad_OnNumberClicked("1");
         Assert.IsTrue(TestBase.CurrentView is LoadingView);
@@ -41,7 +41,7 @@ public class ConfirmByPinTestClass
     public static MainView ConfirmByFingerprint(ConfirmByPinView confirmByPinView)
     {
         TestNavigationService.navigationsCount = 0;
-        TestRestService.Result[ConfigSettings.Authorize] = TestBase.SuccesfullResponce();
+        //TestRestService.Result[ConfigSettings.Authorize] = TestBase.SuccesfullResponce();
         TestBase.TouchFingerPrintWithGoodResult();
         Assert.IsTrue(TestBase.CurrentView is LoadingView);
 
@@ -66,7 +66,7 @@ public class ConfirmByPinTestClass
         confirmByPinView.NumbersPad_OnNumberClicked("1");
         confirmByPinView.NumbersPad_OnNumberClicked("1");
         confirmByPinView.NumbersPad_OnNumberClicked("1");
-        TestRestService.Result[ConfigSettings.Authorize] = TestBase.SuccesfullResponce();
+        //TestRestService.Result[ConfigSettings.Authorize] = TestBase.SuccesfullResponce();
 
         confirmByPinView.NumbersPad_OnNumberClicked("2");
 
@@ -83,12 +83,12 @@ public class ConfirmByPinTestClass
 
     public static ConfirmByPinView ConfirmByPinBadResponse(ConfirmByPinView confirmByPinView)
     {
-        confirmByPinView.NumbersPad_OnNumberClicked("1");
-        confirmByPinView.NumbersPad_OnNumberClicked("1");
-        confirmByPinView.NumbersPad_OnNumberClicked("1");
-        TestRestService.Result[ConfigSettings.Authorize] = TestBase.BadResponce("error");
+        confirmByPinView.NumbersPad_OnNumberClicked("2");
+        confirmByPinView.NumbersPad_OnNumberClicked("2");
+        confirmByPinView.NumbersPad_OnNumberClicked("2");
+        //TestRestService.Result[ConfigSettings.Authorize] = TestBase.BadResponce("error");
 
-        confirmByPinView.NumbersPad_OnNumberClicked("1");
+        confirmByPinView.NumbersPad_OnNumberClicked("2");
 
         while (!(TestBase.CurrentView is ConfirmByPinView) || !TestBase.CurrentView.Appeared)
         {
@@ -103,13 +103,14 @@ public class ConfirmByPinTestClass
 
     public static ConfirmByPinView ConfirmByPinNetworkError(ConfirmByPinView confirmByPinView)
     {
+        ConfigSettings.PassiUrl = "http://localhost:9999";
         confirmByPinView.NumbersPad_OnNumberClicked("1");
         confirmByPinView.NumbersPad_OnNumberClicked("1");
         confirmByPinView.NumbersPad_OnNumberClicked("1");
-        TestRestService.Result[ConfigSettings.Authorize] = TestBase.FailedResponce();
+        //TestRestService.Result[ConfigSettings.Authorize] = TestBase.FailedResponce();
 
         confirmByPinView.NumbersPad_OnNumberClicked("1");
-
+        confirmByPinView._accountDb.Provider.PassiWebApiUrl = "http://localhost:9999";
         while (!(TestBase.CurrentView is ConfirmByPinView) || !TestBase.CurrentView.Appeared)
         {
             Thread.Sleep(1);

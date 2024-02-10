@@ -216,7 +216,7 @@ public class SecureRepository : ISecureRepository
                 Providers = _mySecureStorage.GetAsync<List<ProviderDb>>(StorageKeys.ProvidersKey).Result ?? new List<ProviderDb>();
             }
 
-            if (Providers.All(x => x.WebApiUrl != ConfigSettings.WebApiUrl))
+            if (Providers.All(x => x.PassiWebApiUrl != ConfigSettings.PassiUrl))
                 Providers.Add(new ProviderDb()
                 {
                     Authorize = ConfigSettings.Authorize,
@@ -224,7 +224,7 @@ public class SecureRepository : ISecureRepository
                     CheckForStartedSessions = ConfigSettings.CheckForStartedSessions,
                     DeleteAccount = ConfigSettings.DeleteAccount,
                     Name = "passi",
-                    WebApiUrl = ConfigSettings.WebApiUrl,
+                    PassiWebApiUrl = ConfigSettings.PassiUrl,
                     SignupCheck = ConfigSettings.SignupCheck,
                     SignupConfirmation = ConfigSettings.SignupConfirmation,
                     SignupPath = ConfigSettings.Signup,
@@ -234,7 +234,7 @@ public class SecureRepository : ISecureRepository
                     UpdateCertificate = ConfigSettings.UpdateCertificate,
                     IsDefault = true
                 });
-            if (Debugger.IsAttached && Providers.All(x => x.WebApiUrl != ConfigSettings.WebApiUrlLocal))
+            if (Debugger.IsAttached && Providers.All(x => x.PassiWebApiUrl != ConfigSettings.WebApiUrlLocal))
                 Providers.Add(new ProviderDb()
                 {
                     Authorize = ConfigSettings.Authorize,
@@ -242,7 +242,7 @@ public class SecureRepository : ISecureRepository
                     CheckForStartedSessions = ConfigSettings.CheckForStartedSessions,
                     DeleteAccount = ConfigSettings.DeleteAccount,
                     Name = "passi local",
-                    WebApiUrl = ConfigSettings.WebApiUrlLocal,
+                    PassiWebApiUrl = ConfigSettings.WebApiUrlLocal,
                     SignupCheck = ConfigSettings.SignupCheck,
                     SignupConfirmation = ConfigSettings.SignupConfirmation,
                     SignupPath = ConfigSettings.Signup,

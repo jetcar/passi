@@ -4,7 +4,7 @@ using MauiViewModels.StorageModels;
 
 namespace MauiViewModels.Menu
 {
-    public class AddProviderView : BaseContentPage
+    public class AddProviderView : BaseViewModel
     {
         public ProviderDb Provider { get; set; }
 
@@ -16,7 +16,7 @@ namespace MauiViewModels.Menu
             Provider.IsDefault = false;
             Provider.Guid = Guid.NewGuid();
             Provider.Name = "";
-            Provider.WebApiUrl = "https://";
+            Provider.PassiWebApiUrl = "https://";
         }
 
         private void SaveButton_OnClicked(object sender, EventArgs e)

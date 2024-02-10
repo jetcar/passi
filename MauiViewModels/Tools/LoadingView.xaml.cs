@@ -6,7 +6,7 @@ using Timer = System.Timers.Timer;
 
 namespace MauiViewModels.Tools
 {
-    public class LoadingView : BaseContentPage
+    public class LoadingView : BaseViewModel
     {
         private readonly Action _callBack;
         private Task _task;

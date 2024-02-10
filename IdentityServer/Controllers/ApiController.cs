@@ -32,7 +32,6 @@ namespace IdentityServer.Controllers
     [Route("api")]
     public class ApiController : ControllerBase
     {
-
         private AppSetting _appSetting;
         private IMyRestClient _myRestClient;
         private IRandomGenerator _randomGenerator;
@@ -50,7 +49,6 @@ namespace IdentityServer.Controllers
             Logger = logger;
         }
 
-
         [HttpGet]
         [Route("userloggedin")]
         public UserDto UserLoggedIn()
@@ -61,7 +59,6 @@ namespace IdentityServer.Controllers
                 Name = HttpContext.User.Identity.Name,
             };
         }
-
 
         [HttpPost]
         [Route("check")]
@@ -126,7 +123,6 @@ namespace IdentityServer.Controllers
                     else
                     {
                         return BadRequest(new ApiResponseDto() { errors = result2.Content + " " + result2.ErrorMessage });
-
                     }
                 }
             }
@@ -144,6 +140,7 @@ namespace IdentityServer.Controllers
 
             return Ok(new { Redirect = false });
         }
+
         [HttpPost]
         [Route("login")]
         public async Task<IActionResult> Login(LoginInputDto model)
@@ -177,6 +174,7 @@ namespace IdentityServer.Controllers
             var result = _myRestClient.ExecuteAsync(request).Result;
             if (result.IsSuccessful)
             {
+                Logger.LogDebug("response:" + result.Content);
                 var loginResponceDto = JsonConvert.DeserializeObject<LoginResponceDto>(result.Content);
                 var color = startLoginDto.CheckColor.ToString();
                 return Ok(new CheckInputModel
@@ -188,14 +186,11 @@ namespace IdentityServer.Controllers
                     RandomString = startLoginDto.RandomString
                 });
             }
-            Logger.LogDebug(result.Content);
+            Logger.LogDebug("response:" + result.Content);
             var errorResult = JsonConvert.DeserializeObject<ApiResponseDto>(result.Content);
 
             return BadRequest(new ApiResponseDto() { errors = errorResult.errors });
         }
-
-
-
     }
 
     public class UserDto

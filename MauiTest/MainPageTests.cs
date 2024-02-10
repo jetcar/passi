@@ -21,14 +21,14 @@ namespace MauiTest
             page.OnAppearing();
             var accounts = new ObservableCollection<AccountViewModel>();
             SecureRepository.LoadAccountIntoList(accounts);
-            TestRestService.Result[ConfigSettings.SyncAccounts] = TestBase.SuccesfullResponce<List<AccountMinDto>>(new List<AccountMinDto>()
-            {
-                new AccountMinDto()
-                {
-                    UserGuid = accounts[0].Guid,
-                    Username = accounts[0].Email
-                }
-            });
+            //TestRestService.Result[ConfigSettings.SyncAccounts] = TestBase.SuccesfullResponce<List<AccountMinDto>>(new List<AccountMinDto>()
+            //{
+            //    new AccountMinDto()
+            //    {
+            //        UserGuid = accounts[0].Guid,
+            //        Username = accounts[0].Email
+            //    }
+            //});
             while (!page._loadAccountTask.IsCompleted)
             {
                 Thread.Sleep(1);

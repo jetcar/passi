@@ -4,7 +4,7 @@ using MauiViewModels.utils.Services.Certificate;
 
 namespace MauiViewModels.FingerPrint
 {
-    public class FingerPrintConfirmByPinView : BaseContentPage
+    public class FingerPrintConfirmByPinView : BaseViewModel
     {
         private readonly AccountDb _accountDb;
         private MySecureString _pin1 = new MySecureString("");

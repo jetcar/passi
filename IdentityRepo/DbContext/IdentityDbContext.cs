@@ -61,6 +61,7 @@ namespace IdentityRepo.DbContext
             var trustMode = _appSetting["DbSslMode"] == "Require" ? "Trust Server Certificate=true;" : "";
             //optionsBuilder.AddInterceptors(new TaggedQueryCommandInterceptor(_logger));
             var connectionString = $"host={_appSetting["DbHost"]};database={_appSetting["IdentityDbName"]};user id={_appSetting["DbUser"]};password={_appSetting["DbPassword"]};Ssl Mode={_appSetting["DbSslMode"]};{trustMode}";
+            Console.WriteLine(connectionString);
 
             var serviceProvider = new ServiceCollection()
                 .AddEntityFrameworkNpgsql()
@@ -68,7 +69,6 @@ namespace IdentityRepo.DbContext
             optionsBuilder.UseNpgsql(connectionString, o =>
             {
                 o.EnableRetryOnFailure(30, TimeSpan.FromSeconds(2), null);
-
             }).UseInternalServiceProvider(serviceProvider);
         }
 

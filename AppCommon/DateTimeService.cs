@@ -13,7 +13,7 @@ namespace AppCommon
         {
             new Thread(() =>
             {
-                RestClient client = new RestClient(ConfigSettings.WebApiUrl);
+                RestClient client = new RestClient(ConfigSettings.PassiUrl);
                 var request = new RestRequest(ConfigSettings.Time, Method.Get);
 
                 while (true)

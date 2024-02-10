@@ -11,9 +11,9 @@ namespace MauiTest.Tools;
 internal class TestNavigationService : INavigationService
 {
     public static int navigationsCount = 0;
-    private List<BaseContentPage> _pages = new List<BaseContentPage>();
-
-    public async Task PushModalSinglePage(BaseContentPage page)
+    private List<BaseViewModel> _pages = new List<BaseViewModel>();
+    public static string AlertMessage { get; set; }
+    public async Task PushModalSinglePage(BaseViewModel page)
     {
         _pages.Add(page);
         Console.WriteLine(page.ToString());
@@ -64,6 +64,6 @@ internal class TestNavigationService : INavigationService
 
     public void DisplayAlert(string header, string content, string okText)
     {
-        throw new NotImplementedException();
+        AlertMessage = content;
     }
 }

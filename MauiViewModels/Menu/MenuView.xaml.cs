@@ -5,7 +5,7 @@ using MauiViewModels.StorageModels;
 
 namespace MauiViewModels.Menu
 {
-    public class MenuView : BaseContentPage
+    public class MenuView : BaseViewModel
     {
         private ObservableCollection<ProviderDb> _provider;
         private bool _isDeleteVisible;

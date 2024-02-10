@@ -34,7 +34,7 @@ public class RestService : IRestService
     {
         var client = GetClient(provider);
         var request = new RestRequest(requestUri, Method.Post);
-        request.Timeout = 3000;
+        request.Timeout = 30000;
 
         request.AddJsonBody(item);
         return client.ExecuteAsync(request);
@@ -42,7 +42,7 @@ public class RestService : IRestService
 
     private RestClient GetClient(ProviderDb provider)
     {
-        var client = new RestClient(provider.WebApiUrl);
+        var client = new RestClient(provider.PassiWebApiUrl);
         return client;
     }
 }

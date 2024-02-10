@@ -40,7 +40,7 @@ public class ProviderDb : INotifyPropertyChanged
         }
     }
 
-    public string WebApiUrl { get; set; }
+    public string PassiWebApiUrl { get; set; }
     public string SignupPath { get; set; }
     public string SignupConfirmation { get; set; }
     public string SignupCheck { get; set; }

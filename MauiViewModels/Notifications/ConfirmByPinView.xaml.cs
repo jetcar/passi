@@ -11,7 +11,7 @@ using Timer = System.Timers.Timer;
 
 namespace MauiViewModels.Notifications
 {
-    public class ConfirmByPinView : BaseContentPage
+    public class ConfirmByPinView : BaseViewModel
     {
         private string _requesterName;
         private MySecureString _pin1 = new MySecureString("");
@@ -22,7 +22,7 @@ namespace MauiViewModels.Notifications
         private string _timeLeft;
         private string _responseError;
         private ValidationError _pin1Error = new ValidationError();
-        private AccountDb _accountDb;
+        public AccountDb _accountDb;
         private string _email;
 
         public ConfirmByPinView()
@@ -55,7 +55,7 @@ namespace MauiViewModels.Notifications
             }
         }
 
-        protected override void OnDisappearing()
+        public override void OnDisappearing()
         {
             App.FingerPrintReadingResult = null;
             _timer.Elapsed -= _timer_Elapsed;
@@ -75,7 +75,7 @@ namespace MauiViewModels.Notifications
             }
         }
 
-        protected override void OnAppearing()
+        public override void OnAppearing()
         {
             RequesterName = Message.Sender;
             ReturnHost = Message.ReturnHost;
@@ -240,15 +240,11 @@ namespace MauiViewModels.Notifications
             }
         }
 
-        public void Cancel_OnClicked(object sender, EventArgs e)
+        public void Cancel_OnClicked()
         {
-            var element = sender as VisualElement;
-            element.IsEnabled = false;
-
             _restService.ExecuteAsync(_accountDb.Provider, _accountDb.Provider.CancelCheck + "?SessionId=" + Message.SessionId);
 
             _navigationService.NavigateTop();
-            element.IsEnabled = true;
         }
     }
 }

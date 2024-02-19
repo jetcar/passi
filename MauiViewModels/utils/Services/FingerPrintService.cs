@@ -40,10 +40,13 @@ namespace MauiViewModels.utils.Services
                         {
                             if (signedGuid.IsFaulted)
                             {
-                                _navigationService.PopModal().ContinueWith((task =>
+                                _mainThreadService.BeginInvokeOnMainThread(() =>
                                 {
-                                    errorAction("Invalid Pin");
-                                }));
+                                    _navigationService.PopModal().ContinueWith((task =>
+                                    {
+                                        errorAction("Invalid Pin");
+                                    }));
+                                });
                                 return;
                             }
 

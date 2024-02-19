@@ -17,7 +17,7 @@
                 <RowDefinition Height="Auto"></RowDefinition>
             </Grid.RowDefinitions>
             <StackLayout VerticalOptions="CenterAndExpand" BackgroundColor="#2196f3" HorizontalOptions="FillAndExpand">
-                <ImageButton  Margin="10,0,10,10" BackgroundColor="#2196f3" HorizontalOptions="End" Source="baseline_list_black_24.png" Clicked="Menu_button"></ImageButton>
+                <ImageButton  Margin="10,0,10,10" BackgroundColor="#2196f3" Aspect="Center" HorizontalOptions="End" Source="baseline_list_black_24.png" Clicked="Menu_button"></ImageButton>
             </StackLayout>
             <ListView Grid.Row="1"  ItemsSource="{Binding Path=Accounts}">
                 <ListView.ItemTemplate>

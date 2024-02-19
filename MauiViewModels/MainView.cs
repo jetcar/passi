@@ -54,8 +54,8 @@ public class MainView : BaseViewModel
         {
             _secureRepository.LoadAccountIntoList(Accounts);
             //redirect test
-            var accountDb = _secureRepository.GetAccount(Accounts[0].Guid);
-            _navigationService.PushModalSinglePage(new RegistrationConfirmationViewModel(accountDb));
+            //var accountDb = _secureRepository.GetAccount(Accounts[0].Guid);
+            //_navigationService.PushModalSinglePage(new RegistrationConfirmationViewModel(accountDb));
         });
         base.OnAppearing(sender, eventArgs);
         _syncService.PollNotifications();

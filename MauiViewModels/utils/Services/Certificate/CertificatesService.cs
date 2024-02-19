@@ -33,7 +33,7 @@ public class CertificatesService : ICertificatesService
     public async Task<Tuple<X509Certificate2, string, byte[]>> GenerateCertificate(string subject, MySecureString pin)
     {
         var rsa = RSA.Create(); // generate asymmetric key pair
-        var req = new CertificateRequest($"cn={subject.Replace("@","")}", rsa, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+        var req = new CertificateRequest($"cn={subject.Replace("@", "")}", rsa, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
         var cert = req.CreateSelfSigned(DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddYears(1));
 
         MySecureString password = new MySecureString(Guid.NewGuid().ToString());
@@ -110,16 +110,24 @@ public class CertificatesService : ICertificatesService
                         }
                         else if (!response.Result.IsSuccessful && response.Result.StatusCode == HttpStatusCode.BadRequest)
                         {
-                            _navigationService.PopModal().ContinueWith((task) =>
+                            _mainThreadService.BeginInvokeOnMainThread(() =>
                             {
-                                errorAction.Invoke(JsonConvert.DeserializeObject<ApiResponseDto<string>>(response.Result.Content).errors);
+                                _navigationService.PopModal().ContinueWith((task) =>
+                                {
+                                    errorAction.Invoke(JsonConvert
+                                        .DeserializeObject<ApiResponseDto<string>>(response.Result.Content)
+                                        .errors);
+                                });
                             });
                         }
                         else
                         {
-                            _navigationService.PopModal().ContinueWith((task) =>
+                            _mainThreadService.BeginInvokeOnMainThread(() =>
                             {
-                                errorAction.Invoke("Network error. Try again");
+                                _navigationService.PopModal().ContinueWith((task) =>
+                                {
+                                    errorAction.Invoke("Network error. Try again");
+                                });
                             });
                         }
                     });
@@ -159,16 +167,24 @@ public class CertificatesService : ICertificatesService
                         }
                         else if (!response.Result.IsSuccessful && response.Result.StatusCode == HttpStatusCode.BadRequest)
                         {
-                            _navigationService.PopModal().ContinueWith((task) =>
+                            _mainThreadService.BeginInvokeOnMainThread(() =>
                             {
-                                errorAction.Invoke(JsonConvert.DeserializeObject<ApiResponseDto<string>>(response.Result.Content).errors);
+                                _navigationService.PopModal().ContinueWith((task) =>
+                                {
+                                    errorAction.Invoke(JsonConvert
+                                        .DeserializeObject<ApiResponseDto<string>>(response.Result.Content)
+                                        .errors);
+                                });
                             });
                         }
                         else
                         {
-                            _navigationService.PopModal().ContinueWith((task) =>
+                            _mainThreadService.BeginInvokeOnMainThread(() =>
                             {
-                                errorAction.Invoke("Network error. Try again");
+                                _navigationService.PopModal().ContinueWith((task) =>
+                                {
+                                    errorAction.Invoke("Network error. Try again");
+                                });
                             });
                         }
                     });

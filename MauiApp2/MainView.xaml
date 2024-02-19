@@ -21,7 +21,7 @@
             </StackLayout>
             <ListView Grid.Row="1"  ItemsSource="{Binding Path=Accounts}">
                 <ListView.ItemTemplate>
-                    <DataTemplate x:DataType="viewModels1:AccountViewModel">
+                    <DataTemplate x:DataType="viewModels1:AccountModel">
                         <ViewCell Tapped="Cell_OnTapped">
                             <Grid>
                                 <Grid.ColumnDefinitions>

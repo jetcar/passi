@@ -59,7 +59,7 @@ namespace Repos.CompiledModels
                 propertyInfo: typeof(BaseModel).GetProperty("CreationTime", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
                 fieldInfo: typeof(BaseModel).GetField("<CreationTime>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly),
                 sentinel: NodaTime.Instant.FromUnixTimeTicks(0L));
-            creationTime.TypeMapping = LegacyTimestampInstantMapping.Default.Clone(
+            creationTime.TypeMapping = TimestampTzInstantMapping.Default.Clone(
                 comparer: new ValueComparer<Instant>(
                     (Instant v1, Instant v2) => v1.Equals(v2),
                     (Instant v) => v.GetHashCode(),
@@ -73,7 +73,6 @@ namespace Repos.CompiledModels
                     (Instant v) => v.GetHashCode(),
                     (Instant v) => v));
             creationTime.AddAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.None);
-            creationTime.AddAnnotation("Relational:ColumnType", "timestamp without time zone");
 
             var expirationTime = runtimeEntityType.AddProperty(
                 "ExpirationTime",
@@ -81,7 +80,7 @@ namespace Repos.CompiledModels
                 propertyInfo: typeof(SimpleSessionDb).GetProperty("ExpirationTime", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
                 fieldInfo: typeof(SimpleSessionDb).GetField("<ExpirationTime>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly),
                 sentinel: NodaTime.Instant.FromUnixTimeTicks(0L));
-            expirationTime.TypeMapping = LegacyTimestampInstantMapping.Default.Clone(
+            expirationTime.TypeMapping = TimestampTzInstantMapping.Default.Clone(
                 comparer: new ValueComparer<Instant>(
                     (Instant v1, Instant v2) => v1.Equals(v2),
                     (Instant v) => v.GetHashCode(),
@@ -95,7 +94,6 @@ namespace Repos.CompiledModels
                     (Instant v) => v.GetHashCode(),
                     (Instant v) => v));
             expirationTime.AddAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.None);
-            expirationTime.AddAnnotation("Relational:ColumnType", "timestamp without time zone");
 
             var modifiedById = runtimeEntityType.AddProperty(
                 "ModifiedById",
@@ -124,7 +122,7 @@ namespace Repos.CompiledModels
                 propertyInfo: typeof(BaseModel).GetProperty("ModifiedTime", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
                 fieldInfo: typeof(BaseModel).GetField("<ModifiedTime>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly),
                 nullable: true);
-            modifiedTime.TypeMapping = LegacyTimestampInstantMapping.Default.Clone(
+            modifiedTime.TypeMapping = TimestampTzInstantMapping.Default.Clone(
                 comparer: new ValueComparer<Instant?>(
                     (Nullable<Instant> v1, Nullable<Instant> v2) => v1.HasValue && v2.HasValue && ((Instant)v1).Equals((Instant)v2) || !v1.HasValue && !v2.HasValue,
                     (Nullable<Instant> v) => v.HasValue ? ((Instant)v).GetHashCode() : 0,
@@ -138,7 +136,6 @@ namespace Repos.CompiledModels
                     (Nullable<Instant> v) => v.HasValue ? ((Instant)v).GetHashCode() : 0,
                     (Nullable<Instant> v) => v.HasValue ? (Nullable<Instant>)(Instant)v : default(Nullable<Instant>)));
             modifiedTime.AddAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.None);
-            modifiedTime.AddAnnotation("Relational:ColumnType", "timestamp without time zone");
 
             var signedHashNew = runtimeEntityType.AddProperty(
                 "SignedHashNew",

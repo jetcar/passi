@@ -12,7 +12,7 @@ namespace MauiViewModels.Admin
 
         public AdminButton()
         {
-            _navigationService = App.Services.GetService<INavigationService>();
+            _navigationService = CommonApp.Services.GetService<INavigationService>();
             this.IsVisible = Debugger.IsAttached;
         }
 

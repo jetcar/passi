@@ -19,7 +19,7 @@ namespace Services
             if (publicCert.NotAfter < DateTime.UtcNow || publicCert.NotBefore >= DateTime.UtcNow)
                 throw new BadRequestException("Certificate is expired");
             var nameInfo = publicCert.GetNameInfo(X509NameType.SimpleName, true);
-            if (nameInfo != email)
+            if (nameInfo != email.Replace("@", ""))
                 throw new BadRequestException("Certificate Email do not match");
         }
 
@@ -38,7 +38,7 @@ namespace Services
             if (newPublicCert.NotBefore > DateTime.UtcNow.Date)
                 throw new BadRequestException("Certificate is not started");
             if (newPublicCert.GetNameInfo(X509NameType.SimpleName, true) !=
-                oldpublicCert.GetNameInfo(X509NameType.SimpleName, true))
+                oldpublicCert.GetNameInfo(X509NameType.SimpleName, true).Replace("@", ""))
                 throw new BadRequestException("Certificate Email do not match");
         }
 

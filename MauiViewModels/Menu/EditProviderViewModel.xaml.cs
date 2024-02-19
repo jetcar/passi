@@ -4,16 +4,16 @@ using Newtonsoft.Json;
 
 namespace MauiViewModels.Menu
 {
-    public class EditProviderView : BaseViewModel
+    public class EditProviderViewModel : BaseViewModel
     {
         public ProviderDb Provider { get; set; }
 
-        public EditProviderView(ProviderDb provider)
+        public EditProviderViewModel(ProviderDb provider)
         {
             Provider = JsonConvert.DeserializeObject<ProviderDb>(JsonConvert.SerializeObject(provider));
         }
 
-        private void SaveButton_OnClicked(object sender, EventArgs e)
+        public void SaveButton_OnClicked()
         {
             _secureRepository.UpdateProvider(Provider);
             //save

@@ -8,7 +8,7 @@
     Shell.FlyoutBehavior="Disabled">
 
     <ShellContent
-        ContentTemplate="{DataTemplate local:MainPage}"
+        ContentTemplate="{DataTemplate local:MainView}"
         Route="MainPage">
         <ShellContent.MenuItems>
             <MenuItem Text="Menu" IconImageSource="baseline_list_black_24.png" Clicked="Menu_button" />

@@ -1,47 +1,26 @@
 ﻿using System.Collections.ObjectModel;
-using MauiApp2.StorageModels;
+using MauiViewModels.Menu;
+using MauiViewModels.StorageModels;
 
 namespace MauiApp2.Menu
 {
     public partial class MenuView : BaseContentPage
     {
-        private ObservableCollection<ProviderDb> _provider;
-        private bool _isDeleteVisible;
-
         public MenuView()
         {
-            if (!App.IsTest)
-                InitializeComponent();
-            BindingContext = this;
-            Providers = new ObservableCollection<ProviderDb>(_secureRepository.LoadProviders().Result);
-        }
-
-        public ObservableCollection<ProviderDb> Providers
-        {
-            get { return _provider ?? (_provider = new ObservableCollection<ProviderDb>()); }
-            set
-            {
-                if (_provider != value)
-                {
-                    _provider = value;
-                    OnPropertyChanged();
-                }
-            }
+            InitializeComponent();
         }
 
         private void Button_PreDeleteProvider(object sender, EventArgs e)
         {
-            var account = (ProviderDb)((ImageButton)sender).BindingContext;
-            account.IsDeleteVisible = !account.IsDeleteVisible;
+            var provider = (ProviderDb)((Button)sender).BindingContext;
+            ((MenuViewModel)BindingContext).Button_PreDeleteProvider(provider);
         }
 
         private void Button_DeleteProvider(object sender, EventArgs e)
         {
             var provider = (ProviderDb)((Button)sender).BindingContext;
-            if (provider.IsDefault && Providers.Count(x => x.IsDefault) == 1)
-                return;
-            _secureRepository.DeleteProvider(provider);
-            Providers.Remove(provider);
+            ((MenuViewModel)BindingContext).Button_DeleteProvider(provider);
         }
 
         private void Cell_OnTapped(object sender, EventArgs e)
@@ -50,34 +29,19 @@ namespace MauiApp2.Menu
             cell.IsEnabled = false;
 
             var provider = (ProviderDb)((ViewCell)sender).BindingContext;
+            ((MenuViewModel)BindingContext).Cell_OnTapped(provider);
 
-            _navigationService.PushModalSinglePage(new ProviderView(provider));
             cell.IsEnabled = true;
         }
 
         private void Button_Add(object sender, EventArgs e)
         {
-            _navigationService.PushModalSinglePage(new AddProviderView());
+            ((MenuViewModel)BindingContext).Button_Add();
         }
 
         private void Button_ShowDelete(object sender, EventArgs e)
         {
-            IsDeleteVisible = !IsDeleteVisible;
-            foreach (var provider in Providers)
-            {
-                provider.IsDeleteVisible = false;
-            }
-        }
-
-        public bool IsDeleteVisible
-        {
-            get => _isDeleteVisible;
-            set
-            {
-                if (value == _isDeleteVisible) return;
-                _isDeleteVisible = value;
-                OnPropertyChanged();
-            }
+            ((MenuViewModel)BindingContext).Button_ShowDelete();
         }
     }
 }

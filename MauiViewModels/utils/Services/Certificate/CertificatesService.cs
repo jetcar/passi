@@ -2,19 +2,12 @@
 using System.IO;
 using System.Net;
 using System.Numerics;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using MauiViewModels.StorageModels;
 using MauiViewModels.Tools;
 using Newtonsoft.Json;
-using Org.BouncyCastle.Asn1.X509;
-using Org.BouncyCastle.Crypto;
-using Org.BouncyCastle.Crypto.Generators;
-using Org.BouncyCastle.Crypto.Operators;
-using Org.BouncyCastle.Pkcs;
-using Org.BouncyCastle.Security;
-using Org.BouncyCastle.Utilities;
-using Org.BouncyCastle.X509;
 using WebApiDto;
 using WebApiDto.Certificate;
 
@@ -39,54 +32,24 @@ public class CertificatesService : ICertificatesService
 
     public async Task<Tuple<X509Certificate2, string, byte[]>> GenerateCertificate(string subject, MySecureString pin)
     {
-        var random = new SecureRandom();
-        var certificateGenerator = new X509V3CertificateGenerator();
+        var rsa = RSA.Create(); // generate asymmetric key pair
+        var req = new CertificateRequest($"cn={subject.Replace("@","")}", rsa, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+        var cert = req.CreateSelfSigned(DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddYears(1));
 
-        var serialNumber = BigIntegers.CreateRandomInRange(Org.BouncyCastle.Math.BigInteger.One, Org.BouncyCastle.Math.BigInteger.ValueOf(long.MaxValue), random);
-        certificateGenerator.SetSerialNumber(serialNumber);
-
-        var sha512 = subject;
-        certificateGenerator.SetIssuerDN(new X509Name($"C=NL, O=Passi, CN={sha512}"));
-        certificateGenerator.SetSubjectDN(new X509Name($"C=NL, O=Passi, CN={sha512}"));
-        certificateGenerator.SetNotBefore(DateTime.UtcNow.Date);
-        certificateGenerator.SetNotAfter(DateTime.UtcNow.Date.AddYears(1));
-
-        const int strength = 2048;
-        var keyGenerationParameters = new KeyGenerationParameters(random, strength);
-        var keyPairGenerator = new RsaKeyPairGenerator();
-        keyPairGenerator.Init(keyGenerationParameters);
-
-        var subjectKeyPair = keyPairGenerator.GenerateKeyPair();
-        certificateGenerator.SetPublicKey(subjectKeyPair.Public);
-
-        var issuerKeyPair = subjectKeyPair;
-        const string signatureAlgorithm = "SHA256WithRSA";
-        var signatureFactory = new Asn1SignatureFactory(signatureAlgorithm, issuerKeyPair.Private);
-        var bouncyCert = certificateGenerator.Generate(signatureFactory);
-
-        // Lets convert it to X509Certificate2
-        X509Certificate2 certificate;
-
-        Pkcs12Store store = new Pkcs12StoreBuilder().Build();
-        store.SetKeyEntry($"{sha512}_key", new AsymmetricKeyEntry(subjectKeyPair.Private), new[] { new X509CertificateEntry(bouncyCert) });
         MySecureString password = new MySecureString(Guid.NewGuid().ToString());
         MySecureString fullPassword = new MySecureString(password);
         if (pin != null)
             fullPassword.Append(pin);
 
-        using (var ms = new MemoryStream())
-        {
-            store.Save(ms, fullPassword.SecureStringToString().ToCharArray(), random);
-            var rawBytes = ms.ToArray();
-            certificate = new X509Certificate2(rawBytes, fullPassword.SecureStringToString(), X509KeyStorageFlags.Exportable);
-            var result = new Tuple<X509Certificate2, string, byte[]>(certificate, password.SecureStringToString(), rawBytes);
-            return result;
-        }
+        var rawBytes = cert.Export(X509ContentType.Pkcs12, fullPassword.SecureStringToString());
+        var certificate = new X509Certificate2(rawBytes, fullPassword.SecureStringToString(), X509KeyStorageFlags.Exportable);
+        var result = new Tuple<X509Certificate2, string, byte[]>(certificate, password.SecureStringToString(), rawBytes);
+        return result;
     }
 
     public void CreateFingerPrintCertificate(AccountDb accountDb, MySecureString pin1, Action<string> errorCallback)
     {
-        _navigationService.PushModalSinglePage(new LoadingView(() =>
+        _navigationService.PushModalSinglePage(new LoadingViewModel(() =>
         {
             try
             {
@@ -115,7 +78,7 @@ public class CertificatesService : ICertificatesService
 
     public void UpdateCertificate(MySecureString pinNew, MySecureString pinOld, AccountDb accountDb, Action<string> errorAction)
     {
-        _navigationService.PushModalSinglePage(new LoadingView(() =>
+        _navigationService.PushModalSinglePage(new LoadingViewModel(() =>
         {
             GenerateCertFromOldCertificate(pinNew, pinOld, accountDb, errorAction).ContinueWith(certDto =>
             {
@@ -167,7 +130,7 @@ public class CertificatesService : ICertificatesService
 
     public void UpdateCertificateFingerprint(AccountDb accountDb, Action<string> errorAction)
     {
-        _navigationService.PushModalSinglePage(new LoadingView(() =>
+        _navigationService.PushModalSinglePage(new LoadingViewModel(() =>
         {
             GenerateCertFromOldCertificateFingerPrint(accountDb, errorAction).ContinueWith(certDto =>
             {

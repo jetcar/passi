@@ -2,15 +2,15 @@
 
 namespace MauiViewModels.Main
 {
-    public class TermsAgreementsView : BaseViewModel
+    public class TermsAgreementsViewModel : BaseViewModel
     {
-        public TermsAgreementsView()
+        public TermsAgreementsViewModel()
         {
         }
 
         public void Button_OnAgreeClicked()
         {
-            _navigationService.PushModalSinglePage(new AddAccountView());
+            _navigationService.PushModalSinglePage(new AddAccountViewModel());
         }
 
         public void Button_OnCancelClicked()

@@ -8,21 +8,21 @@ using WebApiDto.SignUp;
 
 namespace MauiViewModels.Registration
 {
-    public class RegistrationConfirmationView : BaseViewModel
+    public class RegistrationConfirmationViewModel : BaseViewModel
     {
         private string _code = "";
         private string _responseError;
         private string _email;
 
-        public RegistrationConfirmationView(AccountDb account)
+        public RegistrationConfirmationViewModel(AccountDb account)
         {
             Account = account;
         }
 
-        public override void OnAppearing()
+        public override void OnAppearing(object sender, EventArgs eventArgs)
         {
             Email = Account.Email;
-            base.OnAppearing();
+            base.OnAppearing(sender, eventArgs);
         }
 
         public string Code
@@ -85,7 +85,7 @@ namespace MauiViewModels.Registration
                 Code = Code,
                 Email = Email,
             };
-            _navigationService.PushModalSinglePage(new LoadingView(() =>
+            _navigationService.PushModalSinglePage(new LoadingViewModel(() =>
             {
                 _restService.ExecutePostAsync(Account.Provider, Account.Provider.SignupCheck, signupConfirmationDto)
                     .ContinueWith((response) =>
@@ -97,7 +97,7 @@ namespace MauiViewModels.Registration
                             _secureRepository.UpdateAccount(Account);
                             _mainThreadService.BeginInvokeOnMainThread(() =>
                             {
-                                _navigationService.PushModalSinglePage(new FinishConfirmationView()
+                                _navigationService.PushModalSinglePage(new FinishConfirmationViewModel()
                                 { Code = Code, Account = Account });
                             });
                         }

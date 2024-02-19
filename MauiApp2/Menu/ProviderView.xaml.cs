@@ -1,26 +1,17 @@
-﻿using MauiApp2.StorageModels;
+﻿using MauiViewModels.Menu;
 
 namespace MauiApp2.Menu
 {
     public partial class ProviderView : BaseContentPage
     {
-        public ProviderDb Provider { get; set; }
-
-        public ProviderView(ProviderDb provider)
+        public ProviderView()
         {
-            Provider = provider;
-            if (!App.IsTest)
-                InitializeComponent();
-            BindingContext = this;
+            InitializeComponent();
         }
 
         private void EditButton_OnClicked(object sender, EventArgs e)
         {
-            var button = sender as VisualElement;
-            button.IsEnabled = false;
-
-            _navigationService.PushModalSinglePage(new EditProviderView(Provider));
-            button.IsEnabled = true;
+            ((ProviderViewModel)BindingContext).EditButton_OnClicked();
         }
     }
 }

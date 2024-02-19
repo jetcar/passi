@@ -3,14 +3,13 @@ using AppCommon;
 
 namespace MauiViewModels
 {
-    public class App
+    public class CommonApp
     {
-        public App()
+        public CommonApp()
         {
         }
 
         public static IServiceProvider Services { get; set; }
-        public static bool IsTest { get; set; }
         public static Action<FingerPrintResult> FingerPrintReadingResult { get; set; }
         public static Action StartFingerPrintReading { get; set; }
         public static bool SkipLoadingTimer { get; set; }

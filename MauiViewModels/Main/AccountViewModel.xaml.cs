@@ -4,7 +4,7 @@ using MauiViewModels.StorageModels;
 
 namespace MauiViewModels.Main
 {
-    public class AccountView : BaseViewModel
+    public class AccountViewModel : BaseViewModel
     {
         public AccountDb AccountDb { get; set; }
         private string _email;
@@ -15,7 +15,7 @@ namespace MauiViewModels.Main
 
         private string _message;
 
-        public AccountView(AccountDb accountDb)
+        public AccountViewModel(AccountDb accountDb)
         {
             AccountDb = accountDb;
 
@@ -100,11 +100,11 @@ namespace MauiViewModels.Main
         {
             if (AccountDb.pinLength > 0)
             {
-                _navigationService.PushModalSinglePage(new UpdateCertificateView() { Account = AccountDb });
+                _navigationService.PushModalSinglePage(new UpdateCertificateViewModel() { Account = AccountDb });
             }
             else if (AccountDb.HaveFingerprint)
             {
-                App.FingerPrintReadingResult = (result) =>
+                CommonApp.FingerPrintReadingResult = (result) =>
                 {
                     if (result.ErrorMessage == null)
                     {
@@ -115,7 +115,7 @@ namespace MauiViewModels.Main
                                 _navigationService.PopModal().ContinueWith((task =>
                                 {
                                     Message = result.ErrorMessage;
-                                    App.StartFingerPrintReading();
+                                    CommonApp.StartFingerPrintReading();
                                 }));
                             });
                         });
@@ -123,11 +123,11 @@ namespace MauiViewModels.Main
                     else
                     {
                         Message = result.ErrorMessage;
-                        App.StartFingerPrintReading();
+                        CommonApp.StartFingerPrintReading();
                     }
                 };
 
-                App.StartFingerPrintReading();
+                CommonApp.StartFingerPrintReading();
             }
             else
             {
@@ -140,14 +140,14 @@ namespace MauiViewModels.Main
 
         public void AddBiometric_Button_OnClicked()
         {
-            App.FingerPrintReadingResult = (result) =>
+            CommonApp.FingerPrintReadingResult = (result) =>
             {
                 if (result.ErrorMessage == null)
                 {
                     if (AccountDb.pinLength > 0)
                         _mainThreadService.BeginInvokeOnMainThread(() =>
                         {
-                            _navigationService.PushModalSinglePage(new FingerPrintConfirmByPinView(AccountDb));
+                            _navigationService.PushModalSinglePage(new FingerPrintConfirmByPinViewModel(AccountDb));
                         });
                     else
                     {
@@ -164,17 +164,17 @@ namespace MauiViewModels.Main
                 else
                 {
                     Message = result.ErrorMessage;
-                    App.StartFingerPrintReading();
+                    CommonApp.StartFingerPrintReading();
                 }
             };
 
-            App.StartFingerPrintReading();
+            CommonApp.StartFingerPrintReading();
         }
 
-        public override void OnDisappearing()
+        public override void OnDisappearing(object sender, EventArgs eventArgs)
         {
-            App.FingerPrintReadingResult = null;
-            base.OnDisappearing();
+            CommonApp.FingerPrintReadingResult = null;
+            base.OnDisappearing(sender, eventArgs);
         }
     }
 }

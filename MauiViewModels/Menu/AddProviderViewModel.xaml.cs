@@ -4,11 +4,11 @@ using MauiViewModels.StorageModels;
 
 namespace MauiViewModels.Menu
 {
-    public class AddProviderView : BaseViewModel
+    public class AddProviderViewModel : BaseViewModel
     {
         public ProviderDb Provider { get; set; }
 
-        public AddProviderView()
+        public AddProviderViewModel()
         {
             Provider = new ProviderDb();
             var defaultProfider = _secureRepository.LoadProviders().Result.First(x => x.IsDefault);
@@ -19,7 +19,7 @@ namespace MauiViewModels.Menu
             Provider.PassiWebApiUrl = "https://";
         }
 
-        private void SaveButton_OnClicked(object sender, EventArgs e)
+        public void SaveButton_OnClicked()
         {
             _secureRepository.AddProvider(Provider);
 

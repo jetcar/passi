@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using AppCommon;
 using MauiViewModels.utils.Services;
@@ -22,26 +23,26 @@ public class BaseViewModel : INotifyPropertyChanged
 
     public BaseViewModel()
     {
-        _navigationService = App.Services.GetService<INavigationService>();
-        _mainThreadService = App.Services.GetService<IMainThreadService>();
-        _secureRepository = App.Services.GetService<ISecureRepository>();
-        _restService = App.Services.GetService<IRestService>();
-        _certHelper = App.Services.GetService<ICertHelper>();
-        _certificatesService = App.Services.GetService<ICertificatesService>();
-        _mySecureStorage = App.Services.GetService<IMySecureStorage>();
-        _dateTimeService = App.Services.GetService<IDateTimeService>();
-        _fingerPrintService = App.Services.GetService<IFingerPrintService>();
-        _syncService = App.Services.GetService<ISyncService>();
+        _navigationService = CommonApp.Services.GetService<INavigationService>();
+        _mainThreadService = CommonApp.Services.GetService<IMainThreadService>();
+        _secureRepository = CommonApp.Services.GetService<ISecureRepository>();
+        _restService = CommonApp.Services.GetService<IRestService>();
+        _certHelper = CommonApp.Services.GetService<ICertHelper>();
+        _certificatesService = CommonApp.Services.GetService<ICertificatesService>();
+        _mySecureStorage = CommonApp.Services.GetService<IMySecureStorage>();
+        _dateTimeService = CommonApp.Services.GetService<IDateTimeService>();
+        _fingerPrintService = CommonApp.Services.GetService<IFingerPrintService>();
+        _syncService = CommonApp.Services.GetService<ISyncService>();
     }
 
     public bool Appeared { get; private set; }
 
-    public virtual void OnAppearing()
+    public virtual void OnAppearing(object sender, EventArgs eventArgs)
     {
         Appeared = true;
     }
 
-    public virtual void OnDisappearing()
+    public virtual void OnDisappearing(object sender, EventArgs eventArgs)
     {
         Appeared = false;
     }

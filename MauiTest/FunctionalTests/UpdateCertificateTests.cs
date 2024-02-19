@@ -33,11 +33,11 @@ namespace MauiTest.FunctionalTests
 
             var accountView = MainTestClass.OpenAccount(mainPage, mainPage.Accounts[0]);
             accountView.UpdateCertificate_OnClicked();
-            while (!CurrentView.Appeared || !(CurrentView is UpdateCertificateView))
+            while (!CurrentView.Appeared || !(CurrentView is UpdateCertificateViewModel))
             {
                 Thread.Sleep(1);
             }
-            var updateCertificateView = CurrentView as UpdateCertificateView;
+            var updateCertificateView = CurrentView as UpdateCertificateViewModel;
             updateCertificateView.NumbersPad_OnNumberClicked("1");
             updateCertificateView.ClearPinOld_OnClicked();
             updateCertificateView.NumbersPad_OnNumberClicked("1");
@@ -77,7 +77,7 @@ namespace MauiTest.FunctionalTests
             Assert.AreEqual(4, updateCertificateView.Pin2.Length);
             Assert.AreEqual("****", updateCertificateView.Pin2Masked);
 
-            Assert.IsTrue(CurrentView is LoadingView);
+            Assert.IsTrue(CurrentView is LoadingViewModel);
             while (!(CurrentView is MainView) || !CurrentView.Appeared)
             {
                 Thread.Sleep(1);
@@ -109,7 +109,7 @@ namespace MauiTest.FunctionalTests
             //TestRestService.Result[ConfigSettings.UpdateCertificate] = TestBase.SuccesfullResponce();
             accountView.UpdateCertificate_OnClicked();
 
-            Assert.IsTrue(CurrentView is LoadingView);
+            Assert.IsTrue(CurrentView is LoadingViewModel);
             while (!(CurrentView is MainView) || !CurrentView.Appeared)
             {
                 Thread.Sleep(1);
@@ -152,11 +152,11 @@ namespace MauiTest.FunctionalTests
             //TestRestService.Result[ConfigSettings.UpdateCertificate] = TestBase.SuccesfullResponce();
             accountView.UpdateCertificate_OnClicked();
             TestBase.TouchFingerPrintWithGoodResult();
-            while (!(CurrentView is LoadingView) || !CurrentView.Appeared)
+            while (!(CurrentView is LoadingViewModel) || !CurrentView.Appeared)
             {
                 Thread.Sleep(1);
             }
-            Assert.IsTrue(CurrentView is LoadingView);
+            Assert.IsTrue(CurrentView is LoadingViewModel);
             while (!(CurrentView is MainView) || !CurrentView.Appeared)
             {
                 Thread.Sleep(1);

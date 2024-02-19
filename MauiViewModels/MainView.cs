@@ -5,19 +5,20 @@ using MauiViewModels.Main;
 using MauiViewModels.Registration;
 using MauiViewModels.ViewModels;
 using RestSharp;
+using AccountViewModel = MauiViewModels.Main.AccountViewModel;
 
 namespace MauiViewModels;
 
 public class MainView : BaseViewModel
 {
-    private ObservableCollection<AccountViewModel> _accounts = new ObservableCollection<AccountViewModel>();
+    private ObservableCollection<ViewModels.AccountModel> _accounts = new ObservableCollection<ViewModels.AccountModel>();
     private bool _isDeleteVisible;
     private string version = "1";
     public Task _loadAccountTask;
 
-    public ObservableCollection<AccountViewModel> Accounts
+    public ObservableCollection<ViewModels.AccountModel> Accounts
     {
-        get { return _accounts ?? (_accounts = new ObservableCollection<AccountViewModel>()); }
+        get { return _accounts ?? (_accounts = new ObservableCollection<ViewModels.AccountModel>()); }
         set
         {
             if (_accounts != value)
@@ -41,19 +42,22 @@ public class MainView : BaseViewModel
     public MainView()
     {
         _secureRepository.LoadProviders();
-        this.Version = App.Version;
+        this.Version = CommonApp.Version;
     }
 
-    public override void OnAppearing()
+    public override void OnAppearing(object sender, EventArgs eventArgs)
     {
-        App.AccountSyncCallback = AccountSyncCallback;
+        CommonApp.AccountSyncCallback = AccountSyncCallback;
         IsDeleteVisible = false;
-        Accounts = new ObservableCollection<AccountViewModel>();
+        Accounts = new ObservableCollection<ViewModels.AccountModel>();
         _loadAccountTask = Task.Run(() =>
         {
             _secureRepository.LoadAccountIntoList(Accounts);
+            //redirect test
+            var accountDb = _secureRepository.GetAccount(Accounts[0].Guid);
+            _navigationService.PushModalSinglePage(new RegistrationConfirmationViewModel(accountDb));
         });
-        base.OnAppearing();
+        base.OnAppearing(sender, eventArgs);
         _syncService.PollNotifications();
     }
 
@@ -61,7 +65,7 @@ public class MainView : BaseViewModel
     {
         _mainThreadService.BeginInvokeOnMainThread(() =>
         {
-            Accounts = new ObservableCollection<AccountViewModel>();
+            Accounts = new ObservableCollection<ViewModels.AccountModel>();
             _loadAccountTask = Task.Run(() =>
             {
                 _secureRepository.LoadAccountIntoList(Accounts);
@@ -71,10 +75,10 @@ public class MainView : BaseViewModel
 
     public void Button_AddAccount()
     {
-        _navigationService.PushModalSinglePage(new TermsAgreementsView());
+        _navigationService.PushModalSinglePage(new TermsAgreementsViewModel());
     }
 
-    public void Button_DeleteAccount(AccountViewModel account)
+    public void Button_DeleteAccount(ViewModels.AccountModel account)
     {
         _secureRepository.DeleteAccount(account, () =>
         {
@@ -85,23 +89,23 @@ public class MainView : BaseViewModel
         });
     }
 
-    public void Button_PreDeleteAccount(AccountViewModel account)
+    public void Button_PreDeleteAccount(ViewModels.AccountModel account)
     {
         account.IsDeleteVisible = !account.IsDeleteVisible;
     }
 
-    public void Cell_OnTapped(AccountViewModel account)
+    public void Cell_OnTapped(ViewModels.AccountModel account)
     {
         var accountDb = _secureRepository.GetAccount(account.Guid);
         var provider = _secureRepository.GetProvider(accountDb.ProviderGuid);
         accountDb.Provider = provider;
         if (!accountDb.IsConfirmed || accountDb.PublicCertBinary == null)
         {
-            _navigationService.PushModalSinglePage(new RegistrationConfirmationView(accountDb));
+            _navigationService.PushModalSinglePage(new RegistrationConfirmationViewModel(accountDb));
         }
         else
         {
-            _navigationService.PushModalSinglePage(new AccountView(accountDb));
+            _navigationService.PushModalSinglePage(new AccountViewModel(accountDb));
         }
     }
 
@@ -134,6 +138,6 @@ public class MainView : BaseViewModel
 
     public void Menu_button()
     {
-        _navigationService.PushModalSinglePage(new Menu.MenuView());
+        _navigationService.PushModalSinglePage(new Menu.MenuViewModel());
     }
 }

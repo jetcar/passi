@@ -28,23 +28,6 @@ public class CertHelper : ICertHelper
         return publicCertJson;
     }
 
-    public bool VerifyData(string data, string signedData, string base64PublicCert)
-    {
-        var parentCert = new X509Certificate2(Convert.FromBase64String(base64PublicCert));
-
-        using (var sha512 = SHA512.Create())
-        {
-            // ComputeHash - returns byte array
-            byte[] bytes = sha512.ComputeHash(Encoding.ASCII.GetBytes(data));
-
-            var verify = parentCert.GetRSAPublicKey().VerifyHash(bytes,
-                Convert.FromBase64String(signedData), HashAlgorithmName.SHA512,
-                RSASignaturePadding.Pkcs1);
-
-            return verify;
-        }
-    }
-
     public async Task<string> Sign(Guid accountGuid, MySecureString pin, string dataForSigning)
     {
         var account = _secureRepository.GetAccount(accountGuid);
@@ -59,7 +42,8 @@ public class CertHelper : ICertHelper
             // ComputeHash - returns byte array
             byte[] bytes = sha512.ComputeHash(Encoding.UTF8.GetBytes(messageToSign));
 
-            var signedBytes = certificate.GetRSAPrivateKey()
+            var rsaPrivateKey = certificate.GetRSAPrivateKey();
+            var signedBytes = rsaPrivateKey
                 .SignHash(bytes, HashAlgorithmName.SHA512, RSASignaturePadding.Pkcs1);
 
             return Convert.ToBase64String(signedBytes);
@@ -77,11 +61,7 @@ public interface ICertHelper
 {
     PublicCert ConvertToPublicCertificate(X509Certificate2 cert);
 
-    bool VerifyData(string data, string signedData, string base64PublicCert);
-
     Task<string> Sign(Guid accountGuid, MySecureString pin, string dataForSigning);
-
-    string GetSignedData(string messageToSign, X509Certificate2 certificate);
 
     Task<string> SignByFingerPrint(string dataForSigning, X509Certificate2 privatecertificate);
 }

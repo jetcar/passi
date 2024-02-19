@@ -77,7 +77,40 @@
 
 		<!-- Images -->
 		<MauiImage Include="Resources\Images\*" />
-		<MauiImage Update="Resources\Images\dotnet_bot.svg" BaseSize="168,208" />
+		<MauiImage Update="Resources\Images\baseline_add_circle_black_36.png">
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</MauiImage>
+		<MauiImage Update="Resources\Images\baseline_backspace_black_18.png">
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</MauiImage>
+		<MauiImage Update="Resources\Images\baseline_backspace_black_24.png">
+		  <SubType>Designer</SubType>
+		  <Generator></Generator>
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</MauiImage>
+		<MauiImage Update="Resources\Images\baseline_delete_black_36.png">
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</MauiImage>
+		<MauiImage Update="Resources\Images\baseline_keyboard_arrow_right_black_18.png">
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</MauiImage>
+		<MauiImage Update="Resources\Images\baseline_keyboard_arrow_right_black_24.png">
+		  <SubType>Designer</SubType>
+		  <Generator></Generator>
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</MauiImage>
+		<MauiImage Update="Resources\Images\baseline_list_black_24.png">
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</MauiImage>
+		<MauiImage Update="Resources\Images\baseline_remove_circle_outline_black_36.png">
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</MauiImage>
+		<MauiImage Update="Resources\Images\baseline_sync_black_36.png">
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</MauiImage>
+		<MauiImage Update="Resources\Images\dotnet_bot.svg" BaseSize="168,208">
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</MauiImage>
 
 		<!-- Custom Fonts -->
 		<MauiFont Include="Resources\Fonts\*" />
@@ -92,6 +125,13 @@
 	  <Compile Remove="FingerPrint\IBiometricHelper.cs" />
 	  <Compile Remove="Notifications\MyFirebaseIIDService.cs" />
 	  <Compile Remove="Notifications\MyFirebaseMessagingService.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Remove="Resources\Images\baseline_backspace_black_18.png" />
+	  <None Remove="Resources\Images\baseline_backspace_black_24.png" />
+	  <None Remove="Resources\Images\baseline_keyboard_arrow_right_black_18.png" />
+	  <None Remove="Resources\Images\baseline_keyboard_arrow_right_black_24.png" />
 	</ItemGroup>
 
 
@@ -113,6 +153,9 @@
 	  <Compile Update="MainView.xaml.cs">
 	    <DependentUpon>MainView.xaml</DependentUpon>
 	  </Compile>
+	</ItemGroup>
+	<ItemGroup>
+	  <Folder Include="Admin\" />
 	</ItemGroup>
 
 

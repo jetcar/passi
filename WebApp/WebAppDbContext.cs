@@ -24,6 +24,7 @@ namespace WebApp
                 {"AppSetting:DbUser", "postgres"},
                 {"AppSetting:DbPassword", "q"},
                 {"AppSetting:DbHost", "localhost"},
+                {"AppSetting:DbPort", "5432"},
             };
             var config = new ConfigurationBuilder().AddInMemoryCollection(myConfiguration).Build();
             var appSetting = new AppSetting(config);
@@ -43,7 +44,7 @@ namespace WebApp
         {
             var trustMode = _appSetting["DbSslMode"] == "Require" ? "Trust Server Certificate=true;" : "";
             //optionsBuilder.AddInterceptors(new TaggedQueryCommandInterceptor(_logger));
-            _connectionString = $"host={_appSetting["DbHost"]};database={_appSetting["WebAppDbName"]};user id={_appSetting["DbUser"]};password={_appSetting["DbPassword"]};Ssl Mode={_appSetting["DbSslMode"]};{trustMode}";
+            _connectionString = $"host={_appSetting["DbHost"]};port={_appSetting["DbPort"]};database={_appSetting["WebAppDbName"]};user id={_appSetting["DbUser"]};password={_appSetting["DbPassword"]};Ssl Mode={_appSetting["DbSslMode"]};{trustMode}";
 
             var serviceProvider = new ServiceCollection()
                 .AddEntityFrameworkNpgsql()
@@ -52,7 +53,6 @@ namespace WebApp
             {
                 c.MigrationsAssembly(typeof(WebAppDbContext).Assembly.FullName);
                 c.EnableRetryOnFailure(30, TimeSpan.FromSeconds(2), null);
-
             }).UseInternalServiceProvider(serviceProvider);
         }
     }

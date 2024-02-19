@@ -2,7 +2,7 @@
 
 namespace MauiViewModels.StorageModels;
 
-public class AccountDb : AccountViewModel
+public class AccountDb : AccountModel
 {
     private bool _haveFingerprint;
     public string Salt { get; set; }

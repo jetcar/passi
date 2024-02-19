@@ -1,4 +1,6 @@
-﻿namespace MauiApp2.utils.Services
+﻿using MauiViewModels.utils.Services;
+
+namespace MauiApp2.utils.Services
 {
     public class MainThreadService : IMainThreadService
     {
@@ -8,8 +10,4 @@
         }
     }
 
-    public interface IMainThreadService
-    {
-        void BeginInvokeOnMainThread(Action action);
-    }
 }

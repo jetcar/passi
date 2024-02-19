@@ -1,11 +1,12 @@
-﻿namespace MauiApp2.Main
+﻿using MauiViewModels.Main;
+
+namespace MauiApp2.Main
 {
     public partial class TermsAgreementsView : BaseContentPage
     {
         public TermsAgreementsView()
         {
-            if (!App.IsTest)
-                InitializeComponent();
+            InitializeComponent();
         }
 
         public void Button_OnAgreeClicked(object sender, EventArgs e)
@@ -13,7 +14,7 @@
             var element = sender as VisualElement;
             element.IsEnabled = false;
 
-            _navigationService.PushModalSinglePage(new AddAccountView());
+            ((TermsAgreementsViewModel)BindingContext).Button_OnAgreeClicked();
             element.IsEnabled = true;
         }
 
@@ -22,7 +23,7 @@
             var element = sender as VisualElement;
             element.IsEnabled = false;
 
-            _navigationService.NavigateTop();
+            ((TermsAgreementsViewModel)BindingContext).Button_OnCancelClicked();
             element.IsEnabled = true;
         }
     }

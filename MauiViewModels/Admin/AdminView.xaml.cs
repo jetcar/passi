@@ -3,12 +3,11 @@ using System.Threading;
 using AppCommon;
 using MauiViewModels.Main;
 using MauiViewModels.Notifications;
+using MauiViewModels.Registration;
 using MauiViewModels.StorageModels;
 using MauiViewModels.Tools;
 using MauiViewModels.utils;
 using WebApiDto;
-using FinishConfirmationView = MauiViewModels.Registration.FinishConfirmationView;
-using RegistrationConfirmationView = MauiViewModels.Registration.RegistrationConfirmationView;
 
 namespace MauiViewModels.Admin
 {
@@ -30,14 +29,14 @@ namespace MauiViewModels.Admin
 
         public AccountDb Account { get; set; }
 
-        public override void OnAppearing()
+        public override void OnAppearing(object sender, EventArgs eventArgs)
         {
             Cert64 = StringExtensions.Truncate(Account.PublicCertBinary, 10);
             Guid = Account.Guid.ToString();
             Salt = Account.Salt;
             IsFinished = Account.IsConfirmed.ToString();
             DeviceId = _secureRepository.GetDeviceId();
-            base.OnAppearing();
+            base.OnAppearing(sender, eventArgs);
         }
 
         public string Cert64
@@ -120,12 +119,12 @@ namespace MauiViewModels.Admin
         {
             ProviderDb provider = _secureRepository.GetProvider(Account.ProviderGuid);
             Account.Provider = provider;
-            _navigationService.PushModalSinglePage(new RegistrationConfirmationView(Account));
+            _navigationService.PushModalSinglePage(new RegistrationConfirmationViewModel(Account));
         }
 
         private void EmptyView(object sender, EventArgs e)
         {
-            _navigationService.PushModalSinglePage(new AccountView(Account));
+            _navigationService.PushModalSinglePage(new AccountViewModel(Account));
         }
 
         private void NotificationConfirmationView(object sender, EventArgs e)
@@ -139,22 +138,22 @@ namespace MauiViewModels.Admin
                 ExpirationTime = DateTime.UtcNow.AddSeconds(90),
                 ReturnHost = "https://localhost"
             };
-            _navigationService.PushModalSinglePage(new NotificationVerifyRequestView(message));
+            _navigationService.PushModalSinglePage(new NotificationVerifyRequestViewModel(message));
         }
 
         private void ConfirmByPinView(object sender, EventArgs e)
         {
-            _navigationService.PushModalSinglePage(new ConfirmByPinView() { Message = new NotificationDto() { Sender = "sender", ConfirmationColor = WebApiDto.Auth.Color.green, RandomString = System.Guid.NewGuid().ToString(), SessionId = System.Guid.NewGuid(), AccountGuid = Account.Guid, ExpirationTime = DateTime.UtcNow.AddSeconds(90), ReturnHost = "https://localhost" } });
+            _navigationService.PushModalSinglePage(new ConfirmByPinViewModel() { Message = new NotificationDto() { Sender = "sender", ConfirmationColor = WebApiDto.Auth.Color.green, RandomString = System.Guid.NewGuid().ToString(), SessionId = System.Guid.NewGuid(), AccountGuid = Account.Guid, ExpirationTime = DateTime.UtcNow.AddSeconds(90), ReturnHost = "https://localhost" } });
         }
 
         private void FinishConfirmation(object sender, EventArgs e)
         {
-            _navigationService.PushModalSinglePage(new FinishConfirmationView() { Code = "5", Account = Account, EmailText = "your@email.com" });
+            _navigationService.PushModalSinglePage(new FinishConfirmationViewModel() { Code = "5", Account = Account, EmailText = "your@email.com" });
         }
 
         private void LoadingPage(object sender, EventArgs e)
         {
-            _navigationService.PushModalSinglePage(new LoadingView(new Action(() =>
+            _navigationService.PushModalSinglePage(new LoadingViewModel(new Action(() =>
             {
                 Thread.Sleep(10000);
                 _navigationService.PopModal();

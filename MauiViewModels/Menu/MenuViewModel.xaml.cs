@@ -5,12 +5,12 @@ using MauiViewModels.StorageModels;
 
 namespace MauiViewModels.Menu
 {
-    public class MenuView : BaseViewModel
+    public class MenuViewModel : BaseViewModel
     {
         private ObservableCollection<ProviderDb> _provider;
         private bool _isDeleteVisible;
 
-        public MenuView()
+        public MenuViewModel()
         {
             Providers = new ObservableCollection<ProviderDb>(_secureRepository.LoadProviders().Result);
         }
@@ -28,12 +28,12 @@ namespace MauiViewModels.Menu
             }
         }
 
-        private void Button_PreDeleteProvider(ProviderDb provider)
+        public void Button_PreDeleteProvider(ProviderDb provider)
         {
             provider.IsDeleteVisible = !provider.IsDeleteVisible;
         }
 
-        private void Button_DeleteProvider(ProviderDb provider)
+        public void Button_DeleteProvider(ProviderDb provider)
         {
             if (provider.IsDefault && Providers.Count(x => x.IsDefault) == 1)
                 return;
@@ -41,17 +41,17 @@ namespace MauiViewModels.Menu
             Providers.Remove(provider);
         }
 
-        private void Cell_OnTapped(ProviderDb provider)
+        public void Cell_OnTapped(ProviderDb provider)
         {
-            _navigationService.PushModalSinglePage(new ProviderView(provider));
+            _navigationService.PushModalSinglePage(new ProviderViewModel(provider));
         }
 
-        private void Button_Add()
+        public void Button_Add()
         {
-            _navigationService.PushModalSinglePage(new AddProviderView());
+            _navigationService.PushModalSinglePage(new AddProviderViewModel());
         }
 
-        private void Button_ShowDelete(object sender, EventArgs e)
+        public void Button_ShowDelete()
         {
             IsDeleteVisible = !IsDeleteVisible;
             foreach (var provider in Providers)

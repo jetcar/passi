@@ -7,17 +7,17 @@ namespace MauiTest.TestClasses;
 
 public class TermsAgreementsTestClass
 {
-    public static AddAccountView ClickAgree(TermsAgreementsView tcView)
+    public static AddAccountViewModel ClickAgree(TermsAgreementsViewModel tcView)
     {
         tcView.Button_OnAgreeClicked();
 
-        Assert.IsTrue(TestBase.CurrentView is AddAccountView);
+        Assert.IsTrue(TestBase.CurrentView is AddAccountViewModel);
 
-        var addAccountView = TestBase.CurrentView as AddAccountView;
+        var addAccountView = TestBase.CurrentView as AddAccountViewModel;
         return addAccountView;
     }
 
-    public static MainView ClickCancel(TermsAgreementsView tcView)
+    public static MainView ClickCancel(TermsAgreementsViewModel tcView)
     {
         TestNavigationService.navigationsCount = 0;
         tcView.Button_OnCancelClicked();

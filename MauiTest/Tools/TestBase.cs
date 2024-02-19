@@ -22,13 +22,12 @@ public class TestBase
     [SetUp]
     public void Setup()
     {
-        App.Services = ConfigureServices();
-        App.IsTest = true;
-        App.SkipLoadingTimer = true;
+        CommonApp.Services = ConfigureServices();
+        CommonApp.SkipLoadingTimer = true;
 
-        App.CancelNotifications = () => { Console.WriteLine("cancel notifications"); };
-        App.CloseApp = () => { Console.WriteLine("close ap"); };
-        App.StartFingerPrintReading = () => { Console.WriteLine("fingerprint reading started"); };
+        CommonApp.CancelNotifications = () => { Console.WriteLine("cancel notifications"); };
+        CommonApp.CloseApp = () => { Console.WriteLine("close ap"); };
+        CommonApp.StartFingerPrintReading = () => { Console.WriteLine("fingerprint reading started"); };
         TestNavigationService.navigationsCount = 0;
         TestNavigationService.AlertMessage = "";
         PrepareDockers();
@@ -93,7 +92,7 @@ public class TestBase
                     .WithPortBinding(5004, true)
                     .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(5004))
                     .WithEnvironment("DbHost", _pgContainer.IpAddress)
-                    .WithEnvironment("DbPort", pgPort)
+                    .WithEnvironment("DbPort", "5432")
                     .WithEnvironment("DoNotSendMail", "true")
                     .WithEnvironment("DbPassword", pgpassword)
                     .WithEnvironment("redis", _redisContainer.IpAddress)
@@ -123,7 +122,7 @@ public class TestBase
                     .WithPortBinding(5003, true)
                     .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(5003))
                     .WithEnvironment("DbHost", _pgContainer.IpAddress)
-                    .WithEnvironment("DbPort", pgPort)
+                    .WithEnvironment("DbPort", "5432")
                     .WithEnvironment("DoNotSendMail", "true")
                     .WithEnvironment("DbPassword", pgpassword)
                     .WithEnvironment("PassiUrl", passiInternalUrl)
@@ -171,18 +170,18 @@ public class TestBase
 
     public static INavigationService Navigation
     {
-        get { return App.Services.GetService<INavigationService>(); }
+        get { return CommonApp.Services.GetService<INavigationService>(); }
     }
 
     public static ISecureRepository SecureRepository
     {
-        get { return App.Services.GetService<ISecureRepository>(); }
+        get { return CommonApp.Services.GetService<ISecureRepository>(); }
     }
 
     public static void TouchFingerPrintWithGoodResult()
     {
         Console.WriteLine("touch fingerprint");
-        App.FingerPrintReadingResult.Invoke(new FingerPrintResult());
+        CommonApp.FingerPrintReadingResult.Invoke(new FingerPrintResult());
     }
 
     public static RestResponse SuccesfullResponce()
@@ -218,9 +217,9 @@ public class TestBase
 
     public void CreateAccount(bool confirmed = true)
     {
-        var certificatesService = App.Services.GetService<ICertificatesService>();
-        var secureRepository = App.Services.GetService<ISecureRepository>();
-        var certHelper = App.Services.GetService<ICertHelper>();
+        var certificatesService = CommonApp.Services.GetService<ICertificatesService>();
+        var secureRepository = CommonApp.Services.GetService<ISecureRepository>();
+        var certHelper = CommonApp.Services.GetService<ICertHelper>();
         var providers = secureRepository.LoadProviders().Result;
         var mail = GetRandomString(6) + "@test.test";
         var cert = certificatesService.GenerateCertificate(mail, new MySecureString("1111"));

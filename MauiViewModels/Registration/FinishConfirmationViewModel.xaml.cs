@@ -11,7 +11,7 @@ using WebApiDto.SignUp;
 
 namespace MauiViewModels.Registration
 {
-    public class FinishConfirmationView : BaseViewModel
+    public class FinishConfirmationViewModel : BaseViewModel
     {
         private string _pin1Masked;
         private string _pin2Masked;
@@ -26,7 +26,7 @@ namespace MauiViewModels.Registration
 
         private readonly int MinPinLenght = 4;
 
-        public FinishConfirmationView()
+        public FinishConfirmationViewModel()
         {
             SecondPin = false;
         }
@@ -82,17 +82,17 @@ namespace MauiViewModels.Registration
             }
         }
 
-        public override void OnAppearing()
+        public override void OnAppearing(object sender, EventArgs eventArgs)
         {
             EmailText = Account.Email;
-            base.OnAppearing();
+            base.OnAppearing(sender, eventArgs);
         }
 
         private void Confirm(string code, string email, MySecureString pin)
         {
-            _navigationService.PushModalSinglePage(new LoadingView(() =>
+            _navigationService.PushModalSinglePage(new LoadingViewModel(() =>
             {
-                GenerateCert(email, pin).ContinueWith(x =>
+                GenerateCert(Account.Email, pin).ContinueWith(x =>
                 {
                     var signupConfirmationDto = new SignupConfirmationDto()
                     {

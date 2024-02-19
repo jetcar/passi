@@ -1,4 +1,7 @@
-﻿using MauiViewModels.utils.Services;
+﻿using System.Diagnostics;
+using MauiViewModels;
+using MauiViewModels.utils.Services;
+using Activity = Android.App.Activity;
 
 namespace MauiApp2.utils.Services
 {
@@ -13,13 +16,25 @@ namespace MauiApp2.utils.Services
             await navigation.PushModalSinglePage(page);
         }
 
-        public Task PushModalSinglePage(MauiViewModels.BaseViewModel page)
+        public async Task PushModalSinglePage(MauiViewModels.BaseViewModel viewModel)
         {
-            throw new NotImplementedException();
+            var pageType = viewModel.GetType().FullName;
+            pageType = pageType.Replace("MauiViewModels", "MauiApp2").Replace("ViewModel", "View");
+            var unwrap = Activator.CreateInstance(App.FirstPage.GetType().Assembly.FullName, pageType).Unwrap();
+            var page = (BaseContentPage)unwrap;
+            page.BindingContext = viewModel;
+            //page.Appearing += viewModel.OnAppearing;
+            //page.Disappearing += viewModel.OnDisappearing;
+            PushModalSinglePage(page);
         }
 
         public async Task NavigateTop()
         {
+            //foreach (var page in _pages)
+            //{
+            //    page.Appearing -= ((BaseViewModel)page.BindingContext).OnAppearing;
+            //    page.Disappearing -= ((BaseViewModel)page.BindingContext).OnDisappearing;
+            //}
             _pages.Clear();
             var navigation = App.FirstPage.Navigation;
             await navigation.NavigateTop();
@@ -27,6 +42,10 @@ namespace MauiApp2.utils.Services
 
         public async Task PopModal()
         {
+            var page = _pages[_pages.Count - 1];
+            page.Appearing -= ((BaseViewModel)page.BindingContext).OnAppearing;
+            page.Disappearing -= ((BaseViewModel)page.BindingContext).OnDisappearing;
+
             _pages.RemoveAt(_pages.Count - 1);
             var navigation = App.FirstPage.Navigation;
             await navigation.PopModal();
@@ -34,7 +53,7 @@ namespace MauiApp2.utils.Services
 
         public void DisplayAlert(string header, string content, string okText)
         {
-            throw new NotImplementedException();
+            App.FirstPage.DisplayAlert(header, content, okText);
         }
     }
 }

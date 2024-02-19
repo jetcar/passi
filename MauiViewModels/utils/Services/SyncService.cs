@@ -33,7 +33,7 @@ public class SyncService : ISyncService
             {
                 lock (locker)
                 {
-                    var accounts = new ObservableCollection<AccountViewModel>();
+                    var accounts = new ObservableCollection<AccountModel>();
                     _secureRepository.LoadAccountIntoList(accounts);
                     var providers = _secureRepository.LoadProviders();
                     var groupedAccounts = accounts.GroupBy(x => x.ProviderGuid);
@@ -70,8 +70,8 @@ public class SyncService : ISyncService
                                 }
                             }
 
-                            if (App.AccountSyncCallback != null)
-                                App.AccountSyncCallback.Invoke();
+                            if (CommonApp.AccountSyncCallback != null)
+                                CommonApp.AccountSyncCallback.Invoke();
                         }
 
                         var task2 = _restService.ExecutePostAsync(provider, provider.CheckForStartedSessions, getAllSessionDto);
@@ -86,7 +86,7 @@ public class SyncService : ISyncService
                                 {
                                     _mainThreadService.BeginInvokeOnMainThread(() =>
                                     {
-                                        _navigationService.PushModalSinglePage(new NotificationVerifyRequestView(msg));
+                                        _navigationService.PushModalSinglePage(new NotificationVerifyRequestViewModel(msg));
                                     });
                                 }
                             }

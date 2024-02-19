@@ -4,7 +4,8 @@
                                xmlns:mauiApp2="clr-namespace:MauiApp2"
                                BackgroundColor="#FAFAFA"
                                xmlns:main1="clr-namespace:MauiApp2.Main"
-                               x:DataType="main1:AddAccountView"
+                               xmlns:main="clr-namespace:MauiViewModels.Main;assembly=MauiViewModels"
+                               x:DataType="main:AddAccountViewModel"
                                x:Class="MauiApp2.Main.AddAccountView">
     <StackLayout VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand">
         <StackLayout VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand">

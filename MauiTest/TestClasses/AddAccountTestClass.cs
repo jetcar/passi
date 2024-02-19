@@ -9,20 +9,20 @@ namespace MauiTest.TestClasses;
 
 public class AddAccountTestClass
 {
-    public static RegistrationConfirmationView ClickConfirm(AddAccountView addAccountView)
+    public static RegistrationConfirmationViewModel ClickConfirm(AddAccountViewModel addAccountView)
     {
         addAccountView.Button_OnClicked();
 
-        Assert.IsTrue(TestBase.CurrentView is LoadingView);
+        Assert.IsTrue(TestBase.CurrentView is LoadingViewModel);
 
-        while (!(TestBase.CurrentView is RegistrationConfirmationView))
+        while (!(TestBase.CurrentView is RegistrationConfirmationViewModel))
         {
             Thread.Sleep(1);
         }
 
-        Assert.IsTrue(TestBase.CurrentView is RegistrationConfirmationView);
+        Assert.IsTrue(TestBase.CurrentView is RegistrationConfirmationViewModel);
 
-        var registrationConfirmation = TestBase.CurrentView as RegistrationConfirmationView;
+        var registrationConfirmation = TestBase.CurrentView as RegistrationConfirmationViewModel;
         return registrationConfirmation;
     }
 }

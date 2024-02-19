@@ -10,35 +10,35 @@ namespace MauiTest.TestClasses;
 
 public class FinishConfirmationTestClass
 {
-    public static MainView FinishRegistrationWithPin(FinishConfirmationView finishConfirmationView)
+    public static MainView FinishRegistrationWithPin(FinishConfirmationViewModel finishConfirmationViewModel)
     {
         TestNavigationService.navigationsCount = 0;
-        finishConfirmationView.NumbersPad_OnNumberClicked("1");
-        finishConfirmationView.ClearPin1_OnClicked();
-        finishConfirmationView.NumbersPad_OnNumberClicked("1");
-        finishConfirmationView.NumbersPad_OnNumberClicked("1");
-        finishConfirmationView.NumbersPad_OnNumberClicked("2");
-        finishConfirmationView.NumbersPad_OnNumberClicked("del");//test editing
-        finishConfirmationView.NumbersPad_OnNumberClicked("1");
-        finishConfirmationView.NumbersPad_OnNumberClicked("1");
-        finishConfirmationView.NumbersPad_OnNumberClicked("confirm");
-        Assert.AreEqual(4, finishConfirmationView.Pin1.Length);
-        Assert.AreEqual("****", finishConfirmationView.Pin1Masked);
+        finishConfirmationViewModel.NumbersPad_OnNumberClicked("1");
+        finishConfirmationViewModel.ClearPin1_OnClicked();
+        finishConfirmationViewModel.NumbersPad_OnNumberClicked("1");
+        finishConfirmationViewModel.NumbersPad_OnNumberClicked("1");
+        finishConfirmationViewModel.NumbersPad_OnNumberClicked("2");
+        finishConfirmationViewModel.NumbersPad_OnNumberClicked("del");//test editing
+        finishConfirmationViewModel.NumbersPad_OnNumberClicked("1");
+        finishConfirmationViewModel.NumbersPad_OnNumberClicked("1");
+        finishConfirmationViewModel.NumbersPad_OnNumberClicked("confirm");
+        Assert.AreEqual(4, finishConfirmationViewModel.Pin1.Length);
+        Assert.AreEqual("****", finishConfirmationViewModel.Pin1Masked);
 
-        finishConfirmationView.NumbersPad_OnNumberClicked("1");
-        finishConfirmationView.ClearPin2_OnClicked();
-        finishConfirmationView.NumbersPad_OnNumberClicked("1");
-        finishConfirmationView.NumbersPad_OnNumberClicked("1");
-        finishConfirmationView.NumbersPad_OnNumberClicked("2");
-        finishConfirmationView.NumbersPad_OnNumberClicked("del");
-        finishConfirmationView.NumbersPad_OnNumberClicked("1");
-        finishConfirmationView.NumbersPad_OnNumberClicked("1");
-        Assert.AreEqual(4, finishConfirmationView.Pin2.Length);
-        Assert.AreEqual("****", finishConfirmationView.Pin2Masked);
+        finishConfirmationViewModel.NumbersPad_OnNumberClicked("1");
+        finishConfirmationViewModel.ClearPin2_OnClicked();
+        finishConfirmationViewModel.NumbersPad_OnNumberClicked("1");
+        finishConfirmationViewModel.NumbersPad_OnNumberClicked("1");
+        finishConfirmationViewModel.NumbersPad_OnNumberClicked("2");
+        finishConfirmationViewModel.NumbersPad_OnNumberClicked("del");
+        finishConfirmationViewModel.NumbersPad_OnNumberClicked("1");
+        finishConfirmationViewModel.NumbersPad_OnNumberClicked("1");
+        Assert.AreEqual(4, finishConfirmationViewModel.Pin2.Length);
+        Assert.AreEqual("****", finishConfirmationViewModel.Pin2Masked);
         //TestRestService.Result[ConfigSettings.SignupConfirmation] = TestBase.SuccesfullResponce();
 
-        finishConfirmationView.NumbersPad_OnNumberClicked("confirm");
-        Assert.IsTrue(TestBase.CurrentView is LoadingView);
+        finishConfirmationViewModel.NumbersPad_OnNumberClicked("confirm");
+        Assert.IsTrue(TestBase.CurrentView is LoadingViewModel);
 
         while (!(TestBase.CurrentView is MainView))
         {
@@ -56,12 +56,12 @@ public class FinishConfirmationTestClass
         return mainPage;
     }
 
-    public static MainView FinishRegistrationSkipPin(FinishConfirmationView finishConfirmationView)
+    public static MainView FinishRegistrationSkipPin(FinishConfirmationViewModel finishConfirmationViewModel)
     {
         TestNavigationService.navigationsCount = 0;
         //TestRestService.Result[ConfigSettings.SignupConfirmation] = TestBase.SuccesfullResponce();
-        finishConfirmationView.SkipButton_OnClicked();
-        Assert.IsTrue(TestBase.CurrentView is LoadingView);
+        finishConfirmationViewModel.SkipButton_OnClicked();
+        Assert.IsTrue(TestBase.CurrentView is LoadingViewModel);
 
         while (!(TestBase.CurrentView is MainView))
         {

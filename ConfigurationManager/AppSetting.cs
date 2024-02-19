@@ -22,6 +22,10 @@ namespace ConfigurationManager
                 var result = PrefferAppsettingFile ? value : environmentVariable ?? value;
                 return result;
             }
+            set
+            {
+                Environment.SetEnvironmentVariable(key, value);
+            }
         }
     }
 }

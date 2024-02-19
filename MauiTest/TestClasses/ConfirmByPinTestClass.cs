@@ -10,7 +10,7 @@ namespace MauiTest.TestClasses;
 
 public class ConfirmByPinTestClass
 {
-    public static MainView ConfirmByPin(ConfirmByPinView confirmByPinView)
+    public static MainView ConfirmByPin(ConfirmByPinViewModel confirmByPinView)
     {
         confirmByPinView.NumbersPad_OnNumberClicked("1");
         confirmByPinView.NumbersPad_OnNumberClicked("2");
@@ -20,7 +20,7 @@ public class ConfirmByPinTestClass
         //TestRestService.Result[ConfigSettings.Authorize] = TestBase.SuccesfullResponce();
         TestNavigationService.navigationsCount = 0;
         confirmByPinView.NumbersPad_OnNumberClicked("1");
-        Assert.IsTrue(TestBase.CurrentView is LoadingView);
+        Assert.IsTrue(TestBase.CurrentView is LoadingViewModel);
 
         while (!(TestBase.CurrentView is MainView))
         {
@@ -38,12 +38,12 @@ public class ConfirmByPinTestClass
         return mainPage;
     }
 
-    public static MainView ConfirmByFingerprint(ConfirmByPinView confirmByPinView)
+    public static MainView ConfirmByFingerprint(ConfirmByPinViewModel confirmByPinView)
     {
         TestNavigationService.navigationsCount = 0;
         //TestRestService.Result[ConfigSettings.Authorize] = TestBase.SuccesfullResponce();
         TestBase.TouchFingerPrintWithGoodResult();
-        Assert.IsTrue(TestBase.CurrentView is LoadingView);
+        Assert.IsTrue(TestBase.CurrentView is LoadingViewModel);
 
         while (!(TestBase.CurrentView is MainView))
         {
@@ -61,7 +61,7 @@ public class ConfirmByPinTestClass
         return mainPage;
     }
 
-    public static ConfirmByPinView ConfirmByIncorrectPin(ConfirmByPinView confirmByPinView)
+    public static ConfirmByPinViewModel ConfirmByIncorrectPin(ConfirmByPinViewModel confirmByPinView)
     {
         confirmByPinView.NumbersPad_OnNumberClicked("1");
         confirmByPinView.NumbersPad_OnNumberClicked("1");
@@ -70,18 +70,18 @@ public class ConfirmByPinTestClass
 
         confirmByPinView.NumbersPad_OnNumberClicked("2");
 
-        while (!(TestBase.CurrentView is ConfirmByPinView) || !TestBase.CurrentView.Appeared)
+        while (!(TestBase.CurrentView is ConfirmByPinViewModel) || !TestBase.CurrentView.Appeared)
         {
             Thread.Sleep(1);
         }
 
-        Assert.IsTrue(TestBase.CurrentView is ConfirmByPinView);
-        var pinView = TestBase.CurrentView as ConfirmByPinView;
+        Assert.IsTrue(TestBase.CurrentView is ConfirmByPinViewModel);
+        var pinView = TestBase.CurrentView as ConfirmByPinViewModel;
 
         return pinView;
     }
 
-    public static ConfirmByPinView ConfirmByPinBadResponse(ConfirmByPinView confirmByPinView)
+    public static ConfirmByPinViewModel ConfirmByPinBadResponse(ConfirmByPinViewModel confirmByPinView)
     {
         confirmByPinView.NumbersPad_OnNumberClicked("2");
         confirmByPinView.NumbersPad_OnNumberClicked("2");
@@ -90,18 +90,18 @@ public class ConfirmByPinTestClass
 
         confirmByPinView.NumbersPad_OnNumberClicked("2");
 
-        while (!(TestBase.CurrentView is ConfirmByPinView) || !TestBase.CurrentView.Appeared)
+        while (!(TestBase.CurrentView is ConfirmByPinViewModel) || !TestBase.CurrentView.Appeared)
         {
             Thread.Sleep(1);
         }
 
-        Assert.IsTrue(TestBase.CurrentView is ConfirmByPinView);
-        var pinView = TestBase.CurrentView as ConfirmByPinView;
+        Assert.IsTrue(TestBase.CurrentView is ConfirmByPinViewModel);
+        var pinView = TestBase.CurrentView as ConfirmByPinViewModel;
 
         return pinView;
     }
 
-    public static ConfirmByPinView ConfirmByPinNetworkError(ConfirmByPinView confirmByPinView)
+    public static ConfirmByPinViewModel ConfirmByPinNetworkError(ConfirmByPinViewModel confirmByPinView)
     {
         ConfigSettings.PassiUrl = "http://localhost:9999";
         confirmByPinView.NumbersPad_OnNumberClicked("1");
@@ -111,13 +111,13 @@ public class ConfirmByPinTestClass
 
         confirmByPinView.NumbersPad_OnNumberClicked("1");
         confirmByPinView._accountDb.Provider.PassiWebApiUrl = "http://localhost:9999";
-        while (!(TestBase.CurrentView is ConfirmByPinView) || !TestBase.CurrentView.Appeared)
+        while (!(TestBase.CurrentView is ConfirmByPinViewModel) || !TestBase.CurrentView.Appeared)
         {
             Thread.Sleep(1);
         }
 
-        Assert.IsTrue(TestBase.CurrentView is ConfirmByPinView);
-        var pinView = TestBase.CurrentView as ConfirmByPinView;
+        Assert.IsTrue(TestBase.CurrentView is ConfirmByPinViewModel);
+        var pinView = TestBase.CurrentView as ConfirmByPinViewModel;
 
         return pinView;
     }

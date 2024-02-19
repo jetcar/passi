@@ -1,18 +1,20 @@
-﻿namespace MauiApp2.Tools
+﻿using MauiViewModels.Tools;
+
+namespace MauiApp2.Tools
 {
     public partial class NumbersPad : ContentView
     {
         public NumbersPad()
         {
-            if (!App.IsTest)
-                InitializeComponent();
+            InitializeComponent();
+            BindingContext = this;
         }
 
         public delegate void NumbersPadDelegate(string value);
 
         public event NumbersPadDelegate NumberClicked;
 
-        public void ImageButton_OnClicked(object sender, EventArgs e)
+        private void ImageButton_OnClicked(object sender, EventArgs e)
         {
             var element = sender as VisualElement;
             element.IsEnabled = false;

@@ -4,7 +4,7 @@ using MauiViewModels.utils.Services.Certificate;
 
 namespace MauiViewModels.FingerPrint
 {
-    public class FingerPrintConfirmByPinView : BaseViewModel
+    public class FingerPrintConfirmByPinViewModel : BaseViewModel
     {
         private readonly AccountDb _accountDb;
         private MySecureString _pin1 = new MySecureString("");
@@ -13,17 +13,15 @@ namespace MauiViewModels.FingerPrint
         private ValidationError _pin1Error = new ValidationError();
         private bool _clickIsEnabled;
 
-        public FingerPrintConfirmByPinView(AccountDb accountDb)
+        public FingerPrintConfirmByPinViewModel(AccountDb accountDb)
         {
             _accountDb = accountDb;
-
-            _pinLength = 4;
         }
 
-        public override void OnAppearing()
+        public override void OnAppearing(object sender, EventArgs eventArgs)
         {
             _pinLength = _accountDb.pinLength;
-            base.OnAppearing();
+            base.OnAppearing(sender, eventArgs);
         }
 
         public MySecureString Pin1

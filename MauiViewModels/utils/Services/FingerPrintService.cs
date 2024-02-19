@@ -28,11 +28,11 @@ namespace MauiViewModels.utils.Services
 
         public void StartReadingConfirmRequest(NotificationDto message, AccountDb accountDb, Action<string> errorAction)
         {
-            App.FingerPrintReadingResult = (fingerPrintResult) =>
+            CommonApp.FingerPrintReadingResult = (fingerPrintResult) =>
             {
                 if (fingerPrintResult.ErrorMessage == null)
                 {
-                    _navigationService.PushModalSinglePage(new LoadingView(() =>
+                    _navigationService.PushModalSinglePage(new LoadingViewModel(() =>
                     {
                         var privatecertificate = _secureRepository.GetCertificateWithFingerPrint(accountDb);
 
@@ -89,10 +89,10 @@ namespace MauiViewModels.utils.Services
                 else
                 {
                     errorAction(fingerPrintResult.ErrorMessage);
-                    App.StartFingerPrintReading();
+                    CommonApp.StartFingerPrintReading();
                 }
             };
-            App.StartFingerPrintReading();
+            CommonApp.StartFingerPrintReading();
         }
     }
 }

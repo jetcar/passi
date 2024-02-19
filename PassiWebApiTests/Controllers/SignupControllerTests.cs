@@ -1,18 +1,19 @@
 using System;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using System.Text;
+using IdentityModel;
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
 using passi_webapi.Controllers;
 using Services;
+using WebApiDto.Certificate;
 using WebApiDto.SignUp;
 
 namespace PassiWebApiTests.Controllers
 {
     public class SignupControllerTests : TestBase
     {
-
-
         [Test]
         public void SignUpTest()
         {
@@ -29,7 +30,7 @@ namespace PassiWebApiTests.Controllers
         }
 
         [Test]
-        public void SignUpAndConfirmTest()
+        public void SignUpConfirmRenewTest()
         {
             var controller = ServiceProvider.GetService<SignUpController>();
             //act
@@ -46,22 +47,64 @@ namespace PassiWebApiTests.Controllers
                 Email = signupDto.Email
             });
 
-            var ecdsa = ECDsa.Create(); // generate asymmetric key pair
-            var req = new CertificateRequest($"cn={signupDto.Email}", ecdsa, HashAlgorithmName.SHA256);
+            var rsa = RSA.Create(); // generate asymmetric key pair
+            var distinguishedName = signupDto.Email;
+            var req = new CertificateRequest($"cn={distinguishedName.Replace("@", "")}", rsa, HashAlgorithmName.SHA512, RSASignaturePadding.Pkcs1);
             var cert = req.CreateSelfSigned(DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddYears(1));
+            Assert.IsTrue(cert.HasPrivateKey);
 
-            var certificate = Convert.ToBase64String(cert.GetRawCertData());
-
-            controller.Confirm(new SignupConfirmationDto()
+            var certificate64 = Convert.ToBase64String(cert.Export(X509ContentType.Pkcs12, "1234"));
+            var certLoaded = new X509Certificate2(Convert.FromBase64String(certificate64), "1234", X509KeyStorageFlags.Exportable);
+            Assert.IsTrue(certLoaded.HasPrivateKey);
+            var signupConfirmationDto = new SignupConfirmationDto()
             {
                 Code = TestEmailSender.Code,
                 DeviceId = signupDto.DeviceId,
                 Email = signupDto.Email,
                 Guid = signupDto.UserGuid.ToString(),
-                PublicCert = certificate
-            });
+                PublicCert = Convert.ToBase64String(certLoaded.RawData)
+            };
+            controller.Confirm(signupConfirmationDto);
             Assert.That(TestEmailSender.Code != null);
+            //renew
+
+            var rsa2 = RSA.Create(); // generate asymmetric key pair
+            var distinguishedName2 = signupDto.Email;
+            var req2 = new CertificateRequest($"cn={distinguishedName2.Replace("@", "")}", rsa2, HashAlgorithmName.SHA512, RSASignaturePadding.Pkcs1);
+            var cert2 = req2.CreateSelfSigned(DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddYears(1));
+
+            var certController = ServiceProvider.GetService<CertificateController>();
+            var parentCertHashSignature = GetSignedData(Convert.ToBase64String(cert2.RawData), cert);
+            var newCert64 = Convert.ToBase64String(cert2.RawData);
+            var valid = CertHelper.VerifyData(newCert64, parentCertHashSignature, signupConfirmationDto.PublicCert);
+            Assert.IsTrue(valid);
+            var certificateUpdateDto = new CertificateUpdateDto()
+            {
+                DeviceId = signupDto.DeviceId,
+                ParentCertThumbprint = certLoaded.Thumbprint,
+                PublicCert = newCert64,
+                ParentCertHashSignature = parentCertHashSignature
+            };
+            var updateResponse = certController.UpdatePublicCert(certificateUpdateDto);
+            var x509Certificate2 = new X509Certificate2(Convert.FromBase64String(updateResponse.PublicCert));
+            Assert.AreEqual(cert2.Thumbprint, x509Certificate2.Thumbprint);
         }
+
+        public string GetSignedData(string messageToSign, X509Certificate2 certificate)
+        {
+            using (var sha512 = SHA512.Create())
+            {
+                // ComputeHash - returns byte array
+                byte[] bytes = sha512.ComputeHash(Encoding.UTF8.GetBytes(messageToSign));
+
+                var rsaPrivateKey = certificate.GetRSAPrivateKey();
+                var signedBytes = rsaPrivateKey
+                    .SignHash(bytes, HashAlgorithmName.SHA512, RSASignaturePadding.Pkcs1);
+
+                return Convert.ToBase64String(signedBytes);
+            }
+        }
+
         [Test]
         public void SignUpAndConfirmInvalidCodeTest()
         {
@@ -76,8 +119,8 @@ namespace PassiWebApiTests.Controllers
             };
             controller.SignUp(signupDto);
 
-            var ecdsa = ECDsa.Create(); // generate asymmetric key pair
-            var req = new CertificateRequest($"cn={signupDto.Email}", ecdsa, HashAlgorithmName.SHA256);
+            var ecdsa = RSA.Create(); // generate asymmetric key pair
+            var req = new CertificateRequest($"cn={signupDto.Email}", ecdsa, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
             var dateTime = DateTime.UtcNow.AddDays(-1);
 
             var cert = req.CreateSelfSigned(dateTime, dateTime.AddYears(1));
@@ -109,7 +152,5 @@ namespace PassiWebApiTests.Controllers
             var exception = Assert.Throws<BadRequestException>(() => controller.Confirm(signupConfirmationDto));
             Assert.That(exception.Message == "Code not found");
         }
-
     }
-
 }

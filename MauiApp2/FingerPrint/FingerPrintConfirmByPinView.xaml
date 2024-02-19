@@ -5,7 +5,7 @@
                               xmlns:tools="clr-namespace:MauiApp2.Tools"
                               xmlns:fingerPrint="clr-namespace:MauiViewModels.FingerPrint;assembly=MauiViewModels"
                               BackgroundColor="#FAFAFA"
-                              x:DataType="fingerPrint:FingerPrintConfirmByPinView"
+                              x:DataType="fingerPrint:FingerPrintConfirmByPinViewModel"
                               x:Class="MauiApp2.FingerPrint.FingerPrintConfirmByPinView">
 
     <mauiApp2:BaseContentPage.Content>

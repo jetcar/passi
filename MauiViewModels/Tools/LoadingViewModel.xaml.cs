@@ -6,13 +6,13 @@ using Timer = System.Timers.Timer;
 
 namespace MauiViewModels.Tools
 {
-    public class LoadingView : BaseViewModel
+    public class LoadingViewModel : BaseViewModel
     {
         private readonly Action _callBack;
         private Task _task;
         private readonly Timer _timer;
 
-        public LoadingView(Action callBack, int timeout = 30000)
+        public LoadingViewModel(Action callBack, int timeout = 30000)
         {
             _callBack = callBack;
 
@@ -25,7 +25,7 @@ namespace MauiViewModels.Tools
 
         private void _timer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            if (!App.SkipLoadingTimer)
+            if (!CommonApp.SkipLoadingTimer)
                 _mainThreadService.BeginInvokeOnMainThread(() =>
                 {
                     _navigationService.DisplayAlert("Something went wrong", "Something went wrong, redirecting to first page.", "Ok");
@@ -33,16 +33,16 @@ namespace MauiViewModels.Tools
                 });
         }
 
-        public override void OnAppearing()
+        public override void OnAppearing(object sender, EventArgs eventArgs)
         {
             this._task = Task.Run(() =>
             {
                 _callBack.Invoke();
             });
-            base.OnAppearing();
+            base.OnAppearing(sender, eventArgs);
         }
 
-        public override void OnDisappearing()
+        public override void OnDisappearing(object sender, EventArgs eventArgs)
         {
             while (!_task.IsCompleted)
             {
@@ -52,7 +52,7 @@ namespace MauiViewModels.Tools
             _timer.Elapsed -= _timer_Elapsed;
             _timer.Stop();
             _timer.Dispose();
-            base.OnDisappearing();
+            base.OnDisappearing(sender, eventArgs);
         }
     }
 }

@@ -4,6 +4,7 @@ using MauiViewModels;
 using MauiViewModels.Main;
 using MauiViewModels.ViewModels;
 using NUnit.Framework;
+using AccountViewModel = MauiViewModels.Main.AccountViewModel;
 
 namespace MauiTest.TestClasses;
 
@@ -23,27 +24,27 @@ public class MainTestClass
         return page;
     }
 
-    public static TermsAgreementsView ClickAddAccount(MainView view)
+    public static TermsAgreementsViewModel ClickAddAccount(MainView view)
     {
         view.Button_AddAccount();
-        Assert.IsTrue(TestBase.CurrentView is TermsAgreementsView);
+        Assert.IsTrue(TestBase.CurrentView is TermsAgreementsViewModel);
 
-        var tcView = TestBase.CurrentView as TermsAgreementsView;
+        var tcView = TestBase.CurrentView as TermsAgreementsViewModel;
         return tcView;
     }
 
-    public static AccountView OpenAccount(MainView mainView, AccountViewModel account)
+    public static AccountViewModel OpenAccount(MainView mainView, MauiViewModels.ViewModels.AccountModel account)
     {
         mainView.Cell_OnTapped(account);
 
-        while (!(TestBase.CurrentView is AccountView))
+        while (!(TestBase.CurrentView is AccountViewModel))
         {
             Thread.Sleep(1);
         }
 
-        Assert.IsTrue(TestBase.CurrentView is AccountView);
+        Assert.IsTrue(TestBase.CurrentView is AccountViewModel);
 
-        var accountView = TestBase.CurrentView as AccountView;
+        var accountView = TestBase.CurrentView as AccountViewModel;
         return accountView;
     }
 }

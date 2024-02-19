@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NodaTime;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -12,9 +13,11 @@ using Repos;
 namespace Repos.Migrations
 {
     [DbContext(typeof(PassiDbContext))]
-    partial class PassiDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240219161013_fix2")]
+    partial class fix2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -63,13 +66,13 @@ namespace Repos.Migrations
                         .HasColumnType("character varying(256)");
 
                     b.Property<Instant>("CreationTime")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<long?>("ModifiedById")
                         .HasColumnType("bigint");
 
                     b.Property<Instant?>("ModifiedTime")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("ParentCertId")
                         .HasMaxLength(256)
@@ -111,7 +114,7 @@ namespace Repos.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<Instant>("CreationTime")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("DeviceId")
                         .IsRequired()
@@ -122,7 +125,7 @@ namespace Repos.Migrations
                         .HasColumnType("bigint");
 
                     b.Property<Instant?>("ModifiedTime")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("NotificationToken")
                         .HasMaxLength(1024)
@@ -152,16 +155,16 @@ namespace Repos.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<Instant>("CreationTime")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<Instant>("ExpirationTime")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<long?>("ModifiedById")
                         .HasColumnType("bigint");
 
                     b.Property<Instant?>("ModifiedTime")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("SignedHashNew")
                         .HasMaxLength(1024)
@@ -195,7 +198,7 @@ namespace Repos.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<Instant>("CreationTime")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<long?>("DeviceId")
                         .ValueGeneratedOnAdd()
@@ -213,7 +216,7 @@ namespace Repos.Migrations
                         .HasColumnType("bigint");
 
                     b.Property<Instant?>("ModifiedTime")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.HasKey("Id");
 
@@ -243,7 +246,7 @@ namespace Repos.Migrations
                         .HasColumnType("character varying(10)");
 
                     b.Property<Instant>("CreationTime")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<bool>("IsConfirmed")
                         .HasColumnType("boolean");
@@ -252,7 +255,7 @@ namespace Repos.Migrations
                         .HasColumnType("bigint");
 
                     b.Property<Instant?>("ModifiedTime")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int?>("TryCount")
                         .HasColumnType("integer");

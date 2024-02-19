@@ -13,7 +13,7 @@ using Timer = System.Timers.Timer;
 
 namespace MauiViewModels.Notifications
 {
-    public class NotificationVerifyRequestView : BaseViewModel
+    public class NotificationVerifyRequestViewModel : BaseViewModel
     {
         private List<WebApiDto.Auth.Color> possibleCodes = null;
         private Color _color1;
@@ -27,7 +27,7 @@ namespace MauiViewModels.Notifications
         private bool _isButtonEnabled = true;
         private string _responseError;
 
-        public NotificationVerifyRequestView(NotificationDto notificationDto)
+        public NotificationVerifyRequestViewModel(NotificationDto notificationDto)
         {
             Message = notificationDto;
             UpdateTimeLeft();
@@ -38,13 +38,13 @@ namespace MauiViewModels.Notifications
             _timer.Start();
         }
 
-        public override void OnDisappearing()
+        public override void OnDisappearing(object sender, EventArgs eventArgs)
         {
             _timer.Elapsed -= _timer_Elapsed;
 
             _timer.Stop();
             _timer.Dispose();
-            base.OnDisappearing();
+            base.OnDisappearing(sender, eventArgs);
         }
 
         private void _timer_Elapsed(object sender, ElapsedEventArgs e)
@@ -73,7 +73,7 @@ namespace MauiViewModels.Notifications
             return leftTotalSeconds;
         }
 
-        public override void OnAppearing()
+        public override void OnAppearing(object sender, EventArgs eventArgs)
         {
             _account = _secureRepository.GetAccount(Message.AccountGuid);
             _account.Provider = _secureRepository.GetProvider(_account.ProviderGuid);
@@ -111,8 +111,8 @@ namespace MauiViewModels.Notifications
                     break;
             }
 
-            base.OnAppearing();
-            App.CancelNotifications.Invoke();
+            base.OnAppearing(sender, eventArgs);
+            CommonApp.CancelNotifications.Invoke();
             _secureRepository.ReleaseSessionKey(Message.SessionId);
         }
 
@@ -256,7 +256,7 @@ namespace MauiViewModels.Notifications
         {
             if (_account.pinLength == 0 && !_account.HaveFingerprint)
             {
-                _navigationService.PushModalSinglePage(new LoadingView(() =>
+                _navigationService.PushModalSinglePage(new LoadingViewModel(() =>
                     {
                         _certHelper.Sign(Message.AccountGuid, null, Message.RandomString).ContinueWith(signedGuid =>
                         {
@@ -288,7 +288,7 @@ namespace MauiViewModels.Notifications
                                     _mainThreadService.BeginInvokeOnMainThread(() =>
                                     {
                                         _navigationService.NavigateTop();
-                                        App.CloseApp.Invoke();
+                                        CommonApp.CloseApp.Invoke();
                                     });
                                 }
                                 else if (!response.Result.IsSuccessful && response.Result.StatusCode == HttpStatusCode.BadRequest)
@@ -327,7 +327,7 @@ namespace MauiViewModels.Notifications
             }
             else
             {
-                _navigationService.PushModalSinglePage(new ConfirmByPinView() { Message = Message });
+                _navigationService.PushModalSinglePage(new ConfirmByPinViewModel() { Message = Message });
             }
         }
 

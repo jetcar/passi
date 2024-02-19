@@ -156,14 +156,14 @@ namespace Repos.CompiledModels
             var defaultTableMappings1 = new List<TableMappingBase<ColumnMappingBase>>();
             certificateDb.SetRuntimeAnnotation("Relational:DefaultMappings", defaultTableMappings1);
             var modelsCertificateDbTableBase = new TableBase("Models.CertificateDb", null, relationalModel);
-            var creationTimeColumnBase = new ColumnBase<ColumnMappingBase>("CreationTime", "timestamp without time zone", modelsCertificateDbTableBase);
+            var creationTimeColumnBase = new ColumnBase<ColumnMappingBase>("CreationTime", "timestamp with time zone", modelsCertificateDbTableBase);
             modelsCertificateDbTableBase.Columns.Add("CreationTime", creationTimeColumnBase);
             var modifiedByIdColumnBase = new ColumnBase<ColumnMappingBase>("ModifiedById", "bigint", modelsCertificateDbTableBase)
             {
                 IsNullable = true
             };
             modelsCertificateDbTableBase.Columns.Add("ModifiedById", modifiedByIdColumnBase);
-            var modifiedTimeColumnBase = new ColumnBase<ColumnMappingBase>("ModifiedTime", "timestamp without time zone", modelsCertificateDbTableBase)
+            var modifiedTimeColumnBase = new ColumnBase<ColumnMappingBase>("ModifiedTime", "timestamp with time zone", modelsCertificateDbTableBase)
             {
                 IsNullable = true
             };
@@ -211,14 +211,14 @@ namespace Repos.CompiledModels
             var certificatesTable = new Table("Certificates", null, relationalModel);
             var thumbprintColumn = new Column("Thumbprint", "character varying(256)", certificatesTable);
             certificatesTable.Columns.Add("Thumbprint", thumbprintColumn);
-            var creationTimeColumn = new Column("CreationTime", "timestamp without time zone", certificatesTable);
+            var creationTimeColumn = new Column("CreationTime", "timestamp with time zone", certificatesTable);
             certificatesTable.Columns.Add("CreationTime", creationTimeColumn);
             var modifiedByIdColumn = new Column("ModifiedById", "bigint", certificatesTable)
             {
                 IsNullable = true
             };
             certificatesTable.Columns.Add("ModifiedById", modifiedByIdColumn);
-            var modifiedTimeColumn = new Column("ModifiedTime", "timestamp without time zone", certificatesTable)
+            var modifiedTimeColumn = new Column("ModifiedTime", "timestamp with time zone", certificatesTable)
             {
                 IsNullable = true
             };
@@ -296,7 +296,7 @@ namespace Repos.CompiledModels
             var defaultTableMappings2 = new List<TableMappingBase<ColumnMappingBase>>();
             deviceDb.SetRuntimeAnnotation("Relational:DefaultMappings", defaultTableMappings2);
             var modelsDeviceDbTableBase = new TableBase("Models.DeviceDb", null, relationalModel);
-            var creationTimeColumnBase0 = new ColumnBase<ColumnMappingBase>("CreationTime", "timestamp without time zone", modelsDeviceDbTableBase);
+            var creationTimeColumnBase0 = new ColumnBase<ColumnMappingBase>("CreationTime", "timestamp with time zone", modelsDeviceDbTableBase);
             modelsDeviceDbTableBase.Columns.Add("CreationTime", creationTimeColumnBase0);
             var deviceIdColumnBase = new ColumnBase<ColumnMappingBase>("DeviceId", "character varying(256)", modelsDeviceDbTableBase);
             modelsDeviceDbTableBase.Columns.Add("DeviceId", deviceIdColumnBase);
@@ -307,7 +307,7 @@ namespace Repos.CompiledModels
                 IsNullable = true
             };
             modelsDeviceDbTableBase.Columns.Add("ModifiedById", modifiedByIdColumnBase0);
-            var modifiedTimeColumnBase0 = new ColumnBase<ColumnMappingBase>("ModifiedTime", "timestamp without time zone", modelsDeviceDbTableBase)
+            var modifiedTimeColumnBase0 = new ColumnBase<ColumnMappingBase>("ModifiedTime", "timestamp with time zone", modelsDeviceDbTableBase)
             {
                 IsNullable = true
             };
@@ -340,7 +340,7 @@ namespace Repos.CompiledModels
             var idColumn0 = new Column("Id", "bigint", devicesTable);
             devicesTable.Columns.Add("Id", idColumn0);
             idColumn0.AddAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
-            var creationTimeColumn0 = new Column("CreationTime", "timestamp without time zone", devicesTable);
+            var creationTimeColumn0 = new Column("CreationTime", "timestamp with time zone", devicesTable);
             devicesTable.Columns.Add("CreationTime", creationTimeColumn0);
             var deviceIdColumn = new Column("DeviceId", "character varying(256)", devicesTable);
             devicesTable.Columns.Add("DeviceId", deviceIdColumn);
@@ -349,7 +349,7 @@ namespace Repos.CompiledModels
                 IsNullable = true
             };
             devicesTable.Columns.Add("ModifiedById", modifiedByIdColumn0);
-            var modifiedTimeColumn0 = new Column("ModifiedTime", "timestamp without time zone", devicesTable)
+            var modifiedTimeColumn0 = new Column("ModifiedTime", "timestamp with time zone", devicesTable)
             {
                 IsNullable = true
             };
@@ -413,9 +413,9 @@ namespace Repos.CompiledModels
             var defaultTableMappings3 = new List<TableMappingBase<ColumnMappingBase>>();
             simpleSessionDb.SetRuntimeAnnotation("Relational:DefaultMappings", defaultTableMappings3);
             var modelsSimpleSessionDbTableBase = new TableBase("Models.SimpleSessionDb", null, relationalModel);
-            var creationTimeColumnBase1 = new ColumnBase<ColumnMappingBase>("CreationTime", "timestamp without time zone", modelsSimpleSessionDbTableBase);
+            var creationTimeColumnBase1 = new ColumnBase<ColumnMappingBase>("CreationTime", "timestamp with time zone", modelsSimpleSessionDbTableBase);
             modelsSimpleSessionDbTableBase.Columns.Add("CreationTime", creationTimeColumnBase1);
-            var expirationTimeColumnBase = new ColumnBase<ColumnMappingBase>("ExpirationTime", "timestamp without time zone", modelsSimpleSessionDbTableBase);
+            var expirationTimeColumnBase = new ColumnBase<ColumnMappingBase>("ExpirationTime", "timestamp with time zone", modelsSimpleSessionDbTableBase);
             modelsSimpleSessionDbTableBase.Columns.Add("ExpirationTime", expirationTimeColumnBase);
             var guidColumnBase = new ColumnBase<ColumnMappingBase>("Guid", "uuid", modelsSimpleSessionDbTableBase);
             modelsSimpleSessionDbTableBase.Columns.Add("Guid", guidColumnBase);
@@ -424,7 +424,7 @@ namespace Repos.CompiledModels
                 IsNullable = true
             };
             modelsSimpleSessionDbTableBase.Columns.Add("ModifiedById", modifiedByIdColumnBase1);
-            var modifiedTimeColumnBase1 = new ColumnBase<ColumnMappingBase>("ModifiedTime", "timestamp without time zone", modelsSimpleSessionDbTableBase)
+            var modifiedTimeColumnBase1 = new ColumnBase<ColumnMappingBase>("ModifiedTime", "timestamp with time zone", modelsSimpleSessionDbTableBase)
             {
                 IsNullable = true
             };
@@ -459,16 +459,16 @@ namespace Repos.CompiledModels
             var sessionsTable = new Table("Sessions", null, relationalModel);
             var guidColumn = new Column("Guid", "uuid", sessionsTable);
             sessionsTable.Columns.Add("Guid", guidColumn);
-            var creationTimeColumn1 = new Column("CreationTime", "timestamp without time zone", sessionsTable);
+            var creationTimeColumn1 = new Column("CreationTime", "timestamp with time zone", sessionsTable);
             sessionsTable.Columns.Add("CreationTime", creationTimeColumn1);
-            var expirationTimeColumn = new Column("ExpirationTime", "timestamp without time zone", sessionsTable);
+            var expirationTimeColumn = new Column("ExpirationTime", "timestamp with time zone", sessionsTable);
             sessionsTable.Columns.Add("ExpirationTime", expirationTimeColumn);
             var modifiedByIdColumn1 = new Column("ModifiedById", "bigint", sessionsTable)
             {
                 IsNullable = true
             };
             sessionsTable.Columns.Add("ModifiedById", modifiedByIdColumn1);
-            var modifiedTimeColumn1 = new Column("ModifiedTime", "timestamp without time zone", sessionsTable)
+            var modifiedTimeColumn1 = new Column("ModifiedTime", "timestamp with time zone", sessionsTable)
             {
                 IsNullable = true
             };
@@ -543,7 +543,7 @@ namespace Repos.CompiledModels
             var defaultTableMappings4 = new List<TableMappingBase<ColumnMappingBase>>();
             userDb.SetRuntimeAnnotation("Relational:DefaultMappings", defaultTableMappings4);
             var modelsUserDbTableBase = new TableBase("Models.UserDb", null, relationalModel);
-            var creationTimeColumnBase2 = new ColumnBase<ColumnMappingBase>("CreationTime", "timestamp without time zone", modelsUserDbTableBase);
+            var creationTimeColumnBase2 = new ColumnBase<ColumnMappingBase>("CreationTime", "timestamp with time zone", modelsUserDbTableBase);
             modelsUserDbTableBase.Columns.Add("CreationTime", creationTimeColumnBase2);
             var deviceIdColumnBase0 = new ColumnBase<ColumnMappingBase>("DeviceId", "bigint", modelsUserDbTableBase)
             {
@@ -564,7 +564,7 @@ namespace Repos.CompiledModels
                 IsNullable = true
             };
             modelsUserDbTableBase.Columns.Add("ModifiedById", modifiedByIdColumnBase2);
-            var modifiedTimeColumnBase2 = new ColumnBase<ColumnMappingBase>("ModifiedTime", "timestamp without time zone", modelsUserDbTableBase)
+            var modifiedTimeColumnBase2 = new ColumnBase<ColumnMappingBase>("ModifiedTime", "timestamp with time zone", modelsUserDbTableBase)
             {
                 IsNullable = true
             };
@@ -587,7 +587,7 @@ namespace Repos.CompiledModels
             var idColumn1 = new Column("Id", "bigint", usersTable);
             usersTable.Columns.Add("Id", idColumn1);
             idColumn1.AddAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
-            var creationTimeColumn2 = new Column("CreationTime", "timestamp without time zone", usersTable);
+            var creationTimeColumn2 = new Column("CreationTime", "timestamp with time zone", usersTable);
             usersTable.Columns.Add("CreationTime", creationTimeColumn2);
             var deviceIdColumn0 = new Column("DeviceId", "bigint", usersTable)
             {
@@ -606,7 +606,7 @@ namespace Repos.CompiledModels
                 IsNullable = true
             };
             usersTable.Columns.Add("ModifiedById", modifiedByIdColumn2);
-            var modifiedTimeColumn2 = new Column("ModifiedTime", "timestamp without time zone", usersTable)
+            var modifiedTimeColumn2 = new Column("ModifiedTime", "timestamp with time zone", usersTable)
             {
                 IsNullable = true
             };
@@ -673,7 +673,7 @@ namespace Repos.CompiledModels
                 IsNullable = true
             };
             modelsUserInvitationDbTableBase.Columns.Add("Code", codeColumnBase);
-            var creationTimeColumnBase3 = new ColumnBase<ColumnMappingBase>("CreationTime", "timestamp without time zone", modelsUserInvitationDbTableBase);
+            var creationTimeColumnBase3 = new ColumnBase<ColumnMappingBase>("CreationTime", "timestamp with time zone", modelsUserInvitationDbTableBase);
             modelsUserInvitationDbTableBase.Columns.Add("CreationTime", creationTimeColumnBase3);
             var idColumnBase2 = new ColumnBase<ColumnMappingBase>("Id", "bigint", modelsUserInvitationDbTableBase);
             modelsUserInvitationDbTableBase.Columns.Add("Id", idColumnBase2);
@@ -684,7 +684,7 @@ namespace Repos.CompiledModels
                 IsNullable = true
             };
             modelsUserInvitationDbTableBase.Columns.Add("ModifiedById", modifiedByIdColumnBase3);
-            var modifiedTimeColumnBase3 = new ColumnBase<ColumnMappingBase>("ModifiedTime", "timestamp without time zone", modelsUserInvitationDbTableBase)
+            var modifiedTimeColumnBase3 = new ColumnBase<ColumnMappingBase>("ModifiedTime", "timestamp with time zone", modelsUserInvitationDbTableBase)
             {
                 IsNullable = true
             };
@@ -720,7 +720,7 @@ namespace Repos.CompiledModels
                 IsNullable = true
             };
             invitationsTable.Columns.Add("Code", codeColumn);
-            var creationTimeColumn3 = new Column("CreationTime", "timestamp without time zone", invitationsTable);
+            var creationTimeColumn3 = new Column("CreationTime", "timestamp with time zone", invitationsTable);
             invitationsTable.Columns.Add("CreationTime", creationTimeColumn3);
             var isConfirmedColumn = new Column("IsConfirmed", "boolean", invitationsTable);
             invitationsTable.Columns.Add("IsConfirmed", isConfirmedColumn);
@@ -729,7 +729,7 @@ namespace Repos.CompiledModels
                 IsNullable = true
             };
             invitationsTable.Columns.Add("ModifiedById", modifiedByIdColumn3);
-            var modifiedTimeColumn3 = new Column("ModifiedTime", "timestamp without time zone", invitationsTable)
+            var modifiedTimeColumn3 = new Column("ModifiedTime", "timestamp with time zone", invitationsTable)
             {
                 IsNullable = true
             };

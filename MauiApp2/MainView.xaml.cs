@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using MauiApp2.Main;
 using MauiApp2.Registration;
+using MauiViewModels;
 using MauiViewModels.ViewModels;
 
 namespace MauiApp2
@@ -17,12 +18,6 @@ namespace MauiApp2
             App.FirstPage = this;
         }
 
-        protected override void OnAppearing()
-        {
-            _bindingContext.OnAppearing();
-            base.OnAppearing();
-        }
-
         public void Button_AddAccount(object sender, EventArgs e)
         {
             _bindingContext.Button_AddAccount();
@@ -30,13 +25,13 @@ namespace MauiApp2
 
         public void Button_DeleteAccount(object sender, EventArgs e)
         {
-            var account = (AccountViewModel)((Button)sender).BindingContext;
+            var account = (AccountModel)((Button)sender).BindingContext;
             _bindingContext.Button_DeleteAccount(account);
         }
 
         private void Button_PreDeleteAccount(object sender, EventArgs e)
         {
-            var account = (AccountViewModel)((ImageButton)sender).BindingContext;
+            var account = (AccountModel)((ImageButton)sender).BindingContext;
             _bindingContext.Button_PreDeleteAccount(account);
         }
 
@@ -45,7 +40,7 @@ namespace MauiApp2
             var cell = sender as ViewCell;
             cell.IsEnabled = false;
 
-            var account = (AccountViewModel)((ViewCell)sender).BindingContext;
+            var account = (AccountModel)((ViewCell)sender).BindingContext;
             _bindingContext.Cell_OnTapped(account);
         }
 

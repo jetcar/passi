@@ -13,17 +13,18 @@ internal class TestNavigationService : INavigationService
     public static int navigationsCount = 0;
     private List<BaseViewModel> _pages = new List<BaseViewModel>();
     public static string AlertMessage { get; set; }
-    public async Task PushModalSinglePage(BaseViewModel page)
+
+    public async Task PushModalSinglePage(BaseViewModel viewModel)
     {
-        _pages.Add(page);
-        Console.WriteLine(page.ToString());
+        _pages.Add(viewModel);
+        Console.WriteLine(viewModel.ToString());
         if (TestBase.CurrentView != null)
         {
-            TestBase.CurrentView.OnDisappearing();
+            TestBase.CurrentView.OnDisappearing(null, null);
         }
-        TestBase.CurrentView = page;
+        TestBase.CurrentView = viewModel;
         Interlocked.Increment(ref navigationsCount);
-        page.OnAppearing();
+        viewModel.OnAppearing(null, null);
     }
 
     public async Task NavigateTop()
@@ -35,12 +36,12 @@ internal class TestNavigationService : INavigationService
             _pages.RemoveAt(i);
         }
         if (TestBase.CurrentView != null)
-            TestBase.CurrentView.OnDisappearing();
+            TestBase.CurrentView.OnDisappearing(null, null);
 
         TestBase.CurrentView = page;
         Console.WriteLine(page.ToString());
         Interlocked.Increment(ref navigationsCount);
-        page.OnAppearing();
+        page.OnAppearing(null, null);
     }
 
     public async Task PopModal()
@@ -52,14 +53,14 @@ internal class TestNavigationService : INavigationService
             var currentView = TestBase.CurrentView;
             Task.Run(() =>
             {
-                currentView.OnDisappearing();
+                currentView.OnDisappearing(null, null);
             });
         }
 
         TestBase.CurrentView = page;
         Console.WriteLine(page.ToString());
         Interlocked.Increment(ref navigationsCount);
-        page.OnAppearing();
+        page.OnAppearing(null, null);
     }
 
     public void DisplayAlert(string header, string content, string okText)

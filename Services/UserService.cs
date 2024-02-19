@@ -19,7 +19,7 @@ namespace Services
             _emailSender = emailSender;
         }
 
-        public void AddUserAndSendConfirmationEmail(SignupDto signupDto)
+        public string AddUserAndSendConfirmationEmail(SignupDto signupDto)
         {
             var userInvitationDb = new UserInvitationDb()
             {
@@ -37,7 +37,7 @@ namespace Services
             };
             user.Invitations.Add(userInvitationDb);
             _userRepository.AddUser(user);
-            _emailSender.SendInvitationEmail(signupDto.Email, userInvitationDb.Code);
+            return _emailSender.SendInvitationEmail(signupDto.Email, userInvitationDb.Code);
         }
 
         public void ConfirmUser(SignupConfirmationDto signupConfirmationDto)
@@ -46,7 +46,7 @@ namespace Services
                 signupConfirmationDto.Guid, signupConfirmationDto.Code, signupConfirmationDto.DeviceId);
         }
 
-        public void SendConfirmationEmail(SignupDto signupDto)
+        public string SendConfirmationEmail(SignupDto signupDto)
         {
             var user = _userRepository.GetUser(signupDto.Email);
             var userInvitationDb = new UserInvitationDb()
@@ -56,7 +56,7 @@ namespace Services
             };
 
             _userRepository.AddInvitation(userInvitationDb);
-            _emailSender.SendInvitationEmail(signupDto.Email, userInvitationDb.Code);
+            return _emailSender.SendInvitationEmail(signupDto.Email, userInvitationDb.Code);
         }
     }
 }

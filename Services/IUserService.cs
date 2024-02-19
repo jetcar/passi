@@ -4,8 +4,10 @@ namespace Services
 {
     public interface IUserService
     {
-        void AddUserAndSendConfirmationEmail(SignupDto signupDto);
+        string AddUserAndSendConfirmationEmail(SignupDto signupDto);
+
         void ConfirmUser(SignupConfirmationDto signupConfirmationDto);
-        void SendConfirmationEmail(SignupDto signupDto);
+
+        string SendConfirmationEmail(SignupDto signupDto);
     }
 }

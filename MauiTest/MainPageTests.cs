@@ -18,8 +18,8 @@ namespace MauiTest
             CreateAccount();
 
             var page = new MainView();
-            page.OnAppearing();
-            var accounts = new ObservableCollection<AccountViewModel>();
+            page.OnAppearing(null, null);
+            var accounts = new ObservableCollection<AccountModel>();
             SecureRepository.LoadAccountIntoList(accounts);
             //TestRestService.Result[ConfigSettings.SyncAccounts] = TestBase.SuccesfullResponce<List<AccountMinDto>>(new List<AccountMinDto>()
             //{
@@ -43,7 +43,7 @@ namespace MauiTest
             CreateAccount();
 
             var page = new MainView();
-            page.OnAppearing();
+            page.OnAppearing(null, null);
             while (page.Accounts.Count == 0)
             {
                 Thread.Sleep(1);
@@ -58,7 +58,7 @@ namespace MauiTest
             CreateAccount();
 
             var page = new MainView();
-            page.OnAppearing();
+            page.OnAppearing(null, null);
             while (page.Accounts.Count == 0)
             {
                 Thread.Sleep(1);

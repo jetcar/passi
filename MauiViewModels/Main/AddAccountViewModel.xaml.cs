@@ -13,7 +13,7 @@ using WebApiDto.SignUp;
 
 namespace MauiViewModels.Main
 {
-    public class AddAccountView : BaseViewModel
+    public class AddAccountViewModel : BaseViewModel
     {
         private string _emailText = "";
         private ValidationError _emailError;
@@ -73,7 +73,7 @@ namespace MauiViewModels.Main
             }
         }
 
-        public AddAccountView()
+        public AddAccountViewModel()
         {
             if (Debugger.IsAttached)
                 EmailText = "admin@passi.cloud";
@@ -96,28 +96,29 @@ namespace MauiViewModels.Main
                 DeviceId = _secureRepository.GetDeviceId()
             };
 
-            _navigationService.PushModalSinglePage(new LoadingView(new System.Action(() =>
+            _navigationService.PushModalSinglePage(new LoadingViewModel(new System.Action(() =>
             {
                 _restService.ExecutePostAsync(CurrentProvider, CurrentProvider.SignupPath, signupDto).ContinueWith((response) =>
                 {
-                    if (!response.Result.IsSuccessful && response.Result.StatusCode == HttpStatusCode.BadRequest)
+                    var responseResult = response.Result;
+                    if (!responseResult.IsSuccessful && responseResult.StatusCode == HttpStatusCode.BadRequest)
                     {
                         _mainThreadService.BeginInvokeOnMainThread(() =>
                         {
                             _navigationService.PopModal().ContinueWith((task =>
                             {
-                                var responseError = JsonConvert.DeserializeObject<ApiResponseDto<string>>(response.Result.Content);
+                                var responseError = JsonConvert.DeserializeObject<ApiResponseDto<string>>(responseResult.Content);
                                 ResponseError = responseError.errors;
                             }));
                         });
                     }
-                    else if (response.Result.IsSuccessful)
+                    else if (responseResult.IsSuccessful)
                     {
                         account.Provider = CurrentProvider;
                         _secureRepository.AddAccount(account);
                         _mainThreadService.BeginInvokeOnMainThread(() =>
                         {
-                            _navigationService.PushModalSinglePage((new RegistrationConfirmationView(account)
+                            _navigationService.PushModalSinglePage((new RegistrationConfirmationViewModel(account)
                             ));
                         });
                     }
@@ -154,7 +155,7 @@ namespace MauiViewModels.Main
             return isValid;
         }
 
-        public void CancelButton_OnClicked(object sender, EventArgs e)
+        public void CancelButton_OnClicked()
         {
             _navigationService.NavigateTop();
         }

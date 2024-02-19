@@ -4,12 +4,11 @@
                                xmlns:mauiApp2="clr-namespace:MauiApp2"
                                BackgroundColor="#FAFAFA"
                                xmlns:main1="clr-namespace:MauiApp2.Main"
-                               xmlns:admin="clr-namespace:MauiApp2.Admin"
-                               x:DataType="main1:AccountView"
+                               xmlns:main="clr-namespace:MauiViewModels.Main;assembly=MauiViewModels"
+                               x:DataType="main:AccountViewModel"
                                x:Class="MauiApp2.Main.AccountView">
     <StackLayout>
 
-        <admin:AdminButton BindingContext="{Binding Path=AccountDb}"></admin:AdminButton>
         <StackLayout VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand">
             <Label HorizontalTextAlignment="Center" TextColor="Black" Margin="10" Text="{Binding Path=Message}"></Label>
 

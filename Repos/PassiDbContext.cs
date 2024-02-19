@@ -21,11 +21,10 @@ namespace Repos
         private CurrentContext _currentContext;
         private string _connectionString;
         private ILogger _logger;
+        private readonly Guid _id;
 
         public PassiDbContext()
         {
-            AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
-
             _logger = Logger.None;
             var myConfiguration = new Dictionary<string, string>
             {
@@ -33,6 +32,7 @@ namespace Repos
                 {"AppSetting:DbUser", "postgres"},
                 {"AppSetting:DbPassword", "test1"},
                 {"AppSetting:DbHost", "localhost"},
+                {"AppSetting:DbPort", "5432"},
                 {"AppSetting:DbSslMode", "prefer"},
             };
             var config = new ConfigurationBuilder().AddInMemoryCollection(myConfiguration).Build();
@@ -43,11 +43,10 @@ namespace Repos
 
         public PassiDbContext(AppSetting appSetting, CurrentContext currentContext, ILogger logger)
         {
-            AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
-
             _appSetting = appSetting;
             _currentContext = currentContext;
             _logger = logger;
+            _id = Guid.NewGuid();
         }
 
         public DbSet<CertificateDb> Certificates { get; set; }
@@ -83,7 +82,7 @@ namespace Repos
             optionsBuilder.UseModel(PassiDbContextModel.Instance);
             var trustMode = _appSetting["DbSslMode"] == "Require" ? "Trust Server Certificate=true;" : "";
             optionsBuilder.AddInterceptors(new TaggedQueryCommandInterceptor(_logger));
-            _connectionString = $"host={_appSetting["DbHost"]};database={_appSetting["DbName"]};user id={_appSetting["DbUser"]};password={_appSetting["DbPassword"]};Ssl Mode={_appSetting["DbSslMode"]};{trustMode}";
+            _connectionString = $"host={_appSetting["DbHost"]};port={_appSetting["DbPort"]};database={_appSetting["DbName"]};user id={_appSetting["DbUser"]};password={_appSetting["DbPassword"]};Ssl Mode={_appSetting["DbSslMode"]};{trustMode}";
             Console.WriteLine(_connectionString);
             optionsBuilder.UseNpgsql(_connectionString, o =>
             {
@@ -111,9 +110,9 @@ namespace Repos
 
                 entity.Property(e => e.Thumbprint).HasMaxLength(256);
 
-                entity.Property(e => e.CreationTime).HasColumnType("timestamp without time zone");
+                entity.Property(e => e.CreationTime);
 
-                entity.Property(e => e.ModifiedTime).HasColumnType("timestamp without time zone");
+                entity.Property(e => e.ModifiedTime);
 
                 entity.Property(e => e.ParentCertId).HasMaxLength(256);
 
@@ -141,7 +140,7 @@ namespace Repos
             modelBuilder.Entity<DeviceDb>(entity =>
             {
                 entity.HasKey(x => x.Id);
-                entity.Property(x => x.Id).ValueGeneratedOnAdd().UseIdentityColumn();;
+                entity.Property(x => x.Id).ValueGeneratedOnAdd().UseIdentityColumn(); ;
                 entity.HasIndex(e => new { e.DeviceId, e.Platform }, "IX_Devices_DeviceId_Platform")
                     .IsUnique();
 
@@ -150,13 +149,13 @@ namespace Repos
                 entity.HasIndex(e => e.NotificationToken, "IX_Devices_NotificationToken")
                     .IsUnique();
 
-                entity.Property(e => e.CreationTime).HasColumnType("timestamp without time zone");
+                entity.Property(e => e.CreationTime);
 
                 entity.Property(e => e.DeviceId)
                     .IsRequired()
                     .HasMaxLength(256);
 
-                entity.Property(e => e.ModifiedTime).HasColumnType("timestamp without time zone");
+                entity.Property(e => e.ModifiedTime);
 
                 entity.Property(e => e.NotificationToken).HasMaxLength(1024);
 
@@ -171,16 +170,16 @@ namespace Repos
             modelBuilder.Entity<UserInvitationDb>(entity =>
             {
                 entity.HasKey(x => x.Id);
-                entity.Property(x => x.Id).ValueGeneratedOnAdd().UseIdentityColumn();;
+                entity.Property(x => x.Id).ValueGeneratedOnAdd().UseIdentityColumn(); ;
                 entity.HasIndex(e => e.ModifiedById, "IX_Invitations_ModifiedById");
 
                 entity.HasIndex(e => e.UserId, "IX_Invitations_UserId");
 
                 entity.Property(e => e.Code).HasMaxLength(10);
 
-                entity.Property(e => e.CreationTime).HasColumnType("timestamp without time zone");
+                entity.Property(e => e.CreationTime);
 
-                entity.Property(e => e.ModifiedTime).HasColumnType("timestamp without time zone");
+                entity.Property(e => e.ModifiedTime);
 
                 entity.HasOne(d => d.ModifiedBy)
                     .WithMany(p => p.InvitationModifiedBies)
@@ -205,13 +204,12 @@ namespace Repos
                 entity.HasIndex(e => e.UserId, "IX_Sessions_UserId");
                 entity.Property(e => e.SignedHashNew).HasMaxLength(1024);
 
-                entity.Property(e => e.CreationTime).HasColumnType("timestamp without time zone");
+                entity.Property(e => e.CreationTime);
 
                 entity.Property(e => e.ExpirationTime)
-                    .HasColumnType("timestamp without time zone");
+                    ;
 
-                entity.Property(e => e.ModifiedTime).HasColumnType("timestamp without time zone");
-
+                entity.Property(e => e.ModifiedTime);
 
                 entity.HasOne(d => d.ModifiedBy)
                     .WithMany(p => p.SessionModifiedBies)
@@ -226,7 +224,7 @@ namespace Repos
             modelBuilder.Entity<UserDb>(entity =>
             {
                 entity.HasKey(x => x.Id);
-                entity.Property(x => x.Id).ValueGeneratedOnAdd().UseIdentityColumn();;
+                entity.Property(x => x.Id).ValueGeneratedOnAdd().UseIdentityColumn(); ;
 
                 entity.HasIndex(e => e.DeviceId, "IX_Users_DeviceId");
 
@@ -238,13 +236,13 @@ namespace Repos
 
                 entity.HasIndex(e => e.ModifiedById, "IX_Users_ModifiedById");
 
-                entity.Property(e => e.CreationTime).HasColumnType("timestamp without time zone");
+                entity.Property(e => e.CreationTime);
 
                 entity.Property(e => e.DeviceId).HasDefaultValueSql("0");
 
                 entity.Property(e => e.EmailHash).HasMaxLength(256);
 
-                entity.Property(e => e.ModifiedTime).HasColumnType("timestamp without time zone");
+                entity.Property(e => e.ModifiedTime);
 
                 entity.HasOne(d => d.Device)
                     .WithMany(p => p.Users)
@@ -267,6 +265,5 @@ namespace Repos
 
             base.OnModelCreating(modelBuilder);
         }
-
     }
 }

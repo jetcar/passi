@@ -1,16 +1,22 @@
 using System;
 using System.Collections.Generic;
+using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
 using System.Threading;
 using AppConfig;
 using MauiTest.Tools;
 using MauiViewModels;
 using MauiViewModels.Notifications;
 using MauiViewModels.utils.Services;
+using MauiViewModels.utils.Services.Certificate;
 using MauiViewModels.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Maui.Graphics;
 using Newtonsoft.Json;
 using NUnit.Framework;
+using passi_webapi.Dto;
 using RestSharp;
 using WebApiDto;
 using WebApiDto.Auth;
@@ -21,7 +27,7 @@ namespace MauiTest.TestClasses;
 
 public class NofiticationViewTestClass
 {
-    public static NotificationVerifyRequestView PollOpenSessions(AccountViewModel accountViewModel, out Microsoft.Maui.Graphics.Color color)
+    public static NotificationVerifyRequestViewModel PollOpenSessions(AccountModel accountViewModel, out Microsoft.Maui.Graphics.Color color)
     {
         var rest = new RestSharp.RestClient(ConfigSettings.IdentityUrl);
         var restRequest = new RestRequest(ConfigSettings.IdentityLogin, Method.Post);
@@ -41,16 +47,16 @@ public class NofiticationViewTestClass
         Microsoft.Maui.Graphics.Color.TryParse(checkColor, out color);
 
         Assert.AreEqual(accountViewModel.Email, username);
-        var syncService = App.Services.GetService<ISyncService>();
+        var syncService = CommonApp.Services.GetService<ISyncService>();
         syncService.PollNotifications();
         while (!(syncService.PollingTask.IsCompleted))
             Thread.Sleep(1);
 
-        while (!(TestBase.CurrentView is NotificationVerifyRequestView))
+        while (!(TestBase.CurrentView is NotificationVerifyRequestViewModel))
         {
             Thread.Sleep(1);
         }
-        var page = TestBase.CurrentView as NotificationVerifyRequestView;
+        var page = TestBase.CurrentView as NotificationVerifyRequestViewModel;
         while (page._account == null)
             Thread.Sleep(1);
         Assert.AreEqual(page._account.Guid, accountViewModel.Guid);
@@ -59,7 +65,7 @@ public class NofiticationViewTestClass
         return page;
     }
 
-    public static MainView PollExistingSessionId(AccountViewModel accountViewModel, Color color, int timeoutSeconds, Guid? sessionid = null)
+    public static MainView PollExistingSessionId(AccountModel accountViewModel, Color color, int timeoutSeconds, Guid? sessionid = null)
     {
         // TestNavigationService.navigationsCount = 0;
         //TestRestService.Result[ConfigSettings.SyncAccounts] = TestBase.SuccesfullResponce<List<AccountMinDto>>(new List<AccountMinDto>()
@@ -81,7 +87,7 @@ public class NofiticationViewTestClass
         //    Sender = "localhost",
         //    SessionId = sessionid ?? Guid.NewGuid(),
         //});
-        var syncService = App.Services.GetService<ISyncService>();
+        var syncService = CommonApp.Services.GetService<ISyncService>();
         syncService.PollNotifications();
         while (!(syncService.PollingTask.IsCompleted))
         {
@@ -92,7 +98,7 @@ public class NofiticationViewTestClass
         return page;
     }
 
-    public static ConfirmByPinView ChooseColorWithPin(NotificationVerifyRequestView notificationPage, Microsoft.Maui.Graphics.Color color)
+    public static ConfirmByPinViewModel ChooseColorWithPin(NotificationVerifyRequestViewModel notificationPage, Microsoft.Maui.Graphics.Color color)
     {
         TestNavigationService.navigationsCount = 0;
         if (notificationPage.Color1 == color)
@@ -102,17 +108,17 @@ public class NofiticationViewTestClass
         if (notificationPage.Color3 == color)
             notificationPage.ImageButton3_OnClicked();
 
-        while (!(TestBase.CurrentView is ConfirmByPinView))
+        while (!(TestBase.CurrentView is ConfirmByPinViewModel))
         {
             Thread.Sleep(1);
         }
         Assert.AreEqual(1, TestNavigationService.navigationsCount);
 
-        var confirmByPin = TestBase.CurrentView as ConfirmByPinView;
+        var confirmByPin = TestBase.CurrentView as ConfirmByPinViewModel;
         return confirmByPin;
     }
 
-    public static MainView ChooseColorWithoutPin(NotificationVerifyRequestView notificationPage, Microsoft.Maui.Graphics.Color color)
+    public static MainView ChooseColorWithoutPin(NotificationVerifyRequestViewModel notificationPage, Microsoft.Maui.Graphics.Color color)
     {
         //TestRestService.Result[ConfigSettings.Authorize] = TestBase.SuccesfullResponce();
 
@@ -137,7 +143,7 @@ public class NofiticationViewTestClass
         return mainPage;
     }
 
-    public static NotificationVerifyRequestView ChooseColorWithoutPinFingerPrint(NotificationVerifyRequestView notificationPage, Microsoft.Maui.Graphics.Color color)
+    public static NotificationVerifyRequestViewModel ChooseColorWithoutPinFingerPrint(NotificationVerifyRequestViewModel notificationPage, Microsoft.Maui.Graphics.Color color)
     {
         //TestRestService.Result[ConfigSettings.Authorize] = TestBase.SuccesfullResponce();
 
@@ -148,13 +154,45 @@ public class NofiticationViewTestClass
         if (notificationPage.Color3 == color)
             notificationPage.ImageButton3_OnClicked();
 
-        while (!(TestBase.CurrentView is NotificationVerifyRequestView))
+        while (!(TestBase.CurrentView is NotificationVerifyRequestViewModel))
         {
             Thread.Sleep(1);
         }
 
-        var mainPage = TestBase.CurrentView as NotificationVerifyRequestView;
+        var mainPage = TestBase.CurrentView as NotificationVerifyRequestViewModel;
 
         return mainPage;
+    }
+
+    public static bool VerifySessionSignature(Guid sessionId, string thumbprint, string email,
+        string nonce)
+    {
+        var myRestClient = new RestSharp.RestClient(ConfigSettings.PassiUrl);
+        var request = new RestRequest($"api/Auth/session?sessionId={sessionId}&thumbprint={thumbprint}&username={email}", Method.Get);
+        var result = myRestClient.ExecuteAsync(request).Result;
+        if (result.IsSuccessful)
+        {
+            var cert = JsonConvert.DeserializeObject<SessionMinDto>(result.Content);
+            // ComputeHash - returns byte array
+            return VerifyData(nonce, cert.SignedHash, cert.PublicCert);
+        }
+        return false;
+    }
+
+    public static bool VerifyData(string data, string signedData, string base64PublicCert)
+    {
+        var parentCert = new X509Certificate2(Convert.FromBase64String(base64PublicCert));
+
+        using (var sha512 = SHA512.Create())
+        {
+            // ComputeHash - returns byte array
+            byte[] bytes = sha512.ComputeHash(Encoding.ASCII.GetBytes(data));
+
+            var verify = parentCert.GetRSAPublicKey().VerifyHash(bytes,
+                Convert.FromBase64String(signedData), HashAlgorithmName.SHA512,
+                RSASignaturePadding.Pkcs1);
+
+            return verify;
+        }
     }
 }

@@ -10,29 +10,29 @@ namespace MauiTest.TestClasses;
 
 public class FingerPrintTestClass
 {
-    public static FingerPrintConfirmByPinView AddFingerPrint(AccountView accountView)
+    public static FingerPrintConfirmByPinViewModel AddFingerPrint(AccountViewModel accountView)
     {
         accountView.AddBiometric_Button_OnClicked();
 
         TestBase.TouchFingerPrintWithGoodResult();
 
-        while (!(TestBase.CurrentView is FingerPrintConfirmByPinView))
+        while (!(TestBase.CurrentView is FingerPrintConfirmByPinViewModel))
         {
             Thread.Sleep(1);
         }
 
-        Assert.IsTrue(TestBase.CurrentView is FingerPrintConfirmByPinView);
+        Assert.IsTrue(TestBase.CurrentView is FingerPrintConfirmByPinViewModel);
 
-        var fingerPrintConfirmByPinView = TestBase.CurrentView as FingerPrintConfirmByPinView;
+        var fingerPrintConfirmByPinView = TestBase.CurrentView as FingerPrintConfirmByPinViewModel;
         return fingerPrintConfirmByPinView;
     }
 
-    public static void AddFingerPrintNoPin(AccountView accountView)
+    public static void AddFingerPrintNoPin(AccountViewModel accountView)
     {
         TestNavigationService.navigationsCount = 0;
         accountView.AddBiometric_Button_OnClicked();
         TestBase.TouchFingerPrintWithGoodResult();
-        Assert.IsTrue(TestBase.CurrentView is LoadingView);
+        Assert.IsTrue(TestBase.CurrentView is LoadingViewModel);
 
         while (!(TestBase.CurrentView is MainView))
         {

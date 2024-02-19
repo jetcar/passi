@@ -1,28 +1,21 @@
 using System;
 using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Net.Sockets;
-using System.Net;
 using System.Threading.Tasks;
 using ConfigurationManager;
-using Docker.DotNet;
-using Docker.DotNet.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities;
 using NUnit.Framework;
 using passi_webapi;
 using passi_webapi.Controllers;
-using Repos;
 using RestSharp;
 using Services;
 using ILogger = Serilog.ILogger;
 using Logger = Serilog.Core.Logger;
 using Message = FirebaseAdmin.Messaging.Message;
+using DotNet.Testcontainers.Builders;
+using DotNet.Testcontainers.Containers;
 
 namespace PassiWebApiTests;
 
@@ -30,15 +23,13 @@ public class TestBase
 {
     private IServiceScope _currentScope;
     public IServiceProvider ServiceProvider { get; private set; }
-    static string DB_CONTAINER_NAME = "IntegrationTestingContainer_Accessioning";
-
 
     [OneTimeSetUp]
     public void OneTimeSetUp()
     {
-
         IServiceCollection services = new ServiceCollection();
         services.AddScoped<SignUpController>();
+        services.AddScoped<CertificateController>();
         services.AddSingleton<ILogger>(Logger.None);
         //IConfiguration configuration = new ConfigurationBuilder().AddInMemoryCollection(myConfiguration).Build();
         IConfiguration configuration = new ConfigurationBuilder().AddJsonFile("test.appsettings.json").Build();
@@ -55,16 +46,9 @@ public class TestBase
         services.AddScoped<IFireBaseClient, TestFireBaseClient>();
 
         ServiceProvider = services.BuildServiceProvider();
-        var appSetting = ServiceProvider.GetService<AppSetting>();
-        CleanupRunningContainers().GetAwaiter().GetResult();
-        var dockerClient = GetDockerClient();
+        PrepareDockers();
 
-        string DB_PASSWORD = appSetting["DbPassword"];
-        string DB_USER = appSetting["DbUser"];
-        string DB_NAME = appSetting["DbName"];
-        string DB_IMAGE = "postgres:15.3";
         // This call ensures that the latest SQL Server Docker image is pulled
-        StartPostgresContainer(dockerClient, DB_IMAGE, DB_USER, DB_PASSWORD, DB_NAME);
 
         var startupServices = ServiceProvider.GetServices<IStartupFilter>();
         foreach (var startupService in startupServices)
@@ -72,57 +56,6 @@ public class TestBase
             startupService.Configure(NextAction).Invoke(new ApplicationBuilder(ServiceProvider));
         }
         passiApiStartup.InitializeDatabase(ServiceProvider);
-
-    }
-
-    private void StartPostgresContainer(DockerClient dockerClient, string dbImage, string dbUser, string dbPassword, string dbName)
-    {
-        dockerClient.Images.CreateImageAsync(new ImagesCreateParameters
-        {
-            FromImage = dbImage
-        }, null, new Progress<JSONMessage>()).GetAwaiter().GetResult();
-
-
-        var contList = dockerClient.Containers.ListContainersAsync(new ContainersListParameters() { All = true }).Result;
-        var existingCont = contList.FirstOrDefault(c => c.Names.Any(n => n.Contains(DB_CONTAINER_NAME)));
-
-        if (existingCont == null)
-        {
-            var sqlContainer = dockerClient
-                .Containers
-                .CreateContainerAsync(new CreateContainerParameters
-                {
-                    Name = DB_CONTAINER_NAME,
-                    Image = dbImage,
-                    Env = new List<string>
-                    {
-                        $"POSTGRES_USER={dbUser}",
-                        $"POSTGRES_PASSWORD={dbPassword}",
-                        $"POSTGRES_DB={dbName}",
-                    },
-                    HostConfig = new HostConfig
-                    {
-                        PortBindings = new Dictionary<string, IList<PortBinding>>
-                        {
-                            {
-                                "5432/tcp",
-                                new PortBinding[]
-                                {
-                                    new PortBinding
-                                    {
-                                        HostPort = "5432"
-                                    }
-                                }
-                            }
-                        }
-                    },
-                }).Result;
-
-            dockerClient.Containers.StartContainerAsync(sqlContainer.ID, new ContainerStartParameters()).GetAwaiter()
-                .GetResult();
-
-            WaitUntilDatabaseAvailableAsync().GetAwaiter().GetResult();
-        }
     }
 
     [SetUp]
@@ -130,10 +63,64 @@ public class TestBase
     {
         TestEmailSender.Code = null;
     }
+
+    private static IContainer _pgContainer;
+    private static IContainer _redisContainer;
+
+    private void PrepareDockers()
+    {
+        var appSetting = ServiceProvider.GetService<AppSetting>();
+
+        var dockerEndpoint = Environment.GetEnvironmentVariable("DOCKER_HOST");
+
+        var pgpassword = "1";
+        if (_pgContainer == null)
+        {
+            var containerBuilder = new ContainerBuilder()
+                .WithImage("postgres:15.5")
+                .WithPortBinding(5432, true)
+                .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(5432))
+                .WithEnvironment("POSTGRES_PASSWORD", pgpassword);
+            if (!string.IsNullOrEmpty(dockerEndpoint))
+                containerBuilder.WithDockerEndpoint(dockerEndpoint);
+            _pgContainer = containerBuilder
+                .Build();
+            Console.WriteLine("starting postgres container");
+            _pgContainer.StartAsync().ConfigureAwait(false).GetAwaiter().GetResult();
+        }
+
+        var pgPort = _pgContainer
+            .GetMappedPublicPort(5432).ToString();
+        appSetting["DbHost"] = _pgContainer.Hostname;
+        appSetting["DbUser"] = "postgres";
+        appSetting["DbPassword"] = pgpassword;
+        appSetting["DbPort"] = pgPort;
+        if (_redisContainer == null)
+        {
+            var containerBuilder = new ContainerBuilder()
+                .WithImage("redis:latest")
+                .WithPortBinding(6379, true)
+                .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(6379));
+            if (!string.IsNullOrEmpty(dockerEndpoint))
+                containerBuilder.WithDockerEndpoint(dockerEndpoint);
+
+            _redisContainer = containerBuilder
+                .Build();
+            Console.WriteLine("starting redis container");
+
+            _redisContainer.StartAsync().ConfigureAwait(false).GetAwaiter().GetResult();
+        }
+        var redisport = _redisContainer
+            .GetMappedPublicPort(6379).ToString();
+        appSetting["redis"] = _redisContainer.Hostname;
+        appSetting["redisPort"] = redisport;
+
+        Console.WriteLine("all containers are started");
+    }
+
     [TearDown]
     public void TearDown()
     {
-
         CurrentScope = null;
         foreach (var serviceScope in AllScopes)
         {
@@ -146,7 +133,6 @@ public class TestBase
     {
         ServiceProvider = null;
     }
-
 
     public IServiceScope CurrentScope
     {
@@ -167,78 +153,7 @@ public class TestBase
 
     private void NextAction(IApplicationBuilder obj)
     {
-
     }
-
-
-    private static DockerClient GetDockerClient()
-    {
-        return new DockerClientConfiguration().CreateClient();
-    }
-
-    private static async Task CleanupRunningContainers(int hoursTillExpiration = -24)
-    {
-        var dockerClient = GetDockerClient();
-
-        var runningContainers = await dockerClient.Containers
-            .ListContainersAsync(new ContainersListParameters());
-
-        foreach (var runningContainer in runningContainers.Where(cont => cont.Names.Any(n => n.Contains(DB_CONTAINER_NAME))))
-        {
-            // Stopping all test containers that are older than 24 hours
-            try
-            {
-                await EnsureDockerContainersStoppedAndRemovedAsync(runningContainer.ID);
-            }
-            catch
-            {
-                // Ignoring failures to stop running containers
-            }
-        }
-    }
-
-    public static async Task EnsureDockerContainersStoppedAndRemovedAsync(string dockerContainerId)
-    {
-        var dockerClient = GetDockerClient();
-        await dockerClient.Containers
-            .StopContainerAsync(dockerContainerId, new ContainerStopParameters());
-        await dockerClient.Containers
-            .RemoveContainerAsync(dockerContainerId, new ContainerRemoveParameters());
-    }
-
-    private async Task WaitUntilDatabaseAvailableAsync()
-    {
-        var start = DateTime.UtcNow;
-        const int maxWaitTimeSeconds = 60;
-        var connectionEstablished = false;
-        using (var scope = ServiceProvider.CreateScope())
-        {
-            var dbContext = scope.ServiceProvider.GetService<PassiDbContext>();
-
-            while (!connectionEstablished && start.AddSeconds(maxWaitTimeSeconds) > DateTime.UtcNow)
-            {
-                try
-                {
-                    var connection = dbContext.Database.GetDbConnection();
-                    connection.Open();
-                    connectionEstablished = connection.State == ConnectionState.Open;
-                }
-                catch
-                {
-                    // If opening the SQL connection fails, SQL Server is not ready yet
-                    await Task.Delay(500);
-                }
-            }
-        }
-
-        if (!connectionEstablished)
-        {
-            throw new Exception($"Connection to the SQL docker database could not be established within {maxWaitTimeSeconds} seconds.");
-        }
-    }
-
-
-
 }
 
 public class TestFireBaseClient : IFireBaseClient
@@ -252,6 +167,7 @@ public class TestFireBaseClient : IFireBaseClient
 public class TestEmailSender : IEmailSender
 {
     public static string Code;
+
     public string SendInvitationEmail(string email, string code)
     {
         return Code = code;

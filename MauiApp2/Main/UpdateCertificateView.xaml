@@ -4,9 +4,10 @@
                                xmlns:mauiApp2="clr-namespace:MauiApp2"
                                xmlns:main="clr-namespace:MauiApp2.Main"
                                xmlns:tools="clr-namespace:MauiApp2.Tools"
+                               xmlns:main1="clr-namespace:MauiViewModels.Main;assembly=MauiViewModels"
                                BackgroundColor="#FAFAFA"
                                x:Class="MauiApp2.Main.UpdateCertificateView"
-                               x:DataType="main:UpdateCertificateView"
+                               x:DataType="main1:UpdateCertificateViewModel"
 >
     <mauiApp2:BaseContentPage.Content>
         <ScrollView>

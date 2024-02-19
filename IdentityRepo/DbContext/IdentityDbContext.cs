@@ -47,6 +47,7 @@ namespace IdentityRepo.DbContext
                 {"AppSetting:DbUser", "postgres"},
                 {"AppSetting:DbPassword", "q"},
                 {"AppSetting:DbHost", "localhost"},
+                {"AppSetting:DbPort", "5432"},
             };
             var config = new ConfigurationBuilder().AddInMemoryCollection(myConfiguration).Build();
             var appSetting = new AppSetting(config);
@@ -60,7 +61,7 @@ namespace IdentityRepo.DbContext
             _logger.Debug("dbhost=" + _appSetting["DbHost"]);
             var trustMode = _appSetting["DbSslMode"] == "Require" ? "Trust Server Certificate=true;" : "";
             //optionsBuilder.AddInterceptors(new TaggedQueryCommandInterceptor(_logger));
-            var connectionString = $"host={_appSetting["DbHost"]};database={_appSetting["IdentityDbName"]};user id={_appSetting["DbUser"]};password={_appSetting["DbPassword"]};Ssl Mode={_appSetting["DbSslMode"]};{trustMode}";
+            var connectionString = $"host={_appSetting["DbHost"]};port={_appSetting["DbPort"]};database={_appSetting["IdentityDbName"]};user id={_appSetting["DbUser"]};password={_appSetting["DbPassword"]};Ssl Mode={_appSetting["DbSslMode"]};{trustMode}";
             Console.WriteLine(connectionString);
 
             var serviceProvider = new ServiceCollection()

@@ -9,7 +9,7 @@ namespace MauiTest.TestClasses;
 
 public class FingerPrintPinViewClass
 {
-    public static void FinishFingerPrintAdding(FingerPrintConfirmByPinView fingerPrintConfirmByPinView)
+    public static void FinishFingerPrintAdding(FingerPrintConfirmByPinViewModel fingerPrintConfirmByPinView)
     {
         TestNavigationService.navigationsCount = 0;
         fingerPrintConfirmByPinView.NumbersPad_OnNumberClicked("1");
@@ -32,7 +32,7 @@ public class FingerPrintPinViewClass
         Assert.IsTrue(TestBase.CurrentView is MainView);
     }
 
-    public static FingerPrintConfirmByPinView FinishFingerPrintAddingIncorrectPin(FingerPrintConfirmByPinView fingerPrintConfirmByPinView)
+    public static FingerPrintConfirmByPinViewModel FinishFingerPrintAddingIncorrectPin(FingerPrintConfirmByPinViewModel fingerPrintConfirmByPinView)
     {
         fingerPrintConfirmByPinView.NumbersPad_OnNumberClicked("1");
         fingerPrintConfirmByPinView.NumbersPad_OnNumberClicked("1");
@@ -40,13 +40,13 @@ public class FingerPrintPinViewClass
         fingerPrintConfirmByPinView.NumbersPad_OnNumberClicked("1");
         fingerPrintConfirmByPinView.NumbersPad_OnNumberClicked("2");
         fingerPrintConfirmByPinView.NumbersPad_OnNumberClicked("1");
-        Assert.IsTrue(TestBase.CurrentView is LoadingView);
+        Assert.IsTrue(TestBase.CurrentView is LoadingViewModel);
         Assert.AreEqual("****", fingerPrintConfirmByPinView.Pin1Masked);
-        while (!(TestBase.CurrentView is FingerPrintConfirmByPinView) || !TestBase.CurrentView.Appeared)
+        while (!(TestBase.CurrentView is FingerPrintConfirmByPinViewModel) || !TestBase.CurrentView.Appeared)
         {
             Thread.Sleep(1);
         }
 
-        return TestBase.CurrentView as FingerPrintConfirmByPinView;
+        return TestBase.CurrentView as FingerPrintConfirmByPinViewModel;
     }
 }

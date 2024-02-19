@@ -74,7 +74,7 @@ public class SecureRepository : ISecureRepository
         }
     }
 
-    public void LoadAccountIntoList(ObservableCollection<AccountViewModel> accounts)
+    public void LoadAccountIntoList(ObservableCollection<AccountModel> accounts)
     {
         lock (_locker)
         {
@@ -84,14 +84,14 @@ public class SecureRepository : ISecureRepository
             }
             foreach (var accountDb in Accounts)
             {
-                var accountView = new AccountViewModel();
+                var accountView = new AccountModel();
                 CopyAll(accountDb, accountView);
                 accounts.Add(accountView);
             }
         }
     }
 
-    public void DeleteAccount(AccountViewModel account, Action callback)
+    public void DeleteAccount(AccountModel account, Action callback)
     {
         lock (_locker)
         {
@@ -214,6 +214,10 @@ public class SecureRepository : ISecureRepository
             if (Providers == null)
             {
                 Providers = _mySecureStorage.GetAsync<List<ProviderDb>>(StorageKeys.ProvidersKey).Result ?? new List<ProviderDb>();
+                foreach (var provider in Providers.Where(x => x.PassiWebApiUrl == null).ToList())
+                {
+                    Providers.Remove(provider);
+                }
             }
 
             if (Providers.All(x => x.PassiWebApiUrl != ConfigSettings.PassiUrl))
@@ -337,9 +341,9 @@ public interface ISecureRepository
 
     void UpdateAccount(AccountDb account);
 
-    void LoadAccountIntoList(ObservableCollection<AccountViewModel> accounts);
+    void LoadAccountIntoList(ObservableCollection<AccountModel> accounts);
 
-    void DeleteAccount(AccountViewModel account, Action callback);
+    void DeleteAccount(AccountModel account, Action callback);
 
     Task SaveFingerPrintKey(AccountDb account, X509Certificate2 cert);
 

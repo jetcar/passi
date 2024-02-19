@@ -18,6 +18,7 @@
     "DbName": "passi_test",
     "DbUser": "postgres",
     "DbPassword": "test1",
+    "DbPort": "5432",
     "Timeout": "2",
     "DbSslMode": "Allow",
     "PassiUrl": "http://192.168.0.208:5004/passiapi",
@@ -25,6 +26,7 @@
     "PassiClientId": "PassiClient",
     "PassiSecret": "secret1",
     "redis": "localhost",
+    "redisPort": "6379",
     "IsTest": "false",
     "projectId": "projectId"
   },

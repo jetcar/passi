@@ -6,6 +6,7 @@ using Services;
 using System;
 using System.Threading.Tasks;
 using ConfigurationManager;
+using IdentityModel;
 using Microsoft.AspNetCore.SignalR.Protocol;
 using Serilog;
 using WebApiDto.SignUp;
@@ -43,11 +44,13 @@ namespace passi_webapi.Controllers
                 {
                     if (_userRepository.IsUsernameTaken(signupDto.Email))
                     {
-                        _userService.SendConfirmationEmail(signupDto);
+                        var result = _userService.SendConfirmationEmail(signupDto);
+                        _logger.Debug(result);
                     }
                     else
                     {
-                        _userService.AddUserAndSendConfirmationEmail(signupDto);
+                        var result = _userService.AddUserAndSendConfirmationEmail(signupDto);
+                        _logger.Debug(result);
                     }
 
                     transaction.Commit();
@@ -62,7 +65,6 @@ namespace passi_webapi.Controllers
             if (Convert.ToBoolean(_appSetting["DoNotSendMail"]))
             {
                 signupDto.Email = signupDto.Email.Trim();
-                var strategy = _userRepository.GetExecutionStrategy();
                 _logger.Debug("returning code");
                 var value = _userRepository.GetCode(signupDto.Email);
                 return value;
@@ -86,7 +88,6 @@ namespace passi_webapi.Controllers
                         _userRepository.IncreaseFailedRetryCount(signupConfirmationDto.Email);
                         throw new BadRequestException("Code not found");
                     }
-
                     _certValidator.ValidateCertificate(signupConfirmationDto.PublicCert, signupConfirmationDto.Email);
 
                     _userService.ConfirmUser(signupConfirmationDto);

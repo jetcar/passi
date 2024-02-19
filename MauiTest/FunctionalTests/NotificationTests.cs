@@ -175,7 +175,7 @@ namespace MauiTest.FunctionalTests
 
             var accountView = MainTestClass.OpenAccount(mainPage, mainPage.Accounts[0]);
             FingerPrintTestClass.AddFingerPrintNoPin(accountView);
-            Assert.AreEqual(App.Services.GetService<ISecureRepository>().GetAccount(mainPage.Accounts[0].Guid).HaveFingerprint, true);
+            Assert.AreEqual(CommonApp.Services.GetService<ISecureRepository>().GetAccount(mainPage.Accounts[0].Guid).HaveFingerprint, true);
 
             var notificationPage =
                 NofiticationViewTestClass.PollOpenSessions(mainPage.Accounts[0], out var color);
@@ -309,6 +309,9 @@ namespace MauiTest.FunctionalTests
             Assert.AreEqual(2, TestNavigationService.navigationsCount);
 
             Assert.IsNotNull(mainPage2);
+            var result = NofiticationViewTestClass.VerifySessionSignature(notificationPage.Message.SessionId,
+                mainPage.Accounts[0].Thumbprint, mainPage.Accounts[0].Email, notificationPage.Message.RandomString);
+            Assert.IsTrue(result);
         }
 
         [Test]

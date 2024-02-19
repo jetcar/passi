@@ -3,10 +3,10 @@ using Android.Content.PM;
 using Android.OS;
 using AppCommon;
 using MauiApp2.utils.Services;
+using MauiViewModels;
 using MauiViewModels.FingerPrint;
 using MauiViewModels.utils.Services;
 using MauiViewModels.utils.Services.Certificate;
-using IMainThreadService = MauiApp2.utils.Services.IMainThreadService;
 
 namespace MauiApp2.Platforms.Android
 {
@@ -19,7 +19,7 @@ namespace MauiApp2.Platforms.Android
 
         public MainActivity()
         {
-            App.Services = ConfigureServices();
+            CommonApp.Services = ConfigureServices();
         }
 
         protected override void OnCreate(Bundle savedInstanceState)
@@ -28,8 +28,8 @@ namespace MauiApp2.Platforms.Android
             IsPlayServicesAvailable();
 
             CreateNotificationChannel();
-            var secureRepository = App.Services.GetService<ISecureRepository>();
-            var dateTimeService = App.Services.GetService<IDateTimeService>();
+            var secureRepository = CommonApp.Services.GetService<ISecureRepository>();
+            var dateTimeService = CommonApp.Services.GetService<IDateTimeService>();
             dateTimeService.Init();
 
             Task.Run(() =>
@@ -43,13 +43,13 @@ namespace MauiApp2.Platforms.Android
                 // MyFirebaseIIDService.SendRegistrationToServer(token);
             });
 
-            App.CloseApp = () =>
+            CommonApp.CloseApp = () =>
             {
                 this.FinishAffinity();
             };
-            App.StartFingerPrintReading = FingerPrintAuthentication;
+            CommonApp.StartFingerPrintReading = FingerPrintAuthentication;
 
-            App.CancelNotifications = () =>
+            CommonApp.CancelNotifications = () =>
             {
                 var notificationManager =
                     (NotificationManager)GetSystemService(Android.MainActivity.NotificationService);
@@ -59,7 +59,7 @@ namespace MauiApp2.Platforms.Android
 
         protected void FingerPrintAuthentication()
         {
-            var biometricHelper = App.Services.GetService<IBiometricHelper>();
+            var biometricHelper = CommonApp.Services.GetService<IBiometricHelper>();
             biometricHelper.RegisterOrAuthenticate();
         }
 

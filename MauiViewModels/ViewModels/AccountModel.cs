@@ -6,7 +6,7 @@ using MauiViewModels.StorageModels;
 
 namespace MauiViewModels.ViewModels;
 
-public class AccountViewModel : INotifyPropertyChanged
+public class AccountModel : INotifyPropertyChanged
 {
     private Guid _guid;
     private bool _isConfirmed;

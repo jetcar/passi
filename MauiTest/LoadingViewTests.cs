@@ -14,14 +14,14 @@ namespace MauiTest
         [Test, Timeout(100000)]
         public void LoadingViewExpired()
         {
-            App.SkipLoadingTimer = false;
+            CommonApp.SkipLoadingTimer = false;
             TestBase.Navigation.PushModalSinglePage(new MainView());
-            TestBase.Navigation.PushModalSinglePage(new LoadingView(() =>
+            TestBase.Navigation.PushModalSinglePage(new LoadingViewModel(() =>
             {
                 Task.Delay(2000);
             }, 1000));
 
-            while (!TestBase.CurrentView.Appeared || !(TestBase.CurrentView is LoadingView))
+            while (!TestBase.CurrentView.Appeared || !(TestBase.CurrentView is LoadingViewModel))
             {
                 Thread.Sleep(1);
             }
@@ -36,9 +36,9 @@ namespace MauiTest
         public void LoadingViewNavigateBack()
         {
             TestBase.Navigation.PushModalSinglePage(new MainView());
-            TestBase.Navigation.PushModalSinglePage(new LoadingView(() =>
+            TestBase.Navigation.PushModalSinglePage(new LoadingViewModel(() =>
             {
-                App.Services.GetService<INavigationService>().PopModal();
+                CommonApp.Services.GetService<INavigationService>().PopModal();
             }));
 
             while (!TestBase.CurrentView.Appeared || !(TestBase.CurrentView is MainView))

@@ -5,9 +5,10 @@
                           xmlns:registration1="clr-namespace:MauiApp2.Registration"
                           xmlns:mauiApp21="clr-namespace:MauiApp2"
                           xmlns:tools="clr-namespace:MauiApp2.Tools"
+                          xmlns:registration="clr-namespace:MauiViewModels.Registration;assembly=MauiViewModels"
                           BackgroundColor="#FAFAFA"
                           x:Class="MauiApp2.Registration.FinishConfirmationView"
-                          x:DataType="registration1:FinishConfirmationView"
+                          x:DataType="registration:FinishConfirmationViewModel"
 >
     <mauiApp2:BaseContentPage.Content>
 

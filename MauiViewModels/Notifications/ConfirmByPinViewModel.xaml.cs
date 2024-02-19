@@ -11,7 +11,7 @@ using Timer = System.Timers.Timer;
 
 namespace MauiViewModels.Notifications
 {
-    public class ConfirmByPinView : BaseViewModel
+    public class ConfirmByPinViewModel : BaseViewModel
     {
         private string _requesterName;
         private MySecureString _pin1 = new MySecureString("");
@@ -25,7 +25,7 @@ namespace MauiViewModels.Notifications
         public AccountDb _accountDb;
         private string _email;
 
-        public ConfirmByPinView()
+        public ConfirmByPinViewModel()
         {
             _pinLength = 4;
             _timer = new Timer();
@@ -55,14 +55,14 @@ namespace MauiViewModels.Notifications
             }
         }
 
-        public override void OnDisappearing()
+        public override void OnDisappearing(object sender, EventArgs eventArgs)
         {
-            App.FingerPrintReadingResult = null;
+            CommonApp.FingerPrintReadingResult = null;
             _timer.Elapsed -= _timer_Elapsed;
 
             _timer.Stop();
             _timer.Dispose();
-            base.OnDisappearing();
+            base.OnDisappearing(sender, eventArgs);
         }
 
         public string Email
@@ -75,7 +75,7 @@ namespace MauiViewModels.Notifications
             }
         }
 
-        public override void OnAppearing()
+        public override void OnAppearing(object sender, EventArgs eventArgs)
         {
             RequesterName = Message.Sender;
             ReturnHost = Message.ReturnHost;
@@ -89,7 +89,7 @@ namespace MauiViewModels.Notifications
                     ResponseError = error;
                 });
             }
-            base.OnAppearing();
+            base.OnAppearing(sender, eventArgs);
         }
 
         public string RequesterName
@@ -170,7 +170,7 @@ namespace MauiViewModels.Notifications
 
         private void SignRequestAndSendResponce()
         {
-            _navigationService.PushModalSinglePage(new LoadingView(() =>
+            _navigationService.PushModalSinglePage(new LoadingViewModel(() =>
             {
                 _certHelper.Sign(Message.AccountGuid, Pin1, Message.RandomString).ContinueWith(signedGuid =>
                 {
@@ -201,7 +201,7 @@ namespace MauiViewModels.Notifications
                             _mainThreadService.BeginInvokeOnMainThread(() =>
                             {
                                 _navigationService.NavigateTop();
-                                App.CloseApp.Invoke();
+                                CommonApp.CloseApp.Invoke();
                             });
                         }
                         else if (!response.Result.IsSuccessful && response.Result.StatusCode == HttpStatusCode.BadRequest)

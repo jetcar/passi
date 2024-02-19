@@ -3,18 +3,19 @@
                               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
                               xmlns:mauiApp2="clr-namespace:MauiApp2"
                               xmlns:menu1="clr-namespace:MauiApp2.Menu"
-                              xmlns:storageModels1="clr-namespace:MauiApp2.StorageModels"
+                              xmlns:menu="clr-namespace:MauiViewModels.Menu;assembly=MauiViewModels"
+                              xmlns:storageModels="clr-namespace:MauiViewModels.StorageModels;assembly=MauiViewModels"
                               x:Name="list"
                               BackgroundColor="#FAFAFA"
                               x:Class="MauiApp2.Menu.MenuView"
-                              x:DataType="menu1:MenuView"
+                              x:DataType="menu:MenuViewModel"
 >
     <mauiApp2:BaseContentPage.Content>
         <StackLayout>
 
             <ListView  ItemsSource="{Binding Path=Providers}">
                 <ListView.ItemTemplate>
-                    <DataTemplate x:DataType="storageModels1:ProviderDb">
+                    <DataTemplate x:DataType="storageModels:ProviderDb">
                         <ViewCell Tapped="Cell_OnTapped">
                             <Grid>
                                 <Grid.ColumnDefinitions>

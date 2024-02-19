@@ -4,7 +4,8 @@
                           xmlns:mauiApp2="clr-namespace:MauiApp2"
                           xmlns:notifications="clr-namespace:MauiApp2.Notifications"
                           xmlns:tools="clr-namespace:MauiApp2.Tools"
-                          x:DataType="notifications:ConfirmByPinView"
+                          xmlns:notifications1="clr-namespace:MauiViewModels.Notifications;assembly=MauiViewModels"
+                          x:DataType="notifications1:ConfirmByPinViewModel"
 
                           BackgroundColor="#FAFAFA"
                           x:Class="MauiApp2.Notifications.ConfirmByPinView">

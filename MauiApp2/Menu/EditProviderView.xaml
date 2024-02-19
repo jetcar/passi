@@ -3,8 +3,9 @@
                            xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
                            xmlns:mauiApp2="clr-namespace:MauiApp2"
                            xmlns:menu="clr-namespace:MauiApp2.Menu"
+                           xmlns:menu1="clr-namespace:MauiViewModels.Menu;assembly=MauiViewModels"
                            BackgroundColor="#FAFAFA"
-                           x:DataType="menu:EditProviderView"
+                           x:DataType="menu1:EditProviderViewModel"
                            x:Class="MauiApp2.Menu.EditProviderView">
     <StackLayout VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand">
         <ScrollView>
@@ -12,7 +13,7 @@
                 <Label TextColor="Black" HorizontalOptions="Center" Text="Identity provider:" />
                 <Entry TextColor="Black" HorizontalOptions="FillAndExpand" Text="{Binding Path=Provider.Name}" />
                 <Label TextColor="Black" HorizontalOptions="Center" Text="Base Url:" />
-                <Entry TextColor="Black" HorizontalOptions="FillAndExpand" Text="{Binding Path=Provider.WebApiUrl}" />
+                <Entry TextColor="Black" HorizontalOptions="FillAndExpand" Text="{Binding Path=Provider.PassiWebApiUrl}" />
                 <Label TextColor="Black" HorizontalOptions="Center" Text="SignupPath:" />
                 <Entry TextColor="Black" HorizontalOptions="FillAndExpand" Text="{Binding Path=Provider.SignupPath}" />
                 <Label TextColor="Black" HorizontalOptions="Center" Text="Authorize:" />

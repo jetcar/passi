@@ -2,6 +2,7 @@
 using Android.Content.PM;
 using Android.OS;
 using AppCommon;
+using MauiApp2.FingerPrint;
 using MauiApp2.utils.Services;
 using MauiViewModels;
 using MauiViewModels.FingerPrint;
@@ -19,6 +20,7 @@ namespace MauiApp2.Platforms.Android
 
         public MainActivity()
         {
+            Instance = this;
             CommonApp.Services = ConfigureServices();
         }
 
@@ -77,6 +79,7 @@ namespace MauiApp2.Platforms.Android
             services.AddSingleton<INavigationService, NavigationService>();
             services.AddSingleton<IMainThreadService, MainThreadService>();
             services.AddSingleton<IFingerPrintService, FingerPrintService>();
+            services.AddSingleton<IBiometricHelper, BiometricHelper>();
 
             return services.BuildServiceProvider();
         }

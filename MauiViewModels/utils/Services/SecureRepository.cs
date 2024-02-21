@@ -112,8 +112,9 @@ public class SecureRepository : ISecureRepository
 
     public async Task SaveFingerPrintKey(AccountDb account, X509Certificate2 cert)
     {
-        _mySecureStorage.SetAsync(account.Thumbprint, Guid.NewGuid().ToString()).GetAwaiter().GetResult();
-        var password = _mySecureStorage.GetAsync(account.Thumbprint).Result;
+        var password = Guid.NewGuid().ToString();
+        _mySecureStorage.SetAsync(account.Thumbprint, password).GetAwaiter().GetResult();
+        //var password = _mySecureStorage.GetAsync(account.Thumbprint).Result;
         var base64String = Convert.ToBase64String(cert.Export(X509ContentType.Pkcs12, password));
         _mySecureStorage.SetAsync("fingerprint_" + account.Guid, base64String).GetAwaiter().GetResult();
         account.HaveFingerprint = true;

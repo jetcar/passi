@@ -11,6 +11,9 @@ using Java.Security;
 using Java.Security.Spec;
 using MauiApp2.Platforms.Android;
 using MauiApp2.utils.Services;
+using MauiViewModels;
+using MauiViewModels.FingerPrint;
+using MauiViewModels.utils.Services;
 using Signature = Java.Security.Signature;
 
 namespace MauiApp2.FingerPrint
@@ -38,7 +41,7 @@ namespace MauiApp2.FingerPrint
         {
             if (Build.VERSION.SdkInt < BuildVersionCodes.P)
             {
-                App.FingerPrintReadingResult.Invoke(new FingerPrintResult() { ErrorMessage = "Fingerprint not supported below Android 9 Pie." });
+                CommonApp.FingerPrintReadingResult.Invoke(new FingerPrintResult() { ErrorMessage = "Fingerprint not supported below Android 9 Pie." });
                 return;
             }
 
@@ -129,16 +132,16 @@ namespace MauiApp2.FingerPrint
                         var signatureString = Base64.EncodeToString(signature.Sign(), Base64Flags.UrlSafe);
                         // Normally, ToBeSignedMessage and Signature are sent to the server and then verified
                         // TODO: Toast.MakeText (getApplicationContext (), signatureMessage + ":" + signatureString, Toast.LENGTH_SHORT).show ();
-                        App.FingerPrintReadingResult.Invoke(new FingerPrintResult());
+                        CommonApp.FingerPrintReadingResult.Invoke(new FingerPrintResult());
                     }
                     catch (SignatureException)
                     {
-                        App.FingerPrintReadingResult.Invoke(new FingerPrintResult() { ErrorMessage = "Error" });
+                        CommonApp.FingerPrintReadingResult.Invoke(new FingerPrintResult() { ErrorMessage = "Error" });
                     }
                 },
                 Failed = () =>
                 {
-                    App.FingerPrintReadingResult.Invoke(new FingerPrintResult() { ErrorMessage = "Error" });
+                    CommonApp.FingerPrintReadingResult.Invoke(new FingerPrintResult() { ErrorMessage = "Error" });
                 },
                 Help = (BiometricAcquiredStatus helpCode, ICharSequence helpString) =>
                 {
@@ -206,7 +209,7 @@ namespace MauiApp2.FingerPrint
             }
         }
 
-        private class BiometricAuthenticationCallback : BiometricPrompt.AuthenticationCallback
+        public class BiometricAuthenticationCallback : BiometricPrompt.AuthenticationCallback
         {
             public Action<BiometricPrompt.AuthenticationResult> Success;
             public Action Failed;

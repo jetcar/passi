@@ -1,8 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" android:installLocation="internalOnly"
-		  package="com.companyname.mauiapp2" android:versionCode="40" android:versionName="1.40">
+		  package="com.passi.cloud.passi_android" android:versionCode="40" android:versionName="1.40">
 	<application android:allowBackup="false" android:icon="@mipmap/appicon" android:supportsRtl="true"
-				 android:label="MauiApp2">
+				 android:label="passi_android.Android">
 		<receiver android:name="com.google.firebase.iid.FirebaseInstanceIdInternalReceiver" android:exported="false"/>
 		<receiver android:name="com.google.firebase.iid.FirebaseInstanceIdReceiver" android:exported="true"
 				  android:permission="com.google.android.c2dm.permission.SEND">
@@ -40,5 +40,5 @@
 	<uses-permission android:name="com.google.android.c2dm.permission.RECEIVE"/>
 	<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
 	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-	<uses-sdk android:minSdkVersion="33" android:targetSdkVersion="33"/>
+	<uses-sdk android:minSdkVersion="28" android:targetSdkVersion="33"/>
 </manifest>

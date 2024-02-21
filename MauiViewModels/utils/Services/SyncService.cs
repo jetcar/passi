@@ -57,6 +57,7 @@ public class SyncService : ISyncService
                         if (restResponse.IsSuccessful)
                         {
                             var serverAccounts = JsonConvert.DeserializeObject<List<AccountMinDto>>(restResponse.Content);
+                            var accountChanged = false;
                             foreach (var account in groupedAccount)
                             {
                                 if (serverAccounts.All(x => x.UserGuid != account.Guid))
@@ -66,11 +67,12 @@ public class SyncService : ISyncService
                                     {
                                         loadedAccount.Inactive = true;
                                         _secureRepository.UpdateAccount(loadedAccount);
+                                        accountChanged = true;
                                     }
                                 }
                             }
 
-                            if (CommonApp.AccountSyncCallback != null)
+                            if (CommonApp.AccountSyncCallback != null && accountChanged)
                                 CommonApp.AccountSyncCallback.Invoke();
                         }
 

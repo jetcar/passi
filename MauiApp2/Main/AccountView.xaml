@@ -24,7 +24,7 @@
             <Label TextColor="Black" HorizontalOptions="Center" Text="{Binding Path=ProviderName}" />
         </StackLayout>
 
-        <Button BackgroundColor="White" TextColor="Black" CornerRadius="100"  Text="Update Certificate" Clicked="UpdateCertificate_OnClicked"></Button>
-        <Button BackgroundColor="White" TextColor="Black" CornerRadius="100"  Text="Add Fingerprint" Clicked="AddBiometric_Button_OnClicked" ></Button>
+        <Button BackgroundColor="White" TextColor="Black" CornerRadius="100" Margin="10" Text="Update Certificate" Clicked="UpdateCertificate_OnClicked"></Button>
+        <Button BackgroundColor="White" TextColor="Black" CornerRadius="100" Margin="10" Text="Add Fingerprint" Clicked="AddBiometric_Button_OnClicked" ></Button>
     </StackLayout>
 </mauiApp2:BaseContentPage>

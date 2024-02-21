@@ -1,5 +1,6 @@
 ﻿using Android.App;
 using Android.Content.PM;
+using Android.Gms.Common;
 using Android.OS;
 using AppCommon;
 using MauiApp2.FingerPrint;
@@ -32,8 +33,16 @@ namespace MauiApp2.Platforms.Android
             CreateNotificationChannel();
             var secureRepository = CommonApp.Services.GetService<ISecureRepository>();
             var dateTimeService = CommonApp.Services.GetService<IDateTimeService>();
+            var syncService = CommonApp.Services.GetService<ISyncService>();
             dateTimeService.Init();
-
+            Task.Run(() =>
+            {
+                while (true)
+                {
+                    Task.Delay(5000);
+                    syncService.PollNotifications();
+                }
+            });
             Task.Run(() =>
             {
                 secureRepository.GetDeviceId();
@@ -106,24 +115,24 @@ namespace MauiApp2.Platforms.Android
 
         public bool IsPlayServicesAvailable()
         {
-            //var msgText = "";
-            //int resultCode = GoogleApiAvailability.Instance.IsGooglePlayServicesAvailable(this);
-            //if (resultCode != ConnectionResult.Success)
-            //{
-            //    if (GoogleApiAvailability.Instance.IsUserResolvableError(resultCode))
-            //        msgText = GoogleApiAvailability.Instance.GetErrorString(resultCode);
-            //    else
-            //    {
-            //        msgText = "This device is not supported";
-            //        Finish();
-            //    }
-            //    return false;
-            //}
-            //else
-            //{
-            //    msgText = "Google Play Services is available.";
-            return true;
-            //}
+            var msgText = "";
+            int resultCode = GoogleApiAvailability.Instance.IsGooglePlayServicesAvailable(this);
+            if (resultCode != ConnectionResult.Success)
+            {
+                if (GoogleApiAvailability.Instance.IsUserResolvableError(resultCode))
+                    msgText = GoogleApiAvailability.Instance.GetErrorString(resultCode);
+                else
+                {
+                    msgText = "This device is not supported";
+                    Finish();
+                }
+                return false;
+            }
+            else
+            {
+                msgText = "Google Play Services is available.";
+                return true;
+            }
         }
     }
 }

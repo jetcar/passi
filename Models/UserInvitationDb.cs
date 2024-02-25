@@ -15,5 +15,6 @@
 
         public virtual UserDb User { get; set; }
         public int? TryCount { get; set; } = 0;
+        public bool? Delete { get; set; }
     }
 }

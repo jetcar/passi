@@ -44,7 +44,7 @@ namespace PassiWebApiTests.Controllers
             controller.Check(new SignupCheckDto()
             {
                 Code = TestEmailSender.Code,
-                Email = signupDto.Email
+                Username = signupDto.Email
             });
 
             var rsa = RSA.Create(); // generate asymmetric key pair

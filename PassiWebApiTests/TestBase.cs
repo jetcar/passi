@@ -172,6 +172,11 @@ public class TestEmailSender : IEmailSender
     {
         return Code = code;
     }
+
+    public string SendDeletingEmail(string email, string code)
+    {
+        return Code = code;
+    }
 }
 
 public class TestRestClient : IMyRestClient

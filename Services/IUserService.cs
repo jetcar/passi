@@ -9,5 +9,9 @@ namespace Services
         void ConfirmUser(SignupConfirmationDto signupConfirmationDto);
 
         string SendConfirmationEmail(SignupDto signupDto);
+
+        string SendDeleteConfirmationEmail(string email);
+
+        void DeleteUser(string deleteEmail);
     }
 }

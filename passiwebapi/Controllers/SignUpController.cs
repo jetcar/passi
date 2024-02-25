@@ -101,10 +101,49 @@ namespace passi_webapi.Controllers
         [HttpPost, Route("check")]
         public IActionResult Check([FromBody] SignupCheckDto confirmationDto)
         {
-            confirmationDto.Email = confirmationDto.Email.Trim();
-            if (!_userRepository.ValidateConfirmationCode(confirmationDto.Email, confirmationDto.Code))
+            confirmationDto.Username = confirmationDto.Username.Trim();
+            if (!_userRepository.ValidateConfirmationCode(confirmationDto.Username, confirmationDto.Code))
                 throw new BadRequestException("Code not found");
 
+            return Ok();
+        }
+
+        [HttpPost, Route("Delete")]
+        public IActionResult Delete([FromBody] DeleteUserDto delete)
+        {
+            delete.Email = delete.Email.Trim();
+            var strategy = _userRepository.GetExecutionStrategy();
+            strategy.Execute(() =>
+            {
+                using (var transaction = _userRepository.BeginTransaction())
+                {
+                    if (_userRepository.IsUsernameTaken(delete.Email))
+                    {
+                        var result = _userService.SendDeleteConfirmationEmail(delete.Email);
+                        _logger.Debug(result);
+                    }
+
+                    transaction.Commit();
+                }
+            });
+            return Ok();
+        }
+
+        [HttpPost, Route("DeleteConfirmation")]
+        public IActionResult DeleteConfirmation([FromBody] SignupCheckDto delete)
+        {
+            if (!_userRepository.ValidateConfirmationCode(delete.Username, delete.Code))
+                throw new BadRequestException("Code not found");
+            var strategy = _userRepository.GetExecutionStrategy();
+            strategy.Execute(() =>
+            {
+                using (var transaction = _userRepository.BeginTransaction())
+                {
+                    _userService.DeleteUser(delete.Username);
+
+                    transaction.Commit();
+                }
+            });
             return Ok();
         }
     }

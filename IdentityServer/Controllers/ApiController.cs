@@ -24,6 +24,8 @@ using WebApiDto;
 using WebApiDto.Auth;
 using IdentityServer.services;
 using Microsoft.Extensions.Logging;
+using static IdentityServer4.Models.IdentityResources;
+using WebApiDto.SignUp;
 
 namespace IdentityServer.Controllers
 {
@@ -138,6 +140,45 @@ namespace IdentityServer.Controllers
                 return BadRequest(new ApiResponseDto() { errors = errorResult.errors });
             }
 
+            return Ok(new { Redirect = false });
+        }
+
+        [HttpPost]
+        [Route("DeleteUser")]
+        public async Task<IActionResult> DeleteUser(LoginInputDto model)
+        {
+            ServicePointManager.ServerCertificateValidationCallback +=
+                (sender, cert, chain, sslPolicyErrors) => true;
+            var restRequest = new RestRequest("api/Signup/delete", Method.Post);
+            restRequest.AddJsonBody(new
+            {
+                Email = model.Username
+            });
+            var response = _myRestClient.ExecuteAsync(restRequest).GetAwaiter().GetResult();
+            if (!response.IsSuccessful)
+            {
+                var errorResult = JsonConvert.DeserializeObject<ApiResponseDto>(response.Content);
+
+                return BadRequest(new ApiResponseDto() { errors = errorResult.errors });
+            }
+            return Ok(new { Redirect = false });
+        }
+
+        [HttpPost]
+        [Route("DeleteConfirm")]
+        public async Task<IActionResult> DeleteConfirm(SignupCheckDto model)
+        {
+            ServicePointManager.ServerCertificateValidationCallback +=
+                (sender, cert, chain, sslPolicyErrors) => true;
+            var restRequest = new RestRequest("api/Signup/DeleteConfirmation", Method.Post);
+            restRequest.AddJsonBody(model);
+            var response = _myRestClient.ExecuteAsync(restRequest).GetAwaiter().GetResult();
+            if (!response.IsSuccessful)
+            {
+                var errorResult = JsonConvert.DeserializeObject<ApiResponseDto>(response.Content);
+
+                return BadRequest(new ApiResponseDto() { errors = errorResult.errors });
+            }
             return Ok(new { Redirect = false });
         }
 

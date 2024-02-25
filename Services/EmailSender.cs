@@ -35,5 +35,19 @@ namespace Services
                 throw new BadRequestException(responce.Body.ReadAsStringAsync().Result);
             return responce.Body.ReadAsStringAsync().Result;
         }
+
+        public string SendDeletingEmail(string email, string code)
+        {
+            if (Convert.ToBoolean(_appSetting["DoNotSendMail"]))
+                email = _appSetting["testMail"];
+            if (email == null)
+                return "ok";
+            var message = MailHelper.CreateSingleTemplateEmail(new EmailAddress(_appSetting["EmailFrom"]), new EmailAddress(email),
+                "d-b6873d40e5c74e6bab695b5bf12a636e", new { code = code });
+            var responce = client.SendEmailAsync(message).Result;
+            if (!responce.IsSuccessStatusCode)
+                throw new BadRequestException(responce.Body.ReadAsStringAsync().Result);
+            return responce.Body.ReadAsStringAsync().Result;
+        }
     }
 }

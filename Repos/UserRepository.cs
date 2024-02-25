@@ -136,6 +136,18 @@ namespace Repos
             return _dbContext.Invitations.Where(x => x.User.EmailHash == email && x.IsConfirmed == false && x.TryCount < 10)
                 .OrderByDescending(x => x.Id).Select(x => x.Code).FirstOrDefault();
         }
+
+        public void DeleteAccount(Guid accountGuid)
+        {
+            var exinstingUser = _dbContext.Users.Where(x => x.Guid == accountGuid).AsNoTracking().FirstOrDefault();
+            if (exinstingUser != null)
+            {
+                _dbContext.Sessions.Where(x => x.UserId == exinstingUser.Id).DeleteFromQuery();
+                _dbContext.Certificates.Where(x => x.UserId == exinstingUser.Id).DeleteFromQuery();
+                _dbContext.Invitations.Where(x => x.UserId == exinstingUser.Id).DeleteFromQuery();
+                _dbContext.Users.Where(x => x.Id == exinstingUser.Id).DeleteFromQuery();
+            }
+        }
     }
 
     public interface IUserRepository : ITransaction
@@ -161,5 +173,7 @@ namespace Repos
         void IncreaseFailedRetryCount(string email);
 
         string GetCode(string email);
+
+        void DeleteAccount(Guid accountGuid);
     }
 }

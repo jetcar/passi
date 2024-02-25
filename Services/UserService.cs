@@ -58,5 +58,26 @@ namespace Services
             _userRepository.AddInvitation(userInvitationDb);
             return _emailSender.SendInvitationEmail(signupDto.Email, userInvitationDb.Code);
         }
+
+        public string SendDeleteConfirmationEmail(string email)
+        {
+            var user = _userRepository.GetUser(email);
+            var userInvitationDb = new UserInvitationDb()
+            {
+                Code = _randomGenerator.GetNumbersString(6),
+                UserId = user.Id,
+                Delete = true
+            };
+
+            _userRepository.AddInvitation(userInvitationDb);
+            return _emailSender.SendDeletingEmail(email, userInvitationDb.Code);
+        }
+
+        public void DeleteUser(string deleteEmail)
+        {
+            var user = _userRepository.GetUser(deleteEmail);
+
+            _userRepository.DeleteAccount(user.Guid);
+        }
     }
 }

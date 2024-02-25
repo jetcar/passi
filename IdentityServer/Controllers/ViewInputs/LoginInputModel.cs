@@ -7,6 +7,7 @@ namespace IdentityServer.Controllers.ViewInputs
     {
         [Required]
         public string Username { get; set; }
+
         public bool RememberLogin { get; set; }
         public string ReturnUrl { get; set; }
         public string Nonce { get; set; }
@@ -16,14 +17,24 @@ namespace IdentityServer.Controllers.ViewInputs
     {
         [Required]
         public string Username { get; set; }
+
         public bool RememberLogin { get; set; }
         public string ReturnUrl { get; set; }
+    }
+
+    public class DeleteConfirmDto
+    {
+        [Required]
+        public string Username { get; set; }
+
+        public string code { get; set; }
     }
 
     public class CheckInputDto
     {
         [Required]
         public string Username { get; set; }
+
         public bool RememberLogin { get; set; }
         public string ReturnUrl { get; set; }
         public string Nonce { get; set; }

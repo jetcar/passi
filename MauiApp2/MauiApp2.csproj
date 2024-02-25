@@ -78,43 +78,8 @@
 
 		<!-- Images -->
 		<MauiImage Include="Resources\Images\*" />
-		<MauiImage Update="Resources\Images\baseline_add_circle_black_36.png">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</MauiImage>
-		<MauiImage Update="Resources\Images\baseline_backspace_black_18.png">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</MauiImage>
-		<MauiImage Update="Resources\Images\baseline_backspace_black_24.png">
-		  <SubType>Designer</SubType>
-		  <Generator></Generator>
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</MauiImage>
-		<MauiImage Update="Resources\Images\baseline_delete_black_36.png">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</MauiImage>
-		<MauiImage Update="Resources\Images\baseline_keyboard_arrow_right_black_18.png">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</MauiImage>
-		<MauiImage Update="Resources\Images\baseline_keyboard_arrow_right_black_24.png">
-		  <SubType>Designer</SubType>
-		  <Generator></Generator>
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</MauiImage>
-		<MauiImage Update="Resources\Images\baseline_list_black_24.png">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</MauiImage>
-		<MauiImage Update="Resources\Images\baseline_remove_circle_outline_black_36.png">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</MauiImage>
-		<MauiImage Update="Resources\Images\baseline_sync_black_36.png">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</MauiImage>
-		<MauiImage Update="Resources\Images\dotnet_bot.svg" BaseSize="168,208">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</MauiImage>
 
 		<!-- Custom Fonts -->
-		<MauiFont Include="Resources\Fonts\*" />
 
 		<!-- Raw Assets (also remove the "Resources\Raw" prefix) -->
 		<MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
@@ -127,10 +92,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <None Remove="Resources\Images\baseline_backspace_black_18.png" />
-	  <None Remove="Resources\Images\baseline_backspace_black_24.png" />
-	  <None Remove="Resources\Images\baseline_keyboard_arrow_right_black_18.png" />
-	  <None Remove="Resources\Images\baseline_keyboard_arrow_right_black_24.png" />
+	  <MauiAsset Remove="Resources\Raw\AboutAssets.txt" />
 	</ItemGroup>
 
 
@@ -155,6 +117,14 @@
 	</ItemGroup>
 	<ItemGroup>
 	  <Folder Include="Admin\" />
+	</ItemGroup>
+	<ItemGroup>
+	  <MauiXaml Update="Resources\Styles\Colors.xaml">
+	    <Generator></Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Resources\Styles\Styles.xaml">
+	    <Generator></Generator>
+	  </MauiXaml>
 	</ItemGroup>
 
 

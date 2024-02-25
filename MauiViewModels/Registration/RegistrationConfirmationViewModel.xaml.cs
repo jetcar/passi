@@ -83,7 +83,7 @@ namespace MauiViewModels.Registration
             var signupConfirmationDto = new SignupCheckDto()
             {
                 Code = Code,
-                Email = Email,
+                Username = Email,
             };
             _navigationService.PushModalSinglePage(new LoadingViewModel(() =>
             {

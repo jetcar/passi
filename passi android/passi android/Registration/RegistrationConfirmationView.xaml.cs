@@ -88,7 +88,7 @@ namespace passi_android.Registration
             var signupConfirmationDto = new SignupCheckDto()
             {
                 Code = Code,
-                Email = Email,
+                Username = Email,
             };
             _navigationService.PushModalSinglePage(new LoadingView(() =>
             {

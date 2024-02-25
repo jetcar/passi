@@ -9,7 +9,7 @@ services:
     networks:
       - database_net
     env_file:
-      - ./configs/variables/dev.env
+      - ../passi_config/dev.env
     volumes:
       - type: bind
         source: /mnt/newdisk/db-data3/
@@ -36,7 +36,7 @@ services:
       - haproxy_net
       - database_net
     env_file:
-      - ./configs/variables/dev.env
+      - ../passi_config/dev.env
     restart: always
     depends_on:
       - database

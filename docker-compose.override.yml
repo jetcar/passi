@@ -42,8 +42,6 @@ services:
     networks:
       - haproxy_net
     build:
-      tags:
-        - webapp:latest
       context: .
       dockerfile: WebApp/Dockerfile
     ports:
@@ -60,8 +58,6 @@ services:
     networks:
       - haproxy_net
     build:
-      tags: 
-        - identityserver:latest
       context: .
       dockerfile: IdentityServer/Dockerfile
     ports:
@@ -78,8 +74,6 @@ services:
     networks:
       - haproxy_net
     build:
-      tags: 
-        - identityserver:latest
       context: .
       dockerfile: passiwebapi/Dockerfile
     ports:

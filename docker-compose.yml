@@ -70,7 +70,7 @@ services:
       - haproxy_net
 
   webapp:
-    image: jetcar/webapp:1.0.19
+    image: jetcar/webapp:1.0.20
     networks:
       - haproxy_net
       - database_net
@@ -84,7 +84,7 @@ services:
     restart: always
 
   identityserver:
-    image: jetcar/identityserver:1.0.19
+    image: jetcar/identityserver:1.0.20
     networks:
       - haproxy_net
       - database_net
@@ -100,7 +100,7 @@ services:
     restart: always
 
   passiwebapi:
-    image: jetcar/passiwebapi:1.0.19
+    image: jetcar/passiwebapi:1.0.20
     networks:
       - haproxy_net
       - database_net

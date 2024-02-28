@@ -5,8 +5,6 @@ using MauiViewModels;
 using MauiViewModels.Notifications;
 using MauiViewModels.StorageModels;
 using Newtonsoft.Json;
-using WebApiDto;
-using WebApiDto.Auth;
 using Color = Microsoft.Maui.Graphics.Color;
 using Timer = System.Timers.Timer;
 

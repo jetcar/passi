@@ -2,8 +2,6 @@
 using System.Timers;
 using MauiViewModels.Notifications;
 using Newtonsoft.Json;
-using WebApiDto;
-using WebApiDto.Auth;
 using Timer = System.Timers.Timer;
 
 namespace MauiApp2.Notifications

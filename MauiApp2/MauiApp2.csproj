@@ -37,6 +37,12 @@
 	  <ApplicationDisplayVersion>1.41</ApplicationDisplayVersion>
 	  <ApplicationId>com.passi.cloud.passi_android</ApplicationId>
 	  <ApplicationTitle>passi_android.Android</ApplicationTitle>
+			  <AndroidSigningKeyStore>D:\repo\passi.keystore</AndroidSigningKeyStore>
+	  <ApplicationId>com.passi.cloud.passi_android</ApplicationId>
+	  <ApplicationTitle>passi_android.Android</ApplicationTitle>
+	  <AndroidSigningStorePass>Curev3st2</AndroidSigningStorePass>
+	  <AndroidSigningKeyPass>Curev3st2</AndroidSigningKeyPass>
+	  <AndroidSigningKeyAlias>passi</AndroidSigningKeyAlias>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net7.0-android33.0|AnyCPU'">
@@ -49,33 +55,18 @@
 	  <AndroidSigningStorePass>Curev3st2</AndroidSigningStorePass>
 	  <AndroidSigningKeyPass>Curev3st2</AndroidSigningKeyPass>
 	  <AndroidSigningKeyAlias>passi</AndroidSigningKeyAlias>
-	  <AndroidLinkTool>r8</AndroidLinkTool>
 	</PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net7.0-maccatalyst|AnyCPU'">
-	  <ApplicationVersion>40</ApplicationVersion>
-	  <ApplicationDisplayVersion>40</ApplicationDisplayVersion>
-	  <ApplicationId>com.passi.cloud.passi_android</ApplicationId>
-	  <ApplicationTitle>passi_android.Android</ApplicationTitle>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net7.0-maccatalyst|AnyCPU'">
-	  <ApplicationVersion>40</ApplicationVersion>
-	  <ApplicationDisplayVersion>40</ApplicationDisplayVersion>
-	  <ApplicationId>com.passi.cloud.passi_android</ApplicationId>
-	  <ApplicationTitle>passi_android.Android</ApplicationTitle>
-	</PropertyGroup>
-
+	
 	<ItemGroup Condition="'$(TargetFramework)' == 'net7.0-android'">
 		<GoogleServicesJson Include="google-services.json" />
 	</ItemGroup>
 	<ItemGroup>
 		<!-- App Icon -->
-		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />
+		<MauiIcon Include="Resources\AppIcon\icon.png" BaseSize="128,128" />
 
 		<!-- Splash Screen -->
-		<MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#2196f3" BaseSize="128,128" />
-
+		<MauiSplashScreen Include="Resources\Splash\launcher_foreground.png" Color="#2196f3" BaseSize="512,512" />
 		<!-- Images -->
 		<MauiImage Include="Resources\Images\*" />
 
@@ -95,15 +86,21 @@
 	  <MauiAsset Remove="Resources\Raw\AboutAssets.txt" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <MauiImage Remove="Resources\Images\icon.png" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Remove="Resources\Images\icon.png" />
+	</ItemGroup>
+
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="7.0.0" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-		<PackageReference Include="Portable.BouncyCastle" Version="1.9.0" />
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="Plugin.Firebase" Version="2.0.3" />
-		<PackageReference Include="Plugin.Firebase.Crashlytics" Version="2.0.1" />
 	</ItemGroup>
 	<ItemGroup>
 	  <ProjectReference Include="..\AppCommon\AppCommon.csproj" />

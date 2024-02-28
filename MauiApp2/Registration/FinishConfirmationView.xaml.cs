@@ -4,8 +4,6 @@ using MauiViewModels.Registration;
 using MauiViewModels.StorageModels;
 using MauiViewModels.utils.Services.Certificate;
 using Newtonsoft.Json;
-using WebApiDto;
-using WebApiDto.SignUp;
 
 namespace MauiApp2.Registration
 {

@@ -11,7 +11,7 @@
         ContentTemplate="{DataTemplate local:MainView}"
         Route="MainPage">
         <ShellContent.MenuItems>
-            <MenuItem Text="Menu" IconImageSource="baseline_list_black_24.png" Clicked="Menu_button" />
+            <MenuItem Text="Menu" IconImageSource="baseline_list_black.svg" Clicked="Menu_button" />
         </ShellContent.MenuItems>
     </ShellContent>
 </Shell>

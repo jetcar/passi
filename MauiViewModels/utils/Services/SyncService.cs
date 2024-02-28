@@ -60,12 +60,23 @@ public class SyncService : ISyncService
                             var accountChanged = false;
                             foreach (var account in groupedAccount)
                             {
-                                if (serverAccounts.All(x => x.UserGuid != account.Guid))
+                                var serverAccount = serverAccounts.FirstOrDefault(x => x.UserGuid == account.Guid);
+                                if (serverAccount == null)
                                 {
                                     var loadedAccount = _secureRepository.GetAccount(account.Guid);
                                     if (loadedAccount != null && loadedAccount.IsConfirmed)
                                     {
                                         loadedAccount.Inactive = true;
+                                        _secureRepository.UpdateAccount(loadedAccount);
+                                        accountChanged = true;
+                                    }
+                                }
+                                else
+                                {
+                                    var loadedAccount = _secureRepository.GetAccount(account.Guid);
+                                    if (loadedAccount != null && loadedAccount.IsConfirmed && loadedAccount.Inactive)
+                                    {
+                                        loadedAccount.Inactive = false;
                                         _secureRepository.UpdateAccount(loadedAccount);
                                         accountChanged = true;
                                     }

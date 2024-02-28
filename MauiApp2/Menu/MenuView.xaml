@@ -23,7 +23,7 @@
                                     <ColumnDefinition Width="*"></ColumnDefinition>
                                 </Grid.ColumnDefinitions>
                                 <StackLayout Grid.Column="0" Padding="10" Orientation="Horizontal">
-                                    <ImageButton  Margin="10,0,10,0" BackgroundColor="#fafafa" IsVisible="{Binding Source={x:Reference list}, Path=BindingContext.IsDeleteVisible}" Source="baseline_remove_circle_outline_black_36.png" Clicked="Button_PreDeleteProvider" ></ImageButton>
+                                    <ImageButton  Margin="10,0,10,0" BackgroundColor="#fafafa" IsVisible="{Binding Source={x:Reference list}, Path=BindingContext.IsDeleteVisible}" Source="baseline_remove_circle_outline_black.svg" Clicked="Button_PreDeleteProvider" ></ImageButton>
                                     <Label TextColor="Black" Text="{Binding Path=Name}" ></Label>
                                 </StackLayout>
                                 <Button Grid.Column="1" Text="Delete" WidthRequest="50" TextColor="White" BackgroundColor="Red" Clicked="Button_DeleteProvider" IsVisible="{Binding IsDeleteVisible}"></Button>
@@ -34,8 +34,8 @@
             </ListView>
             <StackLayout Padding="0" Margin="0"  Orientation="Vertical" BackgroundColor="#2196f3">
                 <StackLayout Padding="0,0,0,20" Margin="0"  Orientation="Horizontal" BackgroundColor="#2196f3">
-                    <ImageButton Margin="10" BackgroundColor="#2196f3" HorizontalOptions="CenterAndExpand" Source="baseline_add_circle_black_36.png" Clicked="Button_Add"></ImageButton>
-                    <ImageButton Margin="10" BackgroundColor="#2196f3" HorizontalOptions="CenterAndExpand" Source="baseline_delete_black_36.png" Clicked="Button_ShowDelete" ></ImageButton>
+                    <ImageButton Margin="10" BackgroundColor="#2196f3" HorizontalOptions="CenterAndExpand" Source="baseline_add_circle_black.svg" Clicked="Button_Add"></ImageButton>
+                    <ImageButton Margin="10" BackgroundColor="#2196f3" HorizontalOptions="CenterAndExpand" Source="baseline_delete_black.svg" Clicked="Button_ShowDelete" ></ImageButton>
                 </StackLayout>
             </StackLayout>
         </StackLayout>

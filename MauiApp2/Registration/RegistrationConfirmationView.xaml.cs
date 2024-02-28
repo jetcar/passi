@@ -1,8 +1,6 @@
 ﻿using System.Net;
 using MauiApp2.Tools;
 using Newtonsoft.Json;
-using WebApiDto;
-using WebApiDto.SignUp;
 
 namespace MauiApp2.Registration
 {

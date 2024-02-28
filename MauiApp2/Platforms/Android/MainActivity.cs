@@ -9,42 +9,48 @@ using MauiViewModels;
 using MauiViewModels.FingerPrint;
 using MauiViewModels.utils.Services;
 using MauiViewModels.utils.Services.Certificate;
+using Timer = System.Timers.Timer;
 
 namespace MauiApp2.Platforms.Android
 {
-    [Activity(Label = "Passi", Icon = "@mipmap/appicon", Theme = "@style/Maui.SplashTheme", MainLauncher = true, DirectBootAware = true, Exported = true, LaunchMode = LaunchMode.SingleTop, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation | ConfigChanges.UiMode | ConfigChanges.ScreenLayout | ConfigChanges.SmallestScreenSize)]
+    [Activity(Label = "Passi", Icon = "@mipmap/icon", Theme = "@style/Maui.SplashTheme", MainLauncher = true, DirectBootAware = true, Exported = true, LaunchMode = LaunchMode.SingleTop, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation | ConfigChanges.UiMode | ConfigChanges.ScreenLayout | ConfigChanges.SmallestScreenSize)]
     public class MainActivity : MauiAppCompatActivity
     {
         internal static readonly string CHANNEL_ID = "passi_notification_channel_id";
 
         public static MainActivity Instance;
+        private readonly Timer _timer;
 
         public MainActivity()
         {
             Instance = this;
             CommonApp.Services = ConfigureServices();
+
+            _timer = new Timer();
+            _timer.Enabled = true;
+            _timer.Interval = 5000;
+            _timer.Elapsed += _timer_Elapsed;
+            _timer.Start();
+        }
+
+        private void _timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            var syncService = CommonApp.Services.GetService<ISyncService>();
+            syncService.PollNotifications();
         }
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
             IsPlayServicesAvailable();
-
+            CommonApp.Version = AppInfo.Current.VersionString;
             CreateNotificationChannel();
             var secureRepository = CommonApp.Services.GetService<ISecureRepository>();
             var dateTimeService = CommonApp.Services.GetService<IDateTimeService>();
-            var syncService = CommonApp.Services.GetService<ISyncService>();
-            dateTimeService.Init();
+
             Task.Run(() =>
             {
-                while (true)
-                {
-                    Task.Delay(5000);
-                    syncService.PollNotifications();
-                }
-            });
-            Task.Run(() =>
-            {
+                dateTimeService.Init();
                 secureRepository.GetDeviceId();
 
                 //var task = FirebaseMessaging.Instance.GetToken().GetAwaiter().GetResult();

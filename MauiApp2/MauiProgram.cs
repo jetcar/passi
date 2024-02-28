@@ -1,8 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Maui.LifecycleEvents;
-using Plugin.Firebase.Auth;
-using Plugin.Firebase.Bundled.Shared;
-using Plugin.Firebase.Bundled.Platforms.Android;
 
 namespace MauiApp2
 {

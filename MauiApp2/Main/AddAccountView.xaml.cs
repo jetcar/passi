@@ -5,8 +5,6 @@ using MauiApp2.Registration;
 using MauiApp2.Tools;
 using MauiViewModels.Main;
 using Newtonsoft.Json;
-using WebApiDto;
-using WebApiDto.SignUp;
 
 namespace MauiApp2.Main
 {

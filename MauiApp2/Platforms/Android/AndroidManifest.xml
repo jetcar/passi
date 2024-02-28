@@ -1,25 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" android:installLocation="internalOnly"
-		  package="com.passi.cloud.passi_android" android:versionCode="41" android:versionName="1.41">
-	<application android:allowBackup="false" android:icon="@mipmap/appicon" android:supportsRtl="true"
-				 android:label="passi_android.Android">
-		<receiver android:name="com.google.firebase.iid.FirebaseInstanceIdInternalReceiver" android:exported="false"/>
-		<receiver android:name="com.google.firebase.iid.FirebaseInstanceIdReceiver" android:exported="true"
-				  android:permission="com.google.android.c2dm.permission.SEND">
-			<intent-filter>
-				<action android:name="com.google.android.c2dm.intent.RECEIVE"/>
-				<action android:name="com.google.android.c2dm.intent.REGISTRATION"/>
-				<category android:name="${applicationId}"/>
-			</intent-filter>
-		</receiver>
-		<!--<service android:name="crc647f588127cf92f80b.MyFirebaseMessagingService" android:enabled="true" android:exported="true">
-			<intent-filter>
-				<action android:name="com.google.firebase.MESSAGING_EVENT" />
-			</intent-filter>
-		</service>-->
-		<meta-data android:name="com.google.firebase.messaging.default_notification_channel_id"
-				   android:value="passi_notification_channel_id"/>
-	</application>
+		  package="com.passi.cloud.passi_android" android:versionCode="42" android:versionName="1.42">
+	<application android:allowBackup="false" android:supportsRtl="true" android:label="passi.maui"
+				 android:icon="@mipmap/icon"></application>
 	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 	<uses-permission android:name="android.permission.USE_FINGERPRINT"/>
 	<uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>

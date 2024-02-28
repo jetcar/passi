@@ -43,10 +43,10 @@
             <Button  Grid.Row="3" Grid.Column="0"   ></Button>
 
             <ImageButton   Grid.Row="3" Grid.Column="0" CommandParameter="del" BackgroundColor="White" Aspect="Center"    Clicked="ImageButton_OnClicked"
-                       Source="baseline_backspace_black_18.png" HorizontalOptions="Center" VerticalOptions="Center" ></ImageButton>
+                       Source="baseline_backspace_black.svg" HorizontalOptions="Center" VerticalOptions="Center" ></ImageButton>
             <Button  Grid.Row="3" Grid.Column="1" CommandParameter="0" Clicked="ImageButton_OnClicked" Text="0"  ></Button>
             <Button  Grid.Row="3" Grid.Column="2"   ></Button>
-            <ImageButton  Grid.Row="3" Grid.Column="2" CommandParameter="confirm" BackgroundColor="White" Aspect="Center" Clicked="ImageButton_OnClicked" Source="baseline_keyboard_arrow_right_black_18.png" HorizontalOptions="Center"   VerticalOptions="Center"  ></ImageButton>
+            <ImageButton  Grid.Row="3" Grid.Column="2" CommandParameter="confirm" BackgroundColor="White" Aspect="Center" Clicked="ImageButton_OnClicked" Source="baseline_keyboard_arrow_right_black.svg" HorizontalOptions="Center"   VerticalOptions="Center"  ></ImageButton>
         </Grid>
     </ContentView.Content>
 </ContentView>

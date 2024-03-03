@@ -6,11 +6,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="BouncyCastle.NetCore" Version="1.9.0" />
     <PackageReference Include="RestSharp" Version="110.2.0" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\MauiViewModels\MauiViewModels.csproj" />
+    <ProjectReference Include="..\Models\Models.csproj" />
+    <ProjectReference Include="..\Repos\Repos.csproj" />
     <ProjectReference Include="..\WebApiDto\WebApiDto.csproj" />
   </ItemGroup>
 

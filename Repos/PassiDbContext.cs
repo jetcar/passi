@@ -19,7 +19,7 @@ namespace Repos
     {
         private AppSetting _appSetting;
         private CurrentContext _currentContext;
-        private string _connectionString;
+        public string _connectionString;
         private ILogger _logger;
         private readonly Guid _id;
 
@@ -80,9 +80,12 @@ namespace Repos
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseModel(PassiDbContextModel.Instance);
-            var trustMode = _appSetting["DbSslMode"] == "Require" ? "Trust Server Certificate=true;" : "";
             optionsBuilder.AddInterceptors(new TaggedQueryCommandInterceptor(_logger));
-            _connectionString = $"host={_appSetting["DbHost"]};port={_appSetting["DbPort"]};database={_appSetting["DbName"]};user id={_appSetting["DbUser"]};password={_appSetting["DbPassword"]};Ssl Mode={_appSetting["DbSslMode"]};{trustMode}";
+            if (string.IsNullOrEmpty(_connectionString))
+            {
+                var trustMode = _appSetting["DbSslMode"] == "Require" ? "Trust Server Certificate=true;" : "";
+                _connectionString = $"host={_appSetting["DbHost"]};port={_appSetting["DbPort"]};database={_appSetting["DbName"]};user id={_appSetting["DbUser"]};password={_appSetting["DbPassword"]};Ssl Mode={_appSetting["DbSslMode"]};{trustMode}";
+            }
             Console.WriteLine(_connectionString);
             optionsBuilder.UseNpgsql(_connectionString, o =>
             {
@@ -237,8 +240,6 @@ namespace Repos
                 entity.HasIndex(e => e.ModifiedById, "IX_Users_ModifiedById");
 
                 entity.Property(e => e.CreationTime);
-
-                entity.Property(e => e.DeviceId).HasDefaultValueSql("0");
 
                 entity.Property(e => e.EmailHash).HasMaxLength(256);
 

@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "RegisterManyUsersTestApp": {
+      "commandName": "Project",
+      "commandLineArgs": "configs/variables/dev.env",
+      "workingDirectory": "D:\\repo\\passi"
+    }
+  }
+}

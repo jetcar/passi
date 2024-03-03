@@ -37,7 +37,7 @@ Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-co
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PassiWebApiTests", "PassiWebApiTests\PassiWebApiTests.csproj", "{AA24EE3B-5CBC-441D-BCC3-759162F1E74A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IdentityRepo", "IdentityRepo\IdentityRepo.csproj", "{D3041543-E2FB-4D58-B282-7C5AAF574A62}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IdentityRepo", "IdentityRepo\IdentityRepo.csproj", "{D3041543-E2FB-4D58-B282-7C5AAF574A62}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

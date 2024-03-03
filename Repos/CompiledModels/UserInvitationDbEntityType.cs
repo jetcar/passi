@@ -96,6 +96,27 @@ namespace Repos.CompiledModels
                 (Instant v) => v));
         creationTime.AddAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.None);
 
+        var delete = runtimeEntityType.AddProperty(
+            "Delete",
+            typeof(bool?),
+            propertyInfo: typeof(UserInvitationDb).GetProperty("Delete", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
+            fieldInfo: typeof(UserInvitationDb).GetField("<Delete>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly),
+            nullable: true);
+        delete.TypeMapping = NpgsqlBoolTypeMapping.Default.Clone(
+            comparer: new ValueComparer<bool?>(
+                (Nullable<bool> v1, Nullable<bool> v2) => v1.HasValue && v2.HasValue && (bool)v1 == (bool)v2 || !v1.HasValue && !v2.HasValue,
+                (Nullable<bool> v) => v.HasValue ? ((bool)v).GetHashCode() : 0,
+                (Nullable<bool> v) => v.HasValue ? (Nullable<bool>)(bool)v : default(Nullable<bool>)),
+            keyComparer: new ValueComparer<bool?>(
+                (Nullable<bool> v1, Nullable<bool> v2) => v1.HasValue && v2.HasValue && (bool)v1 == (bool)v2 || !v1.HasValue && !v2.HasValue,
+                (Nullable<bool> v) => v.HasValue ? ((bool)v).GetHashCode() : 0,
+                (Nullable<bool> v) => v.HasValue ? (Nullable<bool>)(bool)v : default(Nullable<bool>)),
+            providerValueComparer: new ValueComparer<bool?>(
+                (Nullable<bool> v1, Nullable<bool> v2) => v1.HasValue && v2.HasValue && (bool)v1 == (bool)v2 || !v1.HasValue && !v2.HasValue,
+                (Nullable<bool> v) => v.HasValue ? ((bool)v).GetHashCode() : 0,
+                (Nullable<bool> v) => v.HasValue ? (Nullable<bool>)(bool)v : default(Nullable<bool>)));
+        delete.AddAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.None);
+
         var isConfirmed = runtimeEntityType.AddProperty(
             "IsConfirmed",
             typeof(bool),

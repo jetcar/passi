@@ -675,6 +675,11 @@ namespace Repos.CompiledModels
             modelsUserInvitationDbTableBase.Columns.Add("Code", codeColumnBase);
             var creationTimeColumnBase3 = new ColumnBase<ColumnMappingBase>("CreationTime", "timestamp with time zone", modelsUserInvitationDbTableBase);
             modelsUserInvitationDbTableBase.Columns.Add("CreationTime", creationTimeColumnBase3);
+            var deleteColumnBase = new ColumnBase<ColumnMappingBase>("Delete", "boolean", modelsUserInvitationDbTableBase)
+            {
+                IsNullable = true
+            };
+            modelsUserInvitationDbTableBase.Columns.Add("Delete", deleteColumnBase);
             var idColumnBase2 = new ColumnBase<ColumnMappingBase>("Id", "bigint", modelsUserInvitationDbTableBase);
             modelsUserInvitationDbTableBase.Columns.Add("Id", idColumnBase2);
             var isConfirmedColumnBase = new ColumnBase<ColumnMappingBase>("IsConfirmed", "boolean", modelsUserInvitationDbTableBase);
@@ -703,6 +708,7 @@ namespace Repos.CompiledModels
             RelationalModel.CreateColumnMapping((ColumnBase<ColumnMappingBase>)idColumnBase2, userInvitationDb.FindProperty("Id")!, modelsUserInvitationDbMappingBase);
             RelationalModel.CreateColumnMapping((ColumnBase<ColumnMappingBase>)codeColumnBase, userInvitationDb.FindProperty("Code")!, modelsUserInvitationDbMappingBase);
             RelationalModel.CreateColumnMapping((ColumnBase<ColumnMappingBase>)creationTimeColumnBase3, userInvitationDb.FindProperty("CreationTime")!, modelsUserInvitationDbMappingBase);
+            RelationalModel.CreateColumnMapping((ColumnBase<ColumnMappingBase>)deleteColumnBase, userInvitationDb.FindProperty("Delete")!, modelsUserInvitationDbMappingBase);
             RelationalModel.CreateColumnMapping((ColumnBase<ColumnMappingBase>)isConfirmedColumnBase, userInvitationDb.FindProperty("IsConfirmed")!, modelsUserInvitationDbMappingBase);
             RelationalModel.CreateColumnMapping((ColumnBase<ColumnMappingBase>)modifiedByIdColumnBase3, userInvitationDb.FindProperty("ModifiedById")!, modelsUserInvitationDbMappingBase);
             RelationalModel.CreateColumnMapping((ColumnBase<ColumnMappingBase>)modifiedTimeColumnBase3, userInvitationDb.FindProperty("ModifiedTime")!, modelsUserInvitationDbMappingBase);
@@ -722,6 +728,11 @@ namespace Repos.CompiledModels
             invitationsTable.Columns.Add("Code", codeColumn);
             var creationTimeColumn3 = new Column("CreationTime", "timestamp with time zone", invitationsTable);
             invitationsTable.Columns.Add("CreationTime", creationTimeColumn3);
+            var deleteColumn = new Column("Delete", "boolean", invitationsTable)
+            {
+                IsNullable = true
+            };
+            invitationsTable.Columns.Add("Delete", deleteColumn);
             var isConfirmedColumn = new Column("IsConfirmed", "boolean", invitationsTable);
             invitationsTable.Columns.Add("IsConfirmed", isConfirmedColumn);
             var modifiedByIdColumn3 = new Column("ModifiedById", "bigint", invitationsTable)
@@ -772,6 +783,7 @@ namespace Repos.CompiledModels
             RelationalModel.CreateColumnMapping(idColumn2, userInvitationDb.FindProperty("Id")!, invitationsTableMapping);
             RelationalModel.CreateColumnMapping(codeColumn, userInvitationDb.FindProperty("Code")!, invitationsTableMapping);
             RelationalModel.CreateColumnMapping(creationTimeColumn3, userInvitationDb.FindProperty("CreationTime")!, invitationsTableMapping);
+            RelationalModel.CreateColumnMapping(deleteColumn, userInvitationDb.FindProperty("Delete")!, invitationsTableMapping);
             RelationalModel.CreateColumnMapping(isConfirmedColumn, userInvitationDb.FindProperty("IsConfirmed")!, invitationsTableMapping);
             RelationalModel.CreateColumnMapping(modifiedByIdColumn3, userInvitationDb.FindProperty("ModifiedById")!, invitationsTableMapping);
             RelationalModel.CreateColumnMapping(modifiedTimeColumn3, userInvitationDb.FindProperty("ModifiedTime")!, invitationsTableMapping);

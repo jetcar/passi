@@ -1,7 +1,7 @@
-﻿using System;
-using System.Security.Cryptography.X509Certificates;
-using Models;
+﻿using Models;
 using PostSharp.Extensibility;
+using System;
+using System.Security.Cryptography.X509Certificates;
 using WebApiDto.Certificate;
 
 namespace Services

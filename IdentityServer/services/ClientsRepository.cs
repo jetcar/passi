@@ -1,19 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using IdentityModel;
+﻿using IdentityModel;
 using IdentityRepo.DbContext;
 using IdentityServer4.EntityFramework.Entities;
 using IdentityServer4.EntityFramework.Mappers;
 using Microsoft.EntityFrameworkCore;
 using Repos;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using Client = IdentityServer4.EntityFramework.Entities.Client;
 
 namespace IdentityServer.services
 {
     public class IdentityClientsRepository : BaseRepo<IdentityDbContext>, IIdentityClientsRepository
     {
-
         public IdentityClientsRepository(IdentityDbContext dbContext) : base(dbContext)
         {
         }
@@ -52,8 +51,6 @@ namespace IdentityServer.services
                 }
             });
             return savedClientEntity;
-
-
         }
 
         public bool IsClientIdTaken(string clientId)
@@ -72,7 +69,6 @@ namespace IdentityServer.services
             var strategy = GetExecutionStrategy();
             strategy.Execute(() =>
             {
-
                 using (var transaction = _dbContext.Database.BeginTransaction())
                 {
                     var client = _dbContext.UserClients
@@ -124,8 +120,6 @@ namespace IdentityServer.services
         {
             return _dbContext.Clients.ToList();
         }
-
-
     }
 
     public interface IIdentityClientsRepository : ITransaction
@@ -141,6 +135,7 @@ namespace IdentityServer.services
         bool Exists(int id, string userId);
 
         void Update(int id, string userId, string clientSecret, string returnUrls, string url);
+
         List<Client> GetAllClients();
     }
 }

@@ -1,9 +1,9 @@
-﻿using System;
-using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Models;
 using PostSharp.Extensibility;
+using System;
+using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Repos
 {

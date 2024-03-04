@@ -1,8 +1,7 @@
-using System;
-using System.Collections.Generic;
 using ConfigurationManager;
 using Microsoft.Extensions.Configuration;
 using NUnit.Framework;
+using System.Collections.Generic;
 
 namespace ConfigurationManagerTests
 {

@@ -1,7 +1,7 @@
-﻿using System.Linq;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Models;
 using PostSharp.Extensibility;
+using System.Linq;
 
 namespace Repos
 {
@@ -54,13 +54,10 @@ namespace Repos
         {
             return _dbContext.Certificates.FirstOrDefault(x => x.Thumbprint == parentCertThumbprint);
         }
-
-
     }
 
     public interface ICertificateRepository : ITransaction
     {
-
         CertificateDb GetUserCertificate(string username, string thumbprint);
 
         CertificateDb AddCertificate(string certificateThumbprint, string PublicCert, string parentCertThumbprint,

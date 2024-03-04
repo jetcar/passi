@@ -15,7 +15,6 @@ namespace IdentityServer
             get { return Tracer.CurrentTracer; }
         }
 
-
         public override void OnInvoke(MethodInterceptionArgs args)
         {
             var type = args.Instance.GetType();
@@ -25,6 +24,7 @@ namespace IdentityServer
             else
                 base.OnInvoke(args);
         }
+
         public override Task OnInvokeAsync(MethodInterceptionArgs args)
         {
             var type = args.Instance.GetType();
@@ -32,12 +32,11 @@ namespace IdentityServer
                 using (_tracer.StartSpan(type.FullName + "." + args.Method.Name))
                     return base.OnInvokeAsync(args);
             return base.OnInvokeAsync(args);
-
         }
+
         private bool IsPropertyMethod(MethodBase method)
         {
             return method.IsSpecialName && (method.Name.StartsWith("get_") || method.Name.StartsWith("set_"));
         }
-
     }
 }

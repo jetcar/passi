@@ -1,7 +1,7 @@
-﻿using System;
-using System.Runtime.CompilerServices;
-using Serilog;
+﻿using Serilog;
 using Serilog.Context;
+using System;
+using System.Runtime.CompilerServices;
 
 namespace Repos
 {
@@ -14,6 +14,7 @@ namespace Repos
             LogContext.PushProperty("LineNumber", sourceLineNumber);
             logger.Error(exception, message);
         }
+
         public static void LogAppDebug(this ILogger logger, string message, [CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0)
         {
             using var prop = LogContext.PushProperty("Method", memberName);

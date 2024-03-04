@@ -1,9 +1,9 @@
-﻿using System.Data.Common;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore.Diagnostics;
+﻿using Microsoft.EntityFrameworkCore.Diagnostics;
 using PostSharp.Extensibility;
 using Serilog;
+using System.Data.Common;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Repos
 {

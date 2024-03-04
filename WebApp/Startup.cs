@@ -1,21 +1,20 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using ConfigurationManager;
+using Google.Cloud.Diagnostics.AspNetCore3;
+using Google.Cloud.Diagnostics.Common;
+using GoogleTracer;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Diagnostics;
-using ConfigurationManager;
-using Microsoft.AspNetCore.DataProtection;
+using Microsoft.OpenApi.Models;
 using OpenIdLib.OpenId;
 using Serilog;
 using Serilog.Events;
 using Services;
-using Google.Cloud.Diagnostics.Common;
+using System;
 using System.Net.Http;
-using Google.Cloud.Diagnostics.AspNetCore3;
-using GoogleTracer;
-using Microsoft.OpenApi.Models;
 using TraceServiceOptions = Google.Cloud.Diagnostics.Common.TraceServiceOptions;
 
 namespace WebApp
@@ -38,7 +37,6 @@ namespace WebApp
             var clientId = Environment.GetEnvironmentVariable("ClientId") ?? Configuration.GetValue<string>("AppSetting:ClientId");
             var secret = Environment.GetEnvironmentVariable("ClientSecret") ?? Configuration.GetValue<string>("AppSetting:ClientSecret");
             var projectId = Environment.GetEnvironmentVariable("projectId") ?? Configuration.GetValue<string>("AppSetting:projectId");
-
 
             services.AddGoogleTraceForAspNetCore(new AspNetCoreTraceOptions
             {
@@ -79,7 +77,6 @@ namespace WebApp
                 // The next call guarantees that trace information is propagated for outgoing
                 // requests that are already being traced.
                 .AddOutgoingGoogleTraceHandler();
-
 
             services.AddAuthentication(options =>
                 {
@@ -167,7 +164,6 @@ namespace WebApp
                 {
                     endpoints.MapFallbackToFile("/index.html");
                 });
-
             });
         }
     }

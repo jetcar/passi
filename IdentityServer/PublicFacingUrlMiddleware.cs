@@ -1,6 +1,6 @@
-using System.Threading.Tasks;
 using IdentityServer4.Extensions;
 using Microsoft.AspNetCore.Http;
+using System.Threading.Tasks;
 
 namespace IdentityServer;
 

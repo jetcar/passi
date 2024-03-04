@@ -76,6 +76,7 @@
 		<MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
 	</ItemGroup>
 
+
 	<ItemGroup>
 	  <Compile Remove="FingerPrint\IBiometricHelper.cs" />
 	  <Compile Remove="Notifications\MyFirebaseIIDService.cs" />

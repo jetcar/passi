@@ -17,7 +17,6 @@ namespace IdentityServer
                 {
                     loggerConfiguration.ReadFrom.Configuration(hostingContext.Configuration);
                     //loggerConfiguration.WriteTo.LogDNA(apiKey: SecretsLoader.GetValueFromKeyVault("dnaLogKey"), appName: "identityServer");
-
                 })
                 .ConfigureWebHostDefaults(webBuilder =>
                 {

@@ -1,8 +1,7 @@
-﻿using System;
-using ConfigurationManager;
+﻿using ConfigurationManager;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-
+using System;
 
 namespace passi_webapi.Filters
 {
@@ -25,5 +24,4 @@ namespace passi_webapi.Filters
             }
         }
     }
-
 }

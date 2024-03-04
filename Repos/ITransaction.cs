@@ -5,5 +5,6 @@ namespace Repos;
 public interface ITransaction
 {
     IDbContextTransaction BeginTransaction();
+
     IExecutionStrategy GetExecutionStrategy();
 }

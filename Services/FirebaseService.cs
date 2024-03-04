@@ -1,12 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading;
-using ConfigurationManager;
+﻿using ConfigurationManager;
 using FirebaseAdmin.Messaging;
-using Repos;
-using Serilog.Core;
 using Microsoft.EntityFrameworkCore;
 using PostSharp.Extensibility;
+using Repos;
+using Serilog.Core;
+using System;
+using System.Collections.Generic;
+using System.Threading;
 using Message = FirebaseAdmin.Messaging.Message;
 
 namespace Services
@@ -69,7 +69,6 @@ namespace Services
                             transaction.Commit();
                         }
                     });
-
                 }
             }).Start();
             return "";
@@ -85,8 +84,6 @@ namespace Services
             return text.Length > maxLength ? text.Substring(0, maxLength) : text;
         }
     }
-
-
 
     public interface IFirebaseService
     {

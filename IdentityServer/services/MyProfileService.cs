@@ -1,14 +1,13 @@
-using System.Security.Claims;
 using IdentityServer4.Models;
 using IdentityServer4.Services;
 using Microsoft.Extensions.Logging;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace IdentityServer.services
 {
     public class MyProfileService : IProfileService
     {
-
         public MyProfileService(ILogger<MyProfileService> logger)
         {
             this.Logger = logger;

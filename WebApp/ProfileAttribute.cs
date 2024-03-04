@@ -1,8 +1,8 @@
-﻿using System.Reflection;
-using Google.Cloud.Diagnostics.Common;
+﻿using Google.Cloud.Diagnostics.Common;
 using GoogleTracer;
 using PostSharp.Aspects;
 using PostSharp.Serialization;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace WebApp
@@ -15,7 +15,6 @@ namespace WebApp
             get { return Tracer.CurrentTracer; }
         }
 
-
         public override void OnInvoke(MethodInterceptionArgs args)
         {
             var type = args.Instance.GetType();
@@ -25,6 +24,7 @@ namespace WebApp
             else
                 base.OnInvoke(args);
         }
+
         public override Task OnInvokeAsync(MethodInterceptionArgs args)
         {
             var type = args.Instance.GetType();
@@ -32,8 +32,8 @@ namespace WebApp
                 using (_tracer.StartSpan(type.FullName + "." + args.Method.Name))
                     return base.OnInvokeAsync(args);
             return base.OnInvokeAsync(args);
-
         }
+
         private bool IsPropertyMethod(MethodBase method)
         {
             return method.IsSpecialName && (method.Name.StartsWith("get_") || method.Name.StartsWith("set_"));

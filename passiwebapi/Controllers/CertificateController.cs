@@ -13,10 +13,10 @@ namespace passi_webapi.Controllers
     [Profile(AttributeTargetElements = MulticastTargets.Method)]
     public class CertificateController : ControllerBase
     {
-
-        ICertificateRepository _certificateRepository;
-        ICertificatesService _certificatesService;
+        private ICertificateRepository _certificateRepository;
+        private ICertificatesService _certificatesService;
         private ICertValidator _certValidator;
+
         public CertificateController(ICertificateRepository certificateRepository, ICertificatesService certificatesService, ICertValidator certValidator)
         {
             _certificateRepository = certificateRepository;
@@ -32,7 +32,6 @@ namespace passi_webapi.Controllers
             {
                 PublicCert = certificateDb?.PublicCert,
             };
-
         }
 
         [HttpPost, Route("UpdatePublicCert")]
@@ -52,17 +51,12 @@ namespace passi_webapi.Controllers
                     var certificateDb = _certificatesService.UpdateCertificate(newCertificate);
                     transaction.Commit();
                     cert = certificateDb?.PublicCert;
-                    
-
                 }
             });
             return new CertificateUpdateDto()
             {
                 PublicCert = cert
             };
-
         }
     }
-
-
 }

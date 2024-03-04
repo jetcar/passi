@@ -6,8 +6,8 @@
         data() {
             return {
                 User: {
-                    IsLoggedIn:false,
-                    Name:""
+                    IsLoggedIn: false,
+                    Name: ""
                 }
             }
         },
@@ -42,11 +42,9 @@
                         </div>
                     </li>
                 </ul>
-
             </nav>
         </div>
     </header>
 
     <RouterView />
 </template>
-

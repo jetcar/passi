@@ -3,7 +3,7 @@
 
     const API_URL = `/api/UserLoggedIn`
     export default {
-        data()  {
+        data() {
             return {
                 IsLoggedIn: false,
             }
@@ -11,14 +11,14 @@
         created() {
             // fetch on init
             this.fetchData()
-          },
-          methods: {
-              async fetchData() {
+        },
+        methods: {
+            async fetchData() {
                 const url = `${API_URL}`
                 this.IsLoggedIn = await (await fetch(url)).json()
-              }
             }
         }
+    }
 </script>
 
 <template>
@@ -36,10 +36,10 @@
                         <li class="nav-item">
                             <RouterLink class="nav-link text-dark" to="/">Home</RouterLink>
                         </li>
-                        <li class="nav-item" >
+                        <li class="nav-item">
                             <a class="nav-link text-dark" v-if="!IsLoggedIn" href="/Auth/Login">Login</a>
                         </li>
-                        <li class="nav-item" >
+                        <li class="nav-item">
                             <RouterLink class="nav-link text-dark" v-if="IsLoggedIn" to="/UserInfo">UserInfo</RouterLink>
                         </li>
                         <li class="nav-item">
@@ -54,7 +54,6 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" v-if="IsLoggedIn" href="/Auth/Logout">Logout</a>
                         </li>
-
                     </ul>
                 </div>
             </div>
@@ -63,4 +62,3 @@
 
     <RouterView />
 </template>
-

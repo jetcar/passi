@@ -22,7 +22,7 @@ namespace RegisterManyUsersTestApp
         {
             SetVariables(args[0]);
             var timeout = 30000;
-            var certPath = "RegisterManyUsersTestApp/certs";
+            var certPath = "../../certs";
             Directory.CreateDirectory(certPath);
             var list = new int[1000000];
             var certService = new CertificatesService(null, null, null, null, null);

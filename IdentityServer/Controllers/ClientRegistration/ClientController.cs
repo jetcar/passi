@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using ConfigurationManager;
 using IdentityModel;
 using IdentityServer.services;
@@ -9,6 +6,9 @@ using IdentityServer4.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PostSharp.Extensibility;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace IdentityServer.Controllers.ClientRegistration
 {

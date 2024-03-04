@@ -1,7 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using ConfigurationManager;
+using DotNet.Testcontainers.Builders;
+using DotNet.Testcontainers.Containers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -11,11 +10,12 @@ using passi_webapi;
 using passi_webapi.Controllers;
 using RestSharp;
 using Services;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using ILogger = Serilog.ILogger;
 using Logger = Serilog.Core.Logger;
 using Message = FirebaseAdmin.Messaging.Message;
-using DotNet.Testcontainers.Builders;
-using DotNet.Testcontainers.Containers;
 
 namespace PassiWebApiTests;
 
@@ -39,11 +39,9 @@ public class TestBase
 
         services.Remove(new ServiceDescriptor(typeof(IMyRestClient), typeof(MyRestClient)));//remove real requests services
         services.Remove(new ServiceDescriptor(typeof(IEmailSender), typeof(EmailSender)));//remove real requests services
-        services.Remove(new ServiceDescriptor(typeof(IFireBaseClient), typeof(FireBaseClient)));//remove real requests services
 
         services.AddScoped<IMyRestClient, TestRestClient>();
         services.AddScoped<IEmailSender, TestEmailSender>();
-        services.AddScoped<IFireBaseClient, TestFireBaseClient>();
 
         ServiceProvider = services.BuildServiceProvider();
         PrepareDockers();
@@ -153,14 +151,6 @@ public class TestBase
 
     private void NextAction(IApplicationBuilder obj)
     {
-    }
-}
-
-public class TestFireBaseClient : IFireBaseClient
-{
-    public string Send(Message message)
-    {
-        throw new NotImplementedException();
     }
 }
 

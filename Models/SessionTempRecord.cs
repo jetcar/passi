@@ -11,8 +11,8 @@ namespace Models
         public SessionStatus? Status { get; set; }
         public Instant ExpirationTime { get; set; }
         public string SignedHashNew { get; set; }
-
     }
+
     public class SessionTempRecord
     {
         public Guid Guid { get; set; }

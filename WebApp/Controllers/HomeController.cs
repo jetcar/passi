@@ -1,9 +1,6 @@
-﻿using System.Diagnostics;
-using ConfigurationManager;
-using Microsoft.AspNetCore.Diagnostics;
+﻿using ConfigurationManager;
 using Microsoft.AspNetCore.Mvc;
 using PostSharp.Extensibility;
-using WebApp.Models;
 
 namespace WebApp.Controllers
 {
@@ -11,6 +8,7 @@ namespace WebApp.Controllers
     public class HomeController : Controller
     {
         private AppSetting _appSetting;
+
         public HomeController(AppSetting appSetting)
         {
             _appSetting = appSetting;

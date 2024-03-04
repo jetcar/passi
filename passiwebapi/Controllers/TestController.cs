@@ -1,11 +1,11 @@
-﻿using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Models;
 using passi_webapi.Filters;
 using PostSharp.Extensibility;
 using Repos;
 using Services;
+using System.Threading.Tasks;
 using WebApiDto.SignUp;
 
 namespace passi_webapi.Controllers
@@ -16,11 +16,10 @@ namespace passi_webapi.Controllers
     [Profile(AttributeTargetElements = MulticastTargets.Method)]
     public class TestController : ControllerBase
     {
-
-        IUserService _userService;
+        private IUserService _userService;
         private ICertValidator _certValidator;
 
-        IUserRepository _userRepository;
+        private IUserRepository _userRepository;
         private IRandomGenerator _randomGenerator;
 
         public TestController(IUserRepository userRepository, IUserService userService, ICertValidator certValidator, IRandomGenerator randomGenerator)
@@ -41,7 +40,7 @@ namespace passi_webapi.Controllers
                 using (var transaction = _userRepository.BeginTransaction())
                 {
                     UserDb user = null;
-                    if(_userRepository.IsUsernameTaken(signupDto.Email))
+                    if (_userRepository.IsUsernameTaken(signupDto.Email))
                         user = _userRepository.GetUser(signupDto.Email);
                     if (user == null)
                         user = _userRepository.AddUser(new UserDb()
@@ -71,7 +70,6 @@ namespace passi_webapi.Controllers
             var strategy = _userRepository.GetExecutionStrategy();
             strategy.Execute(() =>
             {
-
                 using (var transaction = _userRepository.BeginTransaction())
                 {
                     _certValidator.ValidateCertificate(signupConfirmationDto.PublicCert, signupConfirmationDto.Email);

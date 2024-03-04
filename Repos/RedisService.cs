@@ -1,9 +1,9 @@
-﻿using StackExchange.Redis;
-using System;
-using ConfigurationManager;
+﻿using ConfigurationManager;
 using Models;
 using Newtonsoft.Json;
 using PostSharp.Extensibility;
+using StackExchange.Redis;
+using System;
 
 namespace Repos
 {
@@ -13,6 +13,7 @@ namespace Repos
         private readonly ConnectionMultiplexer _redis;
         private readonly IDatabase _database;
         private AppSetting _appSetting;
+
         public RedisService(AppSetting appSetting)
         {
             _appSetting = appSetting;
@@ -47,7 +48,9 @@ namespace Repos
     public interface IRedisService
     {
         void Add(SessionTempRecord sessionDb);
+
         SessionTempRecord Get(Guid guid);
+
         void Delete(Guid guid);
     }
 }

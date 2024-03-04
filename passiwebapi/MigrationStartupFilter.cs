@@ -1,9 +1,9 @@
-using System;
-using System.Threading;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Threading;
 
 namespace passi_webapi
 {
@@ -19,7 +19,6 @@ namespace passi_webapi
                     {
                         while (true)
                         {
-
                             try
                             {
                                 while (context.Database.GetDbConnection() == null)

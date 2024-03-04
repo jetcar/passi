@@ -1,14 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using ConfigurationManager;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PostSharp.Extensibility;
 using Repos;
+using Serilog;
 using Services;
 using System;
 using System.Threading.Tasks;
-using ConfigurationManager;
-using IdentityModel;
-using Microsoft.AspNetCore.SignalR.Protocol;
-using Serilog;
 using WebApiDto.SignUp;
 
 namespace passi_webapi.Controllers

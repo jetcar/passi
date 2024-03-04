@@ -25,7 +25,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Compile Remove="Controllers\Account\AccountController.cs" />
 	  <Compile Remove="Controllers\LoginController.cs" />
 	</ItemGroup>
 
@@ -36,9 +35,6 @@
 	<ItemGroup>
 		<PackageReference Include="Google.Cloud.Diagnostics.AspNetCore3" Version="5.1.0" />
 		<PackageReference Include="Google.Cloud.Diagnostics.Common" Version="5.1.0" />
-		<PackageReference Include="IdentityModelCore" Version="1.0.1" />
-		<PackageReference Include="IdentityServer4Core" Version="1.0.2" />
-		<PackageReference Include="IdentityServer4Core.EntityFramework" Version="1.0.0" />
 		<PackageReference Include="Microsoft.AspNetCore.DataProtection.EntityFrameworkCore" Version="8.0.1" />
 
 
@@ -76,17 +72,12 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Content Include="vue-project\src\assets\site.css">
-	    <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-	    <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-	  </Content>
-	</ItemGroup>
-
-
-	<ItemGroup>
 	  <ProjectReference Include="..\ConfigurationManager\ConfigurationManager.csproj" />
 	  <ProjectReference Include="..\GoogleTracer\GoogleTracer.csproj" />
 	  <ProjectReference Include="..\IdentityRepo\IdentityRepo.csproj" />
+	  <ProjectReference Include="..\IdentityServer4Core\src\EntityFramework.Storage\src\IdentityServer4.EntityFramework.Storage.csproj" />
+	  <ProjectReference Include="..\IdentityServer4Core\src\EntityFramework\src\IdentityServer4.EntityFramework.csproj" />
+	  <ProjectReference Include="..\IdentityServer4Core\src\IdentityServer4\src\IdentityServer4.csproj" />
 	  <ProjectReference Include="..\Services\Services.csproj" />
 	  <ProjectReference Include="..\WebApiDto\WebApiDto.csproj" />
 	</ItemGroup>

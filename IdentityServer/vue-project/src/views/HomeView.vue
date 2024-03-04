@@ -6,7 +6,6 @@
             }
         },
     }
-
 </script>
 <template>
 
@@ -29,7 +28,6 @@
                         <li>
                             Click <a href="~/diagnostics">here</a> to see the claims for your current session.
                         </li>
-
                     </ul>
                 </div>
             </div>

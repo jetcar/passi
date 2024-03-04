@@ -1,12 +1,11 @@
-using System;
-using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using IdentityModel;
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
 using passi_webapi.Controllers;
 using Services;
+using System;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
 using WebApiDto.Certificate;
 using WebApiDto.SignUp;
 
@@ -51,11 +50,11 @@ namespace PassiWebApiTests.Controllers
             var distinguishedName = signupDto.Email;
             var req = new CertificateRequest($"cn={distinguishedName.Replace("@", "")}", rsa, HashAlgorithmName.SHA512, RSASignaturePadding.Pkcs1);
             var cert = req.CreateSelfSigned(DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddYears(1));
-            Assert.IsTrue(cert.HasPrivateKey);
+            Assert.That(cert.HasPrivateKey);
 
             var certificate64 = Convert.ToBase64String(cert.Export(X509ContentType.Pkcs12, "1234"));
             var certLoaded = new X509Certificate2(Convert.FromBase64String(certificate64), "1234", X509KeyStorageFlags.Exportable);
-            Assert.IsTrue(certLoaded.HasPrivateKey);
+            Assert.That(certLoaded.HasPrivateKey);
             var signupConfirmationDto = new SignupConfirmationDto()
             {
                 Code = TestEmailSender.Code,
@@ -77,7 +76,7 @@ namespace PassiWebApiTests.Controllers
             var parentCertHashSignature = GetSignedData(Convert.ToBase64String(cert2.RawData), cert);
             var newCert64 = Convert.ToBase64String(cert2.RawData);
             var valid = CertHelper.VerifyData(newCert64, parentCertHashSignature, signupConfirmationDto.PublicCert);
-            Assert.IsTrue(valid);
+            Assert.That(valid);
             var certificateUpdateDto = new CertificateUpdateDto()
             {
                 DeviceId = signupDto.DeviceId,
@@ -87,7 +86,7 @@ namespace PassiWebApiTests.Controllers
             };
             var updateResponse = certController.UpdatePublicCert(certificateUpdateDto);
             var x509Certificate2 = new X509Certificate2(Convert.FromBase64String(updateResponse.PublicCert));
-            Assert.AreEqual(cert2.Thumbprint, x509Certificate2.Thumbprint);
+            Assert.That(cert2.Thumbprint.Equals(x509Certificate2.Thumbprint));
         }
 
         public string GetSignedData(string messageToSign, X509Certificate2 certificate)

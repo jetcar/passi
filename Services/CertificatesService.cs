@@ -1,8 +1,8 @@
-﻿using System;
-using System.Security.Cryptography.X509Certificates;
-using Models;
+﻿using Models;
 using PostSharp.Extensibility;
 using Repos;
+using System;
+using System.Security.Cryptography.X509Certificates;
 using WebApiDto.Certificate;
 
 namespace Services
@@ -21,7 +21,7 @@ namespace Services
         {
             var certificate = new X509Certificate2(Convert.FromBase64String(newCertificate.PublicCert));
             return _certificateRepository.AddCertificate(certificate.Thumbprint, newCertificate.PublicCert,
-                newCertificate.ParentCertThumbprint,newCertificate.DeviceId);
+                newCertificate.ParentCertThumbprint, newCertificate.DeviceId);
         }
     }
 

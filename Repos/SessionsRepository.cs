@@ -1,20 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using ConfigurationManager;
+﻿using ConfigurationManager;
 using Microsoft.EntityFrameworkCore;
 using Models;
 using NodaTime;
 using PostSharp.Extensibility;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Repos
 {
-[ReposProfile(AttributeTargetElements = MulticastTargets.Method)]
+    [ReposProfile(AttributeTargetElements = MulticastTargets.Method)]
     public class SessionsRepository : BaseRepo<PassiDbContext>, ISessionsRepository
     {
         private AppSetting _appSetting;
         private int _sessionTimeout;
-        IRedisService _redisService;
+        private IRedisService _redisService;
 
         public SessionsRepository(PassiDbContext dbContext, AppSetting appSetting, IRedisService redisService) : base(dbContext)
         {
@@ -22,7 +22,7 @@ namespace Repos
             _redisService = redisService;
             _sessionTimeout = Convert.ToInt32(_appSetting["Timeout"]);
         }
-        
+
         public SessionTempRecord BeginSession(string username, string clientId, string randomString, string color, string returnUrl)
         {
             var user = _dbContext.Users.First(x => x.EmailHash == username);
@@ -132,6 +132,7 @@ namespace Repos
         SessionTempRecord GetActiveSession(string deviceId, Instant expirationTime);
 
         List<UserDb> SyncAccounts(List<string> guilds, string deviceId);
+
         SimpleSessionDb GetAuthorizedSession(Guid sessionId, string thunbprint, string username);
     }
 }

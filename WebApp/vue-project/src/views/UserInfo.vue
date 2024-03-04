@@ -20,7 +20,6 @@
 
         }
     }
-
 </script>
 
 <template>
@@ -39,7 +38,4 @@
             </div>
         </div>
     </main>
-
-
 </template>
-

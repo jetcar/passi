@@ -4,7 +4,6 @@ using System.Reflection;
 
 namespace Repos
 {
-
     [AttributeUsage(AttributeTargets.Property)]
     public class DateTimeKindAttribute : Attribute
     {
@@ -35,8 +34,8 @@ namespace Repos
                     continue;
 
                 var dt = property.PropertyType == typeof(DateTime?)
-                    ? (DateTime?) property.GetValue(entity)
-                    : (DateTime) property.GetValue(entity);
+                    ? (DateTime?)property.GetValue(entity)
+                    : (DateTime)property.GetValue(entity);
 
                 if (dt == null)
                     continue;

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Models;
 using Newtonsoft.Json;
@@ -10,6 +7,9 @@ using passi_webapi.Dto;
 using PostSharp.Extensibility;
 using Repos;
 using Services;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using WebApiDto;
 using WebApiDto.Auth;
 
@@ -22,13 +22,11 @@ namespace passi_webapi.Controllers
     {
         private ISessionsRepository _sessionsRepository;
         private IUserRepository _userRepository;
-        private IFirebaseService _firebaseService;
 
-        public AuthController(ISessionsRepository sessionsRepository, IUserRepository userRepository, IFirebaseService firebaseService)
+        public AuthController(ISessionsRepository sessionsRepository, IUserRepository userRepository)
         {
             _sessionsRepository = sessionsRepository;
             _userRepository = userRepository;
-            _firebaseService = firebaseService;
         }
 
         [HttpGet, Route("Cancel")]
@@ -70,42 +68,21 @@ namespace passi_webapi.Controllers
             var strategy = _sessionsRepository.GetExecutionStrategy();
             strategy.Execute(() =>
             {
-
                 using (var transaction = _sessionsRepository.BeginTransaction())
                 {
                     if (!_userRepository.IsUsernameTaken(startLoginDto.Username))
                         throw new BadRequestException("username not found");
                     if (!_userRepository.IsUserFinished(startLoginDto.Username))
                         throw new BadRequestException("user not verified");
-                    var user = _userRepository.GetUser(startLoginDto.Username);
                     var sessionDb = _sessionsRepository.BeginSession(startLoginDto.Username, startLoginDto.ClientId,
                         startLoginDto.RandomString, startLoginDto.CheckColor.ToString(), startLoginDto.ReturnUrl);
-                    var host = startLoginDto.ReturnUrl;
-                    try
-                    {
-                        host = new Uri(startLoginDto.ReturnUrl).Host;
-                    }
-                    catch (Exception e)
-                    {
-                    }
 
-                    _firebaseService.SendNotification(user.Device.NotificationToken, "Passi login",
-                        JsonConvert.SerializeObject(
-                            new FirebaseNotificationDto()
-                            {
-                                Sender = startLoginDto.ClientId,
-                                ReturnHost = host,
-                                SessionId = sessionDb.Guid,
-                                AccountGuid = user.Guid
-                            }),
-                        host, sessionDb.Guid);
                     transaction.Commit();
 
                     sessionid = sessionDb.Guid;
                 }
             });
             return new LoginResponceDto() { SessionId = sessionid };
-
         }
 
         [HttpPost, Route("Authorize")]
@@ -123,7 +100,6 @@ namespace passi_webapi.Controllers
                 }
             });
             return new LoginResponceDto() { SessionId = authorizeDto.SessionId };
-
         }
 
         [HttpGet, Route("check")]
@@ -148,7 +124,6 @@ namespace passi_webapi.Controllers
             return new CheckResponceDto() { PublicCertThumbprint = sessionDb.PublicCertThumbprint, Username = sessionDb.Email };
         }
 
-
         [HttpGet, Route("session")]
         public SessionMinDto Session([FromQuery] Guid sessionId, string thumbprint, string username)
         {
@@ -158,7 +133,6 @@ namespace passi_webapi.Controllers
 
             return new SessionMinDto() { SignedHash = sessionDb.SignedHashNew, PublicCert = sessionDb.User.Certificates.FirstOrDefault(x => x.Thumbprint == thumbprint)?.PublicCert, ExpirationTime = sessionDb.ExpirationTime.ToDateTimeUtc() };
         }
-
 
         [HttpPost, Route("GetActiveSession")]
         public IActionResult GetActiveSession([FromBody] GetAllSessionDto getSessionDto)

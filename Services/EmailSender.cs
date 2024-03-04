@@ -1,9 +1,9 @@
-﻿using System;
-using System.Net.Http;
-using ConfigurationManager;
+﻿using ConfigurationManager;
 using PostSharp.Extensibility;
 using SendGrid;
 using SendGrid.Helpers.Mail;
+using System;
+using System.Net.Http;
 
 namespace Services
 {

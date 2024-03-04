@@ -18,13 +18,13 @@
         },
 
         methods: {
-            async handleCancelClick() { 
+            async handleCancelClick() {
                 this.errorMessage = false
                 this.loginForm = true
                 this.confirmForm = false
                 this.loading = true;
             },
-            async handleCancelConfirmClick() { 
+            async handleCancelConfirmClick() {
                 this.errorMessage = false
                 this.loginForm = false
                 this.confirmForm = true
@@ -115,7 +115,6 @@
                                         </div>
                                         <br />
                                         <button class="btn btn-secondary" name="button" @click="handleCancelClick" value="cancel">Cancel</button>
-
                                     </div>
                                     <br />
                                     <div class="form-group" v-if="!loading">
@@ -137,7 +136,6 @@
                                         </div>
                                         <br />
                                         <button class="btn btn-secondary" name="button" @click="handleCancelConfirmClick" value="cancel">Cancel</button>
-
                                     </div>
                                     <br />
                                     <div class="form-group" v-if="!loading">

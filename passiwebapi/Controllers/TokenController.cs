@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using PostSharp.Extensibility;
 using Repos;
-using Services;
 using WebApiDto;
 
 namespace passi_webapi.Controllers
@@ -12,7 +11,8 @@ namespace passi_webapi.Controllers
     [Profile(AttributeTargetElements = MulticastTargets.Method)]
     public class TokenController : ControllerBase
     {
-        IUserRepository _userRepository;
+        private IUserRepository _userRepository;
+
         public TokenController(IUserRepository userRepository)
         {
             _userRepository = userRepository;

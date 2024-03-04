@@ -12,7 +12,6 @@ export default defineConfig({
         alias: {
             '@': fileURLToPath(new URL('./src', import.meta.url)),
             vue: '@vue/compat',
-
         }
     },
     build: {
@@ -25,5 +24,3 @@ export default defineConfig({
         }
     }
 })
-
-

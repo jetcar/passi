@@ -2,7 +2,6 @@ using System;
 
 namespace IdentityServer.Controllers.ViewInputs
 {
-
     public class CheckInputModel
     {
         public string Username { get; set; }

@@ -1,3 +1,6 @@
+using System;
+using static Abstracta.JmeterDsl.JmeterDsl;
+
 namespace LoadTests
 {
     public class Tests
@@ -10,7 +13,12 @@ namespace LoadTests
         [Test]
         public void Test1()
         {
-            Assert.Pass();
+            var stats = TestPlan(
+                ThreadGroup(2, 10,
+                    HttpSampler("https://localhost")
+                )
+            ).Run();
+            Assert.That(stats.Overall.SampleTimePercentile99, Is.LessThan(TimeSpan.FromSeconds(5)));
         }
     }
 }

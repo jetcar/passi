@@ -1,26 +1,26 @@
-using System;
+using AutoMapper;
+using ConfigurationManager;
+using Google.Cloud.Diagnostics.AspNetCore3;
+using Google.Cloud.Diagnostics.Common;
+using GoogleTracer;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using ConfigurationManager;
-using Microsoft.AspNetCore.DataProtection;
-using Microsoft.AspNetCore.Http;
 using Microsoft.OpenApi.Models;
+using Models;
+using NodaTime;
+using OpenIdLib.OpenId;
+using passi_webapi.Dto;
 using Repos;
 using Serilog;
 using Serilog.Events;
 using Services;
-using OpenIdLib.OpenId;
+using System;
 using System.Linq;
-using Models;
-using AutoMapper;
-using Google.Cloud.Diagnostics.AspNetCore3;
-using passi_webapi.Dto;
-using NodaTime;
-using Google.Cloud.Diagnostics.Common;
-using GoogleTracer;
 using TraceServiceOptions = Google.Cloud.Diagnostics.Common.TraceServiceOptions;
 
 namespace passi_webapi
@@ -71,8 +71,6 @@ namespace passi_webapi
             services.AddSingleton<IRedisService, RedisService>();
             services.AddSingleton<IEmailSender, EmailSender>();
             services.AddSingleton<IRandomGenerator, RandomGenerator>();
-            services.AddSingleton<IFireBaseClient, FireBaseClient>();
-            services.AddScoped<IFirebaseService, FirebaseService>();
             services.AddSingleton<ICertValidator, CertValidator>();
             services.AddScoped<PassiDbContext>();
             services.AddScoped<CurrentContext>();
@@ -93,7 +91,6 @@ namespace passi_webapi
                 })
                 .PersistKeysToDbContext<PassiDbContext>();
 
-
             services.AddScoped(CustomTraceContextProvider);
             static ITraceContext CustomTraceContextProvider(IServiceProvider sp)
             {
@@ -105,7 +102,6 @@ namespace passi_webapi
             // Register a method that sets the updated trace context information on the response.
             services.AddSingleton<Action<HttpResponse, ITraceContext>>(
                 (response, traceContext) => response.Headers.Add("custom_trace_id", traceContext.TraceId));
-
 
             services.AddAuthentication(options =>
             {

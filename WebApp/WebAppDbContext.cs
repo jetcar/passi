@@ -1,11 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using ConfigurationManager;
+﻿using ConfigurationManager;
 using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
+using System;
+using System.Collections.Generic;
 
 namespace WebApp
 {

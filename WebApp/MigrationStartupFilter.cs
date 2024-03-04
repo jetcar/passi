@@ -1,11 +1,11 @@
-using System;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using System;
 
-namespace WebApp {
-
+namespace WebApp
+{
     public class MigrationStartupFilter<TContext> : IStartupFilter where TContext : DbContext
     {
         public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next)

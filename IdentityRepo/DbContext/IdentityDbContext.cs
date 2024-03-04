@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Serilog.Core;
 using ILogger = Serilog.ILogger;
 
 namespace IdentityRepo.DbContext

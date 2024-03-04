@@ -11,7 +11,7 @@
                     ReturnUrl: this.$route.query.returnUrl,
                 },
                 LoginResponse: {
-                    checkColor:"red"
+                    checkColor: "red"
 
                 },
                 errorMessage: false,
@@ -20,9 +20,8 @@
             }
         },
 
-
         methods: {
-            async handleCancelClick() { 
+            async handleCancelClick() {
                 this.loginForm = true;
                 this.loading = false;
 
@@ -46,21 +45,22 @@
                                 }
                                 else {
                                     setTimeout(() => this.fetchCheck(), 1000)
-                                    }
+                                }
 
                             })
-                            }
+                        }
                         else {
                             resp.json().then((error) => {
-                                this.errorMessage = error.errors}
+                                this.errorMessage = error.errors
+                            }
                             )
                         }
                     }
-                    ).catch((error)=>
+                ).catch((error) =>
                     this.errorMessage = error
 
                 );
-            
+
             },
             async handleLoginClick() {
                 this.errorMessage = false
@@ -74,12 +74,12 @@
 
                 var resp = await fetch(API_URL, requestOptions)
                 if (resp.ok) {
-                    resp.json().then((data)=>{
+                    resp.json().then((data) => {
                         this.LoginResponse = data
                         this.loginForm = false
-                        this.loading = false        
+                        this.loading = false
                         this.fetchCheck()
-                    })                    
+                    })
 
                 }
                 else {
@@ -115,7 +115,7 @@
                     <div class="row" v-if="loginForm">
                         <div class="col-md-6">
                             <div class="card">
-                                
+
                                 <div class="card-body">
                                     <div class="spinner-border" role="status" v-if="loading">
                                         <span class="sr-only"></span>
@@ -144,5 +144,4 @@
             </div>
         </div>
     </main>
-
 </template>

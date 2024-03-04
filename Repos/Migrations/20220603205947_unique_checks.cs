@@ -8,7 +8,6 @@ namespace Repos.Migrations
         {
             //migrationBuilder.Sql("Truncate table \"Users\"");
 
-
             migrationBuilder.DropIndex(
                 name: "IX_Users_Username",
                 table: "Users");

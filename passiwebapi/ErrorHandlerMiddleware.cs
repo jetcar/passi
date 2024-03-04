@@ -1,15 +1,14 @@
+using Microsoft.AspNetCore.Http;
+using Newtonsoft.Json;
+using Services;
 using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Newtonsoft.Json;
-using Services;
 using WebApiDto;
 
 namespace passi_webapi
 {
-
     public class ErrorHandlerMiddleware
     {
         private readonly RequestDelegate _next;
@@ -37,10 +36,12 @@ namespace passi_webapi
                         responseModel.errors = e.Message;
                         response.StatusCode = (int)HttpStatusCode.BadRequest;
                         break;
+
                     case KeyNotFoundException e:
                         // not found error
                         response.StatusCode = (int)HttpStatusCode.NotFound;
                         break;
+
                     default:
                         // unhandled error
                         responseModel.errors = error.Message;

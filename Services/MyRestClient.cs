@@ -1,17 +1,15 @@
-﻿using System;
-using System.Diagnostics;
-using System.Linq;
-using System.Net;
-using System.Threading.Tasks;
-using ConfigurationManager;
+﻿using ConfigurationManager;
 using Google.Cloud.Diagnostics.Common;
 using Newtonsoft.Json;
-using Serilog;
 using Polly;
 using Polly.Retry;
 using PostSharp.Extensibility;
-using Repos;
 using RestSharp;
+using Serilog;
+using System;
+using System.Diagnostics;
+using System.Net;
+using System.Threading.Tasks;
 
 namespace Services;
 

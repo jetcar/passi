@@ -1,31 +1,30 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Security.Claims;
-using System.Security.Cryptography.X509Certificates;
-using System.Threading.Tasks;
-using System.Web;
-using ConfigurationManager;
+﻿using ConfigurationManager;
 using IdentityServer.Controllers.ViewInputs;
-using IdentityServer.Controllers.ViewModels;
-using IdentityServer4.Events;
 using IdentityServer4;
+using IdentityServer4.Events;
 using IdentityServer4.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using passi_webapi.Dto;
 using PostSharp.Extensibility;
 using RestSharp;
 using Services;
+
+using System;
+using System.Collections.Generic;
+using System.Net;
+using System.Security.Claims;
+using System.Security.Cryptography.X509Certificates;
+using System.Threading.Tasks;
+using System.Web;
 using WebApiDto;
 using WebApiDto.Auth;
-using IdentityServer.services;
-using Microsoft.Extensions.Logging;
-using static IdentityServer4.Models.IdentityResources;
 using WebApiDto.SignUp;
+
+using static IdentityServer4.Models.IdentityResources;
 
 namespace IdentityServer.Controllers
 {

@@ -20,18 +20,13 @@
 
         }
     }
-
 </script>
 
 <template>
     <main>
         <div class="container">
             <div class="text-center">
-
             </div>
         </div>
     </main>
-
-
 </template>
-

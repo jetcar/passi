@@ -14,7 +14,6 @@ namespace Repos
             get { return Tracer.CurrentTracer; }
         }
 
-
         public override void OnInvoke(MethodInterceptionArgs args)
         {
             var type = args.Instance.GetType();
@@ -22,7 +21,7 @@ namespace Repos
                 using (_tracer.StartSpan(type.FullName + "." + args.Method.Name))
                     base.OnInvoke(args);
             else
-                    base.OnInvoke(args);
+                base.OnInvoke(args);
         }
 
         private bool IsPropertyMethod(MethodBase method)
@@ -40,7 +39,5 @@ namespace Repos
         //        return base.OnInvokeAsync(args);
         //    }
         //}
-
-
     }
 }

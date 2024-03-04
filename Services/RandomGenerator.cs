@@ -1,9 +1,8 @@
-﻿using System;
-using PostSharp.Extensibility;
+﻿using PostSharp.Extensibility;
+using System;
 
 namespace Services
 {
-
     [Profile(AttributeTargetElements = MulticastTargets.Method)]
     public class RandomGenerator : IRandomGenerator
     {
@@ -16,8 +15,8 @@ namespace Services
 
         public string GetNumbersString(int i)
         {
-            var from = (int) Math.Pow(10, i - 1);
-            var to = (int) Math.Pow(10, i) - 1;
+            var from = (int)Math.Pow(10, i - 1);
+            var to = (int)Math.Pow(10, i) - 1;
             var result = _random.Next(@from, to);
             return result.ToString();
         }

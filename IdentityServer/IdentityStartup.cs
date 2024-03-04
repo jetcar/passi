@@ -1,15 +1,3 @@
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Security.Cryptography.X509Certificates;
 using ConfigurationManager;
 using Google.Cloud.Diagnostics.AspNetCore3;
 using Google.Cloud.Diagnostics.Common;
@@ -18,17 +6,29 @@ using IdentityModel;
 using IdentityRepo.DbContext;
 using IdentityServer.services;
 using IdentityServer4.Configuration;
+using IdentityServer4.EntityFramework.Entities;
 using IdentityServer4.EntityFramework.Mappers;
 using IdentityServer4.Models;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using AuthenticationOptions = IdentityServer4.Configuration.AuthenticationOptions;
-using IdentityResource = IdentityServer4.EntityFramework.Entities.IdentityResource;
-using Services;
-using ApiScope = IdentityServer4.EntityFramework.Entities.ApiScope;
-using Client = IdentityServer4.Models.Client;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
+using Services;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Security.Cryptography.X509Certificates;
+using ApiScope = IdentityServer4.EntityFramework.Entities.ApiScope;
+using AuthenticationOptions = IdentityServer4.Configuration.AuthenticationOptions;
+using Client = IdentityServer4.EntityFramework.Entities.Client;
+using IdentityResource = IdentityServer4.EntityFramework.Entities.IdentityResource;
 using TraceServiceOptions = Google.Cloud.Diagnostics.Common.TraceServiceOptions;
 
 namespace IdentityServer
@@ -72,13 +72,11 @@ namespace IdentityServer
             services.AddSingleton<Action<HttpResponse, ITraceContext>>(
                 (response, traceContext) => response.Headers.Add("custom_trace_id", traceContext.TraceId));
 
-
             services.AddGoogleTraceForAspNetCore(new AspNetCoreTraceOptions
             {
                 ServiceOptions = new TraceServiceOptions()
                 {
                     ProjectId = projectId,
-
                 }
             });
             services.AddSingleton<Action<HttpRequestMessage, ITraceContext>>(
@@ -174,7 +172,6 @@ namespace IdentityServer
                 {
                     endpoints.MapFallbackToFile("/index.html");
                 });
-
             });
         }
 
@@ -207,49 +204,110 @@ namespace IdentityServer
                 context.UserClients.RemoveRange(
                     context.UserClients.Where(x => x.Client.ClientId == appsettings["PgAdminClientId"]));
 
-
                 var client = new Client()
                 {
                     ClientId = appsettings["ClientId"],
-                    ClientSecrets = new List<IdentityServer4.Models.Secret>() { new IdentityServer4.Models.Secret() { Value = appsettings["ClientSecret"].ToSha256() } },
-                    RedirectUris = new List<string>() { "https://localhost/passiweb/oauth/callback", "https://localhost/oauth/callback", "https://127.0.0.1:5002/oauth/callback", "https://localhost:5002/oauth/callback", "https://192.168.0.208/oauth/callback", "https://passi.cloud/oauth/callback", "https://192.168.0.208:5002/oauth/callback" },
-                    PostLogoutRedirectUris = new List<string>() { "https://localhost", "https://passi.cloud" },
+                    ClientSecrets = new List<ClientSecret>()
+                    {
+                        new ClientSecret() { Value = appsettings["ClientSecret"].ToSha256() }
+                    },
+                    RedirectUris = new List<ClientRedirectUri>()
+                    {
+                        new ClientRedirectUri(){RedirectUri = "https://localhost/passiweb/oauth/callback"},
+                        new ClientRedirectUri(){RedirectUri = "https://localhost/oauth/callback"},
+                        new ClientRedirectUri(){RedirectUri = "https://127.0.0.1:5002/oauth/callback"},
+                        new ClientRedirectUri(){RedirectUri = "https://localhost:5002/oauth/callback"},
+                        new ClientRedirectUri(){RedirectUri = "https://192.168.0.208/oauth/callback"},
+                        new ClientRedirectUri(){RedirectUri = "https://passi.cloud/oauth/callback"},
+                        new ClientRedirectUri(){RedirectUri = "https://192.168.0.208:5002/oauth/callback"}
+                    },
+                    PostLogoutRedirectUris = new List<ClientPostLogoutRedirectUri>()
+                    {
+                        new ClientPostLogoutRedirectUri(){PostLogoutRedirectUri = "https://localhost"},
+                        new ClientPostLogoutRedirectUri(){PostLogoutRedirectUri ="https://passi.cloud"}
+                    },
                     RequirePkce = false,
-                    AllowedGrantTypes = GrantTypes.CodeAndClientCredentials,
-                    AllowedScopes = new List<string>() { "openid", "email" },
+                    AllowedGrantTypes = new List<ClientGrantType>()
+                    {
+                        new ClientGrantType(){GrantType =GrantType.AuthorizationCode },
+                        new ClientGrantType(){GrantType =GrantType.ClientCredentials }
+                    },
+                    AllowedScopes = new List<ClientScope>() {
+                        new ClientScope(){Scope = "openid"} ,
+                        new ClientScope(){Scope = "email"},
+                        new ClientScope(){Scope = "profile"}
+                    },
                     AlwaysIncludeUserClaimsInIdToken = true,
                     ClientUri = "https://passi.cloud",
                     AlwaysSendClientClaims = true,
-                }.ToEntity();
+                };
                 context.Clients.Add(client);
                 var client2 = new Client()
                 {
                     ClientId = appsettings["PassiClientId"],
-                    ClientSecrets = new List<IdentityServer4.Models.Secret>() { new IdentityServer4.Models.Secret() { Value = appsettings["PassiSecret"].ToSha256() } },
-                    RedirectUris = new List<string>() { "https://localhost/passiapi/oauth/callback", "https://127.0.0.1:5004/passiapi/oauth/callback", "https://localhost:5004/passiapi/oauth/callback", "https://192.168.0.208/passiapi/oauth/callback", "https://passi.cloud/passiapi/oauth/callback", "https://192.168.0.208:5004/passiapi/oauth/callback" },
-                    PostLogoutRedirectUris = new List<string>() { "https://localhost", "https://passi.cloud" },
+                    ClientSecrets = new List<ClientSecret>() { new ClientSecret() { Value = appsettings["PassiSecret"].ToSha256() } },
+                    RedirectUris = new List<ClientRedirectUri>()
+                    {
+                        new ClientRedirectUri(){RedirectUri = "https://localhost/passiapi/oauth/callback"},
+                        new ClientRedirectUri(){RedirectUri = "https://127.0.0.1:5004/passiapi/oauth/callback"},
+                        new ClientRedirectUri(){RedirectUri = "https://localhost:5004/passiapi/oauth/callback"},
+                        new ClientRedirectUri(){RedirectUri ="https://192.168.0.208/passiapi/oauth/callback"},
+                        new ClientRedirectUri(){RedirectUri = "https://passi.cloud/passiapi/oauth/callback"},
+                        new ClientRedirectUri(){RedirectUri = "https://192.168.0.208:5004/passiapi/oauth/callback"},
+                    },
+                    PostLogoutRedirectUris = new List<ClientPostLogoutRedirectUri>()
+                    {
+                        new ClientPostLogoutRedirectUri(){PostLogoutRedirectUri = "https://localhost"},
+                        new ClientPostLogoutRedirectUri(){PostLogoutRedirectUri ="https://passi.cloud"}
+                    },
                     RequirePkce = false,
-                    AllowedGrantTypes = GrantTypes.CodeAndClientCredentials,
-                    AllowedScopes = new List<string>() { "openid", "email" },
+                    AllowedGrantTypes = new List<ClientGrantType>()
+                    {
+                        new ClientGrantType(){GrantType =GrantType.AuthorizationCode },
+                        new ClientGrantType(){GrantType =GrantType.ClientCredentials }
+                    },
+                    AllowedScopes = new List<ClientScope>() {
+                        new ClientScope(){Scope = "openid"} ,
+                        new ClientScope(){Scope = "email"},
+                        new ClientScope(){Scope = "profile"}
+                    },
                     AlwaysIncludeUserClaimsInIdToken = true,
                     ClientUri = "https://passi.cloud",
                     AlwaysSendClientClaims = true,
-                }.ToEntity();
+                };
                 context.Clients.Add(client2);
 
                 var client3 = new Client()
                 {
                     ClientId = appsettings["PgAdminClientId"],
-                    ClientSecrets = new List<IdentityServer4.Models.Secret>() { new IdentityServer4.Models.Secret() { Value = appsettings["PgAdminSecret"].ToSha256() } },
-                    RedirectUris = new List<string>() { "http://localhost/pgadmin4/oauth2/authorize", "https://localhost/pgadmin4/oauth2/authorize", "http://passi.cloud/pgadmin4/oauth2/authorize", "https://passi.cloud/pgadmin4/oauth2/authorize" },
-                    PostLogoutRedirectUris = new List<string>() { "https://localhost", "https://passi.cloud" },
+                    ClientSecrets = new List<ClientSecret>() { new ClientSecret() { Value = appsettings["PgAdminSecret"].ToSha256() } },
+                    RedirectUris = new List<ClientRedirectUri>()
+                    {
+                        new ClientRedirectUri(){RedirectUri = "http://localhost/pgadmin4/oauth2/authorize"},
+                        new ClientRedirectUri(){RedirectUri = "https://localhost/pgadmin4/oauth2/authorize"},
+                        new ClientRedirectUri(){RedirectUri ="http://passi.cloud/pgadmin4/oauth2/authorize"},
+                        new ClientRedirectUri(){RedirectUri ="https://passi.cloud/pgadmin4/oauth2/authorize"}
+                    },
+                    PostLogoutRedirectUris = new List<ClientPostLogoutRedirectUri>()
+                    {
+                        new ClientPostLogoutRedirectUri(){PostLogoutRedirectUri = "https://localhost"},
+                        new ClientPostLogoutRedirectUri(){PostLogoutRedirectUri ="https://passi.cloud"}
+                    },
                     RequirePkce = false,
-                    AllowedGrantTypes = GrantTypes.CodeAndClientCredentials,
-                    AllowedScopes = new List<string>() { "openid", "email", "profile" },
+                    AllowedGrantTypes = new List<ClientGrantType>()
+                    {
+                        new ClientGrantType(){GrantType =GrantType.AuthorizationCode },
+                        new ClientGrantType(){GrantType =GrantType.ClientCredentials }
+                    },
+                    AllowedScopes = new List<ClientScope>() {
+                        new ClientScope(){Scope = "openid"} ,
+                        new ClientScope(){Scope = "email"},
+                        new ClientScope(){Scope = "profile"}
+                    },
                     AlwaysIncludeUserClaimsInIdToken = true,
                     ClientUri = "https://passi.cloud/pgadmin4",
                     AlwaysSendClientClaims = true,
-                }.ToEntity();
+                };
                 context.Clients.Add(client3);
 
                 if (!context.IdentityResources.Any())

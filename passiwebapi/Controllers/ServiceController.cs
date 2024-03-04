@@ -1,6 +1,6 @@
-﻿using System;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using PostSharp.Extensibility;
+using System;
 
 namespace passi_webapi.Controllers
 {
@@ -14,7 +14,5 @@ namespace passi_webapi.Controllers
         {
             return DateTime.UtcNow.Ticks;
         }
-
-       
     }
 }

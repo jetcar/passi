@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using Models;
 using Newtonsoft.Json;
 using NodaTime;
-using passi_webapi.Dto;
 using PostSharp.Extensibility;
 using Repos;
 using Services;
@@ -12,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using WebApiDto;
 using WebApiDto.Auth;
+using WebApiDto.Auth.Dto;
 
 namespace passi_webapi.Controllers
 {

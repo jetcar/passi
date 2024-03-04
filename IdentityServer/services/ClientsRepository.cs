@@ -1,13 +1,13 @@
 ﻿using IdentityModel;
 using IdentityRepo.DbContext;
-using IdentityServer4.EntityFramework.Entities;
-using IdentityServer4.EntityFramework.Mappers;
 using Microsoft.EntityFrameworkCore;
 using Repos;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Client = IdentityServer4.EntityFramework.Entities.Client;
+using IdentityServer4.EntityFramework.Storage.Entities;
+using IdentityServer4.EntityFramework.Storage.Mappers;
+using Client = IdentityServer4.EntityFramework.Storage.Entities.Client;
 
 namespace IdentityServer.services
 {
@@ -29,7 +29,7 @@ namespace IdentityServer.services
             return queryable.FirstOrDefault();
         }
 
-        public Client AddClient(IdentityServer4.Models.Client client, string userId)
+        public Client AddClient(IdentityServer4.Storage.Models.Client client, string userId)
         {
             Client savedClientEntity = null;
             var strategy = GetExecutionStrategy();
@@ -128,7 +128,7 @@ namespace IdentityServer.services
 
         Client GetUserRegisteredClientsById(int id, string userId);
 
-        Client AddClient(IdentityServer4.Models.Client client, string userId);
+        Client AddClient(IdentityServer4.Storage.Models.Client client, string userId);
 
         bool IsClientIdTaken(string clientId);
 

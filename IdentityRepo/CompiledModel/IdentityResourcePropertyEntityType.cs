@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using IdentityServer4.EntityFramework.Entities;
+using IdentityServer4.EntityFramework.Storage.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;

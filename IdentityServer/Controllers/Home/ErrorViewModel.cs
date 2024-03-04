@@ -1,4 +1,5 @@
 ﻿using IdentityServer4.Models;
+using IdentityServer4.Models.Messages;
 
 namespace IdentityServer.Controllers.Home
 {

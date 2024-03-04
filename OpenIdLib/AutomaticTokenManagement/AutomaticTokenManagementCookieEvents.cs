@@ -16,7 +16,6 @@ namespace OpenIdLib.AutomaticTokenManagement
         private readonly TokenEndpointService _service;
         private readonly AutomaticTokenManagementOptions _options;
         private readonly ILogger _logger;
-        private readonly ISystemClock _clock;
 
         private static readonly ConcurrentDictionary<string, bool> _pendingRefreshTokenRequests =
             new ConcurrentDictionary<string, bool>();
@@ -24,13 +23,12 @@ namespace OpenIdLib.AutomaticTokenManagement
         public AutomaticTokenManagementCookieEvents(
             TokenEndpointService service,
             IOptions<AutomaticTokenManagementOptions> options,
-            ILogger<AutomaticTokenManagementCookieEvents> logger,
-            ISystemClock clock)
+            ILogger<AutomaticTokenManagementCookieEvents> logger
+            )
         {
             _service = service;
             _options = options.Value;
             _logger = logger;
-            _clock = clock;
         }
 
         public override async Task ValidatePrincipal(CookieValidatePrincipalContext context)
@@ -59,7 +57,7 @@ namespace OpenIdLib.AutomaticTokenManagement
             var dtExpires = DateTimeOffset.Parse(expiresAt.Value, CultureInfo.InvariantCulture);
             var dtRefresh = dtExpires.Subtract(_options.RefreshBeforeExpiration);
 
-            if (dtRefresh < _clock.UtcNow)
+            if (dtRefresh < DateTime.UtcNow)
             {
                 var shouldRefresh = _pendingRefreshTokenRequests.TryAdd(refreshToken.Value, true);
                 if (shouldRefresh)

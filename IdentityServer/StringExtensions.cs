@@ -12,7 +12,7 @@ namespace IdentityServer;
 
 internal static class StringExtensions
 {
-    [DebuggerStepThrough]
+
     public static string ToSpaceSeparatedString(this IEnumerable<string> list)
     {
         if (list == null)
@@ -30,7 +30,7 @@ internal static class StringExtensions
         return sb.ToString().Trim();
     }
 
-    [DebuggerStepThrough]
+
     public static IEnumerable<string> FromSpaceSeparatedString(this string input)
     {
         input = input.Trim();
@@ -56,13 +56,13 @@ internal static class StringExtensions
         return null;
     }
 
-    [DebuggerStepThrough]
+
     public static bool IsMissing(this string value)
     {
         return string.IsNullOrWhiteSpace(value);
     }
 
-    [DebuggerStepThrough]
+
     public static bool IsMissingOrTooLong(this string value, int maxLength)
     {
         if (string.IsNullOrWhiteSpace(value))
@@ -77,13 +77,13 @@ internal static class StringExtensions
         return false;
     }
 
-    [DebuggerStepThrough]
+
     public static bool IsPresent(this string value)
     {
         return !string.IsNullOrWhiteSpace(value);
     }
 
-    [DebuggerStepThrough]
+
     public static string EnsureLeadingSlash(this string url)
     {
         if (url != null && !url.StartsWith("/"))
@@ -94,7 +94,7 @@ internal static class StringExtensions
         return url;
     }
 
-    [DebuggerStepThrough]
+
     public static string EnsureTrailingSlash(this string url)
     {
         if (url != null && !url.EndsWith("/"))
@@ -105,7 +105,7 @@ internal static class StringExtensions
         return url;
     }
 
-    [DebuggerStepThrough]
+
     public static string RemoveLeadingSlash(this string url)
     {
         if (url != null && url.StartsWith("/"))
@@ -116,7 +116,7 @@ internal static class StringExtensions
         return url;
     }
 
-    [DebuggerStepThrough]
+
     public static string RemoveTrailingSlash(this string url)
     {
         if (url != null && url.EndsWith("/"))
@@ -127,7 +127,7 @@ internal static class StringExtensions
         return url;
     }
 
-    [DebuggerStepThrough]
+
     public static string CleanUrlPath(this string url)
     {
         if (String.IsNullOrWhiteSpace(url)) url = "/";
@@ -140,7 +140,7 @@ internal static class StringExtensions
         return url;
     }
 
-    [DebuggerStepThrough]
+
     public static bool IsLocalUrl(this string url)
     {
         if (string.IsNullOrEmpty(url))
@@ -187,7 +187,7 @@ internal static class StringExtensions
         return false;
     }
 
-    [DebuggerStepThrough]
+
     public static string AddQueryString(this string url, string query)
     {
         if (!url.Contains("?"))
@@ -202,13 +202,13 @@ internal static class StringExtensions
         return url + query;
     }
 
-    [DebuggerStepThrough]
+
     public static string AddQueryString(this string url, string name, string value)
     {
         return url.AddQueryString(name + "=" + UrlEncoder.Default.Encode(value));
     }
 
-    [DebuggerStepThrough]
+
     public static string AddHashFragment(this string url, string query)
     {
         if (!url.Contains("#"))
@@ -219,7 +219,7 @@ internal static class StringExtensions
         return url + query;
     }
 
-    [DebuggerStepThrough]
+
     public static NameValueCollection ReadQueryStringAsNameValueCollection(this string url)
     {
         if (url != null)

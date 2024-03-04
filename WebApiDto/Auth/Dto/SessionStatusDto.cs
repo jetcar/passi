@@ -1,4 +1,4 @@
-namespace passi_webapi.Dto
+namespace WebApiDto.Auth.Dto
 {
     public enum SessionStatusDto
     {

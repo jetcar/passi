@@ -2,7 +2,7 @@
 using System;
 using System.Reflection;
 using IdentityRepo.DbContext;
-using IdentityServer4.EntityFramework.Entities;
+using IdentityServer4.EntityFramework.Storage.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 

@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using passi_webapi.Dto;
 using PostSharp.Extensibility;
 using RestSharp;
 using Services;
@@ -20,8 +19,10 @@ using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using System.Web;
+using IdentityServer4.Extensions;
 using WebApiDto;
 using WebApiDto.Auth;
+using WebApiDto.Auth.Dto;
 using WebApiDto.SignUp;
 
 using static IdentityServer4.Models.IdentityResources;

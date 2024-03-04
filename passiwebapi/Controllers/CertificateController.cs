@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using passi_webapi.Dto;
 using PostSharp.Extensibility;
 using Repos;
 using Services;
+using WebApiDto.Auth.Dto;
 using WebApiDto.Certificate;
 
 namespace passi_webapi.Controllers

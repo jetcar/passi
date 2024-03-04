@@ -3,6 +3,8 @@ using IdentityServer4.Services;
 using Microsoft.Extensions.Logging;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using IdentityServer4.Extensions;
+using IdentityServer4.Models.Contexts;
 
 namespace IdentityServer.services
 {

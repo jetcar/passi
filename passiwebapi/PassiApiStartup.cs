@@ -14,13 +14,13 @@ using Microsoft.OpenApi.Models;
 using Models;
 using NodaTime;
 using OpenIdLib.OpenId;
-using passi_webapi.Dto;
 using Repos;
 using Serilog;
 using Serilog.Events;
 using Services;
 using System;
 using System.Linq;
+using WebApiDto.Auth.Dto;
 using TraceServiceOptions = Google.Cloud.Diagnostics.Common.TraceServiceOptions;
 
 namespace passi_webapi

@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace passi_webapi.Dto
+namespace WebApiDto.Auth.Dto
 {
     public class UserDto
     {

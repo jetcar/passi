@@ -6,8 +6,6 @@ using IdentityModel;
 using IdentityRepo.DbContext;
 using IdentityServer.services;
 using IdentityServer4.Configuration;
-using IdentityServer4.EntityFramework.Entities;
-using IdentityServer4.EntityFramework.Mappers;
 using IdentityServer4.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
@@ -25,10 +23,14 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
-using ApiScope = IdentityServer4.EntityFramework.Entities.ApiScope;
-using AuthenticationOptions = IdentityServer4.Configuration.AuthenticationOptions;
-using Client = IdentityServer4.EntityFramework.Entities.Client;
-using IdentityResource = IdentityServer4.EntityFramework.Entities.IdentityResource;
+using IdentityServer4.Configuration.DependencyInjection;
+using IdentityServer4.Configuration.DependencyInjection.BuilderExtensions;
+using IdentityServer4.Configuration.DependencyInjection.Options;
+using IdentityServer4.EntityFramework;
+using IdentityServer4.EntityFramework.Storage.Entities;
+using IdentityServer4.EntityFramework.Storage.Mappers;
+using IdentityServer4.Storage.Models;
+
 using TraceServiceOptions = Google.Cloud.Diagnostics.Common.TraceServiceOptions;
 
 namespace IdentityServer
@@ -93,7 +95,7 @@ namespace IdentityServer
             services.AddIdentityServer(options =>
                 {
                     options.UserInteraction = new UserInteractionOptions() { ConsentUrl = "/Account/Login", LoginUrl = "/Account/Login" };
-                    options.Authentication = new AuthenticationOptions()
+                    options.Authentication = new IdentityServer4.Configuration.DependencyInjection.Options.AuthenticationOptions()
                     {
                         CookieSlidingExpiration = true,
                     };
@@ -204,7 +206,7 @@ namespace IdentityServer
                 context.UserClients.RemoveRange(
                     context.UserClients.Where(x => x.Client.ClientId == appsettings["PgAdminClientId"]));
 
-                var client = new Client()
+                var client = new IdentityServer4.EntityFramework.Storage.Entities.Client()
                 {
                     ClientId = appsettings["ClientId"],
                     ClientSecrets = new List<ClientSecret>()
@@ -242,7 +244,7 @@ namespace IdentityServer
                     AlwaysSendClientClaims = true,
                 };
                 context.Clients.Add(client);
-                var client2 = new Client()
+                var client2 = new IdentityServer4.EntityFramework.Storage.Entities.Client()
                 {
                     ClientId = appsettings["PassiClientId"],
                     ClientSecrets = new List<ClientSecret>() { new ClientSecret() { Value = appsettings["PassiSecret"].ToSha256() } },
@@ -277,7 +279,7 @@ namespace IdentityServer
                 };
                 context.Clients.Add(client2);
 
-                var client3 = new Client()
+                var client3 = new IdentityServer4.EntityFramework.Storage.Entities.Client()
                 {
                     ClientId = appsettings["PgAdminClientId"],
                     ClientSecrets = new List<ClientSecret>() { new ClientSecret() { Value = appsettings["PgAdminSecret"].ToSha256() } },
@@ -311,7 +313,7 @@ namespace IdentityServer
                 context.Clients.Add(client3);
 
                 if (!context.IdentityResources.Any())
-                    context.IdentityResources.AddRange(new List<IdentityResource>()
+                    context.IdentityResources.AddRange(new List<IdentityServer4.EntityFramework.Storage.Entities.IdentityResource>()
                 {
                     new IdentityResources.OpenId().ToEntity(),
                 });
@@ -319,7 +321,7 @@ namespace IdentityServer
 
                 var scope = context.ApiScopes.FirstOrDefault(x => x.Name == "email");
                 if (scope == null)
-                    context.ApiScopes.Add(new ApiScope() { Name = "email", Enabled = true, DisplayName = "email" });
+                    context.ApiScopes.Add(new IdentityServer4.EntityFramework.Storage.Entities.ApiScope() { Name = "email", Enabled = true, DisplayName = "email" });
                 var profileScope = context.ApiScopes.FirstOrDefault(x => x.Name == "profile");
                 if (profileScope != null)
                     context.ApiScopes.Remove(profileScope);

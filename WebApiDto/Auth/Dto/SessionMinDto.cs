@@ -1,6 +1,6 @@
 using System;
 
-namespace passi_webapi.Dto
+namespace WebApiDto.Auth.Dto
 {
     public class SessionMinDto
     {

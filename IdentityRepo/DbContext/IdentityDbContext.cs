@@ -1,6 +1,6 @@
 using ConfigurationManager;
-using IdentityServer4.EntityFramework.Entities;
-using IdentityServer4.EntityFramework.Interfaces;
+using IdentityServer4.EntityFramework.Storage.Entities;
+using IdentityServer4.EntityFramework.Storage.Interfaces;
 using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;

@@ -4,13 +4,13 @@ using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using passi_webapi.Dto;
 using passi_webapi.Filters;
 using PostSharp.Extensibility;
 using Repos;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using WebApiDto.Auth.Dto;
 
 namespace passi_webapi.Controllers
 {

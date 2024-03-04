@@ -10,9 +10,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using OpenIdLib.AutomaticTokenManagement;
-using passi_webapi.Dto;
 using RestSharp;
 using Services;
+using WebApiDto.Auth.Dto;
 
 namespace OpenIdLib.OpenId
 {

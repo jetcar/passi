@@ -22,9 +22,9 @@ namespace RegisterManyUsersTestApp
         {
             SetVariables(args[0]);
             var timeout = 30000;
-            var certPath = "../../certs";
+            var certPath = "../certs";
             Directory.CreateDirectory(certPath);
-            var list = new int[1000000];
+            var list = new int[10000];
             var certService = new CertificatesService(null, null, null, null, null);
             var passiDb = new PassiDbContext()
             {
@@ -45,18 +45,21 @@ namespace RegisterManyUsersTestApp
                     localIndex = Interlocked.Increment(ref index);
                 }
 
-                var subject = $"test{localIndex}passi.cloud";
-                var cert = certService.GenerateCertificate(subject, new MySecureString("")).Result;
+                var subject = $"test{localIndex}@passi.cloud";
+                var cert = certService.GenerateCertificate(subject.Replace("@", ""), new MySecureString("")).Result;
 
                 var path = $"{certPath}/admin{localIndex}.crt";
                 if (File.Exists(path))
                     return;
-                using (var writer = new BinaryWriter(File.Open(path, FileMode.OpenOrCreate)))
-                {
-                    writer.Write(cert.Item3);
-                }
 
                 var userDb = UserDb(localIndex, cert, subject);
+
+                using (var writer = new StreamWriter(File.Open(path, FileMode.OpenOrCreate)))
+                {
+                    writer.Write($"{userDb.EmailHash};{userDb.Guid.ToString()};{userDb.Device.DeviceId};{cert.Item1.Thumbprint};{cert.Item2};{Convert.ToBase64String(cert.Item3)}");
+                    writer.Flush();
+                }
+
                 lock (locker2)
                 {
                     users.Add(userDb);

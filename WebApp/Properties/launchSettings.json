@@ -2,11 +2,11 @@
   "profiles": {
     "WebApp": {
       "commandName": "Project",
+      "commandLineArgs": "../configs/variables/dev.env",
       "applicationUrl": "https://localhost"
     },
     "Docker": {
       "commandName": "Docker",
-      "launchBrowser": false,
       "launchUrl": "https://localhost",
       "publishAllPorts": false,
       "useSSL": true

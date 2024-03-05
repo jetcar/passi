@@ -2,7 +2,7 @@
   "profiles": {
     "IdentityServer": {
       "commandName": "Project",
-      "launchBrowser": false,
+      "commandLineArgs": "../configs/variables/dev.env",
       "applicationUrl": "http://localhost:5003"
     },
     "Docker": {

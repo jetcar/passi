@@ -228,9 +228,13 @@ namespace IdentityServer.Controllers
                 });
             }
             Logger.LogDebug("response:" + result.Content);
-            var errorResult = JsonConvert.DeserializeObject<ApiResponseDto>(result.Content);
+            if (result.Content != null)
+            {
+                var errorResult = JsonConvert.DeserializeObject<ApiResponseDto>(result.Content);
 
-            return BadRequest(new ApiResponseDto() { errors = errorResult.errors });
+                return BadRequest(new ApiResponseDto() { errors = errorResult.errors });
+            }
+            return BadRequest(new ApiResponseDto() { errors = "Internal error" });
         }
     }
 

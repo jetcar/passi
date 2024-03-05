@@ -1,0 +1,5 @@
+{
+  "PassiWebAppUrl": "https://localhost",
+  "PassiApiUrl": "https://localhost/passiapi",
+  "IdentityUrl": "https://localhost/identity"
+}

@@ -30,6 +30,10 @@ services:
     volumes:
       - ./configs/pgadmin/:/etc/pgadmin/:ro #config
       - ../pgadmin/:/var/lib/pgadmin/:rw
+    deploy:
+      mode: replicated
+      replicas: 0
+      endpoint_mode: vip
 
   haproxy:
     networks:
@@ -51,8 +55,10 @@ services:
       - ../passi_config/sendgrid.env
     volumes:
       - ../creds:/home/creds
-    # depends_on:
-    #   - common_image
+    deploy:
+      mode: replicated
+      replicas: 1
+      endpoint_mode: vip
 
   identityserver:
     networks:
@@ -69,6 +75,10 @@ services:
       - ../creds:/home/creds
     # depends_on:
     #   - common_image
+    deploy:
+      mode: replicated
+      replicas: 1
+      endpoint_mode: vip
 
   passiwebapi:
     networks:
@@ -82,47 +92,91 @@ services:
       - ./configs/variables/dev.env
     volumes:
       - ../creds:/home/creds
-    # depends_on:
-    #   - common_image
+    deploy:
+      mode: replicated
+      replicas: 1
+      endpoint_mode: vip
 
   front:
     logging:
       driver: json-file
     env_file:
-    - ./configs/variables/dev.env
+      - ./configs/variables/dev.env
+    deploy:
+      mode: replicated
+      replicas: 0
+      endpoint_mode: vip
 
   resolver:
     env_file:
-    - ./configs/variables/dev.env
-  
+      - ./configs/variables/dev.env
+    deploy:
+      mode: replicated
+      replicas: 0
+      endpoint_mode: vip
+
   admin:
     logging:
       driver: json-file
     ports:
-    - "8080:8080"
+      - "8080:8080"
     env_file:
-    - ./configs/variables/dev.env
+      - ./configs/variables/dev.env
+    deploy:
+      mode: replicated
+      replicas: 0
+      endpoint_mode: vip
 
   imap:
     logging:
       driver: json-file
     env_file:
-    - ./configs/variables/dev.env
-  
+      - ./configs/variables/dev.env
+    deploy:
+      mode: replicated
+      replicas: 0
+      endpoint_mode: vip
+
   smtp:
     logging:
       driver: json-file
     env_file:
-    - ./configs/variables/dev.env
-  
+      - ./configs/variables/dev.env
+    deploy:
+      mode: replicated
+      replicas: 0
+      endpoint_mode: vip
+
   antispam:
     logging:
       driver: json-file
     env_file:
-    - ./configs/variables/dev.env
-  
+      - ./configs/variables/dev.env
+    deploy:
+      mode: replicated
+      replicas: 0
+      endpoint_mode: vip
+
   webmail:
     env_file:
-    - ./configs/variables/dev.env
+      - ./configs/variables/dev.env
+    deploy:
+      mode: replicated
+      replicas: 0
+      endpoint_mode: vip
+
+
+  ddclient:
+    deploy:
+      mode: replicated
+      replicas: 0
+      endpoint_mode: vip
+
+
+  wireguard:
+    deploy:
+      mode: replicated
+      replicas: 0
+      endpoint_mode: vip
 
 

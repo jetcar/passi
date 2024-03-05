@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using Serilog;
+using System.IO;
+using System;
 
 namespace passi_webapi
 {
@@ -8,6 +10,20 @@ namespace passi_webapi
     {
         public static void Main(string[] args)
         {
+            if (args.Length > 0)
+            {
+                using (var reader = new StreamReader(args[0]))
+                {
+                    while (!reader.EndOfStream)
+                    {
+                        var line = reader.ReadLine().Split("=");
+                        if (line.Length == 2)
+                        {
+                            Environment.SetEnvironmentVariable(line[0], line[1]);
+                        }
+                    }
+                }
+            }
             CreateHostBuilder(args).Build().Run();
         }
 

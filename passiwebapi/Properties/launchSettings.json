@@ -2,13 +2,12 @@
   "profiles": {
     "passi_webapi": {
       "commandName": "Project",
-      "launchBrowser": false,
+      "commandLineArgs": "../configs/variables/dev.env",
       "launchUrl": "swagger",
       "applicationUrl": "https://localhost:5004"
     },
     "Docker": {
       "commandName": "Docker",
-      "launchBrowser": false,
       "launchUrl": "https://localhost:5004",
       "publishAllPorts": true
     }

@@ -29,7 +29,7 @@ namespace RegisterManyUsersTestApp
             var passiDb = new PassiDbContext()
             {
                 _connectionString =
-                    $"host=localhost;port={GetVariable("DbPort")};database=Passi;user id=postgres;password={GetVariable("DbPassword")};Ssl Mode=allow;"
+                    $"host={GetVariable("DbHost")};port={GetVariable("DbPort")};database=Passi;user id=postgres;password={GetVariable("DbPassword")};Ssl Mode=allow;"
             };
             passiDb.Database.Migrate();
             var index = 0;

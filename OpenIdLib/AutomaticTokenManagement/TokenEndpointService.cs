@@ -7,9 +7,12 @@ using Microsoft.Extensions.Options;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using PostSharp.Extensibility;
+using Repos;
 
 namespace OpenIdLib.AutomaticTokenManagement
 {
+    [Profile(AttributeTargetElements = MulticastTargets.Method)]
     public class TokenEndpointService
     {
         private readonly AutomaticTokenManagementOptions _managementOptions;

@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace Repos
 {
-    [ReposProfile(AttributeTargetElements = MulticastTargets.Method)]
+    [Profile(AttributeTargetElements = MulticastTargets.Method)]
     public class CertificateRepository : BaseRepo<PassiDbContext>, ICertificateRepository
     {
         public CertificateRepository(PassiDbContext dbContext) : base(dbContext)

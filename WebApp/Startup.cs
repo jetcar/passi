@@ -38,13 +38,9 @@ namespace WebApp
             var secret = Environment.GetEnvironmentVariable("ClientSecret") ?? Configuration.GetValue<string>("AppSetting:ClientSecret");
             var projectId = Environment.GetEnvironmentVariable("projectId") ?? Configuration.GetValue<string>("AppSetting:projectId");
 
-            services.AddGoogleTraceForAspNetCore(new AspNetCoreTraceOptions
-            {
-                ServiceOptions = new TraceServiceOptions()
-                {
-                    ProjectId = projectId
-                }
-            }); services.AddSingleton<AppSetting>();
+            Tracer.SetupTracer(services, projectId, "PassiWebApp");
+
+            services.AddSingleton<AppSetting>();
             services.AddScoped<WebAppDbContext>();
             services.AddSingleton<IStartupFilter, MigrationStartupFilter<WebAppDbContext>>();
             services.AddScoped<IMyRestClient, MyRestClient>();
@@ -56,21 +52,6 @@ namespace WebApp
                     options.NewKeyLifetime = TimeSpan.FromDays(7);
                 })
                 .PersistKeysToDbContext<WebAppDbContext>();
-
-            services.AddScoped(CustomTraceContextProvider);
-            static ITraceContext CustomTraceContextProvider(IServiceProvider sp)
-            {
-                var accessor = sp.GetRequiredService<IHttpContextAccessor>();
-                string traceId = accessor.HttpContext?.Request?.Headers["custom_trace_id"];
-                return new SimpleTraceContext(traceId, null, null);
-            }
-
-            // Register a method that sets the updated trace context information on the response.
-            services.AddSingleton<Action<HttpResponse, ITraceContext>>(
-                (response, traceContext) => response.Headers.Add("custom_trace_id", traceContext.TraceId));
-
-            services.AddSingleton<Action<HttpRequestMessage, ITraceContext>>(
-                (request, traceContext) => request.Headers.Add("custom_trace_id", traceContext.TraceId));
 
             // Register an HttpClient for outgoing requests.
             services.AddHttpClient("tracesOutgoing")

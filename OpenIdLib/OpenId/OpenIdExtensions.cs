@@ -10,19 +10,20 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using OpenIdLib.AutomaticTokenManagement;
+using PostSharp.Extensibility;
+using Repos;
 using RestSharp;
 using Services;
 using WebApiDto.Auth.Dto;
 
 namespace OpenIdLib.OpenId
 {
+    [Profile(AttributeTargetElements = MulticastTargets.Method)]
     public static class OpenIdExtensions
     {
-
         public static AuthenticationBuilder AddOpenIdAuthentication(this AuthenticationBuilder builder,
             string identityUrl, string returnUrl, string passiUrl, string clientId, string clientSecret)
         {
-
             return builder.AddOpenIdConnect(OpenIdConnectDefaults.AuthenticationScheme, options =>
             {
                 options.Authority = identityUrl;

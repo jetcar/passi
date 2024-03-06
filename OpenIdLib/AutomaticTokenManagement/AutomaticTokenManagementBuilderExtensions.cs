@@ -3,9 +3,12 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using System;
+using PostSharp.Extensibility;
+using Repos;
 
 namespace OpenIdLib.AutomaticTokenManagement
 {
+    [Profile(AttributeTargetElements = MulticastTargets.Method)]
     public static class AutomaticTokenManagementBuilderExtensions
     {
         public static AuthenticationBuilder AddAutomaticTokenManagement(this AuthenticationBuilder builder, Action<AutomaticTokenManagementOptions> options)

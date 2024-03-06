@@ -63,5 +63,10 @@ google-services.json
 .vscode
 dist
 */wwwroot/assets/*
-*/wwwroot/assets/*
-/RegisterManyUsersTestApp/certs/
+*/bin/*
+*/obj/*
+*/publish/*
+obj
+bin
+Debug
+

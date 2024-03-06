@@ -5,38 +5,16 @@ using PostSharp.Serialization;
 using System.Reflection;
 using System.Threading.Tasks;
 
-namespace Services
+[PSerializable]
+internal class ProfileAttribute : MethodInterceptionAspect
 {
-    [PSerializable]
-    public class ProfileAttribute : MethodInterceptionAspect
+    public override void OnInvoke(MethodInterceptionArgs args)
     {
-        public static IManagedTracer _tracer
-        {
-            get { return Tracer.CurrentTracer; }
-        }
+        Tracer.OnInvoke(args, base.OnInvoke);
+    }
 
-        public override void OnInvoke(MethodInterceptionArgs args)
-        {
-            var type = args?.Instance?.GetType();
-            if (!IsPropertyMethod(args?.Method) && _tracer != null)
-                using (_tracer.StartSpan(type?.FullName + "." + args.Method.Name))
-                    base.OnInvoke(args);
-            else
-                base.OnInvoke(args);
-        }
-
-        public override Task OnInvokeAsync(MethodInterceptionArgs args)
-        {
-            var type = args.Instance.GetType();
-            if (!IsPropertyMethod(args.Method) && _tracer != null)
-                using (_tracer.StartSpan(type.FullName + "." + args.Method.Name))
-                    return base.OnInvokeAsync(args);
-            return base.OnInvokeAsync(args);
-        }
-
-        private bool IsPropertyMethod(MethodBase method)
-        {
-            return method.IsSpecialName && (method.Name.StartsWith("get_") || method.Name.StartsWith("set_"));
-        }
+    public override Task OnInvokeAsync(MethodInterceptionArgs args)
+    {
+        return Tracer.OnInvokeAsync(args, base.OnInvokeAsync);
     }
 }

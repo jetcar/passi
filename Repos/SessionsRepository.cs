@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace Repos
 {
-    [ReposProfile(AttributeTargetElements = MulticastTargets.Method)]
+    [Profile(AttributeTargetElements = MulticastTargets.Method)]
     public class SessionsRepository : BaseRepo<PassiDbContext>, ISessionsRepository
     {
         private AppSetting _appSetting;

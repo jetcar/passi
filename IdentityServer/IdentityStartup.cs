@@ -23,6 +23,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
+using Google.Cloud.Trace.V1;
 using IdentityServer4.Configuration.DependencyInjection;
 using IdentityServer4.Configuration.DependencyInjection.BuilderExtensions;
 using IdentityServer4.Configuration.DependencyInjection.Options;
@@ -56,42 +57,16 @@ namespace IdentityServer
             //services.AddControllersWithViews();
             services.AddSingleton<AppSetting>();
             services.AddScoped<IMyRestClient, MyRestClient>();
-
             services.AddScoped<IdentityDbContext>();
             services.AddScoped<IIdentityClientsRepository, IdentityClientsRepository>();
             services.AddSingleton<IStartupFilter, MigrationStartupFilter<IdentityDbContext>>();
             services.AddSingleton<IRandomGenerator, RandomGenerator>();
 
-            services.AddScoped(CustomTraceContextProvider);
-            static ITraceContext CustomTraceContextProvider(IServiceProvider sp)
-            {
-                var accessor = sp.GetRequiredService<IHttpContextAccessor>();
-                var traceId = accessor.HttpContext?.Request?.Headers["custom_trace_id"];
-                return new SimpleTraceContext(traceId, null, null);
-            }
-
             // Register a method that sets the updated trace context information on the response.
-            services.AddSingleton<Action<HttpResponse, ITraceContext>>(
-                (response, traceContext) => response.Headers.Add("custom_trace_id", traceContext.TraceId));
+            Tracer.SetupTracer(services, projectId, "Identity");
 
-            services.AddGoogleTraceForAspNetCore(new AspNetCoreTraceOptions
-            {
-                ServiceOptions = new TraceServiceOptions()
-                {
-                    ProjectId = projectId,
-                }
-            });
-            services.AddSingleton<Action<HttpRequestMessage, ITraceContext>>(
-                (request, traceContext) => request.Headers.Add("custom_trace_id", traceContext.TraceId));
-
-            // Register an HttpClient for outgoing requests.
-            services.AddHttpClient("tracesOutgoing")
-                // The next call guarantees that trace information is propagated for outgoing
-                // requests that are already being traced.
-                .AddOutgoingGoogleTraceHandler();
             byte[] certData = File.ReadAllBytes("/myapp/cert/your_certificate.pfx");
 
-            services.AddGoogleDiagnostics(projectId, "Identity");
             services.AddIdentityServer(options =>
                 {
                     options.UserInteraction = new UserInteractionOptions() { ConsentUrl = "/Account/Login", LoginUrl = "/Account/Login" };

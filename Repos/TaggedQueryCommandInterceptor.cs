@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 
 namespace Repos
 {
-    [ReposProfile(AttributeTargetElements = MulticastTargets.Method)]
     public class TaggedQueryCommandInterceptor : DbCommandInterceptor
     {
         private ILogger _logger;

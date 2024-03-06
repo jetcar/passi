@@ -7,7 +7,7 @@ using System.Security.Cryptography.X509Certificates;
 
 namespace Repos
 {
-    [ReposProfile(AttributeTargetElements = MulticastTargets.Method)]
+    [Profile(AttributeTargetElements = MulticastTargets.Method)]
     public class UserRepository : BaseRepo<PassiDbContext>, IUserRepository
     {
         public UserRepository(PassiDbContext dbContext) : base(dbContext)

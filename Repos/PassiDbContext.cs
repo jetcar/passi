@@ -14,7 +14,7 @@ using System.Linq;
 
 namespace Repos
 {
-    [ReposProfile(AttributeTargetElements = MulticastTargets.Method)]
+    [Profile(AttributeTargetElements = MulticastTargets.Method)]
     public class PassiDbContext : DbContext, IDataProtectionKeyContext
     {
         private AppSetting _appSetting;

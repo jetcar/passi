@@ -7,7 +7,7 @@ using System;
 
 namespace Repos
 {
-    [ReposProfile(AttributeTargetElements = MulticastTargets.Method)]
+    [Profile(AttributeTargetElements = MulticastTargets.Method)]
     public class RedisService : IRedisService
     {
         private readonly ConnectionMultiplexer _redis;

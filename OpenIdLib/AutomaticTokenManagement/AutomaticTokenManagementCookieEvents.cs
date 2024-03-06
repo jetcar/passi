@@ -8,9 +8,12 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using PostSharp.Extensibility;
+using Repos;
 
 namespace OpenIdLib.AutomaticTokenManagement
 {
+    [Profile(AttributeTargetElements = MulticastTargets.Method)]
     public class AutomaticTokenManagementCookieEvents : CookieAuthenticationEvents
     {
         private readonly TokenEndpointService _service;

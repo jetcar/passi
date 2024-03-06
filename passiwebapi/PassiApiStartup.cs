@@ -55,14 +55,8 @@ namespace passi_webapi
             var secret = Environment.GetEnvironmentVariable("PassiSecret") ?? Configuration.GetValue<string>("AppSetting:PassiSecret");
             var projectId = Environment.GetEnvironmentVariable("projectId") ?? Configuration.GetValue<string>("AppSetting:projectId");
 
-            if (projectId != null)
-                services.AddGoogleTraceForAspNetCore(new AspNetCoreTraceOptions
-                {
-                    ServiceOptions = new TraceServiceOptions()
-                    {
-                        ProjectId = projectId
-                    }
-                });
+            Tracer.SetupTracer(services, projectId, "PassiApi");
+
             services.AddControllers();
             services.AddSingleton<AppSetting>(new AppSetting(Configuration));
             services.AddSingleton(mapper);
@@ -91,18 +85,6 @@ namespace passi_webapi
                 })
                 .PersistKeysToDbContext<PassiDbContext>();
 
-            services.AddScoped(CustomTraceContextProvider);
-            static ITraceContext CustomTraceContextProvider(IServiceProvider sp)
-            {
-                var accessor = sp.GetRequiredService<IHttpContextAccessor>();
-                string traceId = accessor.HttpContext?.Request?.Headers["custom_trace_id"].ToString();
-                return new SimpleTraceContext(traceId, null, null);
-            }
-
-            // Register a method that sets the updated trace context information on the response.
-            services.AddSingleton<Action<HttpResponse, ITraceContext>>(
-                (response, traceContext) => response.Headers.Add("custom_trace_id", traceContext.TraceId));
-
             services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = "Cookies";
@@ -120,9 +102,7 @@ namespace passi_webapi
                 x.RevokeRefreshTokenOnSignout = true;
             });
             services.AddHttpContextAccessor();
-
             services.AddHealthChecks();
-
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });

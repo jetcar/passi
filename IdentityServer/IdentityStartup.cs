@@ -198,11 +198,6 @@ namespace IdentityServer
                         new ClientRedirectUri(){RedirectUri = "https://passi.cloud/oauth/callback"},
                         new ClientRedirectUri(){RedirectUri = "https://192.168.0.208:5002/oauth/callback"}
                     },
-                    PostLogoutRedirectUris = new List<ClientPostLogoutRedirectUri>()
-                    {
-                        new ClientPostLogoutRedirectUri(){PostLogoutRedirectUri = "https://localhost"},
-                        new ClientPostLogoutRedirectUri(){PostLogoutRedirectUri ="https://passi.cloud"}
-                    },
                     RequirePkce = false,
                     AllowedGrantTypes = new List<ClientGrantType>()
                     {
@@ -232,11 +227,7 @@ namespace IdentityServer
                         new ClientRedirectUri(){RedirectUri = "https://passi.cloud/passiapi/oauth/callback"},
                         new ClientRedirectUri(){RedirectUri = "https://192.168.0.208:5004/passiapi/oauth/callback"},
                     },
-                    PostLogoutRedirectUris = new List<ClientPostLogoutRedirectUri>()
-                    {
-                        new ClientPostLogoutRedirectUri(){PostLogoutRedirectUri = "https://localhost"},
-                        new ClientPostLogoutRedirectUri(){PostLogoutRedirectUri ="https://passi.cloud"}
-                    },
+
                     RequirePkce = false,
                     AllowedGrantTypes = new List<ClientGrantType>()
                     {
@@ -265,11 +256,7 @@ namespace IdentityServer
                         new ClientRedirectUri(){RedirectUri ="http://passi.cloud/pgadmin4/oauth2/authorize"},
                         new ClientRedirectUri(){RedirectUri ="https://passi.cloud/pgadmin4/oauth2/authorize"}
                     },
-                    PostLogoutRedirectUris = new List<ClientPostLogoutRedirectUri>()
-                    {
-                        new ClientPostLogoutRedirectUri(){PostLogoutRedirectUri = "https://localhost"},
-                        new ClientPostLogoutRedirectUri(){PostLogoutRedirectUri ="https://passi.cloud"}
-                    },
+
                     RequirePkce = false,
                     AllowedGrantTypes = new List<ClientGrantType>()
                     {

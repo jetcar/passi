@@ -11,7 +11,6 @@ using System.Threading.Tasks;
 
 namespace IdentityServer4.Hosting
 {
-    [Profile(AttributeTargetElements = MulticastTargets.Method)]
     public class BaseUrlMiddleware
     {
         private readonly RequestDelegate _next;

@@ -9,6 +9,7 @@ using IdentityServer4.Validation;
 using IdentityServer4.Validation.Contexts;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
+using PostSharp.Extensibility;
 
 namespace IdentityServer4.Stores
 {

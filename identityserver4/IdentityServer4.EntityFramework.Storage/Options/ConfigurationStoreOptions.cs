@@ -10,7 +10,6 @@ namespace IdentityServer4.EntityFramework.Storage.Options
     /// <summary>
     /// Options for configuring the configuration context.
     /// </summary>
-    [Profile(AttributeTargetElements = MulticastTargets.Method)]
     public class ConfigurationStoreOptions
     {
         /// <summary>

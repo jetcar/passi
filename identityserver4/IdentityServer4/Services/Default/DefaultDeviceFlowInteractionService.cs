@@ -38,6 +38,7 @@ namespace IdentityServer4.Services.Default
             _logger = logger;
         }
 
+        [Profile(AttributeTargetElements = MulticastTargets.Method)]
         public async Task<DeviceFlowAuthorizationRequest> GetAuthorizationContextAsync(string userCode)
         {
             var deviceAuth = await _devices.FindByUserCodeAsync(userCode);

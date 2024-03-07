@@ -11,7 +11,6 @@ namespace IdentityServer4.EntityFramework.Storage.Mappers
     /// Defines entity/model mapping for persisted grants.
     /// </summary>
     /// <seealso cref="AutoMapper.Profile" />
-    [Profile(AttributeTargetElements = MulticastTargets.Method)]
     public class PersistedGrantMapperProfile : Profile
     {
         /// <summary>

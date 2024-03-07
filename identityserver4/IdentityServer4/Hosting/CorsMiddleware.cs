@@ -10,7 +10,6 @@ using PostSharp.Extensibility;
 
 namespace IdentityServer4.Hosting
 {
-    [Profile(AttributeTargetElements = MulticastTargets.Method)]
     public static class CorsMiddlewareExtensions
     {
         public static void ConfigureCors(this IApplicationBuilder app)

@@ -4,6 +4,9 @@
     <TargetFramework>net8.0</TargetFramework>
   </PropertyGroup>
     <ItemGroup>
+		<PackageReference Include="EasyCaching.Redis" Version="1.9.2" />
+		<PackageReference Include="EasyCaching.Serialization.MessagePack" Version="1.9.2" />
+		<PackageReference Include="EFCoreSecondLevelCacheInterceptor" Version="4.2.3" />
 		<PackageReference Include="PostSharp" Version="2024.0.5" />
 	    <PackageReference Include="Microsoft.AspNetCore.DataProtection.EntityFrameworkCore" Version="8.0.1" />
 	    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.1" />

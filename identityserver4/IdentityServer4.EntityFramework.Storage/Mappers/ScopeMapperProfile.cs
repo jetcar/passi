@@ -12,7 +12,6 @@ namespace IdentityServer4.EntityFramework.Storage.Mappers
     /// Defines entity/model mapping for scopes.
     /// </summary>
     /// <seealso cref="AutoMapper.Profile" />
-    [Profile(AttributeTargetElements = MulticastTargets.Method)]
     public class ScopeMapperProfile : Profile
     {
         /// <summary>

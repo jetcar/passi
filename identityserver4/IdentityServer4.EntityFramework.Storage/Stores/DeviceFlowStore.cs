@@ -20,7 +20,6 @@ namespace IdentityServer4.EntityFramework.Storage.Stores
     /// Implementation of IDeviceFlowStore thats uses EF.
     /// </summary>
     /// <seealso cref="IDeviceFlowStore" />
-    [Profile(AttributeTargetElements = MulticastTargets.Method)]
     public class DeviceFlowStore : IDeviceFlowStore
     {
         /// <summary>

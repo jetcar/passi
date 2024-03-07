@@ -9,7 +9,6 @@ using System;
 
 namespace IdentityServer4.Hosting
 {
-    [Profile(AttributeTargetElements = MulticastTargets.Method)]
     public class Endpoint
     {
         public Endpoint(string name, string path, Type handlerType)

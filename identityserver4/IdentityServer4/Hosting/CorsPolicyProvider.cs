@@ -15,7 +15,6 @@ using System.Threading.Tasks;
 
 namespace IdentityServer4.Hosting
 {
-    [Profile(AttributeTargetElements = MulticastTargets.Method)]
     public class CorsPolicyProvider : ICorsPolicyProvider
     {
         private readonly ILogger _logger;

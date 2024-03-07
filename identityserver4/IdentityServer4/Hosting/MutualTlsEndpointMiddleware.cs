@@ -12,7 +12,6 @@ namespace IdentityServer4.Hosting
     /// <summary>
     ///     Middleware for re-writing the MTLS enabled endpoints to the standard protocol endpoints
     /// </summary>
-    [Profile(AttributeTargetElements = MulticastTargets.Method)]
     public class MutualTlsEndpointMiddleware
     {
         private readonly ILogger<MutualTlsEndpointMiddleware> _logger;

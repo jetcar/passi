@@ -29,6 +29,8 @@
             async handleCheckCancelClick() {
                 this.loginForm = true;
                 this.loading = false;
+                clearTimeout(this.timer)
+
             },
             async fetchCheck() {
                 const checkRequestOptions = {

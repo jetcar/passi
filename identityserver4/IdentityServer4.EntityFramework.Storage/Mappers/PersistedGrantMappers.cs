@@ -10,7 +10,6 @@ namespace IdentityServer4.EntityFramework.Storage.Mappers
     /// <summary>
     /// Extension methods to map to/from entity/model for persisted grants.
     /// </summary>
-    [Profile(AttributeTargetElements = MulticastTargets.Method)]
     public static class PersistedGrantMappers
     {
         static PersistedGrantMappers()

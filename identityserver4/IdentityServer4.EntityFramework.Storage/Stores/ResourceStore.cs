@@ -1,6 +1,3 @@
-// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -99,7 +96,6 @@ namespace IdentityServer4.EntityFramework.Storage.Stores
                 .Include(x => x.Secrets)
                 .Include(x => x.Scopes)
                 .Include(x => x.UserClaims)
-                .Include(x => x.Properties)
                 .AsNoTracking();
 
             var results = (await apis.ToArrayAsync())
@@ -127,7 +123,6 @@ namespace IdentityServer4.EntityFramework.Storage.Stores
 
             var resources = query
                 .Include(x => x.UserClaims)
-                .Include(x => x.Properties)
                 .AsNoTracking();
 
             var results = (await resources.ToArrayAsync())
@@ -135,7 +130,8 @@ namespace IdentityServer4.EntityFramework.Storage.Stores
 
             Logger.LogDebug("Found {scopes} identity scopes in database", results.Select(x => x.Name));
 
-            return results.Select(x => x.ToModel()).ToArray();
+            var findIdentityResourcesByScopeNameAsync = results.Select(x => x.ToModel()).ToArray();
+            return findIdentityResourcesByScopeNameAsync;
         }
 
         /// <summary>
@@ -189,7 +185,6 @@ namespace IdentityServer4.EntityFramework.Storage.Stores
 
             var result = new Resources(
                 (await identity.ToArrayAsync()).Select(x => x.ToModel()),
-                (await apis.ToArrayAsync()).Select(x => x.ToModel()),
                 (await scopes.ToArrayAsync()).Select(x => x.ToModel())
             );
 

@@ -1,6 +1,3 @@
-// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
-
 using IdentityModel;
 using IdentityServer4.Extensions;
 using IdentityServer4.Models.Contexts;
@@ -126,7 +123,7 @@ namespace IdentityServer4.ResponseHandling.Default
             // if we ever parameterize identity scopes, then we would need to invoke the resource validator's parse API here
             var identityResources = await Resources.FindEnabledIdentityResourcesByScopeAsync(scopes);
 
-            var resources = new Resources(identityResources, Enumerable.Empty<ApiResource>(), Enumerable.Empty<ApiScope>());
+            var resources = new Resources(identityResources, Enumerable.Empty<ApiScope>());
             var result = new ResourceValidationResult(resources);
 
             return result;

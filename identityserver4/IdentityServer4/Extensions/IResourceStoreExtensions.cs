@@ -1,6 +1,3 @@
-// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
-
 using IdentityServer4.Storage.Models;
 using IdentityServer4.Storage.Stores;
 using IdentityServer4.Validation.Models;
@@ -26,12 +23,11 @@ namespace IdentityServer4.Extensions
         public static async Task<Resources> FindResourcesByScopeAsync(this IResourceStore store, IEnumerable<string> scopeNames)
         {
             var identity = await store.FindIdentityResourcesByScopeNameAsync(scopeNames);
-            var apiResources = await store.FindApiResourcesByScopeNameAsync(scopeNames);
             var scopes = await store.FindApiScopesByNameAsync(scopeNames);
 
-            Validate(identity, apiResources, scopes);
+            Validate(identity, scopes);
 
-            var resources = new Resources(identity, apiResources, scopes)
+            var resources = new Resources(identity, scopes)
             {
                 OfflineAccess = scopeNames.Contains(IdentityServerConstants.StandardScopes.OfflineAccess)
             };
@@ -39,7 +35,7 @@ namespace IdentityServer4.Extensions
             return resources;
         }
 
-        private static void Validate(IEnumerable<IdentityResource> identity, IEnumerable<ApiResource> apiResources, IEnumerable<ApiScope> apiScopes)
+        private static void Validate(IEnumerable<IdentityResource> identity, IEnumerable<ApiScope> apiScopes)
         {
             // attempt to detect invalid configuration. this is about the only place
             // we can do this, since it's hard to get the values in the store.
@@ -50,15 +46,6 @@ namespace IdentityServer4.Extensions
                 var names = dups.Aggregate((x, y) => x + ", " + y);
                 throw new Exception(
                     $"Duplicate identity scopes found. This is an invalid configuration. Use different names for identity scopes. Scopes found: {names}");
-            }
-
-            var apiNames = apiResources.Select(x => x.Name);
-            dups = GetDuplicates(apiNames);
-            if (dups.Any())
-            {
-                var names = dups.Aggregate((x, y) => x + ", " + y);
-                throw new Exception(
-                    $"Duplicate api resources found. This is an invalid configuration. Use different names for API resources. Names found: {names}");
             }
 
             var scopesNames = apiScopes.Select(x => x.Name);
@@ -122,7 +109,7 @@ namespace IdentityServer4.Extensions
         public static async Task<Resources> GetAllEnabledResourcesAsync(this IResourceStore store)
         {
             var resources = await store.GetAllResourcesAsync();
-            Validate(resources.IdentityResources, resources.ApiResources, resources.ApiScopes);
+            Validate(resources.IdentityResources, resources.ApiScopes);
 
             return resources.FilterEnabled();
         }

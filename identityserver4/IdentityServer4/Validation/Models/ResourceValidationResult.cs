@@ -1,6 +1,3 @@
-// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
-
 using IdentityServer4.Extensions;
 using IdentityServer4.Storage.Models;
 using System.Collections.Generic;
@@ -83,10 +80,7 @@ namespace IdentityServer4.Validation.Models
             var identityToKeep = Resources.IdentityResources.Where(x => parsedScopeNamesToKeep.Contains(x.Name));
             var apiScopesToKeep = Resources.ApiScopes.Where(x => parsedScopeNamesToKeep.Contains(x.Name));
 
-            var apiScopesNamesToKeep = apiScopesToKeep.Select(x => x.Name).ToArray();
-            var apiResourcesToKeep = Resources.ApiResources.Where(x => x.Scopes.Any(y => apiScopesNamesToKeep.Contains(y)));
-
-            var resources = new Resources(identityToKeep, apiResourcesToKeep, apiScopesToKeep)
+            var resources = new Resources(identityToKeep, apiScopesToKeep)
             {
                 OfflineAccess = offline
             };

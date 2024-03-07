@@ -1,7 +1,4 @@
-﻿// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
-
-using IdentityServer4.Storage.Extensions;
+﻿using IdentityServer4.Storage.Extensions;
 using IdentityServer4.Storage.Models;
 using IdentityServer4.Validation.Models;
 using PostSharp.Extensibility;
@@ -95,7 +92,6 @@ namespace IdentityServer4.Extensions
 
             return new Resources(
                 resources.IdentityResources.Where(x => x.Enabled),
-                resources.ApiResources.Where(x => x.Enabled),
                 resources.ApiScopes.Where(x => x.Enabled))
             {
                 OfflineAccess = resources.OfflineAccess

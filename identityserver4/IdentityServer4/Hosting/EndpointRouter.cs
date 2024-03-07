@@ -11,7 +11,6 @@ using System.Collections.Generic;
 
 namespace IdentityServer4.Hosting
 {
-    [Profile(AttributeTargetElements = MulticastTargets.Method)]
     public class EndpointRouter : IEndpointRouter
     {
         private readonly IEnumerable<Endpoint> _endpoints;

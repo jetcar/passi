@@ -1,7 +1,4 @@
-﻿// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
-
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using PostSharp.Extensibility;
 
@@ -25,7 +22,7 @@ namespace IdentityServer4.Storage.Models
         /// </summary>
         /// <param name="other">The other.</param>
         public Resources(Resources other)
-            : this(other.IdentityResources, other.ApiResources, other.ApiScopes)
+            : this(other.IdentityResources, other.ApiScopes)
         {
             OfflineAccess = other.OfflineAccess;
         }
@@ -36,16 +33,15 @@ namespace IdentityServer4.Storage.Models
         /// <param name="identityResources">The identity resources.</param>
         /// <param name="apiResources">The API resources.</param>
         /// <param name="apiScopes">The API scopes.</param>
-        public Resources(IEnumerable<IdentityResource> identityResources, IEnumerable<ApiResource> apiResources, IEnumerable<ApiScope> apiScopes)
+        public Resources(IEnumerable<IdentityResource> identityResources, IEnumerable<ApiScope> apiScopes)
         {
             if (identityResources?.Any() == true)
             {
                 IdentityResources = new HashSet<IdentityResource>(identityResources.ToArray());
             }
-            if (apiResources?.Any() == true)
-            {
-                ApiResources = new HashSet<ApiResource>(apiResources.ToArray());
-            }
+
+            ApiResources = new HashSet<ApiResource>();
+
             if (apiScopes?.Any() == true)
             {
                 ApiScopes = new HashSet<ApiScope>(apiScopes.ToArray());

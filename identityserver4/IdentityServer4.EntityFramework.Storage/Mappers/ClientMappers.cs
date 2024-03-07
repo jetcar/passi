@@ -10,7 +10,6 @@ namespace IdentityServer4.EntityFramework.Storage.Mappers
     /// <summary>
     /// Extension methods to map to/from entity/model for clients.
     /// </summary>
-    [Profile(AttributeTargetElements = MulticastTargets.Method)]
     public static class ClientMappers
     {
         static ClientMappers()

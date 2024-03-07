@@ -10,18 +10,18 @@
 		<PackageReference Include="RestSharp" Version="110.2.0" />
 	</ItemGroup>
 
-	<ItemGroup>
-		<AndroidResource Remove="certs\**" />
-		<Compile Remove="certs\**" />
-		<EmbeddedResource Remove="certs\**" />
-		<None Remove="certs\**" />
-	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\MauiViewModels\MauiViewModels.csproj" />
 		<ProjectReference Include="..\Models\Models.csproj" />
 		<ProjectReference Include="..\Repos\Repos.csproj" />
 		<ProjectReference Include="..\WebApiDto\WebApiDto.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Update="test.appsettings.json">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
 	</ItemGroup>
 
 </Project>

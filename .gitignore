@@ -70,3 +70,4 @@ obj
 bin
 Debug
 
+/RegisterManyUsersTestApp/test.appsettings.json

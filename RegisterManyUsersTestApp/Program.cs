@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Models;
 using NodaTime;
 using Repos;
+using Microsoft.Extensions.Configuration;
 
 namespace RegisterManyUsersTestApp
 {
@@ -17,16 +18,18 @@ namespace RegisterManyUsersTestApp
     {
         private static void Main(string[] args)
         {
-            SetVariables(args[0]);
             var timeout = 30000;
-            var certPath = "../certs";
+            var certPath = "../certs_passi";
+
+            _configuration = new ConfigurationBuilder().AddJsonFile("test.appsettings.json").Build();
+
             Directory.CreateDirectory(certPath);
             var list = new int[10000];
             var certService = new CertificatesService(null, null, null, null, null);
             var passiDb = new PassiDbContext()
             {
                 _connectionString =
-                    $"host={GetVariable("DbHost")};port={GetVariable("DbPort")};database=Passi;user id=postgres;password={GetVariable("DbPassword")};Ssl Mode=allow;"
+                    $"host={_configuration["DbHost"]};port={_configuration["DbPort"]};database=Passi;user id=postgres;password={_configuration["DbPassword"]};Ssl Mode=allow;"
             };
             passiDb.Database.Migrate();
             var index = 0;
@@ -98,26 +101,7 @@ namespace RegisterManyUsersTestApp
             });
         }
 
-        private static void SetVariables(string filepath)
-        {
-            using (StreamReader reader = new StreamReader(filepath))
-            {
-                while (!reader.EndOfStream)
-                {
-                    var line = reader.ReadLine();
-                    var keyValue = line.Split('=');
-                    if (keyValue.Length == 2)
-                        variables[keyValue[0]] = keyValue[1];
-                }
-            }
-        }
-
-        private static Dictionary<string, string> variables = new Dictionary<string, string>();
-
-        private static string GetVariable(string index)
-        {
-            return variables[index];
-        }
+        private static IConfigurationRoot _configuration;
 
         private static UserDb UserDb(int localIndex, Tuple<X509Certificate2, string, byte[]> cert, string subject)
         {

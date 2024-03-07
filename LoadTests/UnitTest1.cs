@@ -97,7 +97,7 @@ namespace LoadTests
                         var accountGuid = "";
                         var certThumbprint = "";
                         X509Certificate2 cert = null;
-                        using (var reader = new StreamReader($"../../../../certs/admin{number}.crt"))
+                        using (var reader = new StreamReader($"../../../../certs_passi/admin{number}.crt"))
                         {
                             var strings = reader.ReadLine().Split(";");
                             accountGuid = strings[1];
@@ -106,7 +106,7 @@ namespace LoadTests
                             cert = new X509Certificate2(Convert.FromBase64String(strings[5]), strings[4]);
                         }
                         var signedHash = Guid.NewGuid().ToString();
-                        var step1 = await Step.Run<LoginResult>("step_1", context, async () =>
+                        var step1 = await Step.Run<LoginResult>("step_1_login_start", context, async () =>
                         {
                             var loginResp = Login(username, out var returnUrl, out var nonce);
                             var value = loginResp.Payload.Value.Content.ReadAsStringAsync().Result.ToString();
@@ -122,7 +122,7 @@ namespace LoadTests
                             });
                         });
 
-                        var step2 = await Step.Run("step_2", context, async () =>
+                        var step2 = await Step.Run("step_2_check", context, async () =>
                         {
                             var resp = await Check(step1.Payload.Value.nonce, username, step1.Payload.Value.sessionId, step1.Payload.Value.returnUrl);
 
@@ -131,7 +131,7 @@ namespace LoadTests
                                 return Response.Fail();
                             return Response.Ok();
                         });
-                        var step3 = await Step.Run("step_3", context, async () =>
+                        var step3 = await Step.Run("step_3_sync_accounts", context, async () =>
                         {
                             var resp = await MobileSync(deviceGuid, accountGuid);
 
@@ -140,7 +140,7 @@ namespace LoadTests
                                 return Response.Fail();
                             return Response.Ok();
                         });
-                        var step4 = await Step.Run("step_4", context, async () =>
+                        var step4 = await Step.Run("step_4_poll_sessions", context, async () =>
                         {
                             var resp = await PollSessions(deviceGuid, accountGuid);
 
@@ -150,7 +150,7 @@ namespace LoadTests
                             return Response.Ok();
                         });
 
-                        var step5 = await Step.Run("step_5", context, async () =>
+                        var step5 = await Step.Run("step_5_send_signed_data", context, async () =>
                         {
                             signedHash = certHelper.GetSignedData(step1.Payload.Value.nonce, cert);
                             var resp = await SendSignedHash(step1.Payload.Value.sessionId, certThumbprint, signedHash);
@@ -161,7 +161,7 @@ namespace LoadTests
                             return Response.Ok();
                         });
 
-                        var step6 = await Step.Run("step_6", context, async () =>
+                        var step6 = await Step.Run("step_6_check_after_Signing", context, async () =>
                         {
                             var resp = await Check(step1.Payload.Value.nonce, username, step1.Payload.Value.sessionId, step1.Payload.Value.returnUrl);
 
@@ -180,7 +180,7 @@ namespace LoadTests
                         return Response.Ok();
                     })
                 .WithLoadSimulations(
-                Simulation.Inject(5, TimeSpan.FromSeconds(20), TimeSpan.FromMinutes(2))
+                Simulation.Inject(20, TimeSpan.FromSeconds(20), TimeSpan.FromMinutes(5))
             )
                 ;
 
@@ -277,9 +277,9 @@ namespace LoadTests
         {
             var loginstart = Http.CreateRequest("GET", _configuration["PassiWebAppUrl"] + "/Auth/Login");
             var loginStartResponse = Http.Send(_client, loginstart).Result;
-            var redirectUri = loginStartResponse.Payload.Value.RequestMessage.RequestUri.Query.Split("?").FirstOrDefault(x => x.StartsWith("ReturnUrl=")).Replace("ReturnUrl=", "");
+            var redirectUri = loginStartResponse.Payload.Value.RequestMessage.RequestUri.Query.Split("?").FirstOrDefault(x => x != null && x.StartsWith("ReturnUrl=")).Replace("ReturnUrl=", "");
             if (string.IsNullOrEmpty(redirectUri))
-                redirectUri = loginStartResponse.Payload.Value.RequestMessage.RequestUri.Query.Split("&").FirstOrDefault(x => x.StartsWith("redirect_uri=")).Replace("redirect_uri=", "");
+                redirectUri = loginStartResponse.Payload.Value.RequestMessage.RequestUri.Query.Split("&").FirstOrDefault(x => x != null && x.StartsWith("redirect_uri=")).Replace("redirect_uri=", "");
             returnUrl = HttpUtility.UrlDecode(redirectUri);
             nonce = returnUrl.Split("&").FirstOrDefault(x => x.StartsWith("nonce=")).Replace("nonce=", "");
             var loginDto = new LoginDto()

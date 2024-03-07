@@ -2,7 +2,6 @@ using System.Threading;
 using MauiTest.Tools;
 using MauiViewModels;
 using MauiViewModels.Main;
-using MauiViewModels.ViewModels;
 using NUnit.Framework;
 using AccountViewModel = MauiViewModels.Main.AccountViewModel;
 

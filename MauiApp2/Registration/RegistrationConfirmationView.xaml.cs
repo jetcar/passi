@@ -1,8 +1,4 @@
-﻿using System.Net;
-using MauiApp2.Tools;
-using Newtonsoft.Json;
-
-namespace MauiApp2.Registration
+﻿namespace MauiApp2.Registration
 {
     public partial class RegistrationConfirmationView : BaseContentPage
     {

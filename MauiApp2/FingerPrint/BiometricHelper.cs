@@ -10,7 +10,6 @@ using Java.Lang;
 using Java.Security;
 using Java.Security.Spec;
 using MauiApp2.Platforms.Android;
-using MauiApp2.utils.Services;
 using MauiViewModels;
 using MauiViewModels.FingerPrint;
 using MauiViewModels.utils.Services;

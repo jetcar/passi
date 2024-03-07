@@ -1,6 +1,4 @@
-﻿using MauiViewModels.Tools;
-
-namespace MauiApp2.Tools
+﻿namespace MauiApp2.Tools
 {
     public partial class NumbersPad : ContentView
     {

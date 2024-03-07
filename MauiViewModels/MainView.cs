@@ -3,7 +3,6 @@ using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using MauiViewModels.Main;
 using MauiViewModels.Registration;
-using MauiViewModels.ViewModels;
 using RestSharp;
 using AccountViewModel = MauiViewModels.Main.AccountViewModel;
 

@@ -1,12 +1,4 @@
-﻿using System.Net;
-using System.Timers;
-using MauiApp2.Tools;
-using MauiViewModels;
-using MauiViewModels.Notifications;
-using MauiViewModels.StorageModels;
-using Newtonsoft.Json;
-using Color = Microsoft.Maui.Graphics.Color;
-using Timer = System.Timers.Timer;
+﻿using MauiViewModels.Notifications;
 
 namespace MauiApp2.Notifications
 {

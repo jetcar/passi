@@ -1,5 +1,4 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using MauiViewModels.StorageModels;
 using MauiViewModels.utils.Services;
 using Microsoft.Extensions.DependencyInjection;

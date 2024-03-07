@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace MauiViewModels.Main
+﻿namespace MauiViewModels.Main
 {
     public class TermsAgreementsViewModel : BaseViewModel
     {

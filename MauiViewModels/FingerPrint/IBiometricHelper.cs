@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace MauiViewModels.FingerPrint;
+﻿namespace MauiViewModels.FingerPrint;
 
 public interface IBiometricHelper
 {

@@ -1,9 +1,4 @@
-﻿using System.Net;
-using MauiViewModels;
-using MauiViewModels.Registration;
-using MauiViewModels.StorageModels;
-using MauiViewModels.utils.Services.Certificate;
-using Newtonsoft.Json;
+﻿using MauiViewModels.Registration;
 
 namespace MauiApp2.Registration
 {

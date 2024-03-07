@@ -1,12 +1,9 @@
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading;
-using AppConfig;
 using MauiTest.Tools;
 using MauiViewModels;
 using MauiViewModels.ViewModels;
 using NUnit.Framework;
-using WebApiDto.Auth;
 
 namespace MauiTest
 {

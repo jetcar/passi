@@ -1,7 +1,4 @@
-﻿using MauiApp2.FingerPrint;
-using MauiViewModels.Main;
-using MauiViewModels.StorageModels;
-using MauiViewModels.ViewModels;
+﻿using MauiViewModels.Main;
 
 namespace MauiApp2.Main
 {

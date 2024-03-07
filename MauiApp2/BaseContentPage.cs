@@ -1,9 +1,4 @@
-﻿using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using AppCommon;
-using MauiViewModels;
-using MauiViewModels.utils.Services;
-using MauiViewModels.utils.Services.Certificate;
+﻿using MauiViewModels;
 
 namespace MauiApp2;
 

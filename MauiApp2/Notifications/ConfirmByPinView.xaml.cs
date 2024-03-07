@@ -1,8 +1,4 @@
-﻿using System.Net;
-using System.Timers;
-using MauiViewModels.Notifications;
-using Newtonsoft.Json;
-using Timer = System.Timers.Timer;
+﻿using MauiViewModels.Notifications;
 
 namespace MauiApp2.Notifications
 {

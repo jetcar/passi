@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -10,17 +8,12 @@ using MauiTest.Tools;
 using MauiViewModels;
 using MauiViewModels.Notifications;
 using MauiViewModels.utils.Services;
-using MauiViewModels.utils.Services.Certificate;
 using MauiViewModels.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Maui.Graphics;
 using Newtonsoft.Json;
 using NUnit.Framework;
-using passi_webapi.Dto;
 using RestSharp;
-using WebApiDto;
-using WebApiDto.Auth;
-using static System.Net.WebRequestMethods;
+using WebApiDto.Auth.Dto;
 using Color = WebApiDto.Auth.Color;
 
 namespace MauiTest.TestClasses;

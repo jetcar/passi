@@ -1,7 +1,4 @@
 ﻿using System.Security.Cryptography.X509Certificates;
-
-using RestSharp;
-using WebApiDto.SignUp;
 using System.IO;
 using System.Threading.Tasks;
 using System.Threading;

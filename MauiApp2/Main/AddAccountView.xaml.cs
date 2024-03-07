@@ -1,10 +1,4 @@
-﻿using System.Diagnostics;
-using System.Net;
-using System.Net.Mail;
-using MauiApp2.Registration;
-using MauiApp2.Tools;
-using MauiViewModels.Main;
-using Newtonsoft.Json;
+﻿using MauiViewModels.Main;
 
 namespace MauiApp2.Main
 {

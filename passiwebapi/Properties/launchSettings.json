@@ -2,7 +2,6 @@
   "profiles": {
     "passi_webapi": {
       "commandName": "Project",
-      "commandLineArgs": "../configs/variables/dev.env",
       "launchUrl": "swagger",
       "applicationUrl": "https://localhost:5004"
     },

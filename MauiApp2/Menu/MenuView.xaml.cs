@@ -1,5 +1,4 @@
-﻿using System.Collections.ObjectModel;
-using MauiViewModels.Menu;
+﻿using MauiViewModels.Menu;
 using MauiViewModels.StorageModels;
 
 namespace MauiApp2.Menu

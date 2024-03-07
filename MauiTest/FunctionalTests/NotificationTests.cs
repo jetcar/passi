@@ -1,6 +1,5 @@
 using System;
 using System.Threading;
-using AppConfig;
 using MauiTest.TestClasses;
 using MauiTest.Tools;
 using MauiViewModels;

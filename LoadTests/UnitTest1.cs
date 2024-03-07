@@ -2,10 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Net.Mime;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,13 +10,10 @@ using System.Web;
 using AppConfig;
 using MauiViewModels.utils.Services.Certificate;
 using Microsoft.Extensions.Configuration;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel.DataCollection;
 using NBomber.Contracts;
-using NBomber.Contracts.Stats;
 using NBomber.CSharp;
 using NBomber.Http.CSharp;
 using Newtonsoft.Json;
-using RestSharp;
 using static Abstracta.JmeterDsl.JmeterDsl;
 
 namespace LoadTests

@@ -2,7 +2,6 @@ using MauiTest.TestClasses;
 using MauiTest.Tools;
 using NUnit.Framework;
 using System.Threading;
-using MauiViewModels;
 using MauiViewModels.Menu;
 
 namespace MauiTest.FunctionalTests

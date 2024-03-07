@@ -1,8 +1,6 @@
-﻿using Google.Cloud.Diagnostics.Common;
-using GoogleTracer;
+﻿using GoogleTracer;
 using PostSharp.Aspects;
 using PostSharp.Serialization;
-using System.Reflection;
 using System.Threading.Tasks;
 
 [PSerializable]

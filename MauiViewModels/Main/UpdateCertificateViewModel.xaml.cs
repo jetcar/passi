@@ -1,8 +1,6 @@
-﻿using System;
-using MauiViewModels.StorageModels;
+﻿using MauiViewModels.StorageModels;
 using MauiViewModels.utils.Services.Certificate;
 using Microsoft.Maui.Graphics;
-using Color = WebApiDto.Auth.Color;
 
 namespace MauiViewModels.Main
 {

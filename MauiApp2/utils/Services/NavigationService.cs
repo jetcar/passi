@@ -1,7 +1,5 @@
-﻿using System.Diagnostics;
-using MauiViewModels;
+﻿using MauiViewModels;
 using MauiViewModels.utils.Services;
-using Activity = Android.App.Activity;
 
 namespace MauiApp2.utils.Services
 {

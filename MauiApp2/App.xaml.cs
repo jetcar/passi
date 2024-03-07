@@ -1,6 +1,4 @@
-﻿using AppCommon;
-
-namespace MauiApp2
+﻿namespace MauiApp2
 {
     public partial class App : Application
     {

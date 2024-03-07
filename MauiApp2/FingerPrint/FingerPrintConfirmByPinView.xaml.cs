@@ -1,5 +1,4 @@
 ﻿using MauiViewModels.FingerPrint;
-using MauiViewModels.StorageModels;
 
 namespace MauiApp2.FingerPrint
 {

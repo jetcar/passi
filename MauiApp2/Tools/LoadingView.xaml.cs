@@ -1,7 +1,4 @@
-﻿using System.Timers;
-using Timer = System.Timers.Timer;
-
-namespace MauiApp2.Tools
+﻿namespace MauiApp2.Tools
 {
     public partial class LoadingView : BaseContentPage
     {

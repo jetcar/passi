@@ -15,7 +15,6 @@ namespace IdentityServer.Controllers.ClientRegistration
 {
     //[SecurityHeaders]
     [Authorize]
-    [Profile(AttributeTargetElements = MulticastTargets.Method)]
     public class ClientController : Controller
     {
         private IIdentityClientsRepository _clients;

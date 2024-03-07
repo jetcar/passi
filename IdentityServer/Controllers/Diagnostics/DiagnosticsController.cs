@@ -9,7 +9,6 @@ namespace IdentityServer.Controllers.Diagnostics
 {
     [SecurityHeaders]
     [Authorize]
-    [Profile(AttributeTargetElements = MulticastTargets.Method)]
     public class DiagnosticsController : Controller
     {
         public async Task<IActionResult> Index()

@@ -16,7 +16,9 @@ namespace GoogleTracer
 
         public static void OnInvoke(MethodInterceptionArgs args, Action<MethodInterceptionArgs> onInvoke)
         {
-            var type = args.Instance.GetType();
+            var type = args.Instance?.GetType();
+            if (type == null)
+                type = typeof(object);
             if (!IsPropertyMethod(args.Method) && CurrentTracer != null)
                 using (CurrentTracer.StartSpan(type.FullName + "." + args.Method.Name))
                     onInvoke(args);
@@ -26,7 +28,10 @@ namespace GoogleTracer
 
         public static Task OnInvokeAsync(MethodInterceptionArgs args, Func<MethodInterceptionArgs, Task> onInvokeAsync)
         {
-            var type = args.Instance.GetType();
+            var type = args.Instance?.GetType();
+            if (type == null)
+                type = typeof(object);
+
             if (!IsPropertyMethod(args.Method) && CurrentTracer != null)
                 using (CurrentTracer.StartSpan(type.FullName + "." + args.Method.Name))
                     return onInvokeAsync(args);

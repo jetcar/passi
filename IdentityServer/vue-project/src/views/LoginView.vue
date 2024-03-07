@@ -24,7 +24,7 @@
             async handleCancelClick() {
                 this.loginForm = true;
                 this.loading = false;
-
+                clearTimeout(this.timer)
             },
             async handleCheckCancelClick() {
                 this.loginForm = true;
@@ -44,7 +44,7 @@
                                     window.location.replace(json.redirect)
                                 }
                                 else {
-                                    setTimeout(() => this.fetchCheck(), 1000)
+                                    this.timer = setTimeout(() => this.fetchCheck(), 1000)
                                 }
 
                             })
@@ -83,7 +83,11 @@
 
                 }
                 else {
-                    this.errorMessage = (await resp.json()).errors.Username[0]
+                    var json = await resp.json()
+                    if (json.errors.Username)
+                        this.errorMessage = json.errors.Username[0]
+                    else
+                        this.errorMessage = json.errors
                     this.loginForm = true
                     this.loading = false
                 }
@@ -106,7 +110,7 @@
                         <div class="row">
                             <div class="col-sm-6">
                                 <div class="alert alert-danger">
-                                    Sorry, there was an error
+                                    Sorry, there was an error:
                                     <div>{{errorMessage}}</div>
                                 </div>
                             </div>

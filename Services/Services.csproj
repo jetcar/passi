@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+		<PackageReference Include="PostSharp" Version="2024.0.5" />
     <PackageReference Include="FirebaseAdmin" Version="2.4.0" />
     <PackageReference Include="Google.Cloud.Diagnostics.Common" Version="5.1.0" />
     <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="7.2.0" />

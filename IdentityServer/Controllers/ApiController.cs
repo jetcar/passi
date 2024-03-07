@@ -29,7 +29,7 @@ using static IdentityServer4.Models.IdentityResources;
 
 namespace IdentityServer.Controllers
 {
-    [Profile(AttributeTargetElements = MulticastTargets.Method)]
+    //[Profile(AttributeTargetElements = MulticastTargets.Method)]
     [ApiController]
     [Route("api")]
     public class ApiController : ControllerBase

@@ -21,7 +21,7 @@
     </ItemGroup>
     <ItemGroup>
       <ProjectReference Include="..\ConfigurationManager\ConfigurationManager.csproj" />
-      <ProjectReference Include="..\IdentityServer4Core\src\EntityFramework.Storage\src\IdentityServer4.EntityFramework.Storage.csproj" />
+      <ProjectReference Include="..\identityserver4\IdentityServer4.EntityFramework.Storage\IdentityServer4.EntityFramework.Storage.csproj" />
     </ItemGroup>
 
 </Project>

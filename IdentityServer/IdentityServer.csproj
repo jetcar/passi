@@ -71,9 +71,9 @@
 	  <ProjectReference Include="..\ConfigurationManager\ConfigurationManager.csproj" />
 	  <ProjectReference Include="..\GoogleTracer\GoogleTracer.csproj" />
 	  <ProjectReference Include="..\IdentityRepo\IdentityRepo.csproj" />
-	  <ProjectReference Include="..\IdentityServer4Core\src\EntityFramework.Storage\src\IdentityServer4.EntityFramework.Storage.csproj" />
-	  <ProjectReference Include="..\IdentityServer4Core\src\EntityFramework\src\IdentityServer4.EntityFramework.csproj" />
-	  <ProjectReference Include="..\IdentityServer4Core\src\IdentityServer4\src\IdentityServer4.csproj" />
+	  <ProjectReference Include="..\identityserver4\IdentityServer4.EntityFramework.Storage\IdentityServer4.EntityFramework.Storage.csproj" />
+	  <ProjectReference Include="..\identityserver4\IdentityServer4.EntityFramework\IdentityServer4.EntityFramework.csproj" />
+	  <ProjectReference Include="..\identityserver4\IdentityServer4\IdentityServer4.csproj" />
 	  <ProjectReference Include="..\Services\Services.csproj" />
 	  <ProjectReference Include="..\WebApiDto\WebApiDto.csproj" />
 	</ItemGroup>

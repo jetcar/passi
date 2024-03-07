@@ -35,7 +35,7 @@
 	<ItemGroup>
 		<ProjectReference Include="..\ConfigurationManager\ConfigurationManager.csproj" />
 		<ProjectReference Include="..\GoogleTracer\GoogleTracer.csproj" />
-		<ProjectReference Include="..\IdentityServer4Core\src\EntityFramework\src\IdentityServer4.EntityFramework.csproj" />
+		<ProjectReference Include="..\identityserver4\IdentityServer4.EntityFramework\IdentityServer4.EntityFramework.csproj" />
 		<ProjectReference Include="..\Models\Models.csproj" />
 	</ItemGroup>
 

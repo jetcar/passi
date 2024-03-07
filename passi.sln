@@ -39,15 +39,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PassiWebApiTests", "PassiWe
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IdentityRepo", "IdentityRepo\IdentityRepo.csproj", "{D3041543-E2FB-4D58-B282-7C5AAF574A62}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IdentityModel", "IdentityModelCore\src\IdentityModel.csproj", "{5599100E-0E77-4477-B323-308D4FC73032}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IdentityModel", "identityserver4\IdentityModel\IdentityModel.csproj", "{5599100E-0E77-4477-B323-308D4FC73032}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IdentityServer4", "IdentityServer4Core\src\IdentityServer4\src\IdentityServer4.csproj", "{76A8A982-C5E3-4B2A-89BA-F1E72C2A4E2C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IdentityServer4", "identityserver4\IdentityServer4\IdentityServer4.csproj", "{76A8A982-C5E3-4B2A-89BA-F1E72C2A4E2C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IdentityServer4.Storage", "IdentityServer4Core\src\Storage\src\IdentityServer4.Storage.csproj", "{4F2D7E60-B447-43A9-8CCC-9E9C4BD85613}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IdentityServer4.Storage", "identityserver4\IdentityServer4.Storage\IdentityServer4.Storage.csproj", "{4F2D7E60-B447-43A9-8CCC-9E9C4BD85613}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IdentityServer4.EntityFramework", "IdentityServer4Core\src\EntityFramework\src\IdentityServer4.EntityFramework.csproj", "{CF967A08-0C41-4606-B3DD-75753D98CC83}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IdentityServer4.EntityFramework", "identityserver4\IdentityServer4.EntityFramework\IdentityServer4.EntityFramework.csproj", "{CF967A08-0C41-4606-B3DD-75753D98CC83}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IdentityServer4.EntityFramework.Storage", "IdentityServer4Core\src\EntityFramework.Storage\src\IdentityServer4.EntityFramework.Storage.csproj", "{8773678D-1950-4DEA-A51C-961970919C6F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IdentityServer4.EntityFramework.Storage", "identityserver4\IdentityServer4.EntityFramework.Storage\IdentityServer4.EntityFramework.Storage.csproj", "{8773678D-1950-4DEA-A51C-961970919C6F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "IdentityServer", "IdentityServer", "{05C62086-6E2C-4978-A32C-456017BAC894}"
 EndProject

@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<AssemblyName>IdentityServer4.Storage</AssemblyName>
+
+		<OutputPath>publish</OutputPath>
+
+		<EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
+	</PropertyGroup>
+
+
+	<ItemGroup>
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+		<PackageReference Include="PostSharp.Redist" Version="2024.0.5" />
+		<PackageReference Include="PostSharp" Version="2024.0.5" />
+	</ItemGroup>
+
+
+	<ItemGroup>
+	  <ProjectReference Include="..\..\GoogleTracer\GoogleTracer.csproj" />
+	  <ProjectReference Include="..\IdentityModel\IdentityModel.csproj" />
+	</ItemGroup>
+
+
+
+
+</Project>

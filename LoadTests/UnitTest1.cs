@@ -79,7 +79,7 @@ namespace LoadTests
             var certHelper = new CertHelper(null);
             var scenario = Scenario.Create("http_scenario", async context =>
                     {
-                        var index = random.Next(1013, 9020);
+                        var index = random.Next(10, 9000);
                         var number = index.ToString();
                         var username = $"test{number}@passi.cloud";
                         var deviceGuid = "";
@@ -174,7 +174,7 @@ namespace LoadTests
                         return Response.Ok();
                     })
                 .WithLoadSimulations(
-                Simulation.Inject(10, TimeSpan.FromSeconds(20), TimeSpan.FromMinutes(2))
+                Simulation.Inject(105, TimeSpan.FromSeconds(20), TimeSpan.FromMinutes(5))
             );
 
             var stats = NBomberRunner

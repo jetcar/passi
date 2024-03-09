@@ -12,6 +12,7 @@
 
 
 	<ItemGroup>
+		<ProjectReference Include="..\MauiTest\MauiTest.csproj" />
 		<ProjectReference Include="..\MauiViewModels\MauiViewModels.csproj" />
 		<ProjectReference Include="..\Models\Models.csproj" />
 		<ProjectReference Include="..\Repos\Repos.csproj" />

@@ -60,7 +60,7 @@ namespace passi_webapi
             services.AddControllers();
             services.AddSingleton<AppSetting>(new AppSetting(Configuration));
             services.AddSingleton(mapper);
-            services.AddScoped<IMyRestClient, MyRestClient>();
+            services.AddSingleton<IMyRestClient, MyRestClient>();
 
             services.AddSingleton<IRedisService, RedisService>();
             services.AddSingleton<IEmailSender, EmailSender>();

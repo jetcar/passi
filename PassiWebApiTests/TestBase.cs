@@ -40,7 +40,7 @@ public class TestBase
         services.Remove(new ServiceDescriptor(typeof(IMyRestClient), typeof(MyRestClient)));//remove real requests services
         services.Remove(new ServiceDescriptor(typeof(IEmailSender), typeof(EmailSender)));//remove real requests services
 
-        services.AddScoped<IMyRestClient, TestRestClient>();
+        services.AddSingleton<IMyRestClient, TestRestClient>();
         services.AddScoped<IEmailSender, TestEmailSender>();
 
         ServiceProvider = services.BuildServiceProvider();

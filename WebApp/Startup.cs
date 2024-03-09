@@ -43,7 +43,7 @@ namespace WebApp
             services.AddSingleton<AppSetting>();
             services.AddScoped<WebAppDbContext>();
             services.AddSingleton<IStartupFilter, MigrationStartupFilter<WebAppDbContext>>();
-            services.AddScoped<IMyRestClient, MyRestClient>();
+            services.AddSingleton<IMyRestClient, MyRestClient>();
             services.AddDataProtection()
                 .SetApplicationName("WebApp")
                 .AddKeyManagementOptions(options =>

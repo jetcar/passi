@@ -28,7 +28,7 @@ namespace MauiApp2.Platforms.Android
 
             _timer = new Timer();
             _timer.Enabled = true;
-            _timer.Interval = 5000;
+            _timer.Interval = 1000;
             _timer.Elapsed += _timer_Elapsed;
             _timer.Start();
         }

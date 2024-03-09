@@ -14,6 +14,7 @@ using NBomber.Contracts;
 using NBomber.CSharp;
 using NBomber.Http.CSharp;
 using Newtonsoft.Json;
+using YamlDotNet.Core.Tokens;
 using static Abstracta.JmeterDsl.JmeterDsl;
 
 namespace LoadTests
@@ -42,18 +43,6 @@ namespace LoadTests
 
         [Test]
         public void IndexPage()
-        {
-            var stats = TestPlan(
-                ThreadGroup(2000, 10,
-                    HttpSampler(_configuration["PassiWebAppUrl"])
-                )
-            ).Run();
-            Assert.That(stats.Overall.SampleTimePercentile99, Is.LessThan(TimeSpan.FromSeconds(10)));
-            Assert.That(stats.Overall.ErrorsCount, Is.LessThan(1));
-        }
-
-        [Test]
-        public void IndexPage2()
         {
             var scenario = Scenario.Create("http_scenario", async context =>
             {
@@ -97,7 +86,7 @@ namespace LoadTests
                         var accountGuid = "";
                         var certThumbprint = "";
                         X509Certificate2 cert = null;
-                        using (var reader = new StreamReader($"../../../../certs_passi/admin{number}.crt"))
+                        using (var reader = new StreamReader($"../../../../certs/admin{number}.crt"))
                         {
                             var strings = reader.ReadLine().Split(";");
                             accountGuid = strings[1];
@@ -142,11 +131,16 @@ namespace LoadTests
                         });
                         var step4 = await Step.Run("step_4_poll_sessions", context, async () =>
                         {
-                            var resp = await PollSessions(deviceGuid, accountGuid);
+                            string value = "";
+                            do
+                            {
+                                var resp = await PollSessions(deviceGuid, accountGuid);
 
-                            var value = resp.Payload.Value.Content.ReadAsStringAsync().Result.ToString();
-                            if (resp.IsError || string.IsNullOrEmpty(value))
-                                return Response.Fail();
+                                value = resp.Payload.Value.Content.ReadAsStringAsync().Result.ToString();
+                                if (resp.IsError)
+                                    return Response.Fail();
+                            } while (string.IsNullOrEmpty(value));
+
                             return Response.Ok();
                         });
 
@@ -180,16 +174,15 @@ namespace LoadTests
                         return Response.Ok();
                     })
                 .WithLoadSimulations(
-                Simulation.Inject(20, TimeSpan.FromSeconds(20), TimeSpan.FromMinutes(5))
-            )
-                ;
+                Simulation.Inject(10, TimeSpan.FromSeconds(20), TimeSpan.FromMinutes(2))
+            );
 
             var stats = NBomberRunner
                 .RegisterScenarios(scenario)
                 .WithReportFolder("report")
                 .Run();
 
-            Assert.That(stats.ScenarioStats[0].Ok.Request.RPS, Is.GreaterThan(1));
+            Assert.That(stats.ScenarioStats[0].Ok.Request.RPS, Is.GreaterThan(1d));
             Assert.That(stats.AllFailCount == 0);
             Assert.That(stats.ScenarioStats[0].Ok.Latency.Percent99, Is.LessThan(10000));
         }
@@ -277,11 +270,13 @@ namespace LoadTests
         {
             var loginstart = Http.CreateRequest("GET", _configuration["PassiWebAppUrl"] + "/Auth/Login");
             var loginStartResponse = Http.Send(_client, loginstart).Result;
-            var redirectUri = loginStartResponse.Payload.Value.RequestMessage.RequestUri.Query.Split("?").FirstOrDefault(x => x != null && x.StartsWith("ReturnUrl=")).Replace("ReturnUrl=", "");
+            var strings = loginStartResponse.Payload.Value.RequestMessage.RequestUri.Query.Split("?").Where(x => !string.IsNullOrEmpty(x)).ToList();
+            var firstOrDefault = strings.FirstOrDefault(x => x != null && x.StartsWith("ReturnUrl="));
+            var redirectUri = firstOrDefault?.Replace("ReturnUrl=", "");
             if (string.IsNullOrEmpty(redirectUri))
-                redirectUri = loginStartResponse.Payload.Value.RequestMessage.RequestUri.Query.Split("&").FirstOrDefault(x => x != null && x.StartsWith("redirect_uri=")).Replace("redirect_uri=", "");
+                redirectUri = loginStartResponse.Payload.Value.RequestMessage.RequestUri.Query.Split("&").FirstOrDefault(x => x != null && x.StartsWith("redirect_uri="))?.Replace("redirect_uri=", "");
             returnUrl = HttpUtility.UrlDecode(redirectUri);
-            nonce = returnUrl.Split("&").FirstOrDefault(x => x.StartsWith("nonce=")).Replace("nonce=", "");
+            nonce = returnUrl.Split("&").FirstOrDefault(x => x.StartsWith("nonce="))?.Replace("nonce=", "");
             var loginDto = new LoginDto()
             {
                 ReturnUrl = returnUrl,

@@ -1,5 +1,5 @@
 {
-  "PassiWebAppUrl": "https://passi.cloud",
-  "PassiApiUrl": "https://passi.cloud/passiapi",
-  "IdentityUrl": "https://passi.cloud/identity"
+  "PassiWebAppUrl": "https://localhost",
+  "PassiApiUrl": "https://localhost/passiapi",
+  "IdentityUrl": "https://localhost/identity"
 }

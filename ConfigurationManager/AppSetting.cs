@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using System;
+using MessagePack.Formatters;
 
 namespace ConfigurationManager
 {
@@ -27,5 +28,20 @@ namespace ConfigurationManager
                 Environment.SetEnvironmentVariable(key, value);
             }
         }
+    }
+
+    public class DBNullFormatter
+    {
+        public static IMessagePackFormatter Instance
+        {
+            get
+            {
+                return new MineDBNullFormatter();
+            }
+        }
+    }
+
+    public class MineDBNullFormatter : IMessagePackFormatter
+    {
     }
 }

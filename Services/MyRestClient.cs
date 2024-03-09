@@ -1,8 +1,6 @@
 ﻿using ConfigurationManager;
 using Google.Cloud.Diagnostics.Common;
 using Newtonsoft.Json;
-using Polly;
-using Polly.Retry;
 using PostSharp.Extensibility;
 using RestSharp;
 using Serilog;

@@ -86,12 +86,13 @@ namespace IdentityRepo.DbContext
                 option.UseRedis(config =>
                     {
                         config.DBConfig.AllowAdmin = true;
-                        config.DBConfig.SyncTimeout = 10000;
-                        config.DBConfig.AsyncTimeout = 10000;
+                        config.DBConfig.SyncTimeout = 5000;
+                        config.DBConfig.AsyncTimeout = 5000;
                         config.DBConfig.Endpoints.Add(new EasyCaching.Core.Configurations.ServerEndPoint(_appSetting["redis"], Convert.ToInt32(_appSetting["redisPort"])));
                         config.EnableLogging = true;
+                        config.DBConfig.KeyPrefix = "passi";
                         config.SerializerName = "Pack";
-                        config.DBConfig.ConnectionTimeout = 10000;
+                        config.DBConfig.ConnectionTimeout = 5000;
                     }, providerName1)
                     .WithMessagePack(so =>
                         {
@@ -184,21 +185,6 @@ namespace IdentityRepo.DbContext
         {
             return base.SaveChangesAsync();
         }
-    }
-
-    public class DBNullFormatter
-    {
-        public static IMessagePackFormatter Instance
-        {
-            get
-            {
-                return new MineDBNullFormatter();
-            }
-        }
-    }
-
-    public class MineDBNullFormatter : IMessagePackFormatter
-    {
     }
 
     public class UserClient

@@ -56,7 +56,7 @@ namespace IdentityServer
             var identityCertPass = Environment.GetEnvironmentVariable("IdentityCertPassword") ?? Configuration.GetValue<string>("AppSetting:IdentityCertPassword");
             //services.AddControllersWithViews();
             services.AddSingleton<AppSetting>();
-            services.AddScoped<IMyRestClient, MyRestClient>();
+            services.AddSingleton<IMyRestClient, MyRestClient>();
             services.AddScoped<IdentityDbContext>();
             services.AddScoped<IIdentityClientsRepository, IdentityClientsRepository>();
             services.AddSingleton<IStartupFilter, MigrationStartupFilter<IdentityDbContext>>();

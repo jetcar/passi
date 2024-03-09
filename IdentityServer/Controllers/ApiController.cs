@@ -67,13 +67,13 @@ namespace IdentityServer.Controllers
         [Route("check")]
         public async Task<IActionResult> Check(CheckInputModel model)
         {
-            var context = await _interaction.GetAuthorizationContextAsync(model.ReturnUrl);
-
             var request = new RestRequest(_appSetting["checkRequest"] + "?sessionId=" + model.SessionId, Method.Get);
             var result = _myRestClient.ExecuteAsync(request).Result;
 
             if (result.IsSuccessful)
             {
+                var context = await _interaction.GetAuthorizationContextAsync(model.ReturnUrl);
+
                 var checkResponceDto = JsonConvert.DeserializeObject<CheckResponceDto>(result.Content);
                 await _events.RaiseAsync(new UserLoginSuccessEvent(model.Username, model.Username, model.Username,
                     clientId: context?.Client.ClientId));

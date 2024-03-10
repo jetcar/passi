@@ -6,7 +6,7 @@ using IdentityServer4.Infrastructure;
 using IdentityServer4.Models.Messages;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.Logging;
-using PostSharp.Extensibility;
+
 using System;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,6 +17,7 @@ namespace IdentityServer4.Stores.Default
     /// IMessageStore implementation that uses data protection to protect message.
     /// </summary>
     /// <typeparam name="TModel"></typeparam>
+    [GoogleTracer.Profile]
     public class ProtectedDataMessageStore<TModel> : IMessageStore<TModel>
     {
         private const string Purpose = "IdentityServer4.Stores.ProtectedDataMessageStore";

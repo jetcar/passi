@@ -5,11 +5,11 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.Encodings.Web;
-using PostSharp.Extensibility;
+using GoogleTracer;
 
 namespace IdentityModel.Internal;
 
-[Profile(AttributeTargetElements = MulticastTargets.Method)]
+[Profile]
 internal static class QueryHelpers
 {
     public static string AddQueryString(

@@ -12,6 +12,7 @@ namespace IdentityServer4.Configuration.DependencyInjection.Options
     /// <summary>
     /// Options for CORS
     /// </summary>
+    [GoogleTracer.Profile]
     public class CorsOptions
     {
         /// <summary>

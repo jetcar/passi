@@ -4,7 +4,7 @@
 using IdentityServer4.Extensions;
 using IdentityServer4.Models.Contexts;
 using Microsoft.Extensions.Logging;
-using PostSharp.Extensibility;
+
 using System.Threading.Tasks;
 
 namespace IdentityServer4.Services.Default
@@ -14,6 +14,7 @@ namespace IdentityServer4.Services.Default
     /// This implementation sources all claims from the current subject (e.g. the cookie).
     /// </summary>
     /// <seealso cref="IdentityServer4.Services.IProfileService" />
+    [GoogleTracer.Profile]
     public class DefaultProfileService : IProfileService
     {
         /// <summary>

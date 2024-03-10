@@ -1,9 +1,9 @@
-﻿using PostSharp.Extensibility;
-using System;
+﻿using System;
+using GoogleTracer;
 
 namespace Services
 {
-    [Profile(AttributeTargetElements = MulticastTargets.Method)]
+    [Profile]
     public class RandomGenerator : IRandomGenerator
     {
         private Random _random;

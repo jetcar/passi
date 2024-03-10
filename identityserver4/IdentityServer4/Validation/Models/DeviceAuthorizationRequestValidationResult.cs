@@ -6,6 +6,7 @@ namespace IdentityServer4.Validation.Models
     /// <summary>
     /// Validation result for device authorization requests
     /// </summary>
+    [GoogleTracer.Profile]
     public class DeviceAuthorizationRequestValidationResult : ValidationResult
     {
         /// <summary>

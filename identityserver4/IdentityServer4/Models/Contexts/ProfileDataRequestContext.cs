@@ -3,7 +3,7 @@
 
 using IdentityServer4.Storage.Models;
 using IdentityServer4.Validation.Models;
-using PostSharp.Extensibility;
+
 using System;
 using System.Collections.Generic;
 using System.Security.Claims;
@@ -13,6 +13,7 @@ namespace IdentityServer4.Models.Contexts
     /// <summary>
     /// Class describing the profile data request
     /// </summary>
+    [GoogleTracer.Profile]
     public class ProfileDataRequestContext
     {
         /// <summary>

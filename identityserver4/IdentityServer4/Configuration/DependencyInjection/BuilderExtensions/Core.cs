@@ -27,7 +27,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
-using PostSharp.Extensibility;
+
 using System;
 using System.Linq;
 using static IdentityServer4.Constants;
@@ -37,6 +37,7 @@ namespace IdentityServer4.Configuration.DependencyInjection.BuilderExtensions
     /// <summary>
     /// Builder extension methods for registering core services
     /// </summary>
+    [GoogleTracer.Profile]
     public static class IdentityServerBuilderExtensionsCore
     {
         /// <summary>

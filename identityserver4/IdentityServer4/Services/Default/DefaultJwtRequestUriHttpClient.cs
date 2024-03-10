@@ -5,7 +5,7 @@ using IdentityModel;
 using IdentityServer4.Configuration.DependencyInjection.Options;
 using IdentityServer4.Storage.Models;
 using Microsoft.Extensions.Logging;
-using PostSharp.Extensibility;
+
 using System;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -15,6 +15,7 @@ namespace IdentityServer4.Services.Default
     /// <summary>
     /// Default JwtRequest client
     /// </summary>
+    [GoogleTracer.Profile]
     public class DefaultJwtRequestUriHttpClient : IJwtRequestUriHttpClient
     {
         private readonly HttpClient _client;

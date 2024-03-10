@@ -7,7 +7,7 @@ using IdentityServer4.Storage.Stores;
 using IdentityServer4.Validation.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using PostSharp.Extensibility;
+
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -16,6 +16,7 @@ namespace IdentityServer4.Validation.Default
     /// <summary>
     /// Validates API secrets using the registered secret validators and parsers
     /// </summary>
+    [GoogleTracer.Profile]
     public class ApiSecretValidator : IApiSecretValidator
     {
         private readonly ILogger _logger;

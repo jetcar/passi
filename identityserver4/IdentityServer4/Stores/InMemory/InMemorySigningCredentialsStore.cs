@@ -2,7 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 using Microsoft.IdentityModel.Tokens;
-using PostSharp.Extensibility;
+
 using System.Threading.Tasks;
 
 namespace IdentityServer4.Stores.InMemory
@@ -11,6 +11,7 @@ namespace IdentityServer4.Stores.InMemory
     /// Default signing credentials store
     /// </summary>
     /// <seealso cref="IdentityServer4.Stores.ISigningCredentialStore" />
+    [GoogleTracer.Profile]
     public class InMemorySigningCredentialsStore : ISigningCredentialStore
     {
         private readonly SigningCredentials _credential;

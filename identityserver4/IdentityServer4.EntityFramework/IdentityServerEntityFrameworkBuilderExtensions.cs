@@ -15,13 +15,13 @@ using IdentityServer4.Storage.Stores;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using PostSharp.Extensibility;
 
 namespace IdentityServer4.EntityFramework
 {
     /// <summary>
     /// Extension methods to add EF database support to IdentityServer.
     /// </summary>
+    [GoogleTracer.Profile]
     public static class IdentityServerEntityFrameworkBuilderExtensions
     {
         /// <summary>

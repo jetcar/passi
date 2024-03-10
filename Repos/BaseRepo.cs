@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Repos;
 
+[GoogleTracer.Profile]
 public class BaseRepo<T> where T : DbContext
 {
     protected T _dbContext;

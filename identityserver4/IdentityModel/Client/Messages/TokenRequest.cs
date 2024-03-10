@@ -7,6 +7,7 @@ namespace IdentityModel.Client.Messages;
 /// Request for token
 /// </summary>
 /// <seealso cref="ProtocolRequest" />
+[GoogleTracer.Profile]
 public class TokenRequest : ProtocolRequest
 {
     /// <summary>

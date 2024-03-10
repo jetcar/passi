@@ -1,7 +1,7 @@
 ﻿using IdentityModel.Internal;
 using System;
 using System.Collections.Generic;
-using PostSharp.Extensibility;
+using GoogleTracer;
 
 namespace IdentityModel.Client;
 
@@ -9,7 +9,7 @@ namespace IdentityModel.Client;
 /// Implementation of <see cref="IAuthorityValidationStrategy"/> based on <see cref="StringComparison"/>.
 /// </summary>
 /// <seealso cref="AuthorityUrlValidationStrategy"/>
-[Profile(AttributeTargetElements = MulticastTargets.Method)]
+[Profile]
 public sealed class StringComparisonAuthorityValidationStrategy : IAuthorityValidationStrategy
 {
     private readonly StringComparison _stringComparison;

@@ -6,7 +6,7 @@ using IdentityServer4.Extensions;
 using IdentityServer4.Models.Contexts;
 using IdentityServer4.Validation.Models;
 using Microsoft.Extensions.Logging;
-using PostSharp.Extensibility;
+
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
@@ -17,6 +17,7 @@ namespace IdentityServer4.Services.Default
     /// <summary>
     /// Default claims provider implementation
     /// </summary>
+    [GoogleTracer.Profile]
     public class DefaultClaimsService : IClaimsService
     {
         /// <summary>

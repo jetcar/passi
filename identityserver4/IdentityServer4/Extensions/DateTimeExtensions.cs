@@ -1,11 +1,11 @@
 ﻿// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
-using PostSharp.Extensibility;
 using System;
 
 namespace IdentityServer4.Extensions
 {
+    [GoogleTracer.Profile]
     internal static class DateTimeExtensions
     {
         public static bool HasExceeded(this DateTime creationTime, int seconds, DateTime now)

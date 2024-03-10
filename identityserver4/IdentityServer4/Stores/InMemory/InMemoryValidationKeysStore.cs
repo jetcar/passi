@@ -2,7 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 using IdentityServer4.Models;
-using PostSharp.Extensibility;
+
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -13,6 +13,7 @@ namespace IdentityServer4.Stores.InMemory
     /// The default validation key store
     /// </summary>
     /// <seealso cref="IdentityServer4.Stores.IValidationKeysStore" />
+    [GoogleTracer.Profile]
     public class InMemoryValidationKeysStore : IValidationKeysStore
     {
         private readonly IEnumerable<SecurityKeyInfo> _keys;

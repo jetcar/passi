@@ -17,6 +17,7 @@ using System.Threading.Tasks;
 
 namespace IdentityServer4.Endpoints.Results
 {
+    [GoogleTracer.Profile]
     public class AuthorizeResult : IEndpointResult
     {
         public AuthorizeResponse Response { get; }

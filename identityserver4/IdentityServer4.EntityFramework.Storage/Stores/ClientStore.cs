@@ -4,13 +4,13 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using GoogleTracer;
 using IdentityServer4.EntityFramework.Storage.Interfaces;
 using IdentityServer4.EntityFramework.Storage.Mappers;
 using IdentityServer4.Storage.Models;
 using IdentityServer4.Storage.Stores;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using PostSharp.Extensibility;
 
 namespace IdentityServer4.EntityFramework.Storage.Stores
 {
@@ -18,7 +18,7 @@ namespace IdentityServer4.EntityFramework.Storage.Stores
     /// Implementation of IClientStore thats uses EF.
     /// </summary>
     /// <seealso cref="IClientStore" />
-    [Profile(AttributeTargetElements = MulticastTargets.Method)]
+    [Profile]
     public class ClientStore : IClientStore
     {
         /// <summary>

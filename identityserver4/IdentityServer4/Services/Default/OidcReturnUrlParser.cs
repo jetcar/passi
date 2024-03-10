@@ -6,13 +6,14 @@ using IdentityServer4.Models.Messages;
 using IdentityServer4.Stores;
 using IdentityServer4.Validation;
 using Microsoft.Extensions.Logging;
-using PostSharp.Extensibility;
+
 using System;
 using System.Collections.Specialized;
 using System.Threading.Tasks;
 
 namespace IdentityServer4.Services.Default
 {
+    [GoogleTracer.Profile]
     internal class OidcReturnUrlParser : IReturnUrlParser
     {
         private readonly IAuthorizeRequestValidator _validator;

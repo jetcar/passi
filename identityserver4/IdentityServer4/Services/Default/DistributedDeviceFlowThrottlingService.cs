@@ -5,7 +5,7 @@ using IdentityServer4.Configuration.DependencyInjection.Options;
 using IdentityServer4.Storage.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Caching.Distributed;
-using PostSharp.Extensibility;
+
 using System;
 using System.Threading.Tasks;
 
@@ -15,10 +15,10 @@ namespace IdentityServer4.Services.Default
     /// The default device flow throttling service using IDistributedCache.
     /// </summary>
     /// <seealso cref="IdentityServer4.Services.IDeviceFlowThrottlingService" />
+    [GoogleTracer.Profile]
     public class DistributedDeviceFlowThrottlingService : IDeviceFlowThrottlingService
     {
         private readonly IDistributedCache _cache;
-        private readonly ISystemClock _clock;
         private readonly IdentityServerOptions _options;
 
         private const string KeyPrefix = "devicecode_";
@@ -31,11 +31,9 @@ namespace IdentityServer4.Services.Default
         /// <param name="options">The options.</param>
         public DistributedDeviceFlowThrottlingService(
             IDistributedCache cache,
-            ISystemClock clock,
             IdentityServerOptions options)
         {
             _cache = cache;
-            _clock = clock;
             _options = options;
         }
 
@@ -51,29 +49,29 @@ namespace IdentityServer4.Services.Default
             if (deviceCode == null) throw new ArgumentNullException(nameof(deviceCode));
 
             var key = KeyPrefix + deviceCode;
-            var options = new DistributedCacheEntryOptions { AbsoluteExpiration = _clock.UtcNow.AddSeconds(details.Lifetime) };
+            var options = new DistributedCacheEntryOptions { AbsoluteExpiration = DateTime.UtcNow.AddSeconds(details.Lifetime) };
 
             var lastSeenAsString = await _cache.GetStringAsync(key);
 
             // record new
             if (lastSeenAsString == null)
             {
-                await _cache.SetStringAsync(key, _clock.UtcNow.ToString("O"), options);
+                await _cache.SetStringAsync(key, DateTime.UtcNow.ToString("O"), options);
                 return false;
             }
 
             // check interval
             if (DateTime.TryParse(lastSeenAsString, out var lastSeen))
             {
-                if (_clock.UtcNow < lastSeen.AddSeconds(_options.DeviceFlow.Interval))
+                if (DateTime.UtcNow < lastSeen.AddSeconds(_options.DeviceFlow.Interval))
                 {
-                    await _cache.SetStringAsync(key, _clock.UtcNow.ToString("O"), options);
+                    await _cache.SetStringAsync(key, DateTime.UtcNow.ToString("O"), options);
                     return true;
                 }
             }
 
             // store current and continue
-            await _cache.SetStringAsync(key, _clock.UtcNow.ToString("O"), options);
+            await _cache.SetStringAsync(key, DateTime.UtcNow.ToString("O"), options);
             return false;
         }
     }

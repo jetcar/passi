@@ -6,7 +6,7 @@ using IdentityServer4.Storage.Models;
 using IdentityServer4.Storage.Stores;
 using IdentityServer4.Storage.Stores.Serialization;
 using Microsoft.Extensions.Logging;
-using PostSharp.Extensibility;
+
 using System.Threading.Tasks;
 
 namespace IdentityServer4.Stores.Default
@@ -14,6 +14,7 @@ namespace IdentityServer4.Stores.Default
     /// <summary>
     /// Default user consent store.
     /// </summary>
+    [GoogleTracer.Profile]
     public class DefaultUserConsentStore : DefaultGrantStore<Consent>, IUserConsentStore
     {
         /// <summary>

@@ -17,6 +17,7 @@ using IdentityServer4.Services.Default;
 
 namespace IdentityServer;
 
+[GoogleTracer.Profile]
 public class UserSession : IUserSession
 {
     /// <summary>
@@ -37,7 +38,6 @@ public class UserSession : IUserSession
     /// <summary>
     /// The clock
     /// </summary>
-    protected readonly ISystemClock Clock;
 
     /// <summary>
     /// The logger
@@ -100,13 +100,11 @@ public class UserSession : IUserSession
         IHttpContextAccessor httpContextAccessor,
         IAuthenticationHandlerProvider handlers,
         IdentityServerOptions options,
-        ISystemClock clock,
         ILogger<IUserSession> logger, AppSetting appSetting)
     {
         HttpContextAccessor = httpContextAccessor;
         Handlers = handlers;
         Options = options;
-        Clock = clock;
         Logger = logger;
         _appSetting = appSetting;
     }

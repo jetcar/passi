@@ -16,6 +16,7 @@ namespace IdentityServer4.Validation.Models
     /// <summary>
     /// Base class for a validate authorize or token request
     /// </summary>
+    [GoogleTracer.Profile]
     public class ValidatedRequest
     {
         /// <summary>

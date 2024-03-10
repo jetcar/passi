@@ -3,7 +3,7 @@
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.Net.Http.Headers;
-using PostSharp.Extensibility;
+
 using System;
 using System.Linq;
 
@@ -11,6 +11,7 @@ using System.Linq;
 
 namespace IdentityServer4.Extensions
 {
+    [GoogleTracer.Profile]
     public static class HttpRequestExtensions
     {
         public static string GetCorsOrigin(this HttpRequest request)

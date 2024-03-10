@@ -2,7 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 using IdentityServer4.Events.Infrastructure;
-using PostSharp.Extensibility;
+
 using static IdentityServer4.Constants;
 
 namespace IdentityServer4.Events
@@ -11,6 +11,7 @@ namespace IdentityServer4.Events
     /// Event for successful user authentication
     /// </summary>
     /// <seealso cref="Event" />
+    [GoogleTracer.Profile]
     public class UserLoginSuccessEvent : Event
     {
         // todo: consolidate ctors in 3.0

@@ -6,7 +6,7 @@ using IdentityServer4.Storage.Models;
 using IdentityServer4.Storage.Stores;
 using IdentityServer4.Validation.Models;
 using Microsoft.Extensions.Logging;
-using PostSharp.Extensibility;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,6 +18,7 @@ namespace IdentityServer4.Services.Default
     /// <summary>
     /// Default consent service
     /// </summary>
+    [GoogleTracer.Profile]
     public class DefaultConsentService : IConsentService
     {
         /// <summary>

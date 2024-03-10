@@ -15,6 +15,7 @@ namespace IdentityServer4.Endpoints.Results
     /// Result for the jwks document
     /// </summary>
     /// <seealso cref="IdentityServer4.Hosting.IEndpointResult" />
+    [GoogleTracer.Profile]
     public class JsonWebKeysResult : IEndpointResult
     {
         /// <summary>

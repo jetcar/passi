@@ -5,7 +5,6 @@ using IdentityServer4.Events.Infrastructure;
 using IdentityServer4.Extensions;
 using IdentityServer4.ResponseHandling.Models;
 using IdentityServer4.Validation.Models;
-using PostSharp.Extensibility;
 
 namespace IdentityServer4.Events
 {
@@ -13,10 +12,10 @@ namespace IdentityServer4.Events
     /// Event for device authorization failure
     /// </summary>
     /// <seealso cref="Event" />
+    [GoogleTracer.Profile]
     public class DeviceAuthorizationSuccessEvent : Event
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="DeviceAuthorizationSuccessEvent"/> class.
         /// </summary>
         /// <param name="response">The response.</param>
         /// <param name="request">The request.</param>

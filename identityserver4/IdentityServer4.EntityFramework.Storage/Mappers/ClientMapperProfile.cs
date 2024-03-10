@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Security.Claims;
 using AutoMapper;
 using IdentityServer4.Storage.Models;
-using PostSharp.Extensibility;
 
 namespace IdentityServer4.EntityFramework.Storage.Mappers
 {
@@ -13,6 +12,7 @@ namespace IdentityServer4.EntityFramework.Storage.Mappers
     /// Defines entity/model mapping for clients.
     /// </summary>
     /// <seealso cref="AutoMapper.Profile" />
+    [GoogleTracer.Profile]
     public class ClientMapperProfile : Profile
     {
         /// <summary>

@@ -5,7 +5,7 @@ using IdentityServer4.Configuration.DependencyInjection.Options;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
-using PostSharp.Extensibility;
+
 using System;
 using System.Threading.Tasks;
 
@@ -14,19 +14,9 @@ namespace IdentityServer4.Extensions
     /// <summary>
     /// Extension methods for signin/out using the IdentityServer authentication scheme.
     /// </summary>
+    [GoogleTracer.Profile]
     public static class AuthenticationManagerExtensions
     {
-        /// <summary>
-        /// Signs the user in.
-        /// </summary>
-        /// <param name="context">The manager.</param>
-        /// <param name="user">The IdentityServer user.</param>
-        /// <returns></returns>
-        public static async Task SignInAsync(this HttpContext context, IdentityServerUser user)
-        {
-            await context.SignInAsync(await context.GetCookieAuthenticationSchemeAsync(), user.CreatePrincipal());
-        }
-
         /// <summary>
         /// Signs the user in.
         /// </summary>

@@ -4,12 +4,13 @@
 using IdentityServer4.Extensions;
 using IdentityServer4.Hosting;
 using Microsoft.AspNetCore.Http;
-using PostSharp.Extensibility;
+
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace IdentityServer4.Endpoints.Results
 {
+    [GoogleTracer.Profile]
     internal class UserInfoResult : IEndpointResult
     {
         public Dictionary<string, object> Claims;

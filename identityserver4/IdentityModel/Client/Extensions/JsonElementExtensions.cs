@@ -5,14 +5,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Text.Json;
-using PostSharp.Extensibility;
+using GoogleTracer;
 
 namespace IdentityModel.Client.Extensions;
 
 /// <summary>
 /// Extensions for JObject
 /// </summary>
-[Profile(AttributeTargetElements = MulticastTargets.Method)]
+[Profile]
 public static class JsonElementExtensions
 {
     /// <summary>

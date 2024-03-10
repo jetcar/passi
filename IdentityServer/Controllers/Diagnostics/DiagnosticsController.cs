@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using PostSharp.Extensibility;
+
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -9,6 +9,7 @@ namespace IdentityServer.Controllers.Diagnostics
 {
     [SecurityHeaders]
     [Authorize]
+    [GoogleTracer.Profile]
     public class DiagnosticsController : Controller
     {
         public async Task<IActionResult> Index()

@@ -3,11 +3,12 @@
 
 using IdentityServer4.Configuration.DependencyInjection.Options;
 using IdentityServer4.Hosting;
-using PostSharp.Extensibility;
+
 using static IdentityServer4.Constants;
 
 namespace IdentityServer4.Extensions
 {
+    [GoogleTracer.Profile]
     public static class EndpointOptionsExtensions
     {
         public static bool IsEndpointEnabled(this EndpointsOptions options, Endpoint endpoint)

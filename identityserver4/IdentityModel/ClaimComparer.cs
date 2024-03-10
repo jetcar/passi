@@ -4,14 +4,14 @@
 using System;
 using System.Collections.Generic;
 using System.Security.Claims;
-using PostSharp.Extensibility;
+using GoogleTracer;
 
 namespace IdentityModel;
 
 /// <summary>
 /// Compares two instances of Claim
 /// </summary>
-[Profile(AttributeTargetElements = MulticastTargets.Method)]
+[Profile]
 public class ClaimComparer : EqualityComparer<Claim>
 {
     /// <summary>

@@ -1,19 +1,20 @@
 ﻿using ConfigurationManager;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using PostSharp.Extensibility;
+
 using Repos;
 using Serilog;
 using Services;
 using System;
 using System.Threading.Tasks;
+using GoogleTracer;
 using WebApiDto.SignUp;
 
 namespace passi_webapi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Profile(AttributeTargetElements = MulticastTargets.Method)]
+    [Profile]
     public class SignUpController : ControllerBase
     {
         private IUserRepository _userRepository;

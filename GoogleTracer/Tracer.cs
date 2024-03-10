@@ -2,46 +2,17 @@
 using System.Net.Http;
 using System.Reflection;
 using System.Threading.Tasks;
+using ArxOne.MrAdvice.Advice;
 using Google.Cloud.Diagnostics.AspNetCore3;
 using Google.Cloud.Diagnostics.Common;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
-using PostSharp.Aspects;
 
 namespace GoogleTracer
 {
     public class Tracer
     {
         public static IManagedTracer CurrentTracer { get; set; }
-
-        public static void OnInvoke(MethodInterceptionArgs args, Action<MethodInterceptionArgs> onInvoke)
-        {
-            var type = args.Instance?.GetType();
-            if (type == null)
-                type = typeof(object);
-            if (!IsPropertyMethod(args.Method) && CurrentTracer != null)
-                using (CurrentTracer.StartSpan(type.FullName + "." + args.Method.Name))
-                    onInvoke(args);
-            else
-                onInvoke(args);
-        }
-
-        public static Task OnInvokeAsync(MethodInterceptionArgs args, Func<MethodInterceptionArgs, Task> onInvokeAsync)
-        {
-            var type = args.Instance?.GetType();
-            if (type == null)
-                type = typeof(object);
-
-            if (!IsPropertyMethod(args.Method) && CurrentTracer != null)
-                using (CurrentTracer.StartSpan(type.FullName + "." + args.Method.Name))
-                    return onInvokeAsync(args);
-            return onInvokeAsync(args);
-        }
-
-        private static bool IsPropertyMethod(MethodBase method)
-        {
-            return method.IsSpecialName && (method.Name.StartsWith("get_") || method.Name.StartsWith("set_"));
-        }
 
         public static void SetupTracer(IServiceCollection services, string projectId, string name)
         {
@@ -85,6 +56,29 @@ namespace GoogleTracer
 
             services.AddSingleton<Action<HttpRequestMessage, ITraceContext>>(
                 (request, traceContext) => request.Headers.Add("custom_trace_id", traceContext.TraceId));
+        }
+
+        public static void OnInvoke(MethodAdviceContext context)
+        {
+            if (CurrentTracer != null && !IsPropertyMethod(context))
+            {
+                var targetMethodName = "";
+                if (context.Target == null)
+                    targetMethodName = context.TargetType.Name + " " + context.TargetName;
+                else
+                    targetMethodName = context.Target.ToString() + " " + context.TargetMethod.Name;
+                using (CurrentTracer.StartSpan(targetMethodName))
+                    context.Proceed();
+            }
+            else
+            {
+                context.Proceed();
+            }
+        }
+
+        private static bool IsPropertyMethod(MethodAdviceContext context)
+        {
+            return context.TargetMethod.IsSpecialName && (context.TargetMethod.Name.StartsWith("get_") || context.TargetMethod.Name.StartsWith("set_"));
         }
     }
 }

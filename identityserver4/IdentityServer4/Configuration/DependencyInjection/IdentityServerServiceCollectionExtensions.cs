@@ -4,7 +4,7 @@
 using IdentityServer4.Configuration.DependencyInjection.BuilderExtensions;
 using IdentityServer4.Configuration.DependencyInjection.Options;
 using Microsoft.Extensions.DependencyInjection;
-using PostSharp.Extensibility;
+
 using System;
 
 namespace IdentityServer4.Configuration.DependencyInjection
@@ -12,6 +12,7 @@ namespace IdentityServer4.Configuration.DependencyInjection
     /// <summary>
     /// DI extension methods for adding IdentityServer
     /// </summary>
+    [GoogleTracer.Profile]
     public static class IdentityServerServiceCollectionExtensions
     {
         /// <summary>

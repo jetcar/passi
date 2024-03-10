@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 
 namespace IdentityServer;
 
+[GoogleTracer.Profile]
 public class PublicFacingUrlMiddleware
 {
     private readonly RequestDelegate _next;

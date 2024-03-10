@@ -7,7 +7,7 @@ using IdentityServer4.Extensions;
 using IdentityServer4.Services;
 using IdentityServer4.Validation.Models;
 using Microsoft.Extensions.Logging;
-using PostSharp.Extensibility;
+
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -18,6 +18,7 @@ namespace IdentityServer4.ResponseHandling.Default
     /// The introspection response generator
     /// </summary>
     /// <seealso cref="IdentityServer4.ResponseHandling.IIntrospectionResponseGenerator" />
+    [GoogleTracer.Profile]
     public class IntrospectionResponseGenerator : IIntrospectionResponseGenerator
     {
         /// <summary>

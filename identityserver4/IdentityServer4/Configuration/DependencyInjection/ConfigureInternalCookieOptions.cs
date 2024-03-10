@@ -6,10 +6,10 @@ using IdentityServer4.Extensions;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using PostSharp.Extensibility;
 
 namespace IdentityServer4.Configuration.DependencyInjection
 {
+    [GoogleTracer.Profile]
     internal class ConfigureInternalCookieOptions : IConfigureNamedOptions<CookieAuthenticationOptions>
     {
         private readonly IdentityServerOptions _idsrv;

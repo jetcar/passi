@@ -11,6 +11,7 @@ using Client = IdentityServer4.EntityFramework.Storage.Entities.Client;
 
 namespace IdentityServer.services
 {
+    [GoogleTracer.Profile]
     public class IdentityClientsRepository : BaseRepo<IdentityDbContext>, IIdentityClientsRepository
     {
         public IdentityClientsRepository(IdentityDbContext dbContext) : base(dbContext)

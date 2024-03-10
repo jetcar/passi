@@ -11,7 +11,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using PostSharp.Extensibility;
+
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
@@ -23,6 +23,7 @@ namespace IdentityServer4.Validation.Default
     /// <summary>
     /// Validates JWT authorization request objects
     /// </summary>
+    [GoogleTracer.Profile]
     public class JwtRequestValidator
     {
         private readonly string _audienceUri;

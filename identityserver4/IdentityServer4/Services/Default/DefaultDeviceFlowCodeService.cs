@@ -1,7 +1,7 @@
 using IdentityServer4.Extensions;
 using IdentityServer4.Storage.Models;
 using IdentityServer4.Storage.Stores;
-using PostSharp.Extensibility;
+
 using System.Threading.Tasks;
 
 namespace IdentityServer4.Services.Default
@@ -10,6 +10,7 @@ namespace IdentityServer4.Services.Default
     /// Default wrapper service for IDeviceFlowStore, handling key hashing
     /// </summary>
     /// <seealso cref="IdentityServer4.Services.IDeviceFlowCodeService" />
+    [GoogleTracer.Profile]
     public class DefaultDeviceFlowCodeService : IDeviceFlowCodeService
     {
         private readonly IDeviceFlowStore _store;

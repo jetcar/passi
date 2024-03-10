@@ -1,6 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using GoogleTracer;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using PostSharp.Extensibility;
+
 using Repos;
 using Services;
 using WebApiDto.Auth.Dto;
@@ -10,7 +11,7 @@ namespace passi_webapi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Profile(AttributeTargetElements = MulticastTargets.Method)]
+    [Profile]
     public class CertificateController : ControllerBase
     {
         private ICertificateRepository _certificateRepository;

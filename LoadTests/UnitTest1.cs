@@ -38,6 +38,7 @@ namespace LoadTests
                 };
             _client = new HttpClient(handler)
             {
+                Timeout = TimeSpan.FromSeconds(10)
             };
         }
 

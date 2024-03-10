@@ -3,7 +3,7 @@
 
 using IdentityServer4.Validation.Models;
 using Microsoft.Extensions.Logging;
-using PostSharp.Extensibility;
+
 using System;
 using System.Collections.Generic;
 
@@ -12,6 +12,7 @@ namespace IdentityServer4.Validation.Default
     /// <summary>
     /// Default implementation of IScopeParser.
     /// </summary>
+    [GoogleTracer.Profile]
     public class DefaultScopeParser : IScopeParser
     {
         private readonly ILogger<DefaultScopeParser> _logger;

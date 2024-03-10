@@ -1,12 +1,13 @@
-﻿using Microsoft.AspNetCore.Authentication;
+﻿using GoogleTracer;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Extensions.Options;
-using PostSharp.Extensibility;
+
 using Repos;
 
 namespace OpenIdLib.AutomaticTokenManagement
 {
-    [Profile(AttributeTargetElements = MulticastTargets.Method)]
+    [Profile]
     public class AutomaticTokenManagementConfigureCookieOptions : IConfigureNamedOptions<CookieAuthenticationOptions>
     {
         private readonly AuthenticationScheme _scheme;

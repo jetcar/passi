@@ -2,7 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 using IdentityModel;
-using PostSharp.Extensibility;
+
 using System.Threading.Tasks;
 
 namespace IdentityServer4.Services.Default
@@ -11,6 +11,7 @@ namespace IdentityServer4.Services.Default
     /// Default handle generation service
     /// </summary>
     /// <seealso cref="IdentityServer4.Services.IHandleGenerationService" />
+    [GoogleTracer.Profile]
     public class DefaultHandleGenerationService : IHandleGenerationService
     {
         /// <summary>

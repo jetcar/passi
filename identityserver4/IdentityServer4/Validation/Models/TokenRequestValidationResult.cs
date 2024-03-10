@@ -8,6 +8,7 @@ namespace IdentityServer4.Validation.Models
     /// <summary>
     /// Validation result for token requests
     /// </summary>
+    [GoogleTracer.Profile]
     public class TokenRequestValidationResult : ValidationResult
     {
         /// <summary>

@@ -11,7 +11,7 @@ using IdentityServer4.Validation;
 using IdentityServer4.Validation.Default;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
-using PostSharp.Extensibility;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,6 +24,7 @@ namespace IdentityServer4.ResponseHandling.Default
     /// Default implementation of the discovery endpoint response generator
     /// </summary>
     /// <seealso cref="IdentityServer4.ResponseHandling.IDiscoveryResponseGenerator" />
+    [GoogleTracer.Profile]
     public class DiscoveryResponseGenerator : IDiscoveryResponseGenerator
     {
         /// <summary>

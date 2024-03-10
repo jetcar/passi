@@ -4,15 +4,15 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using GoogleTracer;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
-using PostSharp.Extensibility;
 
 #pragma warning disable 1591
 
 namespace IdentityServer4.Storage.Stores.Serialization
 {
-    [Profile(AttributeTargetElements = MulticastTargets.Method)]
+    [Profile]
     public class CustomContractResolver : DefaultContractResolver
     {
         protected override IList<JsonProperty> CreateProperties(Type type, MemberSerialization memberSerialization)

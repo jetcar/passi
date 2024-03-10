@@ -4,7 +4,6 @@
 using System.Collections.Generic;
 using AutoMapper;
 using IdentityServer4.Storage.Models;
-using PostSharp.Extensibility;
 
 namespace IdentityServer4.EntityFramework.Storage.Mappers
 {
@@ -12,6 +11,7 @@ namespace IdentityServer4.EntityFramework.Storage.Mappers
     /// Defines entity/model mapping for API resources.
     /// </summary>
     /// <seealso cref="AutoMapper.Profile" />
+    [GoogleTracer.Profile]
     public class ApiResourceMapperProfile : Profile
     {
         /// <summary>

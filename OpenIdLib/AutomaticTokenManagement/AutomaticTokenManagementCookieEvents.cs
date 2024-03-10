@@ -3,17 +3,18 @@ using System.Collections.Concurrent;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using GoogleTracer;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
-using PostSharp.Extensibility;
+
 using Repos;
 
 namespace OpenIdLib.AutomaticTokenManagement
 {
-    [Profile(AttributeTargetElements = MulticastTargets.Method)]
+    [Profile]
     public class AutomaticTokenManagementCookieEvents : CookieAuthenticationEvents
     {
         private readonly TokenEndpointService _service;

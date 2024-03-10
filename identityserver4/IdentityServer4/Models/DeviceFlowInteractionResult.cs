@@ -6,6 +6,7 @@ namespace IdentityServer4.Models
     /// <summary>
     /// Request object for device flow interaction
     /// </summary>
+    [GoogleTracer.Profile]
     public class DeviceFlowInteractionResult
     {
         /// <summary>

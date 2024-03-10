@@ -1,7 +1,6 @@
 // Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
-using PostSharp.Extensibility;
 using System;
 using System.Collections.Generic;
 
@@ -19,6 +18,7 @@ namespace IdentityServer4.Validation.Default
     /// 2.0 Multiple Response Type Encoding Practices draft </see>).
     /// </para>
     /// </remarks>
+    [GoogleTracer.Profile]
     public class ResponseTypeEqualityComparer : IEqualityComparer<string>
     {
         /// <summary>

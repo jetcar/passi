@@ -16,8 +16,9 @@ using ILogger = Serilog.ILogger;
 
 namespace IdentityRepo.DbContext
 {
+    [GoogleTracer.Profile]
     public class IdentityDbContext : Microsoft.EntityFrameworkCore.DbContext, IConfigurationDbContext,
-        IDataProtectionKeyContext, IPersistedGrantDbContext
+            IDataProtectionKeyContext, IPersistedGrantDbContext
     {
         private readonly AppSetting _appSetting;
         private ILogger _logger;

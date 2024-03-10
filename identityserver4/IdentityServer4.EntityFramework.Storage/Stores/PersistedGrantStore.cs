@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using GoogleTracer;
 using IdentityServer4.EntityFramework.Storage.Interfaces;
 using IdentityServer4.EntityFramework.Storage.Mappers;
 using IdentityServer4.Storage.Extensions;
@@ -12,7 +13,6 @@ using IdentityServer4.Storage.Models;
 using IdentityServer4.Storage.Stores;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using PostSharp.Extensibility;
 
 namespace IdentityServer4.EntityFramework.Storage.Stores
 {
@@ -20,7 +20,7 @@ namespace IdentityServer4.EntityFramework.Storage.Stores
     /// Implementation of IPersistedGrantStore thats uses EF.
     /// </summary>
     /// <seealso cref="IPersistedGrantStore" />
-    [Profile(AttributeTargetElements = MulticastTargets.Method)]
+    [Profile]
     public class PersistedGrantStore : IPersistedGrantStore
     {
         /// <summary>

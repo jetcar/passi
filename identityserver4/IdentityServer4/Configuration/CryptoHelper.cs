@@ -1,6 +1,6 @@
 ﻿using IdentityModel;
 using Microsoft.IdentityModel.Tokens;
-using PostSharp.Extensibility;
+
 using System;
 using System.Security.Cryptography;
 using System.Text;
@@ -10,6 +10,7 @@ namespace IdentityServer4.Configuration
     /// <summary>
     /// Crypto helper
     /// </summary>
+    [GoogleTracer.Profile]
     public static class CryptoHelper
     {
         /// <summary>

@@ -15,6 +15,7 @@ using System.Threading.Tasks;
 
 namespace IdentityServer4.Endpoints.Results
 {
+    [GoogleTracer.Profile]
     public class EndSessionCallbackResult : IEndpointResult
     {
         private readonly EndSessionCallbackValidationResult _result;

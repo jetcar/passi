@@ -29,14 +29,14 @@ using System;
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using PostSharp.Extensibility;
+using GoogleTracer;
 
 namespace IdentityModel.Jwk;
 
 /// <summary>
 /// Contains a collection of <see cref="JsonWebKey"/> that can be populated from a json string.
 /// </summary>
-[Profile(AttributeTargetElements = MulticastTargets.Method)]
+[Profile]
 public class JsonWebKeySet
 {
     /// <summary>

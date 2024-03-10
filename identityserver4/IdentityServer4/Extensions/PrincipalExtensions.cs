@@ -2,7 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 using IdentityModel;
-using PostSharp.Extensibility;
+
 using System;
 using System.Collections.Generic;
 using System.Security.Claims;
@@ -13,6 +13,7 @@ namespace IdentityServer4.Extensions
     /// <summary>
     /// Extension methods for <see cref="System.Security.Principal.IPrincipal"/> and <see cref="System.Security.Principal.IIdentity"/> .
     /// </summary>
+    [GoogleTracer.Profile]
     public static class PrincipalExtensions
     {
         /// <summary>

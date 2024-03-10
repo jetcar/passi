@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
-using PostSharp.Extensibility;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -11,6 +10,7 @@ using System.Text.Encodings.Web;
 
 namespace IdentityServer4.Extensions
 {
+    [GoogleTracer.Profile]
     public static class NameValueCollectionExtensions
     {
         public static IDictionary<string, string[]> ToFullDictionary(this NameValueCollection source)

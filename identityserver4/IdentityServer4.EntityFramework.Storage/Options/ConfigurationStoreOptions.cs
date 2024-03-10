@@ -3,13 +3,13 @@
 
 using System;
 using Microsoft.EntityFrameworkCore;
-using PostSharp.Extensibility;
 
 namespace IdentityServer4.EntityFramework.Storage.Options
 {
     /// <summary>
     /// Options for configuring the configuration context.
     /// </summary>
+    [GoogleTracer.Profile]
     public class ConfigurationStoreOptions
     {
         /// <summary>

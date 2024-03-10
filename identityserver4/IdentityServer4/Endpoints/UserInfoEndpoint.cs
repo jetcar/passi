@@ -9,9 +9,10 @@ using IdentityServer4.Validation;
 using IdentityServer4.Validation.Default;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using PostSharp.Extensibility;
+
 using System.Net;
 using System.Threading.Tasks;
+using GoogleTracer;
 
 namespace IdentityServer4.Endpoints
 {
@@ -19,7 +20,7 @@ namespace IdentityServer4.Endpoints
     /// The userinfo endpoint
     /// </summary>
     /// <seealso cref="IdentityServer4.Hosting.IEndpointHandler" />
-    [Profile(AttributeTargetElements = MulticastTargets.Method)]
+    [Profile]
     internal class UserInfoEndpoint : IEndpointHandler
     {
         private readonly BearerTokenUsageValidator _tokenUsageValidator;

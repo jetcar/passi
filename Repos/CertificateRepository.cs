@@ -1,11 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Models;
-using PostSharp.Extensibility;
+
 using System.Linq;
+using GoogleTracer;
 
 namespace Repos
 {
-    [Profile(AttributeTargetElements = MulticastTargets.Method)]
+    [Profile]
     public class CertificateRepository : BaseRepo<PassiDbContext>, ICertificateRepository
     {
         public CertificateRepository(PassiDbContext dbContext) : base(dbContext)

@@ -6,7 +6,7 @@ using IdentityServer4.Extensions;
 using IdentityServer4.Hosting;
 using IdentityServer4.ResponseHandling.Models;
 using Microsoft.AspNetCore.Http;
-using PostSharp.Extensibility;
+
 using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 
 namespace IdentityServer4.Endpoints.Results
 {
+    [GoogleTracer.Profile]
     internal class TokenResult : IEndpointResult
     {
         public TokenResponse Response { get; set; }

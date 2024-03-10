@@ -13,6 +13,7 @@ namespace IdentityServer4
     /// <summary>
     /// Model properties of an IdentityServer user
     /// </summary>
+    [GoogleTracer.Profile]
     public class IdentityServerUser
     {
         /// <summary>

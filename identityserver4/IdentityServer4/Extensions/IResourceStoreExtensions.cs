@@ -1,17 +1,19 @@
 using IdentityServer4.Storage.Models;
 using IdentityServer4.Storage.Stores;
 using IdentityServer4.Validation.Models;
-using PostSharp.Extensibility;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using GoogleTracer;
 
 namespace IdentityServer4.Extensions
 {
     /// <summary>
     /// Extensions for IResourceStore
     /// </summary>
+    [Profile]
     public static class IResourceStoreExtensions
     {
         /// <summary>

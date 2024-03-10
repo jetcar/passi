@@ -4,7 +4,7 @@
 using IdentityModel;
 using IdentityServer4.Infrastructure;
 using Microsoft.AspNetCore.Authentication;
-using PostSharp.Extensibility;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +15,7 @@ namespace IdentityServer4.Extensions
     /// <summary>
     /// Extensions for AuthenticationProperties
     /// </summary>
+    [GoogleTracer.Profile]
     public static class AuthenticationPropertiesExtensions
     {
         internal const string SessionIdKey = "session_id";

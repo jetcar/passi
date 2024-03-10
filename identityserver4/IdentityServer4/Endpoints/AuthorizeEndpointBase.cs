@@ -16,15 +16,16 @@ using IdentityServer4.Validation;
 using IdentityServer4.Validation.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using PostSharp.Extensibility;
+
 using System;
 using System.Collections.Specialized;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using GoogleTracer;
 
 namespace IdentityServer4.Endpoints
 {
-    [Profile(AttributeTargetElements = MulticastTargets.Method)]
+    [Profile]
     public abstract class AuthorizeEndpointBase : IEndpointHandler
     {
         private readonly IAuthorizeResponseGenerator _authorizeResponseGenerator;

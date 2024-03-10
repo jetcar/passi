@@ -3,7 +3,7 @@
 
 using IdentityModel;
 using IdentityServer4.Validation.Models;
-using PostSharp.Extensibility;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +14,7 @@ using System.Text;
 
 namespace IdentityServer4.Extensions
 {
+    [GoogleTracer.Profile]
     public static class ValidatedAuthorizeRequestExtensions
     {
         public static void RemovePrompt(this ValidatedAuthorizeRequest request)

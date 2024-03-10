@@ -3,7 +3,7 @@
 
 using IdentityServer4.Storage.Services;
 using Microsoft.Extensions.Logging;
-using PostSharp.Extensibility;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +14,7 @@ namespace IdentityServer4.Services.Default
     /// <summary>
     /// Default CORS policy service.
     /// </summary>
+    [GoogleTracer.Profile]
     public class DefaultCorsPolicyService : ICorsPolicyService
     {
         /// <summary>

@@ -6,5 +6,6 @@ namespace IdentityModel.Client.Messages;
 /// <summary>
 /// Request for JSON web key set document
 /// </summary>
+[GoogleTracer.Profile]
 public class JsonWebKeySetRequest : ProtocolRequest
 { }

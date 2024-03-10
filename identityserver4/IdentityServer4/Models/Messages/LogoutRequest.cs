@@ -13,6 +13,7 @@ namespace IdentityServer4.Models.Messages
     /// <summary>
     /// Models the validated singout context.
     /// </summary>
+    [GoogleTracer.Profile]
     public class LogoutMessage
     {
         /// <summary>

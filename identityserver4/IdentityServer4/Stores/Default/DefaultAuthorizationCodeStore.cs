@@ -7,7 +7,7 @@ using IdentityServer4.Storage.Models;
 using IdentityServer4.Storage.Stores;
 using IdentityServer4.Storage.Stores.Serialization;
 using Microsoft.Extensions.Logging;
-using PostSharp.Extensibility;
+
 using System.Threading.Tasks;
 
 namespace IdentityServer4.Stores.Default
@@ -15,6 +15,7 @@ namespace IdentityServer4.Stores.Default
     /// <summary>
     /// Default authorization code store.
     /// </summary>
+    [GoogleTracer.Profile]
     public class DefaultAuthorizationCodeStore : DefaultGrantStore<AuthorizationCode>, IAuthorizationCodeStore
     {
         /// <summary>

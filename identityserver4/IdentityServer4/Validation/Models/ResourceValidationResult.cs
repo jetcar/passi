@@ -8,6 +8,7 @@ namespace IdentityServer4.Validation.Models
     /// <summary>
     /// Result of validation of requested scopes and resource indicators.
     /// </summary>
+    [GoogleTracer.Profile]
     public class ResourceValidationResult
     {
         /// <summary>

@@ -4,7 +4,7 @@
 #pragma warning disable 1591
 
 using Microsoft.IdentityModel.Tokens;
-using PostSharp.Extensibility;
+
 using System.Collections.Generic;
 
 namespace IdentityServer4
@@ -19,27 +19,6 @@ namespace IdentityServer4
         public const string AccessTokenAudience = "{0}resources";
 
         public const string JwtRequestClientKey = "idsrv.jwtrequesturi.client";
-
-        /// <summary>
-        /// Constants for local IdentityServer access token authentication.
-        /// </summary>
-        public static class LocalApi
-        {
-            /// <summary>
-            /// The authentication scheme when using the AddLocalApi helper.
-            /// </summary>
-            public const string AuthenticationScheme = "IdentityServerAccessToken";
-
-            /// <summary>
-            /// The API scope name when using the AddLocalApiAuthentication helper.
-            /// </summary>
-            public const string ScopeName = "IdentityServerApi";
-
-            /// <summary>
-            /// The authorization policy name when using the AddLocalApiAuthentication helper.
-            /// </summary>
-            public const string PolicyName = AuthenticationScheme;
-        }
 
         public static class ProtocolTypes
         {
@@ -110,24 +89,6 @@ namespace IdentityServer4
             SecurityAlgorithms.EcdsaSha384,
             SecurityAlgorithms.EcdsaSha512
         };
-
-        public enum RsaSigningAlgorithm
-        {
-            RS256,
-            RS384,
-            RS512,
-
-            PS256,
-            PS384,
-            PS512
-        }
-
-        public enum ECDsaSigningAlgorithm
-        {
-            ES256,
-            ES384,
-            ES512
-        }
 
         public static class StandardScopes
         {

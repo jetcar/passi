@@ -2,7 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 using Microsoft.Extensions.DependencyInjection;
-using PostSharp.Extensibility;
+
 using System;
 
 namespace IdentityServer4.Configuration.DependencyInjection
@@ -10,6 +10,7 @@ namespace IdentityServer4.Configuration.DependencyInjection
     /// <summary>
     /// IdentityServer helper class for DI configuration
     /// </summary>
+    [GoogleTracer.Profile]
     public class IdentityServerBuilder : IIdentityServerBuilder
     {
         /// <summary>

@@ -54,30 +54,4 @@ namespace IdentityServer4.Validation.Models
         /// </value>
         public string Token { get; set; }
     }
-
-    /// <summary>
-    /// Failure reasons for introspection request
-    /// </summary>
-    public enum IntrospectionRequestValidationFailureReason
-    {
-        /// <summary>
-        /// none
-        /// </summary>
-        None,
-
-        /// <summary>
-        /// missing token
-        /// </summary>
-        MissingToken,
-
-        /// <summary>
-        /// invalid token
-        /// </summary>
-        InvalidToken,
-
-        /// <summary>
-        /// invalid scope
-        /// </summary>
-        InvalidScope
-    }
 }

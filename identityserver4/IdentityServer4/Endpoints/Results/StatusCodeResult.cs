@@ -12,6 +12,7 @@ namespace IdentityServer4.Endpoints.Results
     /// Result for a raw HTTP status code
     /// </summary>
     /// <seealso cref="IdentityServer4.Hosting.IEndpointResult" />
+    [GoogleTracer.Profile]
     public class StatusCodeResult : IEndpointResult
     {
         /// <summary>

@@ -7,7 +7,7 @@ using IdentityServer4.Extensions;
 using IdentityServer4.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using PostSharp.Extensibility;
+
 using System;
 using System.Linq;
 using System.Text;
@@ -18,6 +18,7 @@ namespace IdentityServer4.Validation.Default
     /// <summary>
     /// Parses a Basic Authentication header
     /// </summary>
+    [GoogleTracer.Profile]
     public class BasicAuthenticationSecretParser : ISecretParser
     {
         private readonly ILogger _logger;

@@ -3,11 +3,12 @@
 
 using IdentityServer4.Infrastructure;
 using IdentityServer4.Models.Messages;
-using PostSharp.Extensibility;
+
 using System.Threading.Tasks;
 
 namespace IdentityServer4.Stores.Default
 {
+    [GoogleTracer.Profile]
     internal class ConsentMessageStore : IConsentMessageStore
     {
         protected readonly MessageCookie<ConsentResponse> Cookie;

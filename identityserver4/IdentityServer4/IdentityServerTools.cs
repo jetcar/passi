@@ -6,7 +6,7 @@ using IdentityServer4.Extensions;
 using IdentityServer4.Services;
 using IdentityServer4.Storage.Models;
 using Microsoft.AspNetCore.Http;
-using PostSharp.Extensibility;
+
 using System;
 using System.Collections.Generic;
 using System.Security.Claims;
@@ -17,6 +17,7 @@ namespace IdentityServer4
     /// <summary>
     /// Class for useful helpers for interacting with IdentityServer
     /// </summary>
+    [GoogleTracer.Profile]
     public class IdentityServerTools
     {
         internal readonly IHttpContextAccessor ContextAccessor;

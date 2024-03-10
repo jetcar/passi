@@ -4,7 +4,7 @@
 using IdentityServer4.Extensions;
 using IdentityServer4.Storage.Models;
 using IdentityServer4.Validation.Models;
-using PostSharp.Extensibility;
+
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
@@ -14,6 +14,7 @@ namespace IdentityServer4.Models.Messages
     /// <summary>
     /// Represents contextual information about a authorization request.
     /// </summary>
+    [GoogleTracer.Profile]
     public class AuthorizationRequest
     {
         /// <summary>

@@ -4,18 +4,18 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using GoogleTracer;
 using IdentityServer4.EntityFramework.Storage.Interfaces;
 using IdentityServer4.EntityFramework.Storage.Options;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using PostSharp.Extensibility;
 
 namespace IdentityServer4.EntityFramework.Storage.TokenCleanup
 {
     /// <summary>
     /// Helper to cleanup stale persisted grants and device codes.
     /// </summary>
-    [Profile(AttributeTargetElements = MulticastTargets.Method)]
+    [Profile]
     public class TokenCleanupService
     {
         private readonly OperationalStoreOptions _options;

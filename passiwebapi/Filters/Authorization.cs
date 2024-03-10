@@ -1,14 +1,15 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using PostSharp.Extensibility;
+
 using Repos;
 using System.Linq;
 using System.Security.Claims;
+using GoogleTracer;
 
 namespace passi_webapi.Filters
 {
-    [Profile(AttributeTargetElements = MulticastTargets.Method)]
+    [Profile]
     public class Authorization : AuthorizeAttribute, IAuthorizationFilter
     {
         public Authorization()

@@ -6,6 +6,7 @@ namespace IdentityModel.Client.Messages;
 /// <summary>
 /// MTLS endpoint aliases
 /// </summary>
+[GoogleTracer.Profile]
 public class MtlsEndpointAliases
 {
     /// <summary>

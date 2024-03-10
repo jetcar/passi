@@ -3,6 +3,7 @@ namespace IdentityModel.Client.Messages;
 /// <summary>
 /// Models a client assertion
 /// </summary>
+[GoogleTracer.Profile]
 public class ClientAssertion
 {
     /// <summary>

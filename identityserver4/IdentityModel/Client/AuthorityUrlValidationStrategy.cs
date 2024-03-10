@@ -1,7 +1,7 @@
 ﻿using IdentityModel.Internal;
 using System;
 using System.Collections.Generic;
-using PostSharp.Extensibility;
+using GoogleTracer;
 
 namespace IdentityModel.Client;
 
@@ -10,7 +10,7 @@ namespace IdentityModel.Client;
 /// Trailing slash is also ignored.</para>
 /// </summary>
 /// <seealso cref="StringComparisonAuthorityValidationStrategy"/>
-[Profile(AttributeTargetElements = MulticastTargets.Method)]
+[Profile]
 public sealed class AuthorityUrlValidationStrategy : IAuthorityValidationStrategy
 {
     /// <inheritdoc/>

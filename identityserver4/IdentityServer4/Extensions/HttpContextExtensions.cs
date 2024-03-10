@@ -9,7 +9,7 @@ using IdentityServer4.Stores;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
-using PostSharp.Extensibility;
+
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -18,6 +18,7 @@ using System.Threading.Tasks;
 
 namespace IdentityServer4.Extensions
 {
+    [GoogleTracer.Profile]
     public static class HttpContextExtensions
     {
         public static void SetIdentityServerOrigin(this HttpContext context, string value)
@@ -190,8 +191,7 @@ namespace IdentityServer4.Extensions
 
             if (endSessionMsg != null)
             {
-                var clock = context.RequestServices.GetRequiredService<ISystemClock>();
-                var msg = new Message<LogoutNotificationContext>(endSessionMsg, clock.UtcNow.UtcDateTime);
+                var msg = new Message<LogoutNotificationContext>(endSessionMsg, DateTime.UtcNow);
 
                 var endSessionMessageStore = context.RequestServices.GetRequiredService<IMessageStore<LogoutNotificationContext>>();
                 var id = await endSessionMessageStore.WriteAsync(msg);

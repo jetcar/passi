@@ -4,7 +4,7 @@
 using IdentityModel;
 using IdentityServer4.Models.Contexts;
 using Microsoft.Extensions.Logging;
-using PostSharp.Extensibility;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,6 +16,7 @@ namespace IdentityServer4.Services.Default
     /// <summary>
     /// Default back-channel logout notification implementation.
     /// </summary>
+    [GoogleTracer.Profile]
     public class DefaultBackChannelLogoutService : IBackChannelLogoutService
     {
         /// <summary>

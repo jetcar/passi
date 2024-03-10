@@ -6,6 +6,7 @@ namespace IdentityServer4.Configuration.DependencyInjection.Options
     /// <summary>
     /// Options for Mutual TLS features
     /// </summary>
+    [GoogleTracer.Profile]
     public class MutualTlsOptions
     {
         /// <summary>

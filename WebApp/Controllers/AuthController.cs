@@ -3,12 +3,13 @@ using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using PostSharp.Extensibility;
+
 using System.Threading.Tasks;
+using GoogleTracer;
 
 namespace WebApp.Controllers
 {
-    [Profile(AttributeTargetElements = MulticastTargets.Method)]
+    [Profile]
     public class AuthController : Controller
     {
         public AuthController()

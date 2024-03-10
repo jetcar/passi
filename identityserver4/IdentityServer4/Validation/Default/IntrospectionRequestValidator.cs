@@ -4,7 +4,7 @@
 using IdentityServer4.Storage.Models;
 using IdentityServer4.Validation.Models;
 using Microsoft.Extensions.Logging;
-using PostSharp.Extensibility;
+
 using System.Collections.Specialized;
 using System.Threading.Tasks;
 
@@ -14,6 +14,7 @@ namespace IdentityServer4.Validation.Default
     /// The introspection request validator
     /// </summary>
     /// <seealso cref="IdentityServer4.Validation.IIntrospectionRequestValidator" />
+    [GoogleTracer.Profile]
     public class IntrospectionRequestValidator : IIntrospectionRequestValidator
     {
         private readonly ILogger _logger;

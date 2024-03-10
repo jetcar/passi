@@ -4,13 +4,14 @@
 using IdentityServer4.Configuration.DependencyInjection.Options;
 using IdentityServer4.Extensions;
 using Microsoft.AspNetCore.Http;
-using PostSharp.Extensibility;
+
 using System.Threading.Tasks;
 
 #pragma warning disable 1591
 
 namespace IdentityServer4.Hosting
 {
+    [GoogleTracer.Profile]
     public class BaseUrlMiddleware
     {
         private readonly RequestDelegate _next;

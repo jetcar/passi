@@ -5,7 +5,7 @@ using IdentityServer4.Models;
 using IdentityServer4.Validation.Contexts;
 using IdentityServer4.Validation.Models;
 using Microsoft.Extensions.Logging;
-using PostSharp.Extensibility;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,6 +16,7 @@ namespace IdentityServer4.Validation.Default
     /// <summary>
     /// Validates an extension grant request using the registered validators
     /// </summary>
+    [GoogleTracer.Profile]
     public class ExtensionGrantValidator
     {
         private readonly ILogger _logger;

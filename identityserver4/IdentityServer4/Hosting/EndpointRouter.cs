@@ -5,12 +5,13 @@ using IdentityServer4.Configuration.DependencyInjection.Options;
 using IdentityServer4.Extensions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using PostSharp.Extensibility;
+
 using System;
 using System.Collections.Generic;
 
 namespace IdentityServer4.Hosting
 {
+    [GoogleTracer.Profile]
     public class EndpointRouter : IEndpointRouter
     {
         private readonly IEnumerable<Endpoint> _endpoints;

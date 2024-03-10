@@ -5,16 +5,16 @@ using System;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using GoogleTracer;
 using IdentityModel.Client.Messages;
 using IdentityModel.Internal;
-using PostSharp.Extensibility;
 
 namespace IdentityModel.Client.Extensions;
 
 /// <summary>
 /// HttpClient extentions for OIDC discovery
 /// </summary>
-[Profile(AttributeTargetElements = MulticastTargets.Method)]
+[Profile]
 public static class HttpClientDiscoveryExtensions
 {
     /// <summary>

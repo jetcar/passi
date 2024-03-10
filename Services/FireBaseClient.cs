@@ -3,12 +3,12 @@ using FirebaseAdmin;
 using FirebaseAdmin.Messaging;
 using Google.Apis.Auth.OAuth2;
 using Microsoft.Extensions.Logging;
-using PostSharp.Extensibility;
+
 using Message = FirebaseAdmin.Messaging.Message;
 
 namespace Services
 {
-    [Profile(AttributeTargetElements = MulticastTargets.Method)]
+    [Profile]
     public class FireBaseClient : IFireBaseClient
     {
         public ILogger<FireBaseClient> _logger;

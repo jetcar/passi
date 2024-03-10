@@ -12,6 +12,7 @@ namespace IdentityServer4.Storage.Models
     /// Models access to an API scope
     /// </summary>
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}")]
+    [GoogleTracer.Profile]
     public class ApiScope : Resource
     {
         private string DebuggerDisplay => Name ?? $"{{{typeof(ApiScope)}}}";

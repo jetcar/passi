@@ -14,6 +14,7 @@ namespace IdentityServer4.Models.Messages
     /// <summary>
     /// Models the parameters to identify a request for consent.
     /// </summary>
+    [GoogleTracer.Profile]
     public class ConsentRequest
     {
         /// <summary>

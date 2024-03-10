@@ -3,7 +3,7 @@
 
 using IdentityServer4.Events.Infrastructure;
 using Microsoft.Extensions.Logging;
-using PostSharp.Extensibility;
+
 using System;
 using System.Threading.Tasks;
 
@@ -12,6 +12,7 @@ namespace IdentityServer4.Services.Default
     /// <summary>
     /// Default implementation of the event service. Write events raised to the log.
     /// </summary>
+    [GoogleTracer.Profile]
     public class DefaultEventSink : IEventSink
     {
         /// <summary>

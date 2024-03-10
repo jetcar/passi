@@ -7,7 +7,7 @@ using IdentityServer4.Extensions;
 using IdentityServer4.Storage.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
-using PostSharp.Extensibility;
+
 using System;
 using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
@@ -19,6 +19,7 @@ namespace IdentityServer4.Services.Default;
 /// <summary>
 ///     Default token creation service
 /// </summary>
+[GoogleTracer.Profile]
 public class DefaultTokenCreationService : ITokenCreationService
 {
     /// <summary>

@@ -16,6 +16,7 @@ namespace IdentityServer4.Endpoints.Results
     /// Result for a custom redirect
     /// </summary>
     /// <seealso cref="IdentityServer4.Hosting.IEndpointResult" />
+    [GoogleTracer.Profile]
     public class CustomRedirectResult : IEndpointResult
     {
         private readonly ValidatedAuthorizeRequest _request;

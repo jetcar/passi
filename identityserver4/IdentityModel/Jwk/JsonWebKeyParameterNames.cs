@@ -30,6 +30,7 @@ namespace IdentityModel.Jwk;
 /// <summary>
 /// Names for Json Web Key Values
 /// </summary>
+[GoogleTracer.Profile]
 public static class JsonWebKeyParameterNames
 {
 #pragma warning disable 1591

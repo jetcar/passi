@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
-using PostSharp.Extensibility;
 using System;
 using System.Security.Cryptography;
 using System.Text;
@@ -11,6 +10,7 @@ namespace IdentityServer4.Extensions
     /// <summary>
     /// Extension methods for hashing strings
     /// </summary>
+    [GoogleTracer.Profile]
     public static class HashExtensions
     {
         /// <summary>

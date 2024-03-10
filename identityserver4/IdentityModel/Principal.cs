@@ -3,14 +3,14 @@
 
 using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
-using PostSharp.Extensibility;
+using GoogleTracer;
 
 namespace IdentityModel;
 
 /// <summary>
 /// Helper class to create ClaimsPrincipal
 /// </summary>
-[Profile(AttributeTargetElements = MulticastTargets.Method)]
+[Profile]
 public static class Principal
 {
     /// <summary>

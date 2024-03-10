@@ -7,7 +7,7 @@ using IdentityServer4.Models.Contexts;
 using IdentityServer4.Services;
 using IdentityServer4.Validation.Models;
 using Microsoft.Extensions.Logging;
-using PostSharp.Extensibility;
+
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -17,6 +17,7 @@ namespace IdentityServer4.Validation.Default
     /// Default userinfo request validator
     /// </summary>
     /// <seealso cref="IdentityServer4.Validation.IUserInfoRequestValidator" />
+    [GoogleTracer.Profile]
     public class UserInfoRequestValidator : IUserInfoRequestValidator
     {
         private readonly ITokenValidator _tokenValidator;

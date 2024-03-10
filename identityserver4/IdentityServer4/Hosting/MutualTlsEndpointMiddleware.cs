@@ -3,7 +3,7 @@ using IdentityServer4.Extensions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using PostSharp.Extensibility;
+
 using System;
 using System.Threading.Tasks;
 
@@ -12,6 +12,7 @@ namespace IdentityServer4.Hosting
     /// <summary>
     ///     Middleware for re-writing the MTLS enabled endpoints to the standard protocol endpoints
     /// </summary>
+    [GoogleTracer.Profile]
     public class MutualTlsEndpointMiddleware
     {
         private readonly ILogger<MutualTlsEndpointMiddleware> _logger;

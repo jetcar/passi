@@ -17,6 +17,7 @@ namespace IdentityModel.Client.Messages;
 /// <summary>
 /// Models the response from an OpenID Connect discovery endpoint
 /// </summary>
+[GoogleTracer.Profile]
 public class DiscoveryDocumentResponse : ProtocolResponse
 {
     public DiscoveryPolicy Policy { get; set; } = default!;

@@ -3,6 +3,7 @@ using System.Net.Http;
 using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
+using GoogleTracer;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OAuth.Claims;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
@@ -10,7 +11,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using OpenIdLib.AutomaticTokenManagement;
-using PostSharp.Extensibility;
+
 using Repos;
 using RestSharp;
 using Services;
@@ -18,7 +19,7 @@ using WebApiDto.Auth.Dto;
 
 namespace OpenIdLib.OpenId
 {
-    [Profile(AttributeTargetElements = MulticastTargets.Method)]
+    [Profile]
     public static class OpenIdExtensions
     {
         public static AuthenticationBuilder AddOpenIdAuthentication(this AuthenticationBuilder builder,

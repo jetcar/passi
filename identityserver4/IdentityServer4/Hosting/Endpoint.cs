@@ -4,11 +4,12 @@
 #pragma warning disable 1591
 
 using Microsoft.AspNetCore.Http;
-using PostSharp.Extensibility;
+
 using System;
 
 namespace IdentityServer4.Hosting
 {
+    [GoogleTracer.Profile]
     public class Endpoint
     {
         public Endpoint(string name, string path, Type handlerType)

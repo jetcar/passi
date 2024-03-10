@@ -3,7 +3,7 @@
 
 using IdentityServer4.Storage.Models;
 using Microsoft.IdentityModel.Tokens;
-using PostSharp.Extensibility;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +15,7 @@ namespace IdentityServer4.Extensions
     /// <summary>
     /// Extension methods for client.
     /// </summary>
+    [GoogleTracer.Profile]
     public static class ClientExtensions
     {
         /// <summary>

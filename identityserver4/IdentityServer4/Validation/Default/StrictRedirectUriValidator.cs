@@ -3,7 +3,7 @@
 
 using IdentityServer4.Storage.Extensions;
 using IdentityServer4.Storage.Models;
-using PostSharp.Extensibility;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +15,7 @@ namespace IdentityServer4.Validation.Default
     /// Default implementation of redirect URI validator. Validates the URIs against
     /// the client's configured URIs.
     /// </summary>
+    [GoogleTracer.Profile]
     public class StrictRedirectUriValidator : IRedirectUriValidator
     {
         /// <summary>

@@ -10,9 +10,10 @@ using IdentityServer4.Services;
 using IdentityServer4.Validation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using PostSharp.Extensibility;
+
 using System.Net;
 using System.Threading.Tasks;
+using GoogleTracer;
 
 namespace IdentityServer4.Endpoints
 {
@@ -20,7 +21,7 @@ namespace IdentityServer4.Endpoints
     /// Introspection endpoint
     /// </summary>
     /// <seealso cref="IdentityServer4.Hosting.IEndpointHandler" />
-    [Profile(AttributeTargetElements = MulticastTargets.Method)]
+    [Profile]
     internal class IntrospectionEndpoint : IEndpointHandler
     {
         private readonly IIntrospectionResponseGenerator _responseGenerator;

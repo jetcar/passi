@@ -7,6 +7,7 @@ namespace IdentityModel.Client.Messages;
 /// Models a response from an OpenID Connect/OAuth 2 token endpoint
 /// </summary>
 /// <seealso cref="ProtocolResponse" />
+[GoogleTracer.Profile]
 public class TokenResponse : ProtocolResponse
 {
     /// <summary>

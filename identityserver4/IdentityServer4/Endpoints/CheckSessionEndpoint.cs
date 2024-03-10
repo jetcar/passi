@@ -5,13 +5,14 @@ using IdentityServer4.Endpoints.Results;
 using IdentityServer4.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using PostSharp.Extensibility;
+
 using System.Net;
 using System.Threading.Tasks;
+using GoogleTracer;
 
 namespace IdentityServer4.Endpoints
 {
-    [Profile(AttributeTargetElements = MulticastTargets.Method)]
+    [Profile]
     internal class CheckSessionEndpoint : IEndpointHandler
     {
         private readonly ILogger _logger;

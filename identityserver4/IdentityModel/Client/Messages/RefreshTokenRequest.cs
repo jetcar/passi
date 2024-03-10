@@ -6,6 +6,7 @@ namespace IdentityModel.Client.Messages;
 /// Request for token using refresh_token
 /// </summary>
 /// <seealso cref="TokenRequest" />
+[GoogleTracer.Profile]
 public class RefreshTokenRequest : TokenRequest
 {
     /// <summary>

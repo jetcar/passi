@@ -5,7 +5,7 @@ using IdentityServer4.ResponseHandling.Models;
 using IdentityServer4.Storage.Stores;
 using IdentityServer4.Validation.Models;
 using Microsoft.Extensions.Logging;
-using PostSharp.Extensibility;
+
 using System.Threading.Tasks;
 
 namespace IdentityServer4.ResponseHandling.Default
@@ -14,6 +14,7 @@ namespace IdentityServer4.ResponseHandling.Default
     /// Default revocation response generator
     /// </summary>
     /// <seealso cref="IdentityServer4.ResponseHandling.ITokenRevocationResponseGenerator" />
+    [GoogleTracer.Profile]
     public class TokenRevocationResponseGenerator : ITokenRevocationResponseGenerator
     {
         /// <summary>

@@ -6,7 +6,7 @@ using IdentityServer4.Extensions;
 using IdentityServer4.Validation.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using PostSharp.Extensibility;
+
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -15,6 +15,7 @@ namespace IdentityServer4.Validation.Default
     /// <summary>
     /// Validates a request that uses a bearer token for authentication
     /// </summary>
+    [GoogleTracer.Profile]
     public class BearerTokenUsageValidator
     {
         private readonly ILogger _logger;

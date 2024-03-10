@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 
 namespace IdentityServer4.Endpoints.Results
 {
+    [GoogleTracer.Profile]
     public class CheckSessionResult : IEndpointResult
     {
         public CheckSessionResult()

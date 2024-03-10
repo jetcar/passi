@@ -5,18 +5,14 @@ namespace IdentityModel.Client;
 /// <summary>
 /// Options for TokenClient
 /// </summary>
+[GoogleTracer.Profile]
 public class TokenClientOptions : ClientOptions
-{ }
-
-/// <summary>
-/// Options for IntrospectionClient
-/// </summary>
-public class IntrospectionClientOptions : ClientOptions
 { }
 
 /// <summary>
 /// Base-class protocol client options
 /// </summary>
+[GoogleTracer.Profile]
 public abstract class ClientOptions
 {
     /// <summary>

@@ -124,6 +124,7 @@
 	    <Generator></Generator>
 	  </MauiXaml>
 	</ItemGroup>
+	<ProjectExtensions><VisualStudio><UserProperties XamarinHotReloadGenericExceptionInfoBarMauiApp2HideInfoBar="True" /></VisualStudio></ProjectExtensions>
 
 
 </Project>

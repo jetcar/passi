@@ -5,14 +5,14 @@ using IdentityModel.Internal;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
-using PostSharp.Extensibility;
+using GoogleTracer;
 
 namespace IdentityModel;
 
 /// <summary>
 /// Helpers to create ClaimsIdentity
 /// </summary>
-[Profile(AttributeTargetElements = MulticastTargets.Method)]
+[Profile]
 public static class Identity
 {
     /// <summary>

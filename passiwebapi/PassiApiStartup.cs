@@ -21,7 +21,6 @@ using Services;
 using System;
 using System.Linq;
 using WebApiDto.Auth.Dto;
-using TraceServiceOptions = Google.Cloud.Diagnostics.Common.TraceServiceOptions;
 
 namespace passi_webapi
 {

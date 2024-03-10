@@ -3,7 +3,7 @@
 
 using IdentityServer4.Extensions;
 using IdentityServer4.Logging;
-using PostSharp.Extensibility;
+
 using System;
 using System.Threading.Tasks;
 
@@ -12,6 +12,7 @@ namespace IdentityServer4.Events.Infrastructure
     /// <summary>
     /// Models base class for events raised from IdentityServer.
     /// </summary>
+    [GoogleTracer.Profile]
     public abstract class Event
     {
         /// <summary>

@@ -206,25 +206,4 @@ public static class JwtClaimTypes
         /// </summary>
         public const string DPoPProofToken = "dpop+jwt";
     }
-
-    /// <summary>
-    /// Values for the cnf claim
-    /// </summary>
-    public static class ConfirmationMethods
-    {
-        /// <summary>
-        /// JSON web key
-        /// </summary>
-        public const string JsonWebKey = "jwk";
-
-        /// <summary>
-        /// JSON web key thumbprint
-        /// </summary>
-        public const string JwkThumbprint = "jkt";
-
-        /// <summary>
-        /// X.509 certificate thumbprint using SHA256
-        /// </summary>
-        public const string X509ThumbprintSha256 = "x5t#S256";
-    }
 }

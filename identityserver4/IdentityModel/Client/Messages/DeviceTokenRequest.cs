@@ -4,6 +4,7 @@ namespace IdentityModel.Client.Messages;
 /// Request for token using urn:ietf:params:oauth:grant-type:device_code
 /// </summary>
 /// <seealso cref="TokenRequest" />
+[GoogleTracer.Profile]
 public class DeviceTokenRequest : TokenRequest
 {
     /// <summary>

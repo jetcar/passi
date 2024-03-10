@@ -10,7 +10,7 @@ using IdentityServer4.Stores;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
-using PostSharp.Extensibility;
+
 using System;
 using System.Net.Http;
 
@@ -19,6 +19,7 @@ namespace IdentityServer4.Configuration.DependencyInjection.BuilderExtensions
     /// <summary>
     /// Builder extension methods for registering additional services
     /// </summary>
+    [GoogleTracer.Profile]
     public static class IdentityServerBuilderExtensionsAdditional
     {
         /// <summary>

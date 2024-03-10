@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace IdentityServer4.Endpoints.Results
 {
+    [GoogleTracer.Profile]
     internal class BadRequestResult : IEndpointResult
     {
         public string Error { get; set; }

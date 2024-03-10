@@ -7,7 +7,7 @@ using IdentityServer4.Extensions;
 using IdentityServer4.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using PostSharp.Extensibility;
+
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -16,6 +16,7 @@ namespace IdentityServer4.Validation.Default
     /// <summary>
     /// Parses a POST body for secrets
     /// </summary>
+    [GoogleTracer.Profile]
     public class PostBodySecretParser : ISecretParser
     {
         private readonly ILogger _logger;

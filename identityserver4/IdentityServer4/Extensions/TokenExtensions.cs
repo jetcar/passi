@@ -7,7 +7,7 @@ using IdentityServer4.Storage.Extensions;
 using IdentityServer4.Storage.Models;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
-using PostSharp.Extensibility;
+
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
@@ -19,6 +19,7 @@ namespace IdentityServer4.Extensions
     /// <summary>
     /// Extensions for Token
     /// </summary>
+    [GoogleTracer.Profile]
     public static class TokenExtensions
     {
         /// <summary>

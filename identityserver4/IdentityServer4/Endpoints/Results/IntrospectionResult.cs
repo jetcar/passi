@@ -14,6 +14,7 @@ namespace IdentityServer4.Endpoints.Results
     /// Result for introspection
     /// </summary>
     /// <seealso cref="IdentityServer4.Hosting.IEndpointResult" />
+    [GoogleTracer.Profile]
     public class IntrospectionResult : IEndpointResult
     {
         /// <summary>

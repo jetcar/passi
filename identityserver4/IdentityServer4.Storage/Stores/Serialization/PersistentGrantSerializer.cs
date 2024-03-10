@@ -1,8 +1,8 @@
 // Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
+using GoogleTracer;
 using Newtonsoft.Json;
-using PostSharp.Extensibility;
 
 namespace IdentityServer4.Storage.Stores.Serialization
 {
@@ -10,7 +10,7 @@ namespace IdentityServer4.Storage.Stores.Serialization
     /// JSON-based persisted grant serializer
     /// </summary>
     /// <seealso cref="IPersistentGrantSerializer" />
-    [Profile(AttributeTargetElements = MulticastTargets.Method)]
+    [Profile]
     public class PersistentGrantSerializer : IPersistentGrantSerializer
     {
         private static readonly JsonSerializerSettings _settings;

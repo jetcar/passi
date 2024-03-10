@@ -3,7 +3,7 @@
 
 using IdentityServer4.Extensions;
 using IdentityServer4.Storage.Models;
-using PostSharp.Extensibility;
+
 using System;
 using System.Security.Claims;
 
@@ -12,6 +12,7 @@ namespace IdentityServer4.Models.Contexts
     /// <summary>
     /// Context describing the is-active check
     /// </summary>
+    [GoogleTracer.Profile]
     public class IsActiveContext
     {
         /// <summary>

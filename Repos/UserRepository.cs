@@ -1,13 +1,14 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Models;
-using PostSharp.Extensibility;
+
 using System;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
+using GoogleTracer;
 
 namespace Repos
 {
-    [Profile(AttributeTargetElements = MulticastTargets.Method)]
+    [Profile]
     public class UserRepository : BaseRepo<PassiDbContext>, IUserRepository
     {
         public UserRepository(PassiDbContext dbContext) : base(dbContext)

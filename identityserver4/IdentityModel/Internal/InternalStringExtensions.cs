@@ -3,11 +3,11 @@
 
 using System;
 using System.Diagnostics;
-using PostSharp.Extensibility;
+using GoogleTracer;
 
 namespace IdentityModel.Internal;
 
-[Profile(AttributeTargetElements = MulticastTargets.Method)]
+[Profile]
 internal static class InternalStringExtensions
 {
     public static bool IsMissing(this string value)

@@ -14,6 +14,7 @@ namespace IdentityServer4.Validation.Models
     /// <summary>
     /// Models the result of custom grant validation.
     /// </summary>
+    [GoogleTracer.Profile]
     public class GrantValidationResult : ValidationResult
     {
         /// <summary>

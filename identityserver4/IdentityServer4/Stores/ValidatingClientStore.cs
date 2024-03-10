@@ -9,13 +9,14 @@ using IdentityServer4.Validation;
 using IdentityServer4.Validation.Contexts;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
-using PostSharp.Extensibility;
+using GoogleTracer;
 
 namespace IdentityServer4.Stores
 {
     /// <summary>
     /// Client store decorator for running runtime configuration validation checks
     /// </summary>
+    [Profile]
     public class ValidatingClientStore<T> : IClientStore
         where T : IClientStore
     {

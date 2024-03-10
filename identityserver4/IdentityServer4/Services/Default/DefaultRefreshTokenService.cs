@@ -8,7 +8,7 @@ using IdentityServer4.Storage.Models;
 using IdentityServer4.Storage.Stores;
 using IdentityServer4.Validation.Models;
 using Microsoft.Extensions.Logging;
-using PostSharp.Extensibility;
+
 using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -18,6 +18,7 @@ namespace IdentityServer4.Services.Default
     /// <summary>
     /// Default refresh token service
     /// </summary>
+    [GoogleTracer.Profile]
     public class DefaultRefreshTokenService : IRefreshTokenService
     {
         /// <summary>

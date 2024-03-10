@@ -29,7 +29,7 @@ using System;
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using PostSharp.Extensibility;
+using GoogleTracer;
 
 #pragma warning disable 1591
 #nullable disable
@@ -39,7 +39,7 @@ namespace IdentityModel.Jwk;
 /// <summary>
 /// Represents a Json Web Key as defined in http://tools.ietf.org/html/rfc7517.
 /// </summary>
-[Profile(AttributeTargetElements = MulticastTargets.Method)]
+[Profile]
 public class JsonWebKey
 {
     // kept private to hide that a List is used.

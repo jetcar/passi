@@ -11,6 +11,7 @@ namespace IdentityModel.Client.Messages;
 /// <summary>
 /// Models the response of an authorize request
 /// </summary>
+[GoogleTracer.Profile]
 public class AuthorizeResponse
 {
     /// <summary>

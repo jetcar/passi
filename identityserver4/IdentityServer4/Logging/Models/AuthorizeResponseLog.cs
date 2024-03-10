@@ -3,10 +3,10 @@
 
 using IdentityServer4.Extensions;
 using IdentityServer4.ResponseHandling.Models;
-using PostSharp.Extensibility;
 
 namespace IdentityServer4.Logging.Models
 {
+    [GoogleTracer.Profile]
     internal class AuthorizeResponseLog
     {
         public string SubjectId { get; set; }

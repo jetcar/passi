@@ -9,6 +9,7 @@ namespace IdentityServer4.Configuration.DependencyInjection.Options
     /// <summary>
     /// Options for configuring logging behavior
     /// </summary>
+    [GoogleTracer.Profile]
     public class LoggingOptions
     {
         /// <summary>

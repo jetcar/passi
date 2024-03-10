@@ -1,6 +1,7 @@
 // Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
+using System;
 using IdentityModel;
 using IdentityServer4.Extensions;
 using IdentityServer4.Models.Contexts;
@@ -8,7 +9,7 @@ using IdentityServer4.Services;
 using IdentityServer4.Validation.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging;
-using PostSharp.Extensibility;
+
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -17,12 +18,12 @@ namespace IdentityServer4.Validation.Default
     /// <summary>
     /// Validates an incoming token request using the device flow
     /// </summary>
+    [GoogleTracer.Profile]
     public class DeviceCodeValidator : IDeviceCodeValidator
     {
         private readonly IDeviceFlowCodeService _devices;
         private readonly IProfileService _profile;
         private readonly IDeviceFlowThrottlingService _throttlingService;
-        private readonly ISystemClock _systemClock;
         private readonly ILogger<DeviceCodeValidator> _logger;
 
         /// <summary>
@@ -37,13 +38,11 @@ namespace IdentityServer4.Validation.Default
             IDeviceFlowCodeService devices,
             IProfileService profile,
             IDeviceFlowThrottlingService throttlingService,
-            ISystemClock systemClock,
             ILogger<DeviceCodeValidator> logger)
         {
             _devices = devices;
             _profile = profile;
             _throttlingService = throttlingService;
-            _systemClock = systemClock;
             _logger = logger;
         }
 
@@ -79,7 +78,7 @@ namespace IdentityServer4.Validation.Default
             }
 
             // validate lifetime
-            if (deviceCode.CreationTime.AddSeconds(deviceCode.Lifetime) < _systemClock.UtcNow)
+            if (deviceCode.CreationTime.AddSeconds(deviceCode.Lifetime) < DateTime.UtcNow)
             {
                 _logger.LogError("Expired device code");
                 context.Result = new TokenRequestValidationResult(context.Request, OidcConstants.TokenErrors.ExpiredToken);

@@ -1,5 +1,5 @@
 using IdentityModel;
-using PostSharp.Extensibility;
+
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
@@ -10,6 +10,7 @@ namespace IdentityServer4.Extensions
     /// <summary>
     /// Extensions methods for X509Certificate2
     /// </summary>
+    [GoogleTracer.Profile]
     public static class X509CertificateExtensions
     {
         /// <summary>

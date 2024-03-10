@@ -1,13 +1,14 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using PostSharp.Extensibility;
+
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using GoogleTracer;
 using WebApp.Models;
 
 namespace WebApp.Controllers
 {
-    [Profile(AttributeTargetElements = MulticastTargets.Method)]
+    [Profile]
     [ApiController]
     [Route("api")]
     public class ApiController : ControllerBase

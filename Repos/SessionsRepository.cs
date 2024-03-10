@@ -2,14 +2,15 @@
 using Microsoft.EntityFrameworkCore;
 using Models;
 using NodaTime;
-using PostSharp.Extensibility;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using GoogleTracer;
 
 namespace Repos
 {
-    [Profile(AttributeTargetElements = MulticastTargets.Method)]
+    [Profile]
     public class SessionsRepository : BaseRepo<PassiDbContext>, ISessionsRepository
     {
         private AppSetting _appSetting;

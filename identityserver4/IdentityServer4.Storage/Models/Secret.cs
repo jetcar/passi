@@ -2,14 +2,14 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 using System;
-using PostSharp.Extensibility;
+using GoogleTracer;
 
 namespace IdentityServer4.Storage.Models
 {
     /// <summary>
     /// Models a client secret with identifier and expiration
     /// </summary>
-    [Profile(AttributeTargetElements = MulticastTargets.Method)]
+    [Profile]
     public class Secret
     {
         /// <summary>

@@ -11,7 +11,7 @@ using IdentityServer4.Storage.Stores;
 using IdentityServer4.Validation.Contexts;
 using IdentityServer4.Validation.Models;
 using Microsoft.Extensions.Logging;
-using PostSharp.Extensibility;
+
 using System;
 using System.Collections.Specialized;
 using System.Linq;
@@ -20,6 +20,7 @@ using System.Threading.Tasks;
 
 namespace IdentityServer4.Validation.Default
 {
+    [GoogleTracer.Profile]
     public class AuthorizeRequestValidator : IAuthorizeRequestValidator
     {
         private readonly IdentityServerOptions _options;

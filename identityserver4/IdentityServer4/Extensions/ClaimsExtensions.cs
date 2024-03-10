@@ -2,7 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 using IdentityModel;
-using PostSharp.Extensibility;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +11,7 @@ using System.Text.Json;
 
 namespace IdentityServer4.Extensions
 {
+    [GoogleTracer.Profile]
     internal static class ClaimsExtensions
     {
         public static Dictionary<string, object> ToClaimsDictionary(this IEnumerable<Claim> claims)

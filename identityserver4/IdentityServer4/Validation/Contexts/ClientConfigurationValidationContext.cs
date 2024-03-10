@@ -8,6 +8,7 @@ namespace IdentityServer4.Validation.Contexts
     /// <summary>
     /// Context for client configuration validation.
     /// </summary>
+    [GoogleTracer.Profile]
     public class ClientConfigurationValidationContext
     {
         /// <summary>

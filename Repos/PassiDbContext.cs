@@ -5,7 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Models;
 using NodaTime;
-using PostSharp.Extensibility;
+
 using Repos.CompiledModels;
 using Serilog;
 using Serilog.Core;
@@ -13,13 +13,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using EFCoreSecondLevelCacheInterceptor;
+using GoogleTracer;
 using MessagePack;
 using MessagePack.Formatters;
 using MessagePack.Resolvers;
 
 namespace Repos
 {
-    [Profile(AttributeTargetElements = MulticastTargets.Method)]
+    [Profile]
     public class PassiDbContext : DbContext, IDataProtectionKeyContext
     {
         private AppSetting _appSetting;

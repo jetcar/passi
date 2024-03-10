@@ -5,13 +5,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
-using PostSharp.Extensibility;
 
 namespace IdentityServer4.EntityFramework.Storage.Mappers
 {
+    [GoogleTracer.Profile]
     internal class AllowedSigningAlgorithmsConverter :
-        IValueConverter<ICollection<string>, string>,
-        IValueConverter<string, ICollection<string>>
+            IValueConverter<ICollection<string>, string>,
+            IValueConverter<string, ICollection<string>>
     {
         public static AllowedSigningAlgorithmsConverter Converter = new AllowedSigningAlgorithmsConverter();
 

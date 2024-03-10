@@ -4,7 +4,7 @@
 using IdentityServer4.Extensions;
 using IdentityServer4.Hosting;
 using Microsoft.AspNetCore.Http;
-using PostSharp.Extensibility;
+
 using System.Net;
 using System.Threading.Tasks;
 
@@ -14,6 +14,7 @@ namespace IdentityServer4.Endpoints.Results
     /// Result for revocation error
     /// </summary>
     /// <seealso cref="IdentityServer4.Hosting.IEndpointResult" />
+    [GoogleTracer.Profile]
     public class TokenRevocationErrorResult : IEndpointResult
     {
         /// <summary>

@@ -2,7 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 using Microsoft.AspNetCore.WebUtilities;
-using PostSharp.Extensibility;
+
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -12,6 +12,7 @@ using System.Text.Encodings.Web;
 
 namespace IdentityServer4.Extensions
 {
+    [GoogleTracer.Profile]
     public static class StringExtensions
     {
         public static string ToSpaceSeparatedString(this IEnumerable<string> list)

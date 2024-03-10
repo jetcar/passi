@@ -22,6 +22,7 @@ namespace IdentityServer4.Hosting
     // cookie used for check session iframe for session management spec.
     // finally, we track if signout is called to collaborate with the
     // FederatedSignoutAuthenticationHandlerProvider for federated signout.
+    [GoogleTracer.Profile]
     internal class IdentityServerAuthenticationService : IAuthenticationService
     {
         private readonly IAuthenticationService _inner;

@@ -14,6 +14,7 @@ namespace IdentityServer4.Endpoints.Results
     /// Result for a discovery document
     /// </summary>
     /// <seealso cref="IdentityServer4.Hosting.IEndpointResult" />
+    [GoogleTracer.Profile]
     public class DiscoveryDocumentResult : IEndpointResult
     {
         /// <summary>

@@ -5,7 +5,7 @@ using IdentityServer4.Extensions;
 using IdentityServer4.Models;
 using IdentityServer4.Stores;
 using Microsoft.IdentityModel.Tokens;
-using PostSharp.Extensibility;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,6 +17,7 @@ namespace IdentityServer4.Services.Default
     /// The default key material service
     /// </summary>
     /// <seealso cref="IdentityServer4.Services.IKeyMaterialService" />
+    [GoogleTracer.Profile]
     public class DefaultKeyMaterialService : IKeyMaterialService
     {
         private readonly IEnumerable<ISigningCredentialStore> _signingCredentialStores;

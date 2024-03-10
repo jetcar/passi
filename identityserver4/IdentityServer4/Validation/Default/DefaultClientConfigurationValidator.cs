@@ -1,7 +1,7 @@
 using IdentityServer4.Configuration.DependencyInjection.Options;
 using IdentityServer4.Storage.Models;
 using IdentityServer4.Validation.Contexts;
-using PostSharp.Extensibility;
+
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -12,6 +12,7 @@ namespace IdentityServer4.Validation.Default
     /// Default client configuration validator
     /// </summary>
     /// <seealso cref="IdentityServer4.Validation.IClientConfigurationValidator" />
+    [GoogleTracer.Profile]
     public class DefaultClientConfigurationValidator : IClientConfigurationValidator
     {
         private readonly IdentityServerOptions _options;

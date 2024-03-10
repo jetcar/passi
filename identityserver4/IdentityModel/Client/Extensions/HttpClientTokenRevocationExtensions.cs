@@ -5,16 +5,16 @@ using System;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using GoogleTracer;
 using IdentityModel.Client.Messages;
 using IdentityModel.Internal;
-using PostSharp.Extensibility;
 
 namespace IdentityModel.Client.Extensions;
 
 /// <summary>
 /// HttpClient extensions for OAuth token revocation
 /// </summary>
-[Profile(AttributeTargetElements = MulticastTargets.Method)]
+[Profile]
 public static class HttpClientTokenRevocationExtensions
 {
     /// <summary>

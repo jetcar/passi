@@ -1,10 +1,10 @@
 ﻿using ConfigurationManager;
+using GoogleTracer;
 using Microsoft.AspNetCore.Mvc;
-using PostSharp.Extensibility;
 
 namespace WebApp.Controllers
 {
-    [Profile(AttributeTargetElements = MulticastTargets.Method)]
+    [Profile]
     public class HomeController : Controller
     {
         private AppSetting _appSetting;

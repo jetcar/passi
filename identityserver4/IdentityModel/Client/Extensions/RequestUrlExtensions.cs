@@ -1,15 +1,15 @@
 ﻿// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
+using GoogleTracer;
 using IdentityModel.Client.Messages;
-using PostSharp.Extensibility;
 
 namespace IdentityModel.Client.Extensions;
 
 /// <summary>
 /// Extensions for RequestUrl
 /// </summary>
-[Profile(AttributeTargetElements = MulticastTargets.Method)]
+[Profile]
 public static class RequestUrlExtensions
 {
     /// <summary>

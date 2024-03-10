@@ -3,7 +3,7 @@
 
 using IdentityModel;
 using IdentityServer4.Storage.Models;
-using PostSharp.Extensibility;
+
 using System.Linq;
 
 namespace IdentityServer4.Models
@@ -11,6 +11,7 @@ namespace IdentityServer4.Models
     /// <summary>
     /// Convenience class that defines standard identity resources.
     /// </summary>
+    [GoogleTracer.Profile]
     public static class IdentityResources
     {
         /// <summary>

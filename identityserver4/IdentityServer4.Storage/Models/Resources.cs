@@ -1,13 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using PostSharp.Extensibility;
+using GoogleTracer;
 
 namespace IdentityServer4.Storage.Models
 {
     /// <summary>
     /// Models a collection of identity and API resources.
     /// </summary>
-    [Profile(AttributeTargetElements = MulticastTargets.Method)]
+    [Profile]
     public class Resources
     {
         /// <summary>

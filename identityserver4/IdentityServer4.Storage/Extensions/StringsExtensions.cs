@@ -2,11 +2,11 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 using System.Diagnostics;
-using PostSharp.Extensibility;
+using GoogleTracer;
 
 namespace IdentityServer4.Storage.Extensions
 {
-    [Profile(AttributeTargetElements = MulticastTargets.Method)]
+    [Profile]
     internal static class StringExtensions
     {
         public static bool IsMissing(this string value)

@@ -19,6 +19,7 @@ namespace IdentityServer4.Endpoints.Results
     /// Result for consent page
     /// </summary>
     /// <seealso cref="IdentityServer4.Hosting.IEndpointResult" />
+    [GoogleTracer.Profile]
     public class ConsentPageResult : IEndpointResult
     {
         private readonly ValidatedAuthorizeRequest _request;

@@ -7,5 +7,6 @@ namespace IdentityModel.Client.Messages;
 /// Models an OAuth 2.0 token revocation response
 /// </summary>
 /// <seealso cref="ProtocolResponse" />
+[GoogleTracer.Profile]
 public class TokenRevocationResponse : ProtocolResponse
 { }

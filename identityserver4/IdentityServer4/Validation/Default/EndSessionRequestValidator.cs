@@ -11,7 +11,7 @@ using IdentityServer4.Stores;
 using IdentityServer4.Validation.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using PostSharp.Extensibility;
+
 using System;
 using System.Collections.Specialized;
 using System.Linq;
@@ -23,6 +23,7 @@ namespace IdentityServer4.Validation.Default
     /// <summary>
     /// Validates requests to the end session endpoint.
     /// </summary>
+    [GoogleTracer.Profile]
     public class EndSessionRequestValidator : IEndSessionRequestValidator
     {
         /// <summary>

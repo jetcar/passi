@@ -1,11 +1,12 @@
-﻿using Models;
-using PostSharp.Extensibility;
+﻿using GoogleTracer;
+using Models;
+
 using Repos;
 using WebApiDto.SignUp;
 
 namespace Services
 {
-    [Profile(AttributeTargetElements = MulticastTargets.Method)]
+    [Profile]
     public class UserService : IUserService
     {
         private IUserRepository _userRepository;

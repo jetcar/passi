@@ -1,11 +1,11 @@
 ﻿// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
-using PostSharp.Extensibility;
 using System;
 
 namespace IdentityServer4.Configuration.DependencyInjection
 {
+    [GoogleTracer.Profile]
     public class Decorator<TService>
     {
         public TService Instance { get; set; }
@@ -16,14 +16,16 @@ namespace IdentityServer4.Configuration.DependencyInjection
         }
     }
 
+    [GoogleTracer.Profile]
     internal class Decorator<TService, TImpl> : Decorator<TService>
-        where TImpl : class, TService
+            where TImpl : class, TService
     {
         public Decorator(TImpl instance) : base(instance)
         {
         }
     }
 
+    [GoogleTracer.Profile]
     internal class DisposableDecorator<TService> : Decorator<TService>, IDisposable
     {
         public DisposableDecorator(TService instance) : base(instance)

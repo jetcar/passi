@@ -7,7 +7,6 @@ using IdentityServer4.EntityFramework.Storage.Extensions;
 using IdentityServer4.EntityFramework.Storage.Interfaces;
 using IdentityServer4.EntityFramework.Storage.Options;
 using Microsoft.EntityFrameworkCore;
-using PostSharp.Extensibility;
 
 namespace IdentityServer4.EntityFramework.Storage.DbContexts
 {
@@ -16,6 +15,7 @@ namespace IdentityServer4.EntityFramework.Storage.DbContexts
     /// </summary>
     /// <seealso cref="Microsoft.EntityFrameworkCore.DbContext" />
     /// <seealso cref="IConfigurationDbContext" />
+    [GoogleTracer.Profile]
     public class ConfigurationDbContext : ConfigurationDbContext<ConfigurationDbContext>
     {
         /// <summary>

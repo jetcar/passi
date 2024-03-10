@@ -5,7 +5,7 @@ using IdentityServer4.Services;
 using IdentityServer4.Storage.Stores;
 using IdentityServer4.Validation.Models;
 using Microsoft.Extensions.Logging;
-using PostSharp.Extensibility;
+
 using System.Threading.Tasks;
 
 namespace IdentityServer4.Validation.Default
@@ -13,6 +13,7 @@ namespace IdentityServer4.Validation.Default
     /// <summary>
     /// Default custom token validator
     /// </summary>
+    [GoogleTracer.Profile]
     public class DefaultCustomTokenValidator : ICustomTokenValidator
     {
         /// <summary>

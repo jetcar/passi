@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 
 namespace Repos
 {
+    [GoogleTracer.Profile]
     public static class LoggerExtensions
     {
         public static void LogAppError(this ILogger logger, Exception exception, string message, [CallerMemberName] string memberName = "", [CallerFilePath] string sourceFilePath = "", [CallerLineNumber] int sourceLineNumber = 0)

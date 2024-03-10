@@ -2,11 +2,12 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 using IdentityServer4.ResponseHandling.Models;
-using PostSharp.Extensibility;
+
 using System.Collections.Specialized;
 
 namespace IdentityServer4.Extensions
 {
+    [GoogleTracer.Profile]
     internal static class AuthorizeResponseExtensions
     {
         public static NameValueCollection ToNameValueCollection(this AuthorizeResponse response)

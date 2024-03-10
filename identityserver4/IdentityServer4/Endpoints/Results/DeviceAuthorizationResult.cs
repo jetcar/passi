@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 
 namespace IdentityServer4.Endpoints.Results
 {
+    [GoogleTracer.Profile]
     internal class DeviceAuthorizationResult : IEndpointResult
     {
         public DeviceAuthorizationResponse Response { get; }

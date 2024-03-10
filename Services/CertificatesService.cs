@@ -1,13 +1,14 @@
 ﻿using Models;
-using PostSharp.Extensibility;
+
 using Repos;
 using System;
 using System.Security.Cryptography.X509Certificates;
+using GoogleTracer;
 using WebApiDto.Certificate;
 
 namespace Services
 {
-    [Profile(AttributeTargetElements = MulticastTargets.Method)]
+    [Profile]
     public class CertificatesService : ICertificatesService
     {
         private ICertificateRepository _certificateRepository;

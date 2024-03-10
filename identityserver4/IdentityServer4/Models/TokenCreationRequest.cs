@@ -10,6 +10,7 @@ namespace IdentityServer4.Models
     /// <summary>
     /// Models the data to create a token from a validated request.
     /// </summary>
+    [GoogleTracer.Profile]
     public class TokenCreationRequest
     {
         /// <summary>

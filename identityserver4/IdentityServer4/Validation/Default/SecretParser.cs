@@ -4,7 +4,7 @@
 using IdentityServer4.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using PostSharp.Extensibility;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +15,7 @@ namespace IdentityServer4.Validation.Default
     /// <summary>
     /// Uses the registered secret parsers to parse a secret on the current request
     /// </summary>
+    [GoogleTracer.Profile]
     public class SecretParser : ISecretsListParser
     {
         private readonly ILogger _logger;

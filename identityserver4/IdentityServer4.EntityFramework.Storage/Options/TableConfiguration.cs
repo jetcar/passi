@@ -1,14 +1,14 @@
 ﻿// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
-using PostSharp.Extensibility;
+using GoogleTracer;
 
 namespace IdentityServer4.EntityFramework.Storage.Options
 {
     /// <summary>
     /// Class to control a table's name and schema.
     /// </summary>
-    [Profile(AttributeTargetElements = MulticastTargets.Method)]
+    [Profile]
     public class TableConfiguration
     {
         /// <summary>

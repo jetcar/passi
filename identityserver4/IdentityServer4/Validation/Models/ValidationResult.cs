@@ -6,6 +6,7 @@ namespace IdentityServer4.Validation.Models
     /// <summary>
     /// Minimal validation result class (base-class for more complext validation results)
     /// </summary>
+    [GoogleTracer.Profile]
     public class ValidationResult
     {
         /// <summary>

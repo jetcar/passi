@@ -3,7 +3,7 @@
 
 using IdentityServer4.Events.Infrastructure;
 using IdentityServer4.Extensions;
-using PostSharp.Extensibility;
+
 using System.Collections.Generic;
 
 namespace IdentityServer4.Events
@@ -12,6 +12,7 @@ namespace IdentityServer4.Events
     /// Event for failed token introspection
     /// </summary>
     /// <seealso cref="Event" />
+    [GoogleTracer.Profile]
     public class TokenIntrospectionFailureEvent : Event
     {
         /// <summary>

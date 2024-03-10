@@ -2,15 +2,15 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 using System;
+using GoogleTracer;
 using Microsoft.EntityFrameworkCore;
-using PostSharp.Extensibility;
 
 namespace IdentityServer4.EntityFramework.Storage.Options
 {
     /// <summary>
     /// Options for configuring the operational context.
     /// </summary>
-    [Profile(AttributeTargetElements = MulticastTargets.Method)]
+    [Profile]
     public class OperationalStoreOptions
     {
         /// <summary>

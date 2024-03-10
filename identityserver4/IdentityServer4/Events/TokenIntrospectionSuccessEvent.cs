@@ -5,7 +5,7 @@ using IdentityServer4.Events.Infrastructure;
 using IdentityServer4.Extensions;
 using IdentityServer4.Storage.Extensions;
 using IdentityServer4.Validation.Models;
-using PostSharp.Extensibility;
+
 using System.Collections.Generic;
 using System.Linq;
 
@@ -15,6 +15,7 @@ namespace IdentityServer4.Events
     /// Event for successful token introspection
     /// </summary>
     /// <seealso cref="Event" />
+    [GoogleTracer.Profile]
     public class TokenIntrospectionSuccessEvent : Event
     {
         /// <summary>

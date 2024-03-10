@@ -6,6 +6,7 @@ namespace IdentityModel.Client.Messages;
 /// Request for token using password
 /// </summary>
 /// <seealso cref="TokenRequest" />
+[GoogleTracer.Profile]
 public class PasswordTokenRequest : TokenRequest
 {
     /// <summary>

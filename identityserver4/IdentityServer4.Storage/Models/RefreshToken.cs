@@ -4,14 +4,14 @@
 using System;
 using System.Collections.Generic;
 using System.Security.Claims;
-using PostSharp.Extensibility;
+using GoogleTracer;
 
 namespace IdentityServer4.Storage.Models
 {
     /// <summary>
     /// Models a refresh token.
     /// </summary>
-    [Profile(AttributeTargetElements = MulticastTargets.Method)]
+    [Profile]
     public class RefreshToken
     {
         /// <summary>

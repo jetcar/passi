@@ -1,8 +1,9 @@
 ﻿using System;
 using ArxOne.MrAdvice.Advice;
-using GoogleTracer;
 
-public class PassiProfileAttribute : Attribute, IMethodAdvice
+namespace GoogleTracer;
+
+public class ProfileAttribute : Attribute, IMethodAdvice
 {
     public void Advise(MethodAdviceContext context)
     {

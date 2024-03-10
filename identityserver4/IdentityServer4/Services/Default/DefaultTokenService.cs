@@ -10,7 +10,7 @@ using IdentityServer4.Storage.Models;
 using IdentityServer4.Storage.Stores;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using PostSharp.Extensibility;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,6 +22,7 @@ namespace IdentityServer4.Services.Default
     /// <summary>
     /// Default token service
     /// </summary>
+    [GoogleTracer.Profile]
     public class DefaultTokenService : ITokenService
     {
         /// <summary>

@@ -8,6 +8,7 @@ namespace IdentityServer4.Validation.Models
     /// <summary>
     /// Models an error parsing a scope.
     /// </summary>
+    [GoogleTracer.Profile]
     public class ParsedScopeValidationError
     {
         /// <summary>

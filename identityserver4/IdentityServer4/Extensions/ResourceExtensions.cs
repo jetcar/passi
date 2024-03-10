@@ -1,7 +1,7 @@
 ﻿using IdentityServer4.Storage.Extensions;
 using IdentityServer4.Storage.Models;
 using IdentityServer4.Validation.Models;
-using PostSharp.Extensibility;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +11,7 @@ namespace IdentityServer4.Extensions
     /// <summary>
     /// Extensions for Resource
     /// </summary>
+    [GoogleTracer.Profile]
     public static class ResourceExtensions
     {
         /// <summary>

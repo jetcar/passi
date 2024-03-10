@@ -6,7 +6,8 @@
 		<OutputPath>publish</OutputPath>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="PostSharp" Version="2024.0.5" />
+		<PackageReference Include="MrAdvice" Version="2.15.0" />
+
 	</ItemGroup>
 	<ItemGroup>
 	  <ProjectReference Include="..\..\GoogleTracer\GoogleTracer.csproj" />

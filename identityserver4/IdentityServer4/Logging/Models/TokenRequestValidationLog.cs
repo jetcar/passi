@@ -1,14 +1,12 @@
-// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
-
 using IdentityServer4.Extensions;
 using IdentityServer4.Validation.Models;
-using PostSharp.Extensibility;
+
 using System.Collections.Generic;
 using System.Linq;
 
 namespace IdentityServer4.Logging.Models
 {
+    [GoogleTracer.Profile]
     internal class TokenRequestValidationLog
     {
         public string ClientId { get; set; }
@@ -20,9 +18,6 @@ namespace IdentityServer4.Logging.Models
         public string RefreshToken { get; set; }
 
         public string UserName { get; set; }
-        public IEnumerable<string> AuthenticationContextReferenceClasses { get; set; }
-        public string Tenant { get; set; }
-        public string IdP { get; set; }
 
         public Dictionary<string, string> Raw { get; set; }
 

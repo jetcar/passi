@@ -8,6 +8,7 @@ namespace IdentityModel;
 /// <summary>
 /// Base64Url encoder/decoder
 /// </summary>
+[GoogleTracer.Profile]
 public static class Base64Url
 {
     /// <summary>

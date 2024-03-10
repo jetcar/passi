@@ -7,6 +7,7 @@ namespace IdentityModel.Client.Messages;
 /// Request for OAuth token revocation
 /// </summary>
 /// <seealso cref="ProtocolRequest" />
+[GoogleTracer.Profile]
 public class TokenRevocationRequest : ProtocolRequest
 {
     /// <summary>

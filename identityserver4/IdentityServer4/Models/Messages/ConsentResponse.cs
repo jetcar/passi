@@ -9,6 +9,7 @@ namespace IdentityServer4.Models.Messages
     /// <summary>
     /// Models the user's response to the consent screen.
     /// </summary>
+    [GoogleTracer.Profile]
     public class ConsentResponse
     {
         /// <summary>

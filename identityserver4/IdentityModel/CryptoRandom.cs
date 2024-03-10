@@ -3,14 +3,14 @@
 
 using System;
 using System.Security.Cryptography;
-using PostSharp.Extensibility;
+using GoogleTracer;
 
 namespace IdentityModel;
 
 /// <summary>
 /// A class that mimics the standard Random class in the .NET Framework - but uses a random number generator internally.
 /// </summary>
-[Profile(AttributeTargetElements = MulticastTargets.Method)]
+[Profile]
 public class CryptoRandom : Random
 {
     private static readonly RandomNumberGenerator Rng = RandomNumberGenerator.Create();

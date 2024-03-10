@@ -6,16 +6,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using GoogleTracer;
 using IdentityModel.Client.Extensions;
 using IdentityModel.Internal;
-using PostSharp.Extensibility;
 
 namespace IdentityModel.Client.Messages;
 
 /// <summary>
 /// Models a base OAuth/OIDC request with client credentials
 /// </summary>
-[Profile(AttributeTargetElements = MulticastTargets.Method)]
+[Profile]
 public class ProtocolRequest : HttpRequestMessage
 {
     /// <summary>

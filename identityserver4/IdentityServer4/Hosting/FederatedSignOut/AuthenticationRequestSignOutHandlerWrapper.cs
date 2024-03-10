@@ -3,11 +3,12 @@
 
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
-using PostSharp.Extensibility;
+
 using System.Threading.Tasks;
 
 namespace IdentityServer4.Hosting.FederatedSignOut
 {
+    [GoogleTracer.Profile]
     internal class AuthenticationRequestSignOutHandlerWrapper : AuthenticationRequestHandlerWrapper, IAuthenticationSignOutHandler
     {
         private readonly IAuthenticationSignOutHandler _inner;

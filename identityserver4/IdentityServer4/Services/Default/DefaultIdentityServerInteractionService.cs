@@ -7,7 +7,7 @@ using IdentityServer4.Models.Messages;
 using IdentityServer4.Stores;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using PostSharp.Extensibility;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +15,7 @@ using System.Threading.Tasks;
 
 namespace IdentityServer4.Services.Default
 {
+    [GoogleTracer.Profile]
     public class DefaultIdentityServerInteractionService : IIdentityServerInteractionService
     {
         private readonly IHttpContextAccessor _context;

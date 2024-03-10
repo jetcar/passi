@@ -2,7 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 using Microsoft.Extensions.Caching.Memory;
-using PostSharp.Extensibility;
+
 using System;
 using System.Threading.Tasks;
 
@@ -13,8 +13,9 @@ namespace IdentityServer4.Services.Default
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <seealso cref="IdentityServer4.Services.ICache{T}" />
+    [GoogleTracer.Profile]
     public class DefaultCache<T> : ICache<T>
-        where T : class
+            where T : class
     {
         private const string KeySeparator = ":";
 

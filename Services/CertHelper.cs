@@ -1,12 +1,12 @@
-﻿using PostSharp.Extensibility;
-using System;
+﻿using System;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using GoogleTracer;
 
 namespace Services;
 
-[Profile(AttributeTargetElements = MulticastTargets.Method)]
+[Profile]
 public class CertHelper
 {
     public static bool VerifyData(string data, string signedData, string base64PublicCert)

@@ -13,9 +13,10 @@ using IdentityServer4.Validation;
 using IdentityServer4.Validation.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using PostSharp.Extensibility;
+
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using GoogleTracer;
 
 namespace IdentityServer4.Endpoints
 {
@@ -23,7 +24,7 @@ namespace IdentityServer4.Endpoints
     /// The device authorization endpoint
     /// </summary>
     /// <seealso cref="IdentityServer4.Hosting.IEndpointHandler" />
-    [Profile(AttributeTargetElements = MulticastTargets.Method)]
+    [Profile]
     internal class DeviceAuthorizationEndpoint : IEndpointHandler
     {
         private readonly IClientSecretValidator _clientValidator;

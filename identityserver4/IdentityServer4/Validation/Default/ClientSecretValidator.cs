@@ -8,7 +8,7 @@ using IdentityServer4.Storage.Stores;
 using IdentityServer4.Validation.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using PostSharp.Extensibility;
+
 using System.Threading.Tasks;
 
 namespace IdentityServer4.Validation.Default
@@ -16,6 +16,7 @@ namespace IdentityServer4.Validation.Default
     /// <summary>
     /// Validates a client secret using the registered secret validators and parsers
     /// </summary>
+    [GoogleTracer.Profile]
     public class ClientSecretValidator : IClientSecretValidator
     {
         private readonly ILogger _logger;

@@ -8,6 +8,7 @@ using IdentityServer4.Models.Contexts;
 
 namespace IdentityServer.services
 {
+    [GoogleTracer.Profile]
     public class MyProfileService : IProfileService
     {
         public MyProfileService(ILogger<MyProfileService> logger)

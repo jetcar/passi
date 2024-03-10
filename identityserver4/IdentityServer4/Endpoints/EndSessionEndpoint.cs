@@ -8,14 +8,15 @@ using IdentityServer4.Services;
 using IdentityServer4.Validation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using PostSharp.Extensibility;
+
 using System.Collections.Specialized;
 using System.Net;
 using System.Threading.Tasks;
+using GoogleTracer;
 
 namespace IdentityServer4.Endpoints
 {
-    [Profile(AttributeTargetElements = MulticastTargets.Method)]
+    [Profile]
     internal class EndSessionEndpoint : IEndpointHandler
     {
         private readonly IEndSessionRequestValidator _endSessionRequestValidator;

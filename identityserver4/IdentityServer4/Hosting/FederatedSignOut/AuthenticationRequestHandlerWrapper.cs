@@ -5,12 +5,13 @@ using IdentityServer4.Extensions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using PostSharp.Extensibility;
+
 using System;
 using System.Threading.Tasks;
 
 namespace IdentityServer4.Hosting.FederatedSignOut
 {
+    [GoogleTracer.Profile]
     internal class AuthenticationRequestHandlerWrapper : IAuthenticationRequestHandler
     {
         private const string IframeHtml = "<iframe style='display:none' width='0' height='0' src='{0}'></iframe>";

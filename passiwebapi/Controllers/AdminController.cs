@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using passi_webapi.Filters;
-using PostSharp.Extensibility;
+
 using Repos;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,7 +16,7 @@ namespace passi_webapi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Profile(AttributeTargetElements = MulticastTargets.Method)]
+    [GoogleTracer.Profile]
     public class AdminController : Controller
     {
         private PassiDbContext _db;

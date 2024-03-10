@@ -1,6 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using GoogleTracer;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using PostSharp.Extensibility;
+
 using Repos;
 using WebApiDto;
 
@@ -8,7 +9,7 @@ namespace passi_webapi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Profile(AttributeTargetElements = MulticastTargets.Method)]
+    [Profile]
     public class TokenController : ControllerBase
     {
         private IUserRepository _userRepository;

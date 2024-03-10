@@ -8,13 +8,13 @@ using IdentityServer4.EntityFramework.Storage.Options;
 using IdentityServer4.EntityFramework.Storage.TokenCleanup;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using PostSharp.Extensibility;
 
 namespace IdentityServer4.EntityFramework.Storage.Configuration
 {
     /// <summary>
     /// Extension methods to add EF database support to IdentityServer.
     /// </summary>
+    [GoogleTracer.Profile]
     public static class IdentityServerEntityFrameworkBuilderExtensions
     {
         /// <summary>

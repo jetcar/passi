@@ -1,13 +1,14 @@
 ﻿// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
+using System;
 using IdentityServer4.Extensions;
 using IdentityServer4.Models;
 using IdentityServer4.Storage.Models;
 using IdentityServer4.Validation.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging;
-using PostSharp.Extensibility;
+
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -17,11 +18,11 @@ namespace IdentityServer4.Validation.Default
     /// <summary>
     /// Validates secrets using the registered validators
     /// </summary>
+    [GoogleTracer.Profile]
     public class SecretValidator : ISecretsListValidator
     {
         private readonly ILogger _logger;
         private readonly IEnumerable<ISecretValidator> _validators;
-        private readonly ISystemClock _clock;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SecretValidator"/> class.
@@ -29,9 +30,8 @@ namespace IdentityServer4.Validation.Default
         /// <param name="clock">The clock.</param>
         /// <param name="validators">The validators.</param>
         /// <param name="logger">The logger.</param>
-        public SecretValidator(ISystemClock clock, IEnumerable<ISecretValidator> validators, ILogger<ISecretsListValidator> logger)
+        public SecretValidator(IEnumerable<ISecretValidator> validators, ILogger<ISecretsListValidator> logger)
         {
-            _clock = clock;
             _validators = validators;
             _logger = logger;
         }
@@ -46,14 +46,14 @@ namespace IdentityServer4.Validation.Default
         {
             var secretsArray = secrets as Secret[] ?? secrets.ToArray();
 
-            var expiredSecrets = secretsArray.Where(s => s.Expiration.HasExpired(_clock.UtcNow.UtcDateTime)).ToList();
+            var expiredSecrets = secretsArray.Where(s => s.Expiration.HasExpired(DateTime.UtcNow)).ToList();
             if (expiredSecrets.Any())
             {
                 expiredSecrets.ForEach(
                     ex => _logger.LogInformation("Secret [{description}] is expired", ex.Description ?? "no description"));
             }
 
-            var currentSecrets = secretsArray.Where(s => !s.Expiration.HasExpired(_clock.UtcNow.UtcDateTime)).ToArray();
+            var currentSecrets = secretsArray.Where(s => !s.Expiration.HasExpired(DateTime.UtcNow)).ToArray();
 
             // see if a registered validator can validate the secret
             foreach (var validator in _validators)

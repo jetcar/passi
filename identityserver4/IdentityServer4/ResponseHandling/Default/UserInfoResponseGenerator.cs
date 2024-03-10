@@ -6,7 +6,7 @@ using IdentityServer4.Storage.Models;
 using IdentityServer4.Storage.Stores;
 using IdentityServer4.Validation.Models;
 using Microsoft.Extensions.Logging;
-using PostSharp.Extensibility;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,6 +19,7 @@ namespace IdentityServer4.ResponseHandling.Default
     /// The userinfo response generator
     /// </summary>
     /// <seealso cref="IdentityServer4.ResponseHandling.IUserInfoResponseGenerator" />
+    [GoogleTracer.Profile]
     public class UserInfoResponseGenerator : IUserInfoResponseGenerator
     {
         /// <summary>

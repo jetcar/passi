@@ -11,7 +11,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
-using PostSharp.Extensibility;
 
 namespace IdentityServer4.EntityFramework.Services
 {
@@ -19,6 +18,7 @@ namespace IdentityServer4.EntityFramework.Services
     /// Implementation of ICorsPolicyService that consults the client configuration in the database for allowed CORS origins.
     /// </summary>
     /// <seealso cref="ICorsPolicyService" />
+    [GoogleTracer.Profile]
     public class CorsPolicyService : ICorsPolicyService
     {
         private readonly IHttpContextAccessor _context;

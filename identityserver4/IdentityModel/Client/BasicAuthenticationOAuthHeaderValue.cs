@@ -4,7 +4,7 @@
 using System;
 using System.Net.Http.Headers;
 using System.Text;
-using PostSharp.Extensibility;
+using GoogleTracer;
 
 namespace IdentityModel.Client;
 
@@ -12,7 +12,7 @@ namespace IdentityModel.Client;
 /// HTTP Basic Authentication authorization header for RFC6749 client authentication
 /// </summary>
 /// <seealso cref="System.Net.Http.Headers.AuthenticationHeaderValue" />
-[Profile(AttributeTargetElements = MulticastTargets.Method)]
+[Profile]
 public class BasicAuthenticationOAuthHeaderValue : AuthenticationHeaderValue
 {
     /// <summary>

@@ -7,7 +7,7 @@ using IdentityServer4.Storage.Models;
 using IdentityServer4.Storage.Stores;
 using IdentityServer4.Storage.Stores.Serialization;
 using Microsoft.Extensions.Logging;
-using PostSharp.Extensibility;
+
 using System;
 using System.Threading.Tasks;
 
@@ -17,6 +17,7 @@ namespace IdentityServer4.Stores.Default
     /// Base class for persisting grants using the IPersistedGrantStore.
     /// </summary>
     /// <typeparam name="T"></typeparam>
+    [GoogleTracer.Profile]
     public class DefaultGrantStore<T>
     {
         /// <summary>

@@ -4,12 +4,13 @@
 using IdentityModel;
 using IdentityServer4.Extensions;
 using IdentityServer4.Validation.Models;
-using PostSharp.Extensibility;
+
 using System.Collections.Generic;
 using System.Linq;
 
 namespace IdentityServer4.Logging.Models
 {
+    [GoogleTracer.Profile]
     internal class AuthorizeRequestValidationLog
     {
         public string ClientId { get; set; }

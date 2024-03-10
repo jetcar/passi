@@ -12,7 +12,6 @@ using IdentityServer4.Storage.Stores;
 using IdentityServer4.Storage.Stores.Serialization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using PostSharp.Extensibility;
 
 namespace IdentityServer4.EntityFramework.Storage.Stores
 {
@@ -20,6 +19,7 @@ namespace IdentityServer4.EntityFramework.Storage.Stores
     /// Implementation of IDeviceFlowStore thats uses EF.
     /// </summary>
     /// <seealso cref="IDeviceFlowStore" />
+    [GoogleTracer.Profile]
     public class DeviceFlowStore : IDeviceFlowStore
     {
         /// <summary>

@@ -7,12 +7,14 @@ using IdentityServer4.Models.Messages;
 using IdentityServer4.Storage.Stores;
 using IdentityServer4.Validation;
 using Microsoft.Extensions.Logging;
-using PostSharp.Extensibility;
+
 using System;
 using System.Threading.Tasks;
+using GoogleTracer;
 
 namespace IdentityServer4.Services.Default
 {
+    [Profile]
     internal class DefaultDeviceFlowInteractionService : IDeviceFlowInteractionService
     {
         private readonly IClientStore _clients;
@@ -38,7 +40,6 @@ namespace IdentityServer4.Services.Default
             _logger = logger;
         }
 
-        [Profile(AttributeTargetElements = MulticastTargets.Method)]
         public async Task<DeviceFlowAuthorizationRequest> GetAuthorizationContextAsync(string userCode)
         {
             var deviceAuth = await _devices.FindByUserCodeAsync(userCode);

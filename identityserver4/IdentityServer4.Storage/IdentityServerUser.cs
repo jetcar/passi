@@ -5,16 +5,16 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using GoogleTracer;
 using IdentityModel;
 using IdentityServer4.Storage.Extensions;
-using PostSharp.Extensibility;
 
 namespace IdentityServer4.Storage
 {
     /// <summary>
     /// Model properties of an IdentityServer user
     /// </summary>
-    [Profile(AttributeTargetElements = MulticastTargets.Method)]
+    [Profile]
     internal class IdentityServerUser
     {
         /// <summary>

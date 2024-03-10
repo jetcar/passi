@@ -9,13 +9,13 @@ using IdentityServer4.EntityFramework.Storage.TokenCleanup;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using PostSharp.Extensibility;
 
 namespace IdentityServer4.EntityFramework
 {
     /// <summary>
     /// Helper to cleanup expired persisted grants.
     /// </summary>
+    [GoogleTracer.Profile]
     public class TokenCleanupHost : IHostedService
     {
         private readonly IServiceProvider _serviceProvider;

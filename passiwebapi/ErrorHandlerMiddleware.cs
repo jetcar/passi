@@ -9,6 +9,7 @@ using WebApiDto;
 
 namespace passi_webapi
 {
+    [GoogleTracer.Profile]
     public class ErrorHandlerMiddleware
     {
         private readonly RequestDelegate _next;

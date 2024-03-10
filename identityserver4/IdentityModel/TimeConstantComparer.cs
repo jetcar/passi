@@ -2,14 +2,14 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 using System.Runtime.CompilerServices;
-using PostSharp.Extensibility;
+using GoogleTracer;
 
 namespace IdentityModel;
 
 /// <summary>
 /// Helper class to do equality checks without leaking timing information
 /// </summary>
-[Profile(AttributeTargetElements = MulticastTargets.Method)]
+[Profile]
 public static class TimeConstantComparer
 {
     /// <summary>

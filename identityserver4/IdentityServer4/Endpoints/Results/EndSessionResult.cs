@@ -18,6 +18,7 @@ namespace IdentityServer4.Endpoints.Results
     /// Result for endsession
     /// </summary>
     /// <seealso cref="IdentityServer4.Hosting.IEndpointResult" />
+    [GoogleTracer.Profile]
     public class EndSessionResult : IEndpointResult
     {
         private readonly EndSessionValidationResult _result;

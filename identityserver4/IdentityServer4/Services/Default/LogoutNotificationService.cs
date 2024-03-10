@@ -7,7 +7,7 @@ using IdentityServer4.Models.Contexts;
 using IdentityServer4.Storage.Stores;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using PostSharp.Extensibility;
+
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -17,6 +17,7 @@ namespace IdentityServer4.Services.Default
     /// <summary>
     /// Default implementation of logout notification service.
     /// </summary>
+    [GoogleTracer.Profile]
     public class LogoutNotificationService : ILogoutNotificationService
     {
         private readonly IClientStore _clientStore;

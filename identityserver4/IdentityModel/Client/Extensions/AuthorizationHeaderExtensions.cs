@@ -3,14 +3,14 @@
 
 using System.Net.Http;
 using System.Net.Http.Headers;
-using PostSharp.Extensibility;
+using GoogleTracer;
 
 namespace IdentityModel.Client.Extensions;
 
 /// <summary>
 /// Extensions for HttpRequestMessage
 /// </summary>
-[Profile(AttributeTargetElements = MulticastTargets.Method)]
+[Profile]
 public static class AuthorizationHeaderExtensions
 {
     /// <summary>

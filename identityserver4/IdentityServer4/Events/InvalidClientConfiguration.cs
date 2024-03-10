@@ -3,7 +3,6 @@
 
 using IdentityServer4.Events.Infrastructure;
 using IdentityServer4.Storage.Models;
-using PostSharp.Extensibility;
 
 namespace IdentityServer4.Events
 {
@@ -11,6 +10,7 @@ namespace IdentityServer4.Events
     /// Event for unhandled exceptions
     /// </summary>
     /// <seealso cref="Event" />
+    [GoogleTracer.Profile]
     public class InvalidClientConfigurationEvent : Event
     {
         /// <summary>

@@ -5,7 +5,7 @@ using IdentityServer4.Models;
 using IdentityServer4.Validation.Contexts;
 using IdentityServer4.Validation.Models;
 using Microsoft.Extensions.Logging;
-using PostSharp.Extensibility;
+
 using System.Threading.Tasks;
 
 namespace IdentityServer4.Validation.Default
@@ -14,6 +14,7 @@ namespace IdentityServer4.Validation.Default
     /// Default resource owner password validator (no implementation == not supported)
     /// </summary>
     /// <seealso cref="IdentityServer4.Validation.IResourceOwnerPasswordValidator" />
+    [GoogleTracer.Profile]
     public class NotSupportedResourceOwnerPasswordValidator : IResourceOwnerPasswordValidator
     {
         private readonly ILogger _logger;

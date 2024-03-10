@@ -3,7 +3,7 @@
 
 using IdentityServer4.Storage.Models;
 using IdentityServer4.Storage.Stores;
-using PostSharp.Extensibility;
+
 using System.Threading.Tasks;
 
 namespace IdentityServer4.Extensions
@@ -11,6 +11,7 @@ namespace IdentityServer4.Extensions
     /// <summary>
     /// Extension for IClientStore
     /// </summary>
+    [GoogleTracer.Profile]
     public static class IClientStoreExtensions
     {
         /// <summary>

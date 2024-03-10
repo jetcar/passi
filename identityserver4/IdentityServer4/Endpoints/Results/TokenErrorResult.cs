@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 
 namespace IdentityServer4.Endpoints.Results
 {
+    [GoogleTracer.Profile]
     internal class TokenErrorResult : IEndpointResult
     {
         public TokenErrorResponse Response { get; }

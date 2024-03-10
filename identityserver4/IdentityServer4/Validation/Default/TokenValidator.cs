@@ -14,7 +14,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
-using PostSharp.Extensibility;
+
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
@@ -25,6 +25,7 @@ using TokenValidationResult = IdentityServer4.Validation.Models.TokenValidationR
 
 namespace IdentityServer4.Validation.Default
 {
+    [GoogleTracer.Profile]
     public class TokenValidator : ITokenValidator
     {
         private readonly ILogger _logger;
@@ -35,7 +36,6 @@ namespace IdentityServer4.Validation.Default
         private readonly IClientStore _clients;
         private readonly IProfileService _profile;
         private readonly IKeyMaterialService _keys;
-        private readonly ISystemClock _clock;
         private readonly TokenValidationLog _log;
 
         public TokenValidator(
@@ -44,10 +44,8 @@ namespace IdentityServer4.Validation.Default
             IClientStore clients,
             IProfileService profile,
             IReferenceTokenStore referenceTokenStore,
-            IRefreshTokenStore refreshTokenStore,
             ICustomTokenValidator customValidator,
             IKeyMaterialService keys,
-            ISystemClock clock,
             ILogger<TokenValidator> logger)
         {
             _options = options;
@@ -57,7 +55,6 @@ namespace IdentityServer4.Validation.Default
             _referenceTokenStore = referenceTokenStore;
             _customValidator = customValidator;
             _keys = keys;
-            _clock = clock;
             _logger = logger;
 
             _log = new TokenValidationLog();
@@ -361,7 +358,7 @@ namespace IdentityServer4.Validation.Default
                 return Invalid(OidcConstants.ProtectedResourceErrors.InvalidToken);
             }
 
-            if (token.CreationTime.HasExceeded(token.Lifetime, _clock.UtcNow.UtcDateTime))
+            if (token.CreationTime.HasExceeded(token.Lifetime, DateTime.UtcNow))
             {
                 LogError("Token expired.");
 

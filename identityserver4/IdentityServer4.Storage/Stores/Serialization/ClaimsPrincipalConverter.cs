@@ -4,15 +4,15 @@
 using System;
 using System.Linq;
 using System.Security.Claims;
+using GoogleTracer;
 using IdentityModel;
 using Newtonsoft.Json;
-using PostSharp.Extensibility;
 
 #pragma warning disable 1591
 
 namespace IdentityServer4.Storage.Stores.Serialization
 {
-    [Profile(AttributeTargetElements = MulticastTargets.Method)]
+    [Profile]
     public class ClaimsPrincipalConverter : JsonConverter
     {
         public override bool CanConvert(Type objectType)

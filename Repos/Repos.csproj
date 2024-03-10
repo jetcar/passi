@@ -6,6 +6,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="MrAdvice" Version="2.15.0" />
 		<PackageReference Include="EasyCaching.Redis" Version="1.9.2" />
 		<PackageReference Include="EasyCaching.Serialization.MessagePack" Version="1.9.2" />
 		<PackageReference Include="EFCoreSecondLevelCacheInterceptor" Version="4.2.3" />
@@ -29,7 +30,7 @@
 		<PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
 		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL.NodaTime" Version="8.0.0" />
 		<PackageReference Include="Npgsql.NodaTime" Version="8.0.1" />
-		<PackageReference Include="PostSharp" Version="2024.0.5" />
+
 		<PackageReference Include="Serilog" Version="3.1.1" />
 		<PackageReference Include="StackExchange.Redis" Version="2.7.17" />
 		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.2.0" />

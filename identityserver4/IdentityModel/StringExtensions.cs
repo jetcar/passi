@@ -5,14 +5,14 @@ using IdentityModel.Internal;
 using System;
 using System.Security.Cryptography;
 using System.Text;
-using PostSharp.Extensibility;
+using GoogleTracer;
 
 namespace IdentityModel;
 
 /// <summary>
 /// Extensions for strings
 /// </summary>
-[Profile(AttributeTargetElements = MulticastTargets.Method)]
+[Profile]
 public static class StringExtensions
 {
     /// <summary>

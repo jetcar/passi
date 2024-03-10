@@ -2,7 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 using IdentityServer4.Models.Messages;
-using PostSharp.Extensibility;
+
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -11,6 +11,7 @@ namespace IdentityServer4.Services.Default
     /// <summary>
     /// Parses a return URL using all registered URL parsers
     /// </summary>
+    [GoogleTracer.Profile]
     public class ReturnUrlParser
     {
         private readonly IEnumerable<IReturnUrlParser> _parsers;

@@ -3,15 +3,15 @@
 
 using IdentityModel.Internal;
 using System.Linq;
+using GoogleTracer;
 using IdentityModel.Client.Messages;
-using PostSharp.Extensibility;
 
 namespace IdentityModel.Client;
 
 /// <summary>
 /// Helper class for creating request URLs
 /// </summary>
-[Profile(AttributeTargetElements = MulticastTargets.Method)]
+[Profile]
 public class RequestUrl
 {
     private readonly string _baseUrl;

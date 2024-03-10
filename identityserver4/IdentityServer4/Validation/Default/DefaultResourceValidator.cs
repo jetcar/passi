@@ -6,7 +6,7 @@ using IdentityServer4.Storage.Models;
 using IdentityServer4.Storage.Stores;
 using IdentityServer4.Validation.Models;
 using Microsoft.Extensions.Logging;
-using PostSharp.Extensibility;
+
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -16,6 +16,7 @@ namespace IdentityServer4.Validation.Default
     /// <summary>
     /// Default implementation of IResourceValidator.
     /// </summary>
+    [GoogleTracer.Profile]
     public class DefaultResourceValidator : IResourceValidator
     {
         private readonly ILogger _logger;

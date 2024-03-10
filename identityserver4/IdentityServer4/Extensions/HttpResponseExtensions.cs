@@ -5,7 +5,7 @@ using IdentityServer4.Configuration.DependencyInjection.Options;
 using IdentityServer4.Infrastructure;
 using IdentityServer4.Storage.Models;
 using Microsoft.AspNetCore.Http;
-using PostSharp.Extensibility;
+
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 
 namespace IdentityServer4.Extensions
 {
+    [GoogleTracer.Profile]
     public static class HttpResponseExtensions
     {
         public static async Task WriteJsonAsync(this HttpResponse response, object o, string contentType = null)

@@ -1,17 +1,18 @@
 ﻿using ConfigurationManager;
 using Google.Cloud.Diagnostics.Common;
 using Newtonsoft.Json;
-using PostSharp.Extensibility;
+
 using RestSharp;
 using Serilog;
 using System;
 using System.Diagnostics;
 using System.Net;
 using System.Threading.Tasks;
+using GoogleTracer;
 
 namespace Services;
 
-[Profile(AttributeTargetElements = MulticastTargets.Method)]
+[Profile]
 public class MyRestClient : IMyRestClient
 {
     private static RestClient _client;

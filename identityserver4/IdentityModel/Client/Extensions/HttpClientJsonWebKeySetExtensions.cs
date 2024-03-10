@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
+using GoogleTracer;
 using IdentityModel.Client.Messages;
 using IdentityModel.Internal;
 
@@ -14,6 +15,7 @@ namespace IdentityModel.Client.Extensions;
 /// <summary>
 /// HttpClient extentions for OIDC discovery
 /// </summary>
+[Profile]
 public static class HttpClientJsonWebKeySetExtensions
 {
     /// <summary>

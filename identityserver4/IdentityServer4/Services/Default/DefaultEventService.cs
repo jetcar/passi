@@ -4,7 +4,7 @@
 using IdentityServer4.Configuration.DependencyInjection.Options;
 using IdentityServer4.Events.Infrastructure;
 using Microsoft.AspNetCore.Http;
-using PostSharp.Extensibility;
+
 using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
@@ -15,6 +15,7 @@ namespace IdentityServer4.Services.Default
     /// The default event service
     /// </summary>
     /// <seealso cref="IdentityServer4.Services.IEventService" />
+    [GoogleTracer.Profile]
     public class DefaultEventService : IEventService
     {
         /// <summary>
@@ -55,7 +56,6 @@ namespace IdentityServer4.Services.Default
         public async Task RaiseAsync(Event evt)
         {
             if (evt == null) throw new ArgumentNullException(nameof(evt));
-
             if (CanRaiseEvent(evt))
             {
                 await PrepareEventAsync(evt);

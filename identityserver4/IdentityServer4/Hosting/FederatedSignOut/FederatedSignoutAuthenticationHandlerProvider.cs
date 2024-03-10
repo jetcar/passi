@@ -4,7 +4,7 @@
 using IdentityServer4.Configuration.DependencyInjection;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
-using PostSharp.Extensibility;
+
 using System.Threading.Tasks;
 
 namespace IdentityServer4.Hosting.FederatedSignOut
@@ -15,6 +15,7 @@ namespace IdentityServer4.Hosting.FederatedSignOut
     // we assume they are handling the federated signout in an iframe.
     // based on this assumption, we then render our federated signout iframes
     // to any current clients.
+    [GoogleTracer.Profile]
     internal class FederatedSignoutAuthenticationHandlerProvider : IAuthenticationHandlerProvider
     {
         private readonly IAuthenticationHandlerProvider _provider;

@@ -2,14 +2,14 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 using System.Collections.Generic;
-using PostSharp.Extensibility;
+using GoogleTracer;
 
 namespace IdentityModel.Client;
 
 /// <summary>
 /// Security policy for retrieving a discovery document
 /// </summary>
-[Profile(AttributeTargetElements = MulticastTargets.Method)]
+[Profile]
 public class DiscoveryPolicy
 {
     internal static readonly IAuthorityValidationStrategy DefaultAuthorityValidationStrategy = new StringComparisonAuthorityValidationStrategy();

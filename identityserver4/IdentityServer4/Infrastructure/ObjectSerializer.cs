@@ -1,26 +1,18 @@
-﻿// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
-
-using PostSharp.Extensibility;
-using System.Text.Json;
+﻿using Newtonsoft.Json;
 
 namespace IdentityServer4.Infrastructure
 {
+    [GoogleTracer.Profile]
     public static class ObjectSerializer
     {
-        private static readonly JsonSerializerOptions Options = new JsonSerializerOptions
-        {
-            IgnoreNullValues = true
-        };
-
         public static string ToString(object o)
         {
-            return JsonSerializer.Serialize(o, Options);
+            return JsonConvert.SerializeObject(o);
         }
 
         public static T FromString<T>(string value)
         {
-            return JsonSerializer.Deserialize<T>(value, Options);
+            return JsonConvert.DeserializeObject<T>(value);
         }
     }
 }

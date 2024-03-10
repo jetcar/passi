@@ -2,7 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 using Microsoft.Extensions.Primitives;
-using PostSharp.Extensibility;
+
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
@@ -11,6 +11,7 @@ using System.Linq;
 
 namespace IdentityServer4.Extensions
 {
+    [GoogleTracer.Profile]
     public static class IReadableStringCollectionExtensions
     {
         public static NameValueCollection AsNameValueCollection(this IEnumerable<KeyValuePair<string, StringValues>> collection)

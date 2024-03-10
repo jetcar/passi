@@ -17,6 +17,7 @@ namespace IdentityModel.Client.Messages;
 /// <remarks>
 /// <see href="https://datatracker.ietf.org/doc/html/rfc7591" /> and <see href="https://openid.net/specs/openid-connect-registration-1_0.html" />.
 /// </remarks>
+[GoogleTracer.Profile]
 public class DynamicClientRegistrationDocument
 {
     /// <summary>

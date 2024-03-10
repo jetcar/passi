@@ -10,6 +10,7 @@ namespace IdentityModel.Client.Messages;
 /// Models a response from a JWK endpoint
 /// </summary>
 /// <seealso cref="ProtocolResponse" />
+[GoogleTracer.Profile]
 public class JsonWebKeySetResponse : ProtocolResponse
 {
     /// <summary>

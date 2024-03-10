@@ -2,7 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 using Microsoft.Extensions.Logging;
-using PostSharp.Extensibility;
+
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -13,6 +13,7 @@ namespace IdentityServer4.Services.Default
     /// <summary>
     /// Models making HTTP requests for back-channel logout notification.
     /// </summary>
+    [GoogleTracer.Profile]
     public class DefaultBackChannelLogoutHttpClient : IBackChannelLogoutHttpClient
     {
         private readonly HttpClient _client;

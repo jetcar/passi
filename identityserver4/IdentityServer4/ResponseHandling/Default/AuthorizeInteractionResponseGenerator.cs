@@ -9,7 +9,7 @@ using IdentityServer4.ResponseHandling.Models;
 using IdentityServer4.Services;
 using IdentityServer4.Validation.Models;
 using Microsoft.Extensions.Logging;
-using PostSharp.Extensibility;
+
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -20,6 +20,7 @@ namespace IdentityServer4.ResponseHandling.Default
     /// Default logic for determining if user must login or consent when making requests to the authorization endpoint.
     /// </summary>
     /// <seealso cref="IdentityServer4.ResponseHandling.IAuthorizeInteractionResponseGenerator" />
+    [GoogleTracer.Profile]
     public class AuthorizeInteractionResponseGenerator : IAuthorizeInteractionResponseGenerator
     {
         /// <summary>

@@ -6,16 +6,16 @@ using System.Net;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
+using GoogleTracer;
 using IdentityModel.Client.Extensions;
 using IdentityModel.Internal;
-using PostSharp.Extensibility;
 
 namespace IdentityModel.Client.Messages;
 
 /// <summary>
 /// A protocol response
 /// </summary>
-[Profile(AttributeTargetElements = MulticastTargets.Method)]
+[Profile]
 public class ProtocolResponse
 {
     /// <summary>

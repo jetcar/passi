@@ -4,13 +4,13 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using PostSharp.Extensibility;
+using GoogleTracer;
 
 #pragma warning disable 1591
 
 namespace IdentityServer4.Storage.Extensions
 {
-    [Profile(AttributeTargetElements = MulticastTargets.Method)]
+    [Profile]
     public static class IEnumerableExtensions
     {
         public static bool IsNullOrEmpty<T>(this IEnumerable<T> list)

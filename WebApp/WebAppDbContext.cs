@@ -9,6 +9,7 @@ using System.Collections.Generic;
 
 namespace WebApp
 {
+    [GoogleTracer.Profile]
     public class WebAppDbContext : DbContext, IDataProtectionKeyContext
     {
         private ILogger _logger;

@@ -1,13 +1,14 @@
 ﻿using ConfigurationManager;
-using PostSharp.Extensibility;
+
 using SendGrid;
 using SendGrid.Helpers.Mail;
 using System;
 using System.Net.Http;
+using GoogleTracer;
 
 namespace Services
 {
-    [Profile(AttributeTargetElements = MulticastTargets.Method)]
+    [Profile]
     public class EmailSender : IEmailSender
     {
         private SendGridClient client;

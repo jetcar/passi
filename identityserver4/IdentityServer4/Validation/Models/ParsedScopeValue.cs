@@ -8,6 +8,7 @@ namespace IdentityServer4.Validation.Models
     /// <summary>
     /// Models a parsed scope value.
     /// </summary>
+    [GoogleTracer.Profile]
     public class ParsedScopeValue
     {
         /// <summary>

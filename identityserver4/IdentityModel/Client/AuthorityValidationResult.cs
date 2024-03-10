@@ -1,11 +1,11 @@
 ﻿using System;
-using PostSharp.Extensibility;
+using GoogleTracer;
 
 #pragma warning disable 1591
 
 namespace IdentityModel.Client;
 
-[Profile(AttributeTargetElements = MulticastTargets.Method)]
+[Profile]
 public struct AuthorityValidationResult
 {
     public static readonly AuthorityValidationResult SuccessResult = new(true, null);

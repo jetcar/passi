@@ -8,6 +8,7 @@ namespace IdentityServer4.Models.Messages
     /// <summary>
     /// Base class for data that needs to be written out as cookies.
     /// </summary>
+    [GoogleTracer.Profile]
     public class Message<TModel>
     {
         /// <summary>

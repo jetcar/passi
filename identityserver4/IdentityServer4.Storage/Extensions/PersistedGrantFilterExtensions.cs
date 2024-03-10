@@ -2,15 +2,15 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 using System;
+using GoogleTracer;
 using IdentityServer4.Storage.Stores;
-using PostSharp.Extensibility;
 
 namespace IdentityServer4.Storage.Extensions
 {
     /// <summary>
     /// Extensions for PersistedGrantFilter.
     /// </summary>
-    [Profile(AttributeTargetElements = MulticastTargets.Method)]
+    [Profile]
     public static class PersistedGrantFilterExtensions
     {
         /// <summary>

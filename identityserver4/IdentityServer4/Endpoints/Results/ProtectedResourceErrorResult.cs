@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 
 namespace IdentityServer4.Endpoints.Results
 {
+    [GoogleTracer.Profile]
     internal class ProtectedResourceErrorResult : IEndpointResult
     {
         public string Error;

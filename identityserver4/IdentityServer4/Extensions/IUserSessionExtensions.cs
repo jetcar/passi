@@ -3,7 +3,7 @@
 
 using IdentityServer4.Models.Contexts;
 using IdentityServer4.Services;
-using PostSharp.Extensibility;
+
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -12,6 +12,7 @@ namespace IdentityServer4.Extensions
     /// <summary>
     /// Extension for IUserSession.
     /// </summary>
+    [GoogleTracer.Profile]
     public static class IUserSessionExtensions
     {
         /// <summary>

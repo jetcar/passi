@@ -4,12 +4,12 @@
 using IdentityServer4.Configuration.DependencyInjection.Options;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
-using PostSharp.Extensibility;
 
 #pragma warning disable 1591
 
 namespace IdentityServer4.Hosting
 {
+    [GoogleTracer.Profile]
     public static class CorsMiddlewareExtensions
     {
         public static void ConfigureCors(this IApplicationBuilder app)

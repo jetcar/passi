@@ -7,7 +7,7 @@ using IdentityServer4.Models;
 using IdentityServer4.Storage.Models;
 using IdentityServer4.Validation.Models;
 using Microsoft.Extensions.Logging;
-using PostSharp.Extensibility;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,6 +18,7 @@ namespace IdentityServer4.Validation.Default
     /// <summary>
     /// Validates a shared secret stored in SHA256 or SHA512
     /// </summary>
+    [GoogleTracer.Profile]
     public class HashedSharedSecretValidator : ISecretValidator
     {
         private readonly ILogger _logger;

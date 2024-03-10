@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using GoogleTracer;
 
 namespace IdentityModel.Client.Messages;
 
@@ -6,6 +7,7 @@ namespace IdentityModel.Client.Messages;
 /// Request for token using authorization_code
 /// </summary>
 /// <seealso cref="TokenRequest" />
+[Profile]
 public class AuthorizationCodeTokenRequest : TokenRequest
 {
     /// <summary>

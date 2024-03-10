@@ -1,13 +1,14 @@
 ﻿using ConfigurationManager;
 using Models;
 using Newtonsoft.Json;
-using PostSharp.Extensibility;
+
 using StackExchange.Redis;
 using System;
+using GoogleTracer;
 
 namespace Repos
 {
-    [Profile(AttributeTargetElements = MulticastTargets.Method)]
+    [Profile]
     public class RedisService : IRedisService
     {
         private readonly ConnectionMultiplexer _redis;

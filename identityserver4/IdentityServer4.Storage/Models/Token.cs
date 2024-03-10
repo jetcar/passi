@@ -5,15 +5,15 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using GoogleTracer;
 using IdentityModel;
-using PostSharp.Extensibility;
 
 namespace IdentityServer4.Storage.Models
 {
     /// <summary>
     /// Models a token.
     /// </summary>
-    [Profile(AttributeTargetElements = MulticastTargets.Method)]
+    [Profile]
     public class Token
     {
         /// <summary>

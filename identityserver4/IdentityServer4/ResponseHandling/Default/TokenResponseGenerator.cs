@@ -11,7 +11,7 @@ using IdentityServer4.Storage.Stores;
 using IdentityServer4.Validation;
 using IdentityServer4.Validation.Models;
 using Microsoft.Extensions.Logging;
-using PostSharp.Extensibility;
+
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -22,6 +22,7 @@ namespace IdentityServer4.ResponseHandling.Default
     /// The default token response generator
     /// </summary>
     /// <seealso cref="IdentityServer4.ResponseHandling.ITokenResponseGenerator" />
+    [GoogleTracer.Profile]
     public class TokenResponseGenerator : ITokenResponseGenerator
     {
         /// <summary>

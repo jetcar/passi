@@ -5,13 +5,13 @@ using IdentityServer4.EntityFramework.Storage.Entities;
 using IdentityServer4.EntityFramework.Storage.Options;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using PostSharp.Extensibility;
 
 namespace IdentityServer4.EntityFramework.Storage.Extensions
 {
     /// <summary>
     /// Extension methods to define the database schema for the configuration and operational data stores.
     /// </summary>
+    [GoogleTracer.Profile]
     public static class ModelBuilderExtensions
     {
         private static EntityTypeBuilder<TEntity> ToTable<TEntity>(this EntityTypeBuilder<TEntity> entityTypeBuilder, TableConfiguration configuration)

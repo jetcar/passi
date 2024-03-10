@@ -6,6 +6,7 @@ namespace IdentityModel.Client.Messages;
 /// <summary>
 /// Request for OIDC userinfo
 /// </summary>
+[GoogleTracer.Profile]
 public class UserInfoRequest : ProtocolRequest
 {
     /// <summary>

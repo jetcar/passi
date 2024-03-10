@@ -5,16 +5,16 @@ using System;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using GoogleTracer;
 using IdentityModel.Client.Extensions;
 using IdentityModel.Client.Messages;
-using PostSharp.Extensibility;
 
 namespace IdentityModel.Client;
 
 /// <summary>
 /// Client library for the OpenID Connect / OAuth 2 token endpoint
 /// </summary>
-[Profile(AttributeTargetElements = MulticastTargets.Method)]
+[Profile]
 public class TokenClient
 {
     private readonly Func<HttpMessageInvoker> _client;

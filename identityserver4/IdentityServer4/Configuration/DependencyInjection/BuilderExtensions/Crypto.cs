@@ -6,7 +6,7 @@ using IdentityServer4.Stores;
 using IdentityServer4.Stores.InMemory;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
-using PostSharp.Extensibility;
+
 using System;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
@@ -16,6 +16,7 @@ namespace IdentityServer4.Configuration.DependencyInjection.BuilderExtensions
     /// <summary>
     /// Builder extension methods for registering crypto services
     /// </summary>
+    [GoogleTracer.Profile]
     public static class IdentityServerBuilderExtensionsCrypto
     {
         /// <summary>

@@ -3,13 +3,13 @@
 
 using AutoMapper;
 using IdentityServer4.Storage.Models;
-using PostSharp.Extensibility;
 
 namespace IdentityServer4.EntityFramework.Storage.Mappers
 {
     /// <summary>
     /// Extension methods to map to/from entity/model for persisted grants.
     /// </summary>
+    [GoogleTracer.Profile]
     public static class PersistedGrantMappers
     {
         static PersistedGrantMappers()

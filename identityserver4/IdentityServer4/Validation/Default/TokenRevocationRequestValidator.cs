@@ -6,7 +6,7 @@ using IdentityServer4.Extensions;
 using IdentityServer4.Storage.Models;
 using IdentityServer4.Validation.Models;
 using Microsoft.Extensions.Logging;
-using PostSharp.Extensibility;
+
 using System;
 using System.Collections.Specialized;
 using System.Threading.Tasks;
@@ -17,6 +17,7 @@ namespace IdentityServer4.Validation.Default
     /// The token revocation request validator
     /// </summary>
     /// <seealso cref="IdentityServer4.Validation.ITokenRevocationRequestValidator" />
+    [GoogleTracer.Profile]
     public class TokenRevocationRequestValidator : ITokenRevocationRequestValidator
     {
         private readonly ILogger _logger;

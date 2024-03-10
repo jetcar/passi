@@ -13,7 +13,6 @@ using System.Threading.Tasks;
 
 namespace IdentityServer4.Services.Default
 {
-    [GoogleTracer.Profile]
     internal class OidcReturnUrlParser : IReturnUrlParser
     {
         private readonly IAuthorizeRequestValidator _validator;

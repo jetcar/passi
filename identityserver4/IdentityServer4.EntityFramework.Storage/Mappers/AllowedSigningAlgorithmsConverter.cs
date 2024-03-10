@@ -8,7 +8,6 @@ using AutoMapper;
 
 namespace IdentityServer4.EntityFramework.Storage.Mappers
 {
-    [GoogleTracer.Profile]
     internal class AllowedSigningAlgorithmsConverter :
             IValueConverter<ICollection<string>, string>,
             IValueConverter<string, ICollection<string>>

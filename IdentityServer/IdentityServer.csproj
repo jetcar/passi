@@ -8,10 +8,7 @@
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 		<OutputPath>publish</OutputPath>
 		<BaseOutputPath>publish</BaseOutputPath>
-		<!-- 👇 Add this to enable C#12 preview features -->
-		<LangVersion>preview</LangVersion>
-		<!-- 👇 Enable the interceptors feature -->
-		<Features>InterceptorsPreview</Features>
+
 	</PropertyGroup>
 
 	<ItemGroup>

@@ -15,7 +15,6 @@ namespace IdentityServer4.Extensions
     /// <summary>
     /// Extensions for AuthenticationProperties
     /// </summary>
-    [GoogleTracer.Profile]
     public static class AuthenticationPropertiesExtensions
     {
         internal const string SessionIdKey = "session_id";

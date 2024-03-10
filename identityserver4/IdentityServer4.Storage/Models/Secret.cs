@@ -9,7 +9,6 @@ namespace IdentityServer4.Storage.Models
     /// <summary>
     /// Models a client secret with identifier and expiration
     /// </summary>
-    [Profile]
     public class Secret
     {
         /// <summary>

@@ -12,7 +12,6 @@ namespace IdentityServer4.Storage.Models
     /// Models access to an API scope
     /// </summary>
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}")]
-    [GoogleTracer.Profile]
     public class ApiScope : Resource
     {
         private string DebuggerDisplay => Name ?? $"{{{typeof(ApiScope)}}}";
@@ -80,10 +79,5 @@ namespace IdentityServer4.Storage.Models
         /// Specifies whether the user can de-select the scope on the consent screen. Defaults to false.
         /// </summary>
         public bool Required { get; set; } = false;
-
-        /// <summary>
-        /// Specifies whether the consent screen will emphasize this scope. Use this setting for sensitive or important scopes. Defaults to false.
-        /// </summary>
-        public bool Emphasize { get; set; } = false;
     }
 }

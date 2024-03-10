@@ -28,7 +28,8 @@ namespace GoogleTracer
             {
                 ServiceOptions = new TraceServiceOptions()
                 {
-                    ProjectId = projectId
+                    ProjectId = projectId,
+                    Options = TraceOptions.Create(0.1d, BufferOptions.TimedBuffer(TimeSpan.FromSeconds(5)))
                 },
                 TraceFallbackPredicate = TraceDecisionPredicate.Create(request =>
                 {
@@ -66,7 +67,7 @@ namespace GoogleTracer
                 if (context.Target == null)
                     targetMethodName = context.TargetType.Name + " " + context.TargetName;
                 else
-                    targetMethodName = context.Target.ToString() + " " + context.TargetMethod.Name;
+                    targetMethodName = context.Target.GetType().Name + " " + context.TargetName;
                 using (CurrentTracer.StartSpan(targetMethodName))
                     context.Proceed();
             }
@@ -78,7 +79,7 @@ namespace GoogleTracer
 
         private static bool IsPropertyMethod(MethodAdviceContext context)
         {
-            return context.TargetMethod.IsSpecialName && (context.TargetMethod.Name.StartsWith("get_") || context.TargetMethod.Name.StartsWith("set_"));
+            return context.TargetMethod.IsSpecialName && (context.TargetMethod.Name.StartsWith("get_") || context.TargetMethod.Name.StartsWith("set_") || context.TargetMethod.Name.StartsWith(".ctor"));
         }
     }
 }

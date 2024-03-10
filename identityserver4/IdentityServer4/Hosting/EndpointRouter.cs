@@ -11,7 +11,6 @@ using System.Collections.Generic;
 
 namespace IdentityServer4.Hosting
 {
-    [GoogleTracer.Profile]
     public class EndpointRouter : IEndpointRouter
     {
         private readonly IEnumerable<Endpoint> _endpoints;

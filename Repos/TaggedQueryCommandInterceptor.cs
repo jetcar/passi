@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 
 namespace Repos
 {
-    [GoogleTracer.Profile]
     public class TaggedQueryCommandInterceptor : DbCommandInterceptor
     {
         private ILogger _logger;

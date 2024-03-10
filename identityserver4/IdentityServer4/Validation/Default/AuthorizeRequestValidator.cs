@@ -20,7 +20,6 @@ using System.Threading.Tasks;
 
 namespace IdentityServer4.Validation.Default
 {
-    [GoogleTracer.Profile]
     public class AuthorizeRequestValidator : IAuthorizeRequestValidator
     {
         private readonly IdentityServerOptions _options;

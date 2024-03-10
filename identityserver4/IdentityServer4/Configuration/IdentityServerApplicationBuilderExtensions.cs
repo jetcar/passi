@@ -20,7 +20,6 @@ namespace IdentityServer4.Configuration
     /// <summary>
     /// Pipeline extension methods for adding IdentityServer
     /// </summary>
-    [GoogleTracer.Profile]
     public static class IdentityServerApplicationBuilderExtensions
     {
         /// <summary>

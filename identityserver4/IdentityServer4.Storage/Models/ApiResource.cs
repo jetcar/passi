@@ -12,7 +12,6 @@ namespace IdentityServer4.Storage.Models
     /// Models a web API resource.
     /// </summary>
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}")]
-    [GoogleTracer.Profile]
     public class ApiResource : Resource
     {
         private string DebuggerDisplay => Name ?? $"{{{typeof(ApiResource)}}}";

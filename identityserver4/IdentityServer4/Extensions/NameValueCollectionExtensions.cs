@@ -10,7 +10,6 @@ using System.Text.Encodings.Web;
 
 namespace IdentityServer4.Extensions
 {
-    [GoogleTracer.Profile]
     public static class NameValueCollectionExtensions
     {
         public static IDictionary<string, string[]> ToFullDictionary(this NameValueCollection source)

@@ -11,7 +11,6 @@ namespace IdentityServer4.Extensions
     /// <summary>
     /// Extensions for Resource
     /// </summary>
-    [GoogleTracer.Profile]
     public static class ResourceExtensions
     {
         /// <summary>

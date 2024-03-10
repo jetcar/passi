@@ -10,7 +10,6 @@ using GoogleTracer;
 
 namespace IdentityServer4.Storage.Extensions
 {
-    [Profile]
     public static class IEnumerableExtensions
     {
         public static bool IsNullOrEmpty<T>(this IEnumerable<T> list)

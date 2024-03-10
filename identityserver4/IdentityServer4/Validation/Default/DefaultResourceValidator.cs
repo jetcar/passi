@@ -16,7 +16,6 @@ namespace IdentityServer4.Validation.Default
     /// <summary>
     /// Default implementation of IResourceValidator.
     /// </summary>
-    [GoogleTracer.Profile]
     public class DefaultResourceValidator : IResourceValidator
     {
         private readonly ILogger _logger;

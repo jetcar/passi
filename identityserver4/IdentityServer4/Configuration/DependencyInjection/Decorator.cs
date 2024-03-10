@@ -5,7 +5,6 @@ using System;
 
 namespace IdentityServer4.Configuration.DependencyInjection
 {
-    [GoogleTracer.Profile]
     public class Decorator<TService>
     {
         public TService Instance { get; set; }
@@ -16,7 +15,6 @@ namespace IdentityServer4.Configuration.DependencyInjection
         }
     }
 
-    [GoogleTracer.Profile]
     internal class Decorator<TService, TImpl> : Decorator<TService>
             where TImpl : class, TService
     {

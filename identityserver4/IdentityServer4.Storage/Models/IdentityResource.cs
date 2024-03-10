@@ -13,7 +13,6 @@ namespace IdentityServer4.Storage.Models
     /// Models a user identity resource.
     /// </summary>
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}")]
-    [Profile]
     public class IdentityResource : Resource
     {
         private string DebuggerDisplay => Name ?? $"{{{typeof(IdentityResource)}}}";

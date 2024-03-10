@@ -13,7 +13,6 @@ namespace IdentityServer4.Storage.Models
     /// <summary>
     /// Models a token.
     /// </summary>
-    [Profile]
     public class Token
     {
         /// <summary>

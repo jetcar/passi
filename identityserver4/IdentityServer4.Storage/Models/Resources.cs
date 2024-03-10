@@ -7,7 +7,6 @@ namespace IdentityServer4.Storage.Models
     /// <summary>
     /// Models a collection of identity and API resources.
     /// </summary>
-    [Profile]
     public class Resources
     {
         /// <summary>

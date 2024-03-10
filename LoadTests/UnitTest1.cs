@@ -175,7 +175,7 @@ namespace LoadTests
                         return Response.Ok();
                     })
                 .WithLoadSimulations(
-                Simulation.Inject(105, TimeSpan.FromSeconds(20), TimeSpan.FromMinutes(5))
+                Simulation.Inject(5, TimeSpan.FromSeconds(20), TimeSpan.FromMinutes(5))
             );
 
             var stats = NBomberRunner

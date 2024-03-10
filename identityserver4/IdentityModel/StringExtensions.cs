@@ -12,7 +12,6 @@ namespace IdentityModel;
 /// <summary>
 /// Extensions for strings
 /// </summary>
-[Profile]
 public static class StringExtensions
 {
     /// <summary>

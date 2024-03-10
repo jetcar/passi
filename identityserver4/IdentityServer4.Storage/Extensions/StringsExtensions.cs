@@ -6,7 +6,6 @@ using GoogleTracer;
 
 namespace IdentityServer4.Storage.Extensions
 {
-    [Profile]
     internal static class StringExtensions
     {
         public static bool IsMissing(this string value)

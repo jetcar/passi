@@ -12,7 +12,6 @@ namespace IdentityServer4.Validation.Default
     /// Default client configuration validator
     /// </summary>
     /// <seealso cref="IdentityServer4.Validation.IClientConfigurationValidator" />
-    [GoogleTracer.Profile]
     public class DefaultClientConfigurationValidator : IClientConfigurationValidator
     {
         private readonly IdentityServerOptions _options;

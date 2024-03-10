@@ -11,7 +11,6 @@ namespace IdentityServer4.Storage.Models
     /// <summary>
     /// Models a refresh token.
     /// </summary>
-    [Profile]
     public class RefreshToken
     {
         /// <summary>

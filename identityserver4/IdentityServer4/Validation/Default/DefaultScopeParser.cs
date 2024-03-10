@@ -12,7 +12,6 @@ namespace IdentityServer4.Validation.Default
     /// <summary>
     /// Default implementation of IScopeParser.
     /// </summary>
-    [GoogleTracer.Profile]
     public class DefaultScopeParser : IScopeParser
     {
         private readonly ILogger<DefaultScopeParser> _logger;

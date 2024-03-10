@@ -10,7 +10,6 @@ namespace IdentityServer4.Validation.Default
     /// <summary>
     /// Default custom request validator
     /// </summary>
-    [GoogleTracer.Profile]
     public class DefaultCustomAuthorizeRequestValidator : ICustomAuthorizeRequestValidator
     {
         /// <summary>

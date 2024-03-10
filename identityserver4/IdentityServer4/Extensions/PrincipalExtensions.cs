@@ -13,7 +13,6 @@ namespace IdentityServer4.Extensions
     /// <summary>
     /// Extension methods for <see cref="System.Security.Principal.IPrincipal"/> and <see cref="System.Security.Principal.IIdentity"/> .
     /// </summary>
-    [GoogleTracer.Profile]
     public static class PrincipalExtensions
     {
         /// <summary>

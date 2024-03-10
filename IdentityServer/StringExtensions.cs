@@ -10,7 +10,6 @@ using System.Text.Encodings.Web;
 
 namespace IdentityServer;
 
-[GoogleTracer.Profile]
 internal static class StringExtensions
 {
     public static bool IsPresent(this string value)

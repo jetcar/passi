@@ -11,7 +11,6 @@ namespace IdentityModel;
 /// <summary>
 /// Compares two instances of Claim
 /// </summary>
-[Profile]
 public class ClaimComparer : EqualityComparer<Claim>
 {
     /// <summary>

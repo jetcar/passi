@@ -14,7 +14,6 @@ using System.Text;
 
 namespace IdentityServer4.Extensions
 {
-    [GoogleTracer.Profile]
     public static class ValidatedAuthorizeRequestExtensions
     {
         public static void RemovePrompt(this ValidatedAuthorizeRequest request)

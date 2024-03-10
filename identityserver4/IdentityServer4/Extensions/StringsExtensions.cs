@@ -12,7 +12,6 @@ using System.Text.Encodings.Web;
 
 namespace IdentityServer4.Extensions
 {
-    [GoogleTracer.Profile]
     public static class StringExtensions
     {
         public static string ToSpaceSeparatedString(this IEnumerable<string> list)

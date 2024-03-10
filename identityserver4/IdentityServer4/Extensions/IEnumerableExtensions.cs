@@ -6,7 +6,6 @@ using System.Linq;
 
 namespace IdentityServer4.Extensions
 {
-    [GoogleTracer.Profile]
     public static class IEnumerableExtensions
     {
         public static bool IsNullOrEmptyList<T>(this IEnumerable<T> list)

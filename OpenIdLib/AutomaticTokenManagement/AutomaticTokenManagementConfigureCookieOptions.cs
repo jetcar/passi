@@ -7,7 +7,6 @@ using Repos;
 
 namespace OpenIdLib.AutomaticTokenManagement
 {
-    [Profile]
     public class AutomaticTokenManagementConfigureCookieOptions : IConfigureNamedOptions<CookieAuthenticationOptions>
     {
         private readonly AuthenticationScheme _scheme;

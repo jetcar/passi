@@ -9,6 +9,8 @@ using IdentityServer4.Storage.Models;
 using IdentityServer4.Storage.Stores;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using RedisClient;
+using static System.Formats.Asn1.AsnWriter;
 
 namespace IdentityServer4.EntityFramework.Storage.Stores
 {
@@ -24,6 +26,8 @@ namespace IdentityServer4.EntityFramework.Storage.Stores
         /// </summary>
         protected readonly IConfigurationDbContext Context;
 
+        private IRedisService _redisService;
+
         /// <summary>
         /// The logger.
         /// </summary>
@@ -35,10 +39,11 @@ namespace IdentityServer4.EntityFramework.Storage.Stores
         /// <param name="context">The context.</param>
         /// <param name="logger">The logger.</param>
         /// <exception cref="ArgumentNullException">context</exception>
-        public ResourceStore(IConfigurationDbContext context, ILogger<ResourceStore> logger)
+        public ResourceStore(IConfigurationDbContext context, ILogger<ResourceStore> logger, IRedisService redisService)
         {
             Context = context ?? throw new ArgumentNullException(nameof(context));
             Logger = logger;
+            _redisService = redisService;
         }
 
         /// <summary>
@@ -50,9 +55,14 @@ namespace IdentityServer4.EntityFramework.Storage.Stores
         {
             if (apiResourceNames == null) throw new ArgumentNullException(nameof(apiResourceNames));
 
+            var resourceNames = apiResourceNames as string[] ?? apiResourceNames.ToArray();
+            var redisValue = _redisService.Get<ApiResource[]>(string.Join(",", resourceNames.ToArray()));
+            if (redisValue != null)
+                return redisValue;
+
             var query =
                 from apiResource in Context.ApiResources
-                where apiResourceNames.Contains(apiResource.Name)
+                where resourceNames.Contains(apiResource.Name)
                 select apiResource;
 
             var apis = query
@@ -63,7 +73,7 @@ namespace IdentityServer4.EntityFramework.Storage.Stores
                 .AsNoTracking();
 
             var result = (await apis.ToArrayAsync())
-                .Where(x => apiResourceNames.Contains(x.Name))
+                .Where(x => resourceNames.Contains(x.Name))
                 .Select(x => x.ToModel()).ToArray();
 
             if (result.Any())
@@ -74,6 +84,7 @@ namespace IdentityServer4.EntityFramework.Storage.Stores
             {
                 Logger.LogDebug("Did not find {apis} API resource in database", apiResourceNames);
             }
+            _redisService.Add(string.Join(",", resourceNames), result, new TimeSpan(1, 0, 0));
 
             return result;
         }
@@ -86,6 +97,9 @@ namespace IdentityServer4.EntityFramework.Storage.Stores
         public virtual async Task<IEnumerable<ApiResource>> FindApiResourcesByScopeNameAsync(IEnumerable<string> scopeNames)
         {
             var names = scopeNames.ToArray();
+            var redisValue = _redisService.Get<ApiResource[]>(string.Join(",", names));
+            if (redisValue != null)
+                return redisValue;
 
             var query =
                 from api in Context.ApiResources
@@ -101,6 +115,7 @@ namespace IdentityServer4.EntityFramework.Storage.Stores
             var results = (await apis.ToArrayAsync())
                 .Where(api => api.Scopes.Any(x => names.Contains(x.Scope)));
             var models = results.Select(x => x.ToModel()).ToArray();
+            _redisService.Add(string.Join(",", names), models, new TimeSpan(1, 0, 0));
 
             Logger.LogDebug("Found {apis} API resources in database", models.Select(x => x.Name));
 
@@ -115,7 +130,9 @@ namespace IdentityServer4.EntityFramework.Storage.Stores
         public virtual async Task<IEnumerable<IdentityResource>> FindIdentityResourcesByScopeNameAsync(IEnumerable<string> scopeNames)
         {
             var scopes = scopeNames.ToArray();
-
+            var redisValue = _redisService.Get<IdentityResource[]>(string.Join(",", scopes));
+            if (redisValue != null)
+                return redisValue;
             var query =
                 from identityResource in Context.IdentityResources
                 where scopes.Contains(identityResource.Name)
@@ -131,6 +148,7 @@ namespace IdentityServer4.EntityFramework.Storage.Stores
             Logger.LogDebug("Found {scopes} identity scopes in database", results.Select(x => x.Name));
 
             var findIdentityResourcesByScopeNameAsync = results.Select(x => x.ToModel()).ToArray();
+            _redisService.Add(string.Join(",", scopes), findIdentityResourcesByScopeNameAsync, new TimeSpan(1, 0, 0));
             return findIdentityResourcesByScopeNameAsync;
         }
 
@@ -142,6 +160,9 @@ namespace IdentityServer4.EntityFramework.Storage.Stores
         public virtual async Task<IEnumerable<ApiScope>> FindApiScopesByNameAsync(IEnumerable<string> scopeNames)
         {
             var scopes = scopeNames.ToArray();
+            var redisValue = _redisService.Get<ApiScope[]>(string.Join(",", scopes));
+            if (redisValue != null)
+                return redisValue;
 
             var query =
                 from scope in Context.ApiScopes
@@ -158,7 +179,10 @@ namespace IdentityServer4.EntityFramework.Storage.Stores
 
             Logger.LogDebug("Found {scopes} scopes in database", results.Select(x => x.Name));
 
-            return results.Select(x => x.ToModel()).ToArray();
+            var findApiScopesByNameAsync = results.Select(x => x.ToModel()).ToArray();
+            _redisService.Add(string.Join(",", scopes), findApiScopesByNameAsync, new TimeSpan(1, 0, 0));
+
+            return findApiScopesByNameAsync;
         }
 
         /// <summary>
@@ -167,6 +191,10 @@ namespace IdentityServer4.EntityFramework.Storage.Stores
         /// <returns></returns>
         public virtual async Task<Resources> GetAllResourcesAsync()
         {
+            var redisValue = _redisService.Get<Resources>("");
+            if (redisValue != null)
+                return redisValue;
+
             var identity = Context.IdentityResources
               .Include(x => x.UserClaims)
               .Include(x => x.Properties);
@@ -191,6 +219,7 @@ namespace IdentityServer4.EntityFramework.Storage.Stores
             Logger.LogDebug("Found {scopes} as all scopes, and {apis} as API resources",
                 result.IdentityResources.Select(x => x.Name).Union(result.ApiScopes.Select(x => x.Name)),
                 result.ApiResources.Select(x => x.Name));
+            _redisService.Add("", result, new TimeSpan(1, 0, 0));
 
             return result;
         }

@@ -50,10 +50,8 @@ namespace GoogleTracer
                     return true;
                 }, true)
             });
-            services.AddGoogleDiagnostics(projectId, name);
+
             services.AddHttpClient("tracesOutgoing").AddOutgoingGoogleTraceHandler();
-            services.AddSingleton<Action<HttpResponse, ITraceContext>>(
-                (response, traceContext) => response.Headers.Add("custom_trace_id", traceContext.TraceId));
 
             services.AddSingleton<Action<HttpRequestMessage, ITraceContext>>(
                 (request, traceContext) => request.Headers.Add("custom_trace_id", traceContext.TraceId));

@@ -12,11 +12,7 @@ using Serilog.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using EFCoreSecondLevelCacheInterceptor;
 using GoogleTracer;
-using MessagePack;
-using MessagePack.Formatters;
-using MessagePack.Resolvers;
 
 namespace Repos
 {
@@ -86,62 +82,17 @@ namespace Repos
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseModel(PassiDbContextModel.Instance);
-            optionsBuilder.AddInterceptors(new TaggedQueryCommandInterceptor(_logger));
             if (string.IsNullOrEmpty(_connectionString))
             {
                 var trustMode = _appSetting["DbSslMode"] == "Require" ? "Trust Server Certificate=true;" : "";
                 _connectionString = $"host={_appSetting["DbHost"]};port={_appSetting["DbPort"]};database={_appSetting["DbName"]};user id={_appSetting["DbUser"]};password={_appSetting["DbPassword"]};Ssl Mode={_appSetting["DbSslMode"]};{trustMode}";
             }
-            var dbServices = new ServiceCollection()
-                .AddEntityFrameworkNpgsql();
-
-            const string providerName1 = "Redis2";
-            dbServices.AddEFSecondLevelCache(options =>
-                options.UseEasyCachingCoreProvider(providerName1, isHybridCache: false).DisableLogging(false).UseCacheKeyPrefix("EF_")
-                    // Fallback on db if the caching provider fails (for example, if Redis is down).
-                    .UseDbCallsIfCachingProviderIsDown(TimeSpan.FromMinutes(1))
-            );
-            dbServices.AddEntityFrameworkNpgsqlNodaTime();
-            // More info: https://easycaching.readthedocs.io/en/latest/Redis/
-            dbServices.AddEasyCaching(option =>
-            {
-                option.UseRedis(config =>
-                    {
-                        config.DBConfig.AllowAdmin = true;
-                        config.DBConfig.SyncTimeout = 5000;
-                        config.DBConfig.AsyncTimeout = 5000;
-                        config.DBConfig.Endpoints.Add(new EasyCaching.Core.Configurations.ServerEndPoint(_appSetting["redis"], Convert.ToInt32(_appSetting["redisPort"])));
-                        config.EnableLogging = true;
-                        config.SerializerName = "Pack";
-                        config.DBConfig.KeyPrefix = "passi";
-                        config.DBConfig.ConnectionTimeout = 5000;
-                    }, providerName1)
-                    .WithMessagePack(so =>
-                        {
-                            so.EnableCustomResolver = true;
-                            so.CustomResolvers = CompositeResolver.Create(
-                                new IMessagePackFormatter[]
-                                {
-                                    DBNullFormatter.Instance, // This is necessary for the null values
-                                },
-                                new IFormatterResolver[]
-                                {
-                                    NativeDateTimeResolver.Instance,
-                                    ContractlessStandardResolver.Instance,
-                                    StandardResolverAllowPrivate.Instance,
-                                });
-                        },
-                        "Pack");
-            });
-
-            var serviceProvider = dbServices
-                .BuildServiceProvider();
 
             optionsBuilder.UseNpgsql(_connectionString, o =>
             {
                 o.UseNodaTime();
                 o.EnableRetryOnFailure(30, TimeSpan.FromSeconds(2), null);
-            }).UseInternalServiceProvider(serviceProvider);
+            });
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

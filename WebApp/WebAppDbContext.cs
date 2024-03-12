@@ -47,14 +47,11 @@ namespace WebApp
             //optionsBuilder.AddInterceptors(new TaggedQueryCommandInterceptor(_logger));
             _connectionString = $"host={_appSetting["DbHost"]};port={_appSetting["DbPort"]};database={_appSetting["WebAppDbName"]};user id={_appSetting["DbUser"]};password={_appSetting["DbPassword"]};Ssl Mode={_appSetting["DbSslMode"]};{trustMode}";
 
-            var serviceProvider = new ServiceCollection()
-                .AddEntityFrameworkNpgsql()
-                .BuildServiceProvider();
             optionsBuilder.UseNpgsql(_connectionString, c =>
             {
                 c.MigrationsAssembly(typeof(WebAppDbContext).Assembly.FullName);
                 c.EnableRetryOnFailure(30, TimeSpan.FromSeconds(2), null);
-            }).UseInternalServiceProvider(serviceProvider);
+            });
         }
     }
 }

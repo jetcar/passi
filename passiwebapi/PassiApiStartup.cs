@@ -20,6 +20,7 @@ using Serilog.Events;
 using Services;
 using System;
 using System.Linq;
+using RedisClient;
 using WebApiDto.Auth.Dto;
 
 namespace passi_webapi

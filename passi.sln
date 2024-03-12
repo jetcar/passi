@@ -51,6 +51,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IdentityServer4.EntityFrame
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "IdentityServer", "IdentityServer", "{05C62086-6E2C-4978-A32C-456017BAC894}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RedisClient", "..\RedisClient\RedisClient.csproj", "{BFB5C51F-E154-4159-8875-91DC756C99DA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -301,6 +303,18 @@ Global
 		{8773678D-1950-4DEA-A51C-961970919C6F}.Release|iPhone.Build.0 = Release|Any CPU
 		{8773678D-1950-4DEA-A51C-961970919C6F}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
 		{8773678D-1950-4DEA-A51C-961970919C6F}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
+		{BFB5C51F-E154-4159-8875-91DC756C99DA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BFB5C51F-E154-4159-8875-91DC756C99DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BFB5C51F-E154-4159-8875-91DC756C99DA}.Debug|iPhone.ActiveCfg = Debug|Any CPU
+		{BFB5C51F-E154-4159-8875-91DC756C99DA}.Debug|iPhone.Build.0 = Debug|Any CPU
+		{BFB5C51F-E154-4159-8875-91DC756C99DA}.Debug|iPhoneSimulator.ActiveCfg = Debug|Any CPU
+		{BFB5C51F-E154-4159-8875-91DC756C99DA}.Debug|iPhoneSimulator.Build.0 = Debug|Any CPU
+		{BFB5C51F-E154-4159-8875-91DC756C99DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BFB5C51F-E154-4159-8875-91DC756C99DA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BFB5C51F-E154-4159-8875-91DC756C99DA}.Release|iPhone.ActiveCfg = Release|Any CPU
+		{BFB5C51F-E154-4159-8875-91DC756C99DA}.Release|iPhone.Build.0 = Release|Any CPU
+		{BFB5C51F-E154-4159-8875-91DC756C99DA}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
+		{BFB5C51F-E154-4159-8875-91DC756C99DA}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -326,6 +340,7 @@ Global
 		{CF967A08-0C41-4606-B3DD-75753D98CC83} = {05C62086-6E2C-4978-A32C-456017BAC894}
 		{8773678D-1950-4DEA-A51C-961970919C6F} = {05C62086-6E2C-4978-A32C-456017BAC894}
 		{05C62086-6E2C-4978-A32C-456017BAC894} = {9F57F958-769A-4C93-99DA-FD04477199B8}
+		{BFB5C51F-E154-4159-8875-91DC756C99DA} = {9F57F958-769A-4C93-99DA-FD04477199B8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E045AA5D-71D4-4E94-B382-7DE4372903CC}

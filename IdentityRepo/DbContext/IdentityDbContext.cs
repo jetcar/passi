@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using ConfigurationManager;
-using EFCoreSecondLevelCacheInterceptor;
 using IdentityServer4.EntityFramework.Storage.Entities;
 using IdentityServer4.EntityFramework.Storage.Interfaces;
 using MessagePack;
@@ -71,55 +70,10 @@ namespace IdentityRepo.DbContext
             var connectionString = $"host={_appSetting["DbHost"]};port={_appSetting["DbPort"]};database={_appSetting["IdentityDbName"]};user id={_appSetting["DbUser"]};password={_appSetting["DbPassword"]};Ssl Mode={_appSetting["DbSslMode"]};{trustMode}";
             Console.WriteLine(connectionString);
 
-            var dbServices = new ServiceCollection()
-                .AddEntityFrameworkNpgsql();
-
-            const string providerName1 = "Redis1";
-            dbServices.AddEFSecondLevelCache(options =>
-                options.UseEasyCachingCoreProvider(providerName1, isHybridCache: false).DisableLogging(false).UseCacheKeyPrefix("EF_")
-                    // Fallback on db if the caching provider fails (for example, if Redis is down).
-                    .UseDbCallsIfCachingProviderIsDown(TimeSpan.FromMinutes(1))
-            );
-
-            // More info: https://easycaching.readthedocs.io/en/latest/Redis/
-            dbServices.AddEasyCaching(option =>
-            {
-                option.UseRedis(config =>
-                    {
-                        config.DBConfig.AllowAdmin = true;
-                        config.DBConfig.SyncTimeout = 5000;
-                        config.DBConfig.AsyncTimeout = 5000;
-                        config.DBConfig.Endpoints.Add(new EasyCaching.Core.Configurations.ServerEndPoint(_appSetting["redis"], Convert.ToInt32(_appSetting["redisPort"])));
-                        config.EnableLogging = true;
-                        config.DBConfig.KeyPrefix = "passi";
-                        config.SerializerName = "Pack";
-                        config.DBConfig.ConnectionTimeout = 5000;
-                    }, providerName1)
-                    .WithMessagePack(so =>
-                        {
-                            so.EnableCustomResolver = true;
-                            so.CustomResolvers = CompositeResolver.Create(
-                                new IMessagePackFormatter[]
-                                {
-                                    DBNullFormatter.Instance, // This is necessary for the null values
-                                },
-                                new IFormatterResolver[]
-                                {
-                                    NativeDateTimeResolver.Instance,
-                                    ContractlessStandardResolver.Instance,
-                                    StandardResolverAllowPrivate.Instance,
-                                });
-                        },
-                        "Pack");
-            });
-
-            var serviceProvider = dbServices
-                .BuildServiceProvider();
-
             optionsBuilder.UseNpgsql(connectionString, o =>
             {
                 o.EnableRetryOnFailure(30, TimeSpan.FromSeconds(2), null);
-            }).UseInternalServiceProvider(serviceProvider);
+            });
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

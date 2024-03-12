@@ -31,7 +31,7 @@ using IdentityServer4.EntityFramework;
 using IdentityServer4.EntityFramework.Storage.Entities;
 using IdentityServer4.EntityFramework.Storage.Mappers;
 using IdentityServer4.Storage.Models;
-
+using RedisClient;
 using TraceServiceOptions = Google.Cloud.Diagnostics.Common.TraceServiceOptions;
 
 namespace IdentityServer
@@ -57,6 +57,7 @@ namespace IdentityServer
             //services.AddControllersWithViews();
             services.AddSingleton<AppSetting>();
             services.AddSingleton<IMyRestClient, MyRestClient>();
+            services.AddSingleton<IRedisService, RedisService>();
             services.AddScoped<IdentityDbContext>();
             services.AddScoped<IIdentityClientsRepository, IdentityClientsRepository>();
             services.AddSingleton<IStartupFilter, MigrationStartupFilter<IdentityDbContext>>();
@@ -66,7 +67,6 @@ namespace IdentityServer
             Tracer.SetupTracer(services, projectId, "Identity");
 
             byte[] certData = File.ReadAllBytes("/myapp/cert/your_certificate.pfx");
-
             services.AddIdentityServer(options =>
                 {
                     options.UserInteraction = new UserInteractionOptions() { ConsentUrl = "/Account/Login", LoginUrl = "/Account/Login" };

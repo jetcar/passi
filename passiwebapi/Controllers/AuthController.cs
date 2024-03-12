@@ -5,7 +5,6 @@ using Newtonsoft.Json;
 using NodaTime;
 
 using Repos;
-using Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,7 +17,7 @@ namespace passi_webapi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [PassiProfile]
+    [Profile]
     public class AuthController : ControllerBase
     {
         private ISessionsRepository _sessionsRepository;
@@ -33,15 +32,7 @@ namespace passi_webapi.Controllers
         [HttpGet, Route("Cancel")]
         public IActionResult Cancel([FromQuery] Guid SessionId)
         {
-            var strategy = _sessionsRepository.GetExecutionStrategy();
-            strategy.Execute(() =>
-            {
-                using (var transaction = _sessionsRepository.BeginTransaction())
-                {
-                    _sessionsRepository.CancelSession(SessionId);
-                    transaction.Commit();
-                }
-            });
+            _sessionsRepository.CancelSession(SessionId);
 
             return Ok();
         }
@@ -49,90 +40,65 @@ namespace passi_webapi.Controllers
         [HttpDelete, Route("Delete")]
         public IActionResult Delete([FromQuery] Guid accountGuid, [FromQuery] string thumbprint)
         {
-            var strategy = _sessionsRepository.GetExecutionStrategy();
-            strategy.Execute(() =>
-            {
-                using (var transaction = _sessionsRepository.BeginTransaction())
-                {
-                    _userRepository.DeleteAccount(accountGuid, thumbprint);
-                    transaction.Commit();
-                }
-            });
+            _userRepository.DeleteAccount(accountGuid, thumbprint);
 
             return Ok();
         }
 
         [HttpPost, Route("Start")]
-        public LoginResponceDto Start([FromBody] StartLoginDto startLoginDto)
+        public IActionResult Start([FromBody] StartLoginDto startLoginDto)
         {
-            Guid sessionid = Guid.Empty;
-            var strategy = _sessionsRepository.GetExecutionStrategy();
-            strategy.Execute(() =>
-            {
-                using (var transaction = _sessionsRepository.BeginTransaction())
-                {
-                    if (!_userRepository.IsUsernameTaken(startLoginDto.Username))
-                        throw new BadRequestException("username not found");
-                    if (!_userRepository.IsUserFinished(startLoginDto.Username))
-                        throw new BadRequestException("user not verified");
-                    var sessionDb = _sessionsRepository.BeginSession(startLoginDto.Username, startLoginDto.ClientId,
-                        startLoginDto.RandomString, startLoginDto.CheckColor.ToString(), startLoginDto.ReturnUrl);
+            if (!_userRepository.IsUsernameTaken(startLoginDto.Username))
+                return BadRequest("username not found");
+            if (!_userRepository.IsUserFinished(startLoginDto.Username))
+                return BadRequest("user not verified");
+            var sessionDb = _sessionsRepository.BeginSession(startLoginDto.Username, startLoginDto.ClientId,
+                startLoginDto.RandomString, startLoginDto.CheckColor.ToString(), startLoginDto.ReturnUrl);
 
-                    transaction.Commit();
+            Guid sessionid = sessionDb.Guid;
 
-                    sessionid = sessionDb.Guid;
-                }
-            });
-            return new LoginResponceDto() { SessionId = sessionid };
+            return Ok(new LoginResponceDto() { SessionId = sessionid });
         }
 
         [HttpPost, Route("Authorize")]
         public LoginResponceDto Authorize([FromBody] AuthorizeDto authorizeDto)
         {
-            var strategy = _sessionsRepository.GetExecutionStrategy();
-            strategy.Execute(() =>
-            {
-                using (var transaction = _sessionsRepository.BeginTransaction())
-                {
-                    _sessionsRepository.VerifySession(authorizeDto.SessionId, authorizeDto.SignedHash,
-                        authorizeDto.PublicCertThumbprint);
+            _sessionsRepository.VerifySession(authorizeDto.SessionId, authorizeDto.SignedHash,
+                authorizeDto.PublicCertThumbprint);
 
-                    transaction.Commit();
-                }
-            });
             return new LoginResponceDto() { SessionId = authorizeDto.SessionId };
         }
 
         [HttpGet, Route("check")]
-        public CheckResponceDto Check([FromQuery] Guid sessionId)
+        public IActionResult Check([FromQuery] Guid sessionId)
         {
             var sessionDb = _sessionsRepository.CheckSessionAndReturnUser(sessionId);
             if (sessionDb == null)
-                throw new BadRequestException("Session not found");
+                return BadRequest("Session not found");
             if (sessionDb.Status == SessionStatus.Canceled)
-                throw new BadRequestException("User canceled");
+                return BadRequest("User canceled");
             var universalTime = sessionDb.ExpirationTime;
             if (DateTime.UtcNow > universalTime)
-                throw new BadRequestException("Request Expired");
+                return BadRequest("Request Expired");
             if (sessionDb.Status == SessionStatus.Error)
-                throw new BadRequestException(sessionDb.ErrorMessage);
+                return BadRequest(sessionDb.ErrorMessage);
             if (sessionDb.Status != SessionStatus.Confirmed)
-                throw new BadRequestException("Waiting for response");
+                return BadRequest("Waiting for response");
 
             //sessionDb.PublicCertThumbprint = "s";
             //sessionDb.SignedHash = "s";
 
-            return new CheckResponceDto() { PublicCertThumbprint = sessionDb.PublicCertThumbprint, Username = sessionDb.Email };
+            return Ok(new CheckResponceDto() { PublicCertThumbprint = sessionDb.PublicCertThumbprint, Username = sessionDb.Email });
         }
 
         [HttpGet, Route("session")]
-        public SessionMinDto Session([FromQuery] Guid sessionId, string thumbprint, string username)
+        public IActionResult Session([FromQuery] Guid sessionId, string thumbprint, string username)
         {
             var sessionDb = _sessionsRepository.GetAuthorizedSession(sessionId, thumbprint, username);
             if (sessionDb == null)
-                throw new BadRequestException("Session not found");
+                return BadRequest("Session not found");
 
-            return new SessionMinDto() { SignedHash = sessionDb.SignedHashNew, PublicCert = sessionDb.User.Certificates.FirstOrDefault(x => x.Thumbprint == thumbprint)?.PublicCert, ExpirationTime = sessionDb.ExpirationTime.ToDateTimeUtc() };
+            return Ok(new SessionMinDto() { SignedHash = sessionDb.SignedHashNew, PublicCert = sessionDb.User.Certificates.FirstOrDefault(x => x.Thumbprint == thumbprint)?.PublicCert, ExpirationTime = sessionDb.ExpirationTime.ToDateTimeUtc() });
         }
 
         [HttpPost, Route("GetActiveSession")]
@@ -166,21 +132,15 @@ namespace passi_webapi.Controllers
         public List<AccountMinDto> SyncAccounts([FromBody] SyncAccountsDto syncAccountsDto)
         {
             List<AccountMinDto> list = new List<AccountMinDto>();
-            var strategy = _sessionsRepository.GetExecutionStrategy();
-            strategy.Execute(() =>
-            {
-                using (var transaction = _sessionsRepository.BeginTransaction())
-                {
-                    var accounts = _sessionsRepository.SyncAccounts(syncAccountsDto.Guids, syncAccountsDto.DeviceId);
 
-                    transaction.Commit();
-                    list = accounts.Select(x => new AccountMinDto
-                    {
-                        UserGuid = x.Guid,
-                        Username = x.EmailHash
-                    }).ToList();
-                }
-            });
+            var accounts = _sessionsRepository.SyncAccounts(syncAccountsDto.Guids, syncAccountsDto.DeviceId);
+
+            list = accounts.Select(x => new AccountMinDto
+            {
+                UserGuid = x.Guid,
+                Username = x.EmailHash
+            }).ToList();
+
             return list;
         }
     }

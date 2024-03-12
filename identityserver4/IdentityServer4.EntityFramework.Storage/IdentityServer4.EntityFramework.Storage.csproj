@@ -17,7 +17,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\..\..\RedisClient\RedisClient.csproj" />
+	  <ProjectReference Include="..\..\RedisClient\RedisClient.csproj" />
 	  <ProjectReference Include="..\IdentityServer4.Storage\IdentityServer4.Storage.csproj" />
 	</ItemGroup>
 

@@ -88,6 +88,7 @@ services:
     networks:
       - haproxy_net
       - database_net
+      - redis_net
     container_name: identityserver
     env_file:
     - ../passi_config/dev.env

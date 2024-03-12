@@ -125,6 +125,8 @@ public class TestBase
                     .WithEnvironment("DbPort", "5432")
                     .WithEnvironment("DoNotSendMail", "true")
                     .WithEnvironment("DbPassword", pgpassword)
+                    .WithEnvironment("redis", _redisContainer.IpAddress)
+                    .WithEnvironment("redisPort", redisport)
                     .WithEnvironment("PassiUrl", passiInternalUrl)
                     .WithEnvironment("GOOGLE_APPLICATION_CREDENTIALS", "/home/creds/passi-dev.json")
                     .WithBindMount("d:/home/creds/", "/home/creds/")

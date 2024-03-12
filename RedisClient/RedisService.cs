@@ -1,6 +1,5 @@
 ﻿using ConfigurationManager;
 using GoogleTracer;
-using Models;
 using Newtonsoft.Json;
 using StackExchange.Redis;
 
@@ -47,27 +46,10 @@ namespace RedisClient
             return default(T);
         }
 
-        public void Add(SessionTempRecord sessionDb)
+        public void Delete<T>(string key)
         {
-            var expiry = sessionDb.ExpirationTime - DateTime.UtcNow;
-            _database.StringSet(new RedisKey(sessionDb.Guid.ToString()), new RedisValue(JsonConvert.SerializeObject(sessionDb)), expiry);
-        }
-
-        public SessionTempRecord Get(Guid guid)
-        {
-            var redisValue = _database.StringGet(new RedisKey(guid.ToString()));
-            if (redisValue.HasValue)
-            {
-                var value = redisValue.ToString();
-                return JsonConvert.DeserializeObject<SessionTempRecord>(value);
-            }
-
-            return null;
-        }
-
-        public void Delete(Guid guid)
-        {
-            _database.KeyDelete(new RedisKey(guid.ToString()));
+            var newKey = typeof(T).FullName + "." + key;
+            _database.KeyDelete(new RedisKey(newKey));
         }
     }
 
@@ -79,10 +61,6 @@ namespace RedisClient
 
         T Get<T>(string key);
 
-        void Add(SessionTempRecord sessionDb);
-
-        SessionTempRecord Get(Guid guid);
-
-        void Delete(Guid guid);
+        void Delete<T>(string key);
     }
 }

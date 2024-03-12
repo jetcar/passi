@@ -11,9 +11,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\passi\ConfigurationManager\ConfigurationManager.csproj" />
-    <ProjectReference Include="..\passi\GoogleTracer\GoogleTracer.csproj" />
-    <ProjectReference Include="..\passi\Models\Models.csproj" />
+    <ProjectReference Include="..\ConfigurationManager\ConfigurationManager.csproj" />
+    <ProjectReference Include="..\GoogleTracer\GoogleTracer.csproj" />
   </ItemGroup>
 
 </Project>

@@ -40,7 +40,7 @@ namespace Repos
                 ExpirationTime = DateTime.UtcNow.AddMinutes(_sessionTimeout),
                 UserGuid = user.Guid
             };
-            _redisService.Add(sessionDb);
+            _redisService.Add(sessionDb.Guid.ToString(), sessionDb);
             _dbContext.Sessions.Add(new SimpleSessionDb()
             {
                 Guid = sessionDb.Guid,
@@ -53,19 +53,19 @@ namespace Repos
 
         public SessionTempRecord CheckSessionAndReturnUser(Guid sessionId)
         {
-            var userBySession = _redisService.Get(sessionId);
+            var userBySession = _redisService.Get<SessionTempRecord>(sessionId.ToString());
 
             return userBySession;
         }
 
         public void CancelSession(Guid guid)
         {
-            _redisService.Delete(guid);
+            _redisService.Get<SessionTempRecord>(guid.ToString());
         }
 
         public void VerifySession(Guid guid, string signedHash, string publicCertThumbprint)
         {
-            var session = _redisService.Get(guid);
+            var session = _redisService.Get<SessionTempRecord>(guid.ToString());
             if (session != null)
             {
                 var sessionDb = _dbContext.Sessions.FirstOrDefault(x => x.Guid == guid);
@@ -76,7 +76,7 @@ namespace Repos
                 }
                 session.PublicCertThumbprint = publicCertThumbprint;
                 session.Status = SessionStatus.Confirmed;
-                _redisService.Add(session);
+                _redisService.Add(session.Guid.ToString(), session);
             }
         }
 
@@ -84,7 +84,7 @@ namespace Repos
         {
             var sessionDbs = _dbContext.Sessions.Include(x => x.User).Where(x => x.User.Device.DeviceId == deviceId).OrderByDescending(x => x.CreationTime).FirstOrDefault(x => x.Status != SessionStatus.Canceled && x.Status != SessionStatus.Confirmed && x.ExpirationTime >= expirationTime);
             if (sessionDbs != null)
-                return _redisService.Get(sessionDbs.Guid);
+                return _redisService.Get<SessionTempRecord>(sessionDbs.Guid.ToString());
             return null;
         }
 
@@ -99,16 +99,6 @@ namespace Repos
             }
 
             return activeAccounts;
-        }
-
-        public SessionTempRecord GetSessionById(Guid sessionId)
-        {
-            return _redisService.Get(sessionId);
-        }
-
-        public void Update(SessionTempRecord session)
-        {
-            _redisService.Add(session);
         }
 
         public SimpleSessionDb GetAuthorizedSession(Guid sessionId, string thunbprint, string username)

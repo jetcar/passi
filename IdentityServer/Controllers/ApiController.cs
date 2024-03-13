@@ -151,8 +151,7 @@ namespace IdentityServer.Controllers
 
             if (result.Content != null && !result.Content.Contains("Waiting for response"))
             {
-                var errorResult = JsonConvert.DeserializeObject<ApiResponseDto<string>>(result.Content);
-                return BadRequest(new ApiResponseDto() { errors = errorResult.errors });
+                return BadRequest(new ApiResponseDto() { errors = result.Content });
             }
 
             return Ok(new { Redirect = false });

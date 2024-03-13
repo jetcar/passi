@@ -3,6 +3,7 @@ using Microsoft.Extensions.Hosting;
 using Serilog;
 using System.IO;
 using System;
+using System.Threading;
 
 namespace passi_webapi
 {
@@ -10,6 +11,7 @@ namespace passi_webapi
     {
         public static void Main(string[] args)
         {
+            ThreadPool.SetMinThreads(500, 500);
             CreateHostBuilder(args).Build().Run();
         }
 

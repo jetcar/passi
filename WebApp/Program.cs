@@ -3,6 +3,7 @@ using Microsoft.Extensions.Hosting;
 using Serilog;
 using System.IO;
 using System;
+using System.Threading;
 
 namespace WebApp
 {
@@ -10,6 +11,7 @@ namespace WebApp
     {
         public static void Main(string[] args)
         {
+            ThreadPool.SetMinThreads(500, 500);
             var app = CreateWebHostBuilder(args).Build();
             app.Run();
         }

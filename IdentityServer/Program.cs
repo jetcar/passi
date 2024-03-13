@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Threading;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using Serilog;
@@ -10,6 +11,7 @@ namespace IdentityServer
     {
         public static void Main(string[] args)
         {
+            ThreadPool.SetMinThreads(500, 500);
             CreateHostBuilder(args).Build().Run();
         }
 

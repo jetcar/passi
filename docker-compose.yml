@@ -121,8 +121,6 @@ services:
     restart: always
     env_file:
       - ../passi_config/dev.env
-    logging:
-      driver: gcplogs
     ports:
       - "25:25"
       - "465:465"
@@ -156,8 +154,6 @@ services:
     restart: always
     env_file:
       - ../passi_config/dev.env
-    logging:
-      driver: gcplogs
     volumes:
       - "/mnt/newdisk/mailu/data:/data"
       - "/mnt/newdisk/mailu/dkim:/dkim"
@@ -176,8 +172,6 @@ services:
     restart: always
     env_file:
       - ../passi_config/dev.env
-    logging:
-      driver: gcplogs
     volumes:
       - "/mnt/newdisk/mailu/mail:/mail"
       - "/mnt/newdisk/mailu/overrides/dovecot:/overrides:ro"
@@ -195,8 +189,6 @@ services:
     restart: always
     env_file:
       - ../passi_config/dev.env
-    logging:
-      driver: gcplogs
     networks:
       - haproxy_net
       - default
@@ -215,8 +207,6 @@ services:
     restart: always
     env_file:
       - ../passi_config/dev.env
-    logging:
-      driver: gcplogs
     volumes:
       - "/mnt/newdisk/mailu/filter:/var/lib/rspamd"
       - "/mnt/newdisk/mailu/overrides/rspamd:/overrides:ro"

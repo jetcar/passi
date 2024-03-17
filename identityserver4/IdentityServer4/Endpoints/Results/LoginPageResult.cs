@@ -83,6 +83,10 @@ namespace IdentityServer4.Endpoints.Results
             }
 
             var url = loginUrl.AddQueryString(_options.UserInteraction.LoginReturnUrlParameter, returnUrl);
+            if (!url.Contains("ReturnUrl="))
+            {
+
+            }
             context.Response.RedirectToAbsoluteUrl(url);
         }
     }

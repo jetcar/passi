@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Net.Http;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -7,6 +8,7 @@ using Google.Cloud.Diagnostics.AspNetCore3;
 using Google.Cloud.Diagnostics.Common;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using TraceOptions = Google.Cloud.Diagnostics.Common.TraceOptions;
 
 namespace GoogleTracer
 {
@@ -57,6 +59,7 @@ namespace GoogleTracer
                 (request, traceContext) => request.Headers.Add("custom_trace_id", traceContext.TraceId));
         }
 
+        [DebuggerStepThrough]
         public static void OnInvoke(MethodAdviceContext context)
         {
             if (CurrentTracer != null && !IsPropertyMethod(context))

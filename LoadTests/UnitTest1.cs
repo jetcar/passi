@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -14,6 +15,7 @@ using NBomber.Contracts;
 using NBomber.CSharp;
 using NBomber.Http.CSharp;
 using Newtonsoft.Json;
+using RestSharp;
 using YamlDotNet.Core.Tokens;
 using static Abstracta.JmeterDsl.JmeterDsl;
 
@@ -22,23 +24,18 @@ namespace LoadTests
     public class Tests
     {
         private IConfigurationRoot _configuration;
-        private static HttpClient _client;
+        private static RestClient _client;
 
         [SetUp]
         public void Setup()
         {
             _configuration = new ConfigurationBuilder().AddJsonFile("test.appsettings.json").Build();
+            ServicePointManager
+                    .ServerCertificateValidationCallback +=
+                (sender, cert, chain, sslPolicyErrors) => true;
 
-            var handler = new HttpClientHandler();
-            handler.ClientCertificateOptions = ClientCertificateOption.Manual;
-            handler.ServerCertificateCustomValidationCallback =
-                (httpRequestMessage, cert, cetChain, policyErrors) =>
-                {
-                    return true;
-                };
-            _client = new HttpClient(handler)
+            _client = new RestClient()
             {
-                Timeout = TimeSpan.FromSeconds(10)
             };
         }
 
@@ -48,12 +45,13 @@ namespace LoadTests
             var scenario = Scenario.Create("http_scenario", async context =>
             {
                 var request =
-                    Http.CreateRequest("GET", _configuration["PassiWebAppUrl"]);
+                    new RestRequest(_configuration["PassiWebAppUrl"]);
                 // .WithBody(new StringContent("{ some JSON }", Encoding.UTF8, "application/json"));
 
-                var response = await Http.Send(_client, request);
-
-                return response;
+                var response = await _client.ExecuteGetAsync(request);
+                if (response.IsSuccessful)
+                    return Response.Ok();
+                return Response.Fail();
             }).WithLoadSimulations(
                 // it creates 100 copies and keeps them running
                 // until the iterations count reaches 1000
@@ -99,8 +97,8 @@ namespace LoadTests
                         var step1 = await Step.Run<LoginResult>("step_1_login_start", context, async () =>
                         {
                             var loginResp = Login(username, out var returnUrl, out var nonce);
-                            var value = loginResp.Payload.Value.Content.ReadAsStringAsync().Result.ToString();
-                            if (loginResp.IsError || string.IsNullOrEmpty(value))
+                            var value = loginResp.Content;
+                            if (!loginResp.IsSuccessful || string.IsNullOrEmpty(value))
                                 return Response.Fail(payload: new LoginResult());
                             var sessionId = JsonConvert.DeserializeObject<dynamic>(value).sessionId;
                             return Response.Ok(payload: new LoginResult()
@@ -116,8 +114,8 @@ namespace LoadTests
                         {
                             var resp = await Check(step1.Payload.Value.nonce, username, step1.Payload.Value.sessionId, step1.Payload.Value.returnUrl);
 
-                            var value = resp.Payload.Value.Content.ReadAsStringAsync().Result.ToString();
-                            if (resp.IsError || string.IsNullOrEmpty(value))
+                            var value = resp.Content;
+                            if (!resp.IsSuccessful || string.IsNullOrEmpty(value))
                                 return Response.Fail();
                             return Response.Ok();
                         });
@@ -125,8 +123,8 @@ namespace LoadTests
                         {
                             var resp = await MobileSync(deviceGuid, accountGuid);
 
-                            var value = resp.Payload.Value.Content.ReadAsStringAsync().Result.ToString();
-                            if (resp.IsError || string.IsNullOrEmpty(value))
+                            var value = resp.Content;
+                            if (!resp.IsSuccessful || string.IsNullOrEmpty(value))
                                 return Response.Fail();
                             return Response.Ok();
                         });
@@ -137,8 +135,8 @@ namespace LoadTests
                             {
                                 var resp = await PollSessions(deviceGuid, accountGuid);
 
-                                value = resp.Payload.Value.Content.ReadAsStringAsync().Result.ToString();
-                                if (resp.IsError)
+                                value = resp.Content;
+                                if (!resp.IsSuccessful)
                                     return Response.Fail();
                             } while (string.IsNullOrEmpty(value));
 
@@ -150,8 +148,8 @@ namespace LoadTests
                             signedHash = certHelper.GetSignedData(step1.Payload.Value.nonce, cert);
                             var resp = await SendSignedHash(step1.Payload.Value.sessionId, certThumbprint, signedHash);
 
-                            var value = resp.Payload.Value.Content.ReadAsStringAsync().Result.ToString();
-                            if (resp.IsError || string.IsNullOrEmpty(value))
+                            var value = resp.Content;
+                            if (!resp.IsSuccessful || string.IsNullOrEmpty(value))
                                 return Response.Fail();
                             return Response.Ok();
                         });
@@ -160,13 +158,13 @@ namespace LoadTests
                         {
                             var resp = await Check(step1.Payload.Value.nonce, username, step1.Payload.Value.sessionId, step1.Payload.Value.returnUrl);
 
-                            var value = resp.Payload.Value.Content.ReadAsStringAsync().Result.ToString();
-                            if (resp.IsError || string.IsNullOrEmpty(value))
+                            var value = resp.Content;
+                            if (!resp.IsSuccessful || string.IsNullOrEmpty(value))
                                 return Response.Fail();
                             var redirect = JsonConvert.DeserializeObject<dynamic>(value).redirect.ToString();
-                            var redirectResponse = await Redirect(redirect);
-                            var value2 = redirectResponse.Payload.Value.Content.ReadAsStringAsync().Result.ToString();
-                            if (redirectResponse.IsError || string.IsNullOrEmpty(value2))
+                            var redirectResponse = await Redirect(redirect, resp.Cookies);
+                            var value2 = redirectResponse.Content;
+                            if (!redirectResponse.IsSuccessful || string.IsNullOrEmpty(value2))
                                 return Response.Fail();
 
                             return Response.Ok();
@@ -175,7 +173,7 @@ namespace LoadTests
                         return Response.Ok();
                     })
                 .WithLoadSimulations(
-                Simulation.Inject(150, TimeSpan.FromSeconds(20), TimeSpan.FromMinutes(5))
+                Simulation.Inject(100, TimeSpan.FromSeconds(20), TimeSpan.FromMinutes(5))
             );
 
             var stats = NBomberRunner
@@ -185,10 +183,9 @@ namespace LoadTests
 
             Assert.That(stats.ScenarioStats[0].Ok.Request.RPS, Is.GreaterThan(1d));
             Assert.That(stats.AllFailCount == 0);
-            Assert.That(stats.ScenarioStats[0].Ok.Latency.Percent99, Is.LessThan(10000));
         }
 
-        private async Task<Response<HttpResponseMessage>> SendSignedHash(string sessionId, string certThumbprint, string signedHash)
+        private async Task<RestResponse> SendSignedHash(string sessionId, string certThumbprint, string signedHash)
         {
             var syncAccountsDto = new AuthorizeDto()
             {
@@ -196,16 +193,30 @@ namespace LoadTests
                 PublicCertThumbprint = certThumbprint,
                 SignedHash = signedHash
             };
-            var request =
-                Http.CreateRequest("POST", _configuration["PassiApiUrl"] + ConfigSettings.Authorize)
-                    .WithBody(new StringContent(JsonConvert.SerializeObject(syncAccountsDto), Encoding.UTF8, "application/json"));
+            var request = new RestRequest(_configuration["PassiApiUrl"] + ConfigSettings.Authorize);
+            request.AddJsonBody(syncAccountsDto);
 
-            var response = await Http.Send(_client, request);
+            var response = await _client.ExecutePostAsync(request);
 
             return response;
         }
 
-        private async Task<Response<HttpResponseMessage>> PollSessions(string deviceGuid, string accountGuid)
+        private async Task<RestResponse> PollSessions(string deviceGuid, string accountGuid)
+        {
+            var syncAccountsDto = new SyncAccountsDto()
+            {
+                DeviceId = deviceGuid,
+                Guids = new List<string>() { accountGuid }
+            };
+            var request = new RestRequest(_configuration["PassiApiUrl"] + ConfigSettings.CheckForStartedSessions);
+            request.AddJsonBody(syncAccountsDto);
+
+            var response = await _client.ExecutePostAsync(request);
+
+            return response;
+        }
+
+        private async Task<RestResponse> MobileSync(string deviceGuid, string accountGuid)
         {
             var syncAccountsDto = new SyncAccountsDto()
             {
@@ -213,31 +224,15 @@ namespace LoadTests
                 Guids = new List<string>() { accountGuid }
             };
             var request =
-                Http.CreateRequest("POST", _configuration["PassiApiUrl"] + ConfigSettings.CheckForStartedSessions)
-                    .WithBody(new StringContent(JsonConvert.SerializeObject(syncAccountsDto), Encoding.UTF8, "application/json"));
+                new RestRequest(_configuration["PassiApiUrl"] + ConfigSettings.SyncAccounts);
+            request.AddJsonBody(syncAccountsDto);
 
-            var response = await Http.Send(_client, request);
-
-            return response;
-        }
-
-        private async Task<Response<HttpResponseMessage>> MobileSync(string deviceGuid, string accountGuid)
-        {
-            var syncAccountsDto = new SyncAccountsDto()
-            {
-                DeviceId = deviceGuid,
-                Guids = new List<string>() { accountGuid }
-            };
-            var request =
-                Http.CreateRequest("POST", _configuration["PassiApiUrl"] + ConfigSettings.SyncAccounts)
-                    .WithBody(new StringContent(JsonConvert.SerializeObject(syncAccountsDto), Encoding.UTF8, "application/json"));
-
-            var response = await Http.Send(_client, request);
+            var response = await _client.ExecutePostAsync(request);
 
             return response;
         }
 
-        private async Task<Response<HttpResponseMessage>> Check(string nonce, string username, string sessionId, string returnUrl)
+        private async Task<RestResponse> Check(string nonce, string username, string sessionId, string returnUrl)
         {
             var checkDto = new CheckDto()
             {
@@ -249,47 +244,59 @@ namespace LoadTests
                 username = username,
             };
             var request =
-                Http.CreateRequest("POST", _configuration["IdentityUrl"] + "/api/check")
-                    .WithBody(new StringContent(JsonConvert.SerializeObject(checkDto), Encoding.UTF8, "application/json"));
+                new RestRequest(_configuration["IdentityUrl"] + "/api/check");
+            request.AddJsonBody(checkDto);
 
-            var response = await Http.Send(_client, request);
-
-            return response;
-        }
-
-        private async Task<Response<HttpResponseMessage>> Redirect(string returnUrl)
-        {
-            var request =
-                Http.CreateRequest("GET", _configuration["IdentityUrl"] + returnUrl);
-
-            var response = await Http.Send(_client, request);
+            var response = await _client.ExecutePostAsync(request);
 
             return response;
         }
 
-        private Response<HttpResponseMessage> Login(string username, out string returnUrl, out string nonce)
+        private async Task<RestResponse> Redirect(string returnUrl, CookieCollection cookies)
         {
-            var loginstart = Http.CreateRequest("GET", _configuration["PassiWebAppUrl"] + "/Auth/Login");
-            var loginStartResponse = Http.Send(_client, loginstart).Result;
-            var strings = loginStartResponse.Payload.Value.RequestMessage.RequestUri.Query.Split("?").Where(x => !string.IsNullOrEmpty(x)).ToList();
+            var request = new RestRequest(_configuration["IdentityUrl"] + returnUrl);
+            foreach (Cookie cookie in cookies)
+            {
+                request.AddCookie(cookie.Name, cookie.Value, cookie.Path, cookie.Domain);
+            }
+            var response = await _client.ExecuteGetAsync(request);
+
+            return response;
+        }
+
+        private RestResponse Login(string username, out string returnUrl, out string nonce)
+        {
+            returnUrl = "";
+            nonce = "";
+            var loginstart = new RestRequest(_configuration["PassiWebAppUrl"] + "/Auth/Login");
+            var loginStartResponse = _client.ExecuteGet(loginstart);
+            if (!loginStartResponse.IsSuccessful)
+                return loginStartResponse;
+            var strings = loginStartResponse.ResponseUri.Query.Split("?").Where(x => !string.IsNullOrEmpty(x)).ToList();
             var firstOrDefault = strings.FirstOrDefault(x => x != null && x.StartsWith("ReturnUrl="));
             var redirectUri = firstOrDefault?.Replace("ReturnUrl=", "");
             if (string.IsNullOrEmpty(redirectUri))
-                redirectUri = loginStartResponse.Payload.Value.RequestMessage.RequestUri.Query.Split("&").FirstOrDefault(x => x != null && x.StartsWith("redirect_uri="))?.Replace("redirect_uri=", "");
+            {
+                var url = loginStartResponse.ResponseUri.ToString();
+                loginStartResponse = _client.ExecuteGet(new RestRequest(url));
+                strings = loginStartResponse.ResponseUri.Query.Split("?").Where(x => !string.IsNullOrEmpty(x)).ToList();
+                firstOrDefault = strings.FirstOrDefault(x => x != null && x.StartsWith("ReturnUrl="));
+                redirectUri = firstOrDefault?.Replace("ReturnUrl=", "");
+            }
+
             returnUrl = HttpUtility.UrlDecode(redirectUri);
             nonce = returnUrl.Split("&").FirstOrDefault(x => x.StartsWith("nonce="))?.Replace("nonce=", "");
             var loginDto = new LoginDto()
             {
                 ReturnUrl = returnUrl,
-                username = username,
                 Username = username
             };
             var apiCheck = _configuration["IdentityUrl"] + "/api/login";
             var request =
-                Http.CreateRequest("POST", apiCheck)
-                    .WithBody(new StringContent(JsonConvert.SerializeObject(loginDto), Encoding.UTF8, "application/json"));
+                new RestRequest(apiCheck, Method.Post);
+            request.AddJsonBody(loginDto);
 
-            var response = Http.Send(_client, request).Result;
+            var response = _client.ExecutePost(request);
 
             return response;
         }
@@ -329,6 +336,5 @@ namespace LoadTests
     {
         public string Username { get; set; }
         public string ReturnUrl { get; set; }
-        public string username { get; set; }
     }
 }

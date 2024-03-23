@@ -96,7 +96,7 @@ public class TestBase
                     .WithEnvironment("DoNotSendMail", "true")
                     .WithEnvironment("DbPassword", pgpassword)
                     .WithEnvironment("redis", _redisContainer.IpAddress)
-                    .WithEnvironment("redisPort", redisport)
+                    .WithEnvironment("redisPort", "6379")
                     .WithEnvironment("GOOGLE_APPLICATION_CREDENTIALS", "/home/creds/passi-dev.json")
                     .WithBindMount("d:/home/creds/", "/home/creds/")
                 ;
@@ -126,7 +126,7 @@ public class TestBase
                     .WithEnvironment("DoNotSendMail", "true")
                     .WithEnvironment("DbPassword", pgpassword)
                     .WithEnvironment("redis", _redisContainer.IpAddress)
-                    .WithEnvironment("redisPort", redisport)
+                    .WithEnvironment("redisPort", "6379")
                     .WithEnvironment("PassiUrl", passiInternalUrl)
                     .WithEnvironment("GOOGLE_APPLICATION_CREDENTIALS", "/home/creds/passi-dev.json")
                     .WithBindMount("d:/home/creds/", "/home/creds/")

@@ -64,7 +64,6 @@ public class MainView : BaseViewModel
     {
         _mainThreadService.BeginInvokeOnMainThread(() =>
         {
-            Accounts = new ObservableCollection<ViewModels.AccountModel>();
             _loadAccountTask = Task.Run(() =>
             {
                 _secureRepository.LoadAccountIntoList(Accounts);

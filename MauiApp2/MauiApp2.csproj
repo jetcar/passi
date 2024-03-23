@@ -33,8 +33,8 @@
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net7.0-android33.0|AnyCPU'">
-	  <ApplicationVersion>41</ApplicationVersion>
-	  <ApplicationDisplayVersion>1.41</ApplicationDisplayVersion>
+	  <ApplicationVersion>43</ApplicationVersion>
+	  <ApplicationDisplayVersion>1.43</ApplicationDisplayVersion>
 	  <ApplicationId>com.passi.cloud.passi_android</ApplicationId>
 	  <ApplicationTitle>passi_android.Android</ApplicationTitle>
 			  <AndroidSigningKeyStore>D:\repo\passi.keystore</AndroidSigningKeyStore>
@@ -47,8 +47,8 @@
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net7.0-android33.0|AnyCPU'">
 	  <AndroidKeyStore>True</AndroidKeyStore>
-	  <ApplicationVersion>41</ApplicationVersion>
-	  <ApplicationDisplayVersion>1.41</ApplicationDisplayVersion>
+	  <ApplicationVersion>43</ApplicationVersion>
+	  <ApplicationDisplayVersion>1.43</ApplicationDisplayVersion>
 	  <AndroidSigningKeyStore>D:\repo\passi.keystore</AndroidSigningKeyStore>
 	  <ApplicationId>com.passi.cloud.passi_android</ApplicationId>
 	  <ApplicationTitle>passi_android.Android</ApplicationTitle>

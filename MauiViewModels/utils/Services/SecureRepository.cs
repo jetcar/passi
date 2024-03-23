@@ -16,7 +16,7 @@ public class SecureRepository : ISecureRepository
 {
     private static object _locker = new object();
     private List<ProviderDb> Providers { get; set; }
-    private List<AccountDb> Accounts { get; set; }
+    private List<AccountDb> AccountsDb { get; set; }
 
     private IMySecureStorage _mySecureStorage;
 
@@ -29,14 +29,14 @@ public class SecureRepository : ISecureRepository
     {
         lock (_locker)
         {
-            if (Accounts == null)
+            if (AccountsDb == null)
             {
-                Accounts = _mySecureStorage.GetAsync<List<AccountDb>>(StorageKeys.AllAccounts).Result ?? new List<AccountDb>();
+                AccountsDb = _mySecureStorage.GetAsync<List<AccountDb>>(StorageKeys.AllAccounts).Result ?? new List<AccountDb>();
             }
 
-            Accounts.Add(account);
+            AccountsDb.Add(account);
             account.ProviderGuid = account.Provider.Guid;
-            _mySecureStorage.SetAsync(StorageKeys.AllAccounts, Accounts).GetAwaiter().GetResult();
+            _mySecureStorage.SetAsync(StorageKeys.AllAccounts, AccountsDb).GetAwaiter().GetResult();
         }
     }
 
@@ -44,11 +44,11 @@ public class SecureRepository : ISecureRepository
     {
         lock (_locker)
         {
-            if (Accounts == null)
+            if (AccountsDb == null)
             {
-                Accounts = _mySecureStorage.GetAsync<List<AccountDb>>(StorageKeys.AllAccounts).Result ?? new List<AccountDb>();
+                AccountsDb = _mySecureStorage.GetAsync<List<AccountDb>>(StorageKeys.AllAccounts).Result ?? new List<AccountDb>();
             }
-            var accountDb = Accounts.FirstOrDefault(x => x.Guid == accountGuid);
+            var accountDb = AccountsDb.FirstOrDefault(x => x.Guid == accountGuid);
             return accountDb;
         }
     }
@@ -57,36 +57,42 @@ public class SecureRepository : ISecureRepository
     {
         lock (_locker)
         {
-            if (Accounts == null)
+            if (AccountsDb == null)
             {
-                Accounts = _mySecureStorage.GetAsync<List<AccountDb>>(StorageKeys.AllAccounts).Result ?? new List<AccountDb>();
+                AccountsDb = _mySecureStorage.GetAsync<List<AccountDb>>(StorageKeys.AllAccounts).Result ?? new List<AccountDb>();
             }
 
             if (account.Guid == Guid.Empty)
                 throw new ArgumentNullException("Guid");
-            var existingAccount = Accounts.FirstOrDefault(x => x.Guid == account.Guid);
+            var existingAccount = AccountsDb.FirstOrDefault(x => x.Guid == account.Guid);
             if (existingAccount != null)
             {
                 CopyAll(account, existingAccount);
                 existingAccount.ProviderGuid = account.Provider?.Guid ?? account.ProviderGuid;
             }
-            _mySecureStorage.SetAsync(StorageKeys.AllAccounts, Accounts).GetAwaiter().GetResult();
+            _mySecureStorage.SetAsync(StorageKeys.AllAccounts, AccountsDb).GetAwaiter().GetResult();
         }
     }
 
-    public void LoadAccountIntoList(ObservableCollection<AccountModel> accounts)
+    public void LoadAccountIntoList(ObservableCollection<AccountModel> accountViews)
     {
         lock (_locker)
         {
-            if (Accounts == null)
+            if (AccountsDb == null)
             {
-                Accounts = _mySecureStorage.GetAsync<List<AccountDb>>(StorageKeys.AllAccounts).Result ?? new List<AccountDb>();
+                AccountsDb = _mySecureStorage.GetAsync<List<AccountDb>>(StorageKeys.AllAccounts).Result ?? new List<AccountDb>();
             }
-            foreach (var accountDb in Accounts)
+
+            for (int i = 0; i < AccountsDb.Count; i++)
             {
-                var accountView = new AccountModel();
-                CopyAll(accountDb, accountView);
-                accounts.Add(accountView);
+                if (accountViews.Count < i + 1)
+                    accountViews.Add(new AccountModel());
+                CopyAll(AccountsDb[i], accountViews[i]);
+            }
+
+            while (AccountsDb.Count > accountViews.Count)
+            {
+                accountViews.RemoveAt(accountViews.Count - 1);
             }
         }
     }
@@ -95,14 +101,14 @@ public class SecureRepository : ISecureRepository
     {
         lock (_locker)
         {
-            if (Accounts == null)
+            if (AccountsDb == null)
             {
-                Accounts = _mySecureStorage.GetAsync<List<AccountDb>>(StorageKeys.AllAccounts).Result ?? new List<AccountDb>();
+                AccountsDb = _mySecureStorage.GetAsync<List<AccountDb>>(StorageKeys.AllAccounts).Result ?? new List<AccountDb>();
             }
 
-            var oldAccount = Accounts.FirstOrDefault(x => x.Guid == account.Guid);
-            Accounts.Remove(oldAccount);
-            _mySecureStorage.SetAsync(StorageKeys.AllAccounts, Accounts).ContinueWith((result) =>
+            var oldAccount = AccountsDb.FirstOrDefault(x => x.Guid == account.Guid);
+            AccountsDb.Remove(oldAccount);
+            _mySecureStorage.SetAsync(StorageKeys.AllAccounts, AccountsDb).ContinueWith((result) =>
             {
                 if (callback != null)
                     callback.Invoke();
@@ -342,7 +348,7 @@ public interface ISecureRepository
 
     void UpdateAccount(AccountDb account);
 
-    void LoadAccountIntoList(ObservableCollection<AccountModel> accounts);
+    void LoadAccountIntoList(ObservableCollection<AccountModel> accountViews);
 
     void DeleteAccount(AccountModel account, Action callback);
 

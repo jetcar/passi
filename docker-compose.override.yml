@@ -104,7 +104,6 @@ services:
       - ./configs/variables/dev.env
     deploy:
       mode: replicated
-      replicas: 0
       endpoint_mode: vip
 
   resolver:
@@ -112,7 +111,6 @@ services:
       - ./configs/variables/dev.env
     deploy:
       mode: replicated
-      replicas: 0
       endpoint_mode: vip
 
   admin:
@@ -124,7 +122,6 @@ services:
       - ./configs/variables/dev.env
     deploy:
       mode: replicated
-      replicas: 0
       endpoint_mode: vip
 
   imap:
@@ -134,7 +131,6 @@ services:
       - ./configs/variables/dev.env
     deploy:
       mode: replicated
-      replicas: 0
       endpoint_mode: vip
 
   smtp:
@@ -144,7 +140,6 @@ services:
       - ./configs/variables/dev.env
     deploy:
       mode: replicated
-      replicas: 0
       endpoint_mode: vip
 
   antispam:
@@ -154,7 +149,6 @@ services:
       - ./configs/variables/dev.env
     deploy:
       mode: replicated
-      replicas: 0
       endpoint_mode: vip
 
   webmail:
@@ -162,21 +156,18 @@ services:
       - ./configs/variables/dev.env
     deploy:
       mode: replicated
-      replicas: 0
       endpoint_mode: vip
 
 
   ddclient:
     deploy:
       mode: replicated
-      replicas: 0
       endpoint_mode: vip
 
 
   wireguard:
     deploy:
       mode: replicated
-      replicas: 0
       endpoint_mode: vip
 
 

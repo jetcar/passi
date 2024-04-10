@@ -41,7 +41,7 @@ services:
     depends_on:
       - database
     volumes:
-      - ./passi_config/pgadmin/:/etc/pgadmin/:ro #config
+      - ../passi_config/pgadmin/:/etc/pgadmin/:ro #config
       - ../pgadmin/:/var/lib/pgadmin/:rw
 
   redis:

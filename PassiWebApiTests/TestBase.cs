@@ -38,7 +38,8 @@ public class TestBase
         passiApiStartup.ConfigureServices(services);
 
         services.Remove(new ServiceDescriptor(typeof(IMyRestClient), typeof(MyRestClient)));//remove real requests services
-        services.Remove(new ServiceDescriptor(typeof(IEmailSender), typeof(EmailSender)));//remove real requests services
+        services.Remove(new ServiceDescriptor(typeof(IEmailSender), typeof(SendgridEmailSender)));//remove real requests services
+        services.Remove(new ServiceDescriptor(typeof(IEmailSender), typeof(SmtpEmailSender)));//remove real requests services
 
         services.AddSingleton<IMyRestClient, TestRestClient>();
         services.AddScoped<IEmailSender, TestEmailSender>();

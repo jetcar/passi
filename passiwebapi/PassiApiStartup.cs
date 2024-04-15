@@ -63,7 +63,7 @@ namespace passi_webapi
             services.AddSingleton<IMyRestClient, MyRestClient>();
 
             services.AddSingleton<IRedisService, RedisService>();
-            services.AddSingleton<IEmailSender, EmailSender>();
+            services.AddSingleton<IEmailSender, SmtpEmailSender>();
             services.AddSingleton<IRandomGenerator, RandomGenerator>();
             services.AddSingleton<ICertValidator, CertValidator>();
             services.AddScoped<PassiDbContext>();

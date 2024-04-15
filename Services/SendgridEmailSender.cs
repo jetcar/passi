@@ -9,12 +9,12 @@ using GoogleTracer;
 namespace Services
 {
     [Profile]
-    public class EmailSender : IEmailSender
+    public class SendgridEmailSender : IEmailSender
     {
         private SendGridClient client;
         private AppSetting _appSetting;
 
-        public EmailSender(AppSetting appSetting)
+        public SendgridEmailSender(AppSetting appSetting)
         {
             _appSetting = appSetting;
             var apiKey = _appSetting["SendgridApiKey"];

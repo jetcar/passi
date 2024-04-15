@@ -13,25 +13,24 @@ namespace MauiTest
         public void OpenMainView()
         {
             CreateAccount();
+            CreateAccount();
+            CreateAccount();
 
             var page = new MainView();
             page.OnAppearing(null, null);
             var accounts = new ObservableCollection<AccountModel>();
             SecureRepository.LoadAccountIntoList(accounts);
-            //TestRestService.Result[ConfigSettings.SyncAccounts] = TestBase.SuccesfullResponce<List<AccountMinDto>>(new List<AccountMinDto>()
-            //{
-            //    new AccountMinDto()
-            //    {
-            //        UserGuid = accounts[0].Guid,
-            //        Username = accounts[0].Email
-            //    }
-            //});
+
             while (!page._loadAccountTask.IsCompleted)
             {
                 Thread.Sleep(1);
             }
-
-            Assert.AreEqual(page.Accounts.Count, 1);
+            page.Button_ShowDeleteAccount();
+            page.Button_PreDeleteAccount(page.Accounts[0]);
+            Assert.AreEqual(true, page.Accounts[0].IsDeleteVisible);
+            Assert.AreEqual(page.Accounts.Count, 3);
+            Thread.Sleep(2000);
+            Assert.AreEqual(true, page.Accounts[0].IsDeleteVisible);
         }
 
         [Test]

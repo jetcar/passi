@@ -298,7 +298,7 @@ public class SecureRepository : ISecureRepository
         var destType = typeof(R);
         foreach (var destProperty in destType.GetProperties())
         {
-            if (!destProperty.CanWrite)
+            if (!destProperty.CanWrite || destProperty.Name == "IsDeleteVisible")
                 continue;
             var sourceProperty = sourceType.GetProperty(destProperty.Name);
             if (sourceProperty != null)

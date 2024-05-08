@@ -129,6 +129,7 @@ services:
       - "995:995"
       - "143:143"
       - "993:993"
+      - "8008:8008"
     networks:
       - default
       - haproxy_net

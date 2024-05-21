@@ -30,25 +30,25 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Google.Cloud.Diagnostics.AspNetCore3" Version="5.1.0" />
-		<PackageReference Include="Google.Cloud.Diagnostics.Common" Version="5.1.0" />
-		<PackageReference Include="Microsoft.AspNetCore.DataProtection.EntityFrameworkCore" Version="8.0.1" />
+		<PackageReference Include="Google.Cloud.Diagnostics.AspNetCore3" Version="5.2.0" />
+		<PackageReference Include="Google.Cloud.Diagnostics.Common" Version="5.2.0" />
+		<PackageReference Include="Microsoft.AspNetCore.DataProtection.EntityFrameworkCore" Version="8.0.5" />
 
 
-		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.1" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.1">
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.5" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.5">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.1">
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.5">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="7.2.0" />
+		<PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="7.5.2" />
 		<PackageReference Include="MrAdvice" Version="2.15.0" />
-		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.0" />
+		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.4" />
 
-		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.19.6" />
+		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.20.1" />
 
 
 		<PackageReference Include="RestSharp" Version="110.2.0" />
@@ -59,12 +59,12 @@
 		<PackageReference Include="Serilog.Settings.Configuration" Version="8.0.0" />
 		<PackageReference Include="Serilog.Sinks.Console" Version="5.0.1" />
 		<PackageReference Include="Serilog.Sinks.GoogleCloudLogging" Version="5.0.0" />
-		<PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.5.0" />
-		<PackageReference Include="Swashbuckle.AspNetCore.Newtonsoft" Version="6.5.0" />
-		<PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="6.5.0" />
-		<PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="6.5.0" />
-		<PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="6.5.0" />
-		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.2.0" />
+		<PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.6.2" />
+		<PackageReference Include="Swashbuckle.AspNetCore.Newtonsoft" Version="6.6.2" />
+		<PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="6.6.2" />
+		<PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="6.6.2" />
+		<PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="6.6.2" />
+		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.5.2" />
 		<PackageReference Include="System.Security.Cryptography.Pkcs" Version="8.0.0" />
 
 	</ItemGroup>

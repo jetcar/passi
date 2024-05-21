@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CSRedisCore" Version="3.8.802" />
+    <PackageReference Include="CSRedisCore" Version="3.8.803" />
     <PackageReference Include="ServiceStack.Redis" Version="8.2.2" />
   </ItemGroup>
 

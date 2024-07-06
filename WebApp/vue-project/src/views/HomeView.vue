@@ -8,9 +8,8 @@
                 </div>
             </div>
             <br />
-            <div>
-                <iframe style="width: 100%; height: 300px;max-width: 460px" src="https://www.youtube.com/embed/tRrWp6LWQNU" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-            </div>
+            <a href='https://www.youtube.com/watch?v=tRrWp6LWQNU' target="_blank"><img style="width: 100%; max-width: 460px" src='/img/youtube.png' /></a>
+            <br />
             <a href='https://play.google.com/store/apps/details?id=com.passi.cloud.passi_android&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img style="max-width: 200px" alt='Get it on Google Play' src='/img/en_badge_web_generic.png' /></a>
             <br />
         </div>

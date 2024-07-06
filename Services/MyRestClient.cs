@@ -38,7 +38,7 @@ public class MyRestClient : IMyRestClient
     {
         var currentTraceId = _tracer.GetCurrentTraceId() ?? Guid.NewGuid().ToString();
         request.AddHeader("custom_trace_id", currentTraceId);
-        request.Timeout = 10000;
+        request.Timeout = TimeSpan.FromSeconds(10);
         _logger.Debug($"{_client.Options.BaseUrl} {request.Resource}: {JsonConvert.SerializeObject(request.Parameters)}");
         return _client.ExecuteWithRetryAsync(request);
     }

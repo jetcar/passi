@@ -15,10 +15,10 @@
 		<PackageReference Include="MrAdvice" Version="2.15.0" />
     <PackageReference Include="FirebaseAdmin" Version="3.0.0" />
     <PackageReference Include="Google.Cloud.Diagnostics.Common" Version="5.2.0" />
-    <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="7.5.2" />
-    <PackageReference Include="RestSharp" Version="110.2.0" />
+    <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="7.6.2" />
+    <PackageReference Include="RestSharp" Version="111.3.0" />
     <PackageReference Include="SendGrid" Version="9.29.3" />
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.5.2" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.6.2" />
   </ItemGroup>
 
   <ItemGroup>

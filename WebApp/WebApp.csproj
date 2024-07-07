@@ -61,5 +61,11 @@
 	  <None Remove="vue-project\node_modules\**" />
 	  <None Remove="vue-project\.vscode\**" />
 	</ItemGroup>
+<ItemGroup>
+  <Content Remove="wwwroot\site.css" />
+</ItemGroup>
+<ItemGroup>
+  <None Include="wwwroot\site.css" />
+</ItemGroup>
 
 </Project>

@@ -3,21 +3,15 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
-using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using AppConfig;
 using MauiViewModels.utils.Services.Certificate;
 using Microsoft.Extensions.Configuration;
-using NBomber.Contracts;
 using NBomber.CSharp;
-using NBomber.Http.CSharp;
 using Newtonsoft.Json;
 using RestSharp;
-using YamlDotNet.Core.Tokens;
-using static Abstracta.JmeterDsl.JmeterDsl;
 
 namespace LoadTests
 {

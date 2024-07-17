@@ -1,15 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Maui.Graphics" Version="7.0.101" />
+    <PackageReference Include="Microsoft.Maui.Graphics" Version="8.0.70" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="RestSharp" Version="110.2.0" />
+    <PackageReference Include="RestSharp" Version="111.4.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection">
-	    <Version>7.0.0</Version>
+	    <Version>8.0.0</Version>
     </PackageReference>
   </ItemGroup>
 

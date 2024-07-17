@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using MauiViewModels.StorageModels;
 using Newtonsoft.Json;
 using RestSharp;
@@ -11,7 +12,7 @@ public class RestService : IRestService
     {
         var client = GetClient(provider);
         var request = new RestRequest(requestUri, Method.Get);
-        request.Timeout = 100000;
+        request.Timeout = TimeSpan.FromSeconds(100);
         var message = $"{client.Options.BaseUrl} {request.Resource}: {JsonConvert.SerializeObject(request.Parameters)}";
         System.Diagnostics.Debug.WriteLine(message);
         return client.ExecuteAsync(request);
@@ -21,7 +22,7 @@ public class RestService : IRestService
     {
         var client = GetClient(provider);
         var request = new RestRequest(requestUri, Method.Get);
-        request.Timeout = 100000;
+        request.Timeout = TimeSpan.FromSeconds(100);
         var message = $"{client.Options.BaseUrl} {request.Resource}: {JsonConvert.SerializeObject(request.Parameters)}";
         System.Diagnostics.Debug.WriteLine(message);
         return client.ExecuteAsync(request);
@@ -31,7 +32,7 @@ public class RestService : IRestService
     {
         var client = GetClient(provider);
         var request = new RestRequest(requestUri, method);
-        request.Timeout = 100000;
+        request.Timeout = TimeSpan.FromSeconds(100);
         var message = $"{client.Options.BaseUrl} {request.Resource}: {JsonConvert.SerializeObject(request.Parameters)}";
         System.Diagnostics.Debug.WriteLine(message);
         return client.ExecuteAsync(request);
@@ -41,7 +42,7 @@ public class RestService : IRestService
     {
         var client = GetClient(provider);
         var request = new RestRequest(requestUri, Method.Post);
-        request.Timeout = 30000;
+        request.Timeout = TimeSpan.FromSeconds(30);
 
         request.AddJsonBody(item);
         var message = $"{client.Options.BaseUrl} {request.Resource}: {JsonConvert.SerializeObject(request.Parameters)}";

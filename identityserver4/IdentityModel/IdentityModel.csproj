@@ -6,7 +6,7 @@
 		<OutputPath>publish</OutputPath>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="MrAdvice" Version="2.15.0" />
+		<PackageReference Include="MrAdvice" Version="2.16.0" />
 
 	</ItemGroup>
 	<ItemGroup>

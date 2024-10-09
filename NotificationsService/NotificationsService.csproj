@@ -7,13 +7,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CSRedisCore" Version="3.8.803" />
-    <PackageReference Include="ServiceStack.Redis" Version="8.4.0" />
+    <PackageReference Include="FirebaseAdmin" Version="3.0.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\ConfigurationManager\ConfigurationManager.csproj" />
     <ProjectReference Include="..\GoogleTracer\GoogleTracer.csproj" />
+    <ProjectReference Include="..\Models\Models.csproj" />
+    <ProjectReference Include="..\RedisClient\RedisClient.csproj" />
   </ItemGroup>
 
 </Project>

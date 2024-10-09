@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using GoogleTracer;
+using NotificationsService;
 using WebApiDto;
 using WebApiDto.Auth;
 using WebApiDto.Auth.Dto;
@@ -22,11 +23,12 @@ namespace passi_webapi.Controllers
     {
         private ISessionsRepository _sessionsRepository;
         private IUserRepository _userRepository;
-
-        public AuthController(ISessionsRepository sessionsRepository, IUserRepository userRepository)
+        private IFirebaseService _firebaseService;
+        public AuthController(ISessionsRepository sessionsRepository, IUserRepository userRepository, IFirebaseService firebaseService)
         {
             _sessionsRepository = sessionsRepository;
             _userRepository = userRepository;
+            _firebaseService = firebaseService;
         }
 
         [HttpGet, Route("Cancel")]
@@ -54,6 +56,25 @@ namespace passi_webapi.Controllers
                 return BadRequest("user not verified");
             var sessionDb = _sessionsRepository.BeginSession(startLoginDto.Username, startLoginDto.ClientId,
                 startLoginDto.RandomString, startLoginDto.CheckColor.ToString(), startLoginDto.ReturnUrl);
+            var user = _userRepository.GetUser(startLoginDto.Username);
+            var host = startLoginDto.ReturnUrl;
+            try
+            {
+                host = new Uri(startLoginDto.ReturnUrl).Host;
+            }
+            catch (Exception e)
+            {
+            }
+            _firebaseService.SendNotification(user.Device.NotificationToken, "Passi login",
+                JsonConvert.SerializeObject(
+                    new FirebaseNotificationDto()
+                    {
+                        Sender = startLoginDto.ClientId,
+                        ReturnHost = host,
+                        SessionId = sessionDb.Guid,
+                        AccountGuid = user.Guid
+                    }),
+                host, sessionDb.Guid);
 
             Guid sessionid = sessionDb.Guid;
 

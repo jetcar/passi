@@ -5,9 +5,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Maui.Graphics" Version="8.0.70" />
+    <PackageReference Include="Microsoft.Maui.Graphics" Version="8.0.91" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="RestSharp" Version="111.4.0" />
+    <PackageReference Include="RestSharp" Version="112.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection">
 	    <Version>8.0.0</Version>
     </PackageReference>

@@ -2,11 +2,11 @@
 using FirebaseAdmin;
 using FirebaseAdmin.Messaging;
 using Google.Apis.Auth.OAuth2;
+using GoogleTracer;
 using Microsoft.Extensions.Logging;
-
 using Message = FirebaseAdmin.Messaging.Message;
 
-namespace Services
+namespace NotificationsService
 {
     [Profile]
     public class FireBaseClient : IFireBaseClient

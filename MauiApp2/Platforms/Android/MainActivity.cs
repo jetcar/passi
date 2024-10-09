@@ -7,8 +7,10 @@ using MauiApp2.FingerPrint;
 using MauiApp2.utils.Services;
 using MauiViewModels;
 using MauiViewModels.FingerPrint;
+using MauiViewModels.Notifications;
 using MauiViewModels.utils.Services;
 using MauiViewModels.utils.Services.Certificate;
+using Plugin.Firebase.CloudMessaging;
 using Timer = System.Timers.Timer;
 
 namespace MauiApp2.Platforms.Android
@@ -52,12 +54,10 @@ namespace MauiApp2.Platforms.Android
             {
                 dateTimeService.Init();
                 secureRepository.GetDeviceId();
+                CrossFirebaseCloudMessaging.Current.CheckIfValidAsync().GetAwaiter().GetResult();
+                var token = CrossFirebaseCloudMessaging.Current.GetTokenAsync().Result;
 
-                //var task = FirebaseMessaging.Instance.GetToken().GetAwaiter().GetResult();
-
-                //var token = task.ToString();
-
-                // MyFirebaseIIDService.SendRegistrationToServer(token);
+                MyFirebaseIIDService.SendRegistrationToServer(token);
             });
 
             CommonApp.CloseApp = () =>

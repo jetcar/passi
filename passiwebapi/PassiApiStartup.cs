@@ -20,6 +20,7 @@ using Serilog.Events;
 using Services;
 using System;
 using System.Linq;
+using NotificationsService;
 using RedisClient;
 using WebApiDto.Auth.Dto;
 
@@ -66,6 +67,8 @@ namespace passi_webapi
             services.AddSingleton<IEmailSender, SmtpEmailSender>();
             services.AddSingleton<IRandomGenerator, RandomGenerator>();
             services.AddSingleton<ICertValidator, CertValidator>();
+            services.AddSingleton<IFirebaseService, FirebaseService>();
+            services.AddSingleton<IFireBaseClient, FireBaseClient>();
             services.AddScoped<PassiDbContext>();
             services.AddScoped<CurrentContext>();
             services.AddScoped<IUserRepository, UserRepository>();

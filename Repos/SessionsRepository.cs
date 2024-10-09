@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using Models;
 using NodaTime;
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,7 +16,6 @@ namespace Repos
         private AppSetting _appSetting;
         private int _sessionTimeout;
         private IRedisService _redisService;
-
         public SessionsRepository(PassiDbContext dbContext, AppSetting appSetting, IRedisService redisService) : base(dbContext)
         {
             _appSetting = appSetting;

@@ -4,12 +4,9 @@
     <TargetFramework>net8.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-		<PackageReference Include="MrAdvice" Version="2.15.0" />
-	  <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.6" />
-	  <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="8.0.6" />
-	  <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="7.6.2" />
-	  <PackageReference Include="RestSharp" Version="111.3.0" />
-	  <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.6.2" />
+		<PackageReference Include="MrAdvice" Version="2.16.0" />
+	  <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.8" />
+	  <PackageReference Include="RestSharp" Version="112.0.0" />
 
 
   </ItemGroup>

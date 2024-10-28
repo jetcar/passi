@@ -7,9 +7,9 @@
   <ItemGroup>
     <PackageReference Include="Google.Cloud.Diagnostics.AspNetCore3" Version="5.2.0" />
     <PackageReference Include="Google.Cloud.Diagnostics.Common" Version="5.2.0" />
-    <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.1.0" />
+    <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.1.2" />
     <PackageReference Include="MrAdvice" Version="2.16.0" />
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.1.0" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.1.2" />
 
   </ItemGroup>
 

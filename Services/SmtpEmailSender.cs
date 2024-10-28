@@ -19,8 +19,14 @@ namespace Services
             _appSetting = appSetting;
             _logger = logger;
             var host = _appSetting["smtpHost"];
-            if (!Convert.ToBoolean(_appSetting["DoNotSendMail"]) || !string.IsNullOrEmpty(host))
-                this.client = new SmtpClient() { Host = host, Port = Convert.ToInt32(_appSetting["smtpPort"]),EnableSsl = true, Credentials = new NetworkCredential(_appSetting["smtpUsername"], _appSetting["smtpPassword"]) };
+            var boolean = Convert.ToBoolean(_appSetting["DoNotSendMail"]);
+            if (!boolean || (!string.IsNullOrEmpty(host) && host != "-"))
+            {
+                var port = Convert.ToInt32(_appSetting["smtpPort"]);
+                var userName = _appSetting["smtpUsername"];
+                var password = _appSetting["smtpPassword"];
+                this.client = new SmtpClient() { Host = host, Port = port,EnableSsl = true, Credentials = new NetworkCredential(userName, password) };
+            }
         }
 
         public string SendInvitationEmail(string email, string code)

@@ -16,8 +16,7 @@
 		</service>
 		<meta-data android:name="com.google.firebase.messaging.default_notification_channel_id" android:value="passi_notification_channel_id" />
 	</application>
-	<uses-permission
-			android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+
 	<uses-permission android:name="android.permission.USE_FINGERPRINT" />
 	<uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
 	<uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />

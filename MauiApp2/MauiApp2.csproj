@@ -18,8 +18,8 @@
 		<ApplicationIdGuid>71773da4-3d4e-4f91-8f17-a674dd8fa63b</ApplicationIdGuid>
 
 		<!-- Versions -->
-		<ApplicationDisplayVersion>1.48</ApplicationDisplayVersion>
-		<ApplicationVersion>48</ApplicationVersion>
+		<ApplicationDisplayVersion>1.49</ApplicationDisplayVersion>
+		<ApplicationVersion>49</ApplicationVersion>
 
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">11.0</SupportedOSPlatformVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">13.1</SupportedOSPlatformVersion>
@@ -49,8 +49,8 @@
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net8.0-android34.0|AnyCPU'">
 		<AndroidKeyStore>True</AndroidKeyStore>
-		<ApplicationVersion>48</ApplicationVersion>
-		<ApplicationDisplayVersion>1.48</ApplicationDisplayVersion>
+		<ApplicationVersion>49</ApplicationVersion>
+		<ApplicationDisplayVersion>1.49</ApplicationDisplayVersion>
 		<AndroidSigningKeyStore>passi.keystore</AndroidSigningKeyStore>
 		<ApplicationId>com.passi.cloud.passi_android</ApplicationId>
 		<ApplicationTitle>passi_android.Android</ApplicationTitle>

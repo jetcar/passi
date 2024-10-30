@@ -11,6 +11,7 @@
                 <Setter Property="TextColor" Value="Black" />
                 <Setter Property="CornerRadius" Value="100" />
                 <Setter Property="FontSize" Value="15" />
+                <Setter Property="HeightRequest" Value="45" />
                 <Setter Property="Margin" Value="10" />
             </Style>
         </ResourceDictionary>

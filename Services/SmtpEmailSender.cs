@@ -3,6 +3,7 @@ using System;
 using System.Net;
 using GoogleTracer;
 using System.Net.Mail;
+using System.Threading;
 using Serilog;
 
 namespace Services
@@ -25,7 +26,7 @@ namespace Services
                 var port = Convert.ToInt32(_appSetting["smtpPort"]);
                 var userName = _appSetting["smtpUsername"];
                 var password = _appSetting["smtpPassword"];
-                this.client = new SmtpClient() { Host = host, Port = port,EnableSsl = true, Credentials = new NetworkCredential(userName, password) };
+                this.client = new SmtpClient() { Host = host, Port = port, EnableSsl = true, Credentials = new NetworkCredential(userName, password) };
             }
         }
 
@@ -44,16 +45,22 @@ namespace Services
                 $"<tr><td><b>{code}</b></td></tr>" +
                 "</table></body></html>"
             };
-            try
+            for (int i = 0; i < 10; i++)
             {
-                client.Send(message);
+                try
+                {
+                    client.Send(message);
+                    return "ok";
+                }
+                catch (Exception e)
+                {
+                    _logger.Error(e, e.Message);
+                    Thread.Sleep(1000);
+                }
+
             }
-            catch (Exception e)
-            {
-                _logger.Error(e, e.Message);
-                return "failed";
-            }
-            return "ok";
+
+            return "failed";
         }
 
         public string SendDeletingEmail(string email, string code)

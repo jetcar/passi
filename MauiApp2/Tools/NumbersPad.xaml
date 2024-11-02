@@ -12,7 +12,7 @@
                 <Setter Property="CornerRadius" Value="100" />
                 <Setter Property="FontSize" Value="15" />
                 <Setter Property="HeightRequest" Value="45" />
-                <Setter Property="Margin" Value="10" />
+                <Setter Property="Margin" Value="10,20" />
             </Style>
         </ResourceDictionary>
     </ContentView.Resources>

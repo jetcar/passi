@@ -1,4 +1,5 @@
 ﻿using MauiViewModels.StorageModels;
+using MauiViewModels.utils.Services;
 
 namespace MauiViewModels.Menu
 {
@@ -14,6 +15,11 @@ namespace MauiViewModels.Menu
         public void EditButton_OnClicked()
         {
             _navigationService.PushModalSinglePage(new EditProviderViewModel(Provider));
+        }
+
+        public void BackButton_OnClicked()
+        {
+            _navigationService.PopModal();
         }
     }
 }

@@ -7,30 +7,46 @@
                               BackgroundColor="#FAFAFA"
                               x:DataType="menu1:ProviderViewModel"
                               x:Class="MauiApp2.Menu.ProviderView">
-    <StackLayout HorizontalOptions="FillAndExpand">
-
-        <StackLayout VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand">
-            <Label TextColor="Black" HorizontalOptions="Center" Text="Identity provider:" />
-            <Label TextColor="Black" HorizontalOptions="Center" Text="{Binding Path=Provider.Name}" />
-            <Label TextColor="Black" HorizontalOptions="Center" Text="IsDefault" />
-            <Label TextColor="Black" HorizontalOptions="Center" Text="{Binding Path=Provider.IsDefault}" />
-            <Label TextColor="Black" HorizontalOptions="Center" Text="Base Url:" />
-            <Label TextColor="Black" HorizontalOptions="Center" Text="{Binding Path=Provider.PassiWebApiUrl}" />
-            <Label TextColor="Black" HorizontalOptions="Center" Text="SignupPath:" />
-            <Label TextColor="Black" HorizontalOptions="Center" Text="{Binding Path=Provider.SignupPath}" />
-            <Label TextColor="Black" HorizontalOptions="Center" Text="Authorize:" />
-            <Label TextColor="Black" HorizontalOptions="Center" Text="{Binding Path=Provider.Authorize}" />
-            <Label TextColor="Black" HorizontalOptions="Center" Text="CancelCheck:" />
-            <Label TextColor="Black" HorizontalOptions="Center" Text="{Binding Path=Provider.CancelCheck}" />
-            <Label TextColor="Black" HorizontalOptions="Center" Text="CheckForStartedSessions:" />
-            <Label TextColor="Black" HorizontalOptions="Center" Text="{Binding Path=Provider.CheckForStartedSessions}" />
-            <Label TextColor="Black" HorizontalOptions="Center" Text="DeleteAccount:" />
-            <Label TextColor="Black" HorizontalOptions="Center" Text="{Binding Path=Provider.DeleteAccount}" />
-            <Label TextColor="Black" HorizontalOptions="Center" Text="SignupCheck:" />
-            <Label TextColor="Black" HorizontalOptions="Center" Text="{Binding Path=Provider.SignupCheck}" />
-            <Label TextColor="Black" HorizontalOptions="Center" Text="SignupConfirmation:" />
-            <Label TextColor="Black" HorizontalOptions="Center" Text="{Binding Path=Provider.SignupConfirmation}" />
+    <mauiApp2:BaseContentPage.Resources>
+        <ResourceDictionary>
+            <Style TargetType="Label">
+                <Setter Property="Margin" Value="20,5" />
+            </Style>
+        </ResourceDictionary>
+    </mauiApp2:BaseContentPage.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+        </Grid.RowDefinitions>
+        <StackLayout VerticalOptions="CenterAndExpand" BackgroundColor="#2196f3" HorizontalOptions="FillAndExpand">
+            <ImageButton  Margin="10,0,10,10" BackgroundColor="#2196f3" Aspect="Center" HorizontalOptions="Start" Source="keyboard_arrow_left.svg" 
+                          Clicked="BackButton_OnClicked"></ImageButton>
         </StackLayout>
-        <Button BackgroundColor="White" TextColor="Black" CornerRadius="100"  Text="Edit" Clicked="EditButton_OnClicked"></Button>
-    </StackLayout>
+        <StackLayout Grid.Row="1" HorizontalOptions="FillAndExpand">
+            <StackLayout VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand">
+                <Label TextColor="Black" HorizontalOptions="Start" Text="Identity provider:" />
+                <Label TextColor="Black" HorizontalOptions="Start" Text="{Binding Path=Provider.Name}" />
+                <Label TextColor="Black" HorizontalOptions="Start" Text="IsDefault" />
+                <Label TextColor="Black" HorizontalOptions="Start" Text="{Binding Path=Provider.IsDefault}" />
+                <Label TextColor="Black" HorizontalOptions="Start" Text="Base Url:" />
+                <Label TextColor="Black" HorizontalOptions="Start" Text="{Binding Path=Provider.PassiWebApiUrl}" />
+                <Label TextColor="Black" HorizontalOptions="Start" Text="SignupPath:" />
+                <Label TextColor="Black" HorizontalOptions="Start" Text="{Binding Path=Provider.SignupPath}" />
+                <Label TextColor="Black" HorizontalOptions="Start" Text="Authorize:" />
+                <Label TextColor="Black" HorizontalOptions="Start" Text="{Binding Path=Provider.Authorize}" />
+                <Label TextColor="Black" HorizontalOptions="Start" Text="CancelCheck:" />
+                <Label TextColor="Black" HorizontalOptions="Start" Text="{Binding Path=Provider.CancelCheck}" />
+                <Label TextColor="Black" HorizontalOptions="Start" Text="CheckForStartedSessions:" />
+                <Label TextColor="Black" HorizontalOptions="Start" Text="{Binding Path=Provider.CheckForStartedSessions}" />
+                <Label TextColor="Black" HorizontalOptions="Start" Text="DeleteAccount:" />
+                <Label TextColor="Black" HorizontalOptions="Start" Text="{Binding Path=Provider.DeleteAccount}" />
+                <Label TextColor="Black" HorizontalOptions="Start" Text="SignupCheck:" />
+                <Label TextColor="Black" HorizontalOptions="Start" Text="{Binding Path=Provider.SignupCheck}" />
+                <Label TextColor="Black" HorizontalOptions="Start" Text="SignupConfirmation:" />
+                <Label TextColor="Black" HorizontalOptions="Start" Text="{Binding Path=Provider.SignupConfirmation}" />
+            </StackLayout>
+            <Button BackgroundColor="White" TextColor="Black" CornerRadius="100" Margin="10" Text="Edit" Clicked="EditButton_OnClicked"></Button>
+        </StackLayout>
+    </Grid>
 </mauiApp2:BaseContentPage>

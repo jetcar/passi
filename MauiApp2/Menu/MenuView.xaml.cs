@@ -42,5 +42,10 @@ namespace MauiApp2.Menu
         {
             ((MenuViewModel)BindingContext).Button_ShowDelete();
         }
+
+        private void Back_button(object sender, EventArgs e)
+        {
+            ((MenuViewModel)BindingContext).Back_button();
+        }
     }
 }

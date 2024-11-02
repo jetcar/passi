@@ -27,5 +27,10 @@ namespace MauiApp2.Main
 
             button.IsEnabled = true;
         }
+
+        private void BackButton_OnClicked(object sender, EventArgs e)
+        {
+            ((AccountViewModel)BindingContext).BackButton_OnClicked();
+        }
     }
 }

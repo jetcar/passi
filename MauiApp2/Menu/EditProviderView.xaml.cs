@@ -13,5 +13,13 @@ namespace MauiApp2.Menu
         {
             ((EditProviderViewModel)BindingContext).SaveButton_OnClicked();
         }
+
+        private void BackButton_OnClicked(object sender, EventArgs e)
+        {
+            ((EditProviderViewModel)BindingContext).CancelButton_OnClicked();
+
+        }
+
+      
     }
 }

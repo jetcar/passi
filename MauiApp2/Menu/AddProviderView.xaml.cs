@@ -18,5 +18,13 @@ namespace MauiApp2.Menu
             //save
             button.IsEnabled = true;
         }
+
+        private void BackButton_OnClicked(object sender, EventArgs e)
+        {
+
+            ((AddProviderViewModel)BindingContext).CancelButton_OnClicked();
+        }
+
+       
     }
 }

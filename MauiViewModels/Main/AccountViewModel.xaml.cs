@@ -176,5 +176,11 @@ namespace MauiViewModels.Main
             CommonApp.FingerPrintReadingResult = null;
             base.OnDisappearing(sender, eventArgs);
         }
+
+        public void BackButton_OnClicked()
+        {
+            _navigationService.PopModal();
+
+        }
     }
 }

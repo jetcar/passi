@@ -7,37 +7,47 @@
                               xmlns:storageModels="clr-namespace:MauiViewModels.StorageModels;assembly=MauiViewModels"
                               x:Name="list"
                               BackgroundColor="#FAFAFA"
+                              
                               x:Class="MauiApp2.Menu.MenuView"
                               x:DataType="menu:MenuViewModel"
 >
     <mauiApp2:BaseContentPage.Content>
-        <StackLayout>
-
-            <ListView  ItemsSource="{Binding Path=Providers}">
-                <ListView.ItemTemplate>
-                    <DataTemplate x:DataType="storageModels:ProviderDb">
-                        <ViewCell Tapped="Cell_OnTapped">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"></ColumnDefinition>
-                                    <ColumnDefinition Width="*"></ColumnDefinition>
-                                </Grid.ColumnDefinitions>
-                                <StackLayout Grid.Column="0" Padding="10" Orientation="Horizontal">
-                                    <ImageButton  Margin="10,0,10,0" BackgroundColor="#fafafa" IsVisible="{Binding Source={x:Reference list}, Path=BindingContext.IsDeleteVisible}" Source="baseline_remove_circle_outline_black.svg" Clicked="Button_PreDeleteProvider" ></ImageButton>
-                                    <Label TextColor="Black" Text="{Binding Path=Name}" ></Label>
-                                </StackLayout>
-                                <Button Grid.Column="1" Text="Delete" WidthRequest="50" TextColor="White" BackgroundColor="Red" Clicked="Button_DeleteProvider" IsVisible="{Binding IsDeleteVisible}"></Button>
-                            </Grid>
-                        </ViewCell>
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
-            <StackLayout Padding="0" Margin="0"  Orientation="Vertical" BackgroundColor="#2196f3">
-                <StackLayout Padding="0,0,0,20" Margin="0"  Orientation="Horizontal" BackgroundColor="#2196f3">
-                    <ImageButton Margin="10" BackgroundColor="#2196f3" HorizontalOptions="CenterAndExpand" Source="baseline_add_circle_black.svg" Clicked="Button_Add"></ImageButton>
-                    <ImageButton Margin="10" BackgroundColor="#2196f3" HorizontalOptions="CenterAndExpand" Source="baseline_delete_black.svg" Clicked="Button_ShowDelete" ></ImageButton>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="*"></RowDefinition>
+            </Grid.RowDefinitions>
+            <StackLayout VerticalOptions="CenterAndExpand" BackgroundColor="#2196f3" HorizontalOptions="FillAndExpand">
+                <ImageButton  Margin="10,0,10,10" BackgroundColor="#2196f3" Aspect="Center" HorizontalOptions="Start" Source="keyboard_arrow_left.svg" 
+                              Clicked="Back_button"></ImageButton>
+            </StackLayout>
+            <StackLayout Grid.Row="1">
+                <ListView  ItemsSource="{Binding Path=Providers}">
+                    <ListView.ItemTemplate>
+                        <DataTemplate x:DataType="storageModels:ProviderDb">
+                            <ViewCell Tapped="Cell_OnTapped">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                        <ColumnDefinition Width="*"></ColumnDefinition>
+                                    </Grid.ColumnDefinitions>
+                                    <StackLayout Grid.Column="0" Padding="10" Orientation="Horizontal">
+                                        <ImageButton  Margin="10,0,10,0" BackgroundColor="#fafafa" IsVisible="{Binding Source={x:Reference list}, Path=BindingContext.IsDeleteVisible}" Source="baseline_remove_circle_outline_black.svg" Clicked="Button_PreDeleteProvider" ></ImageButton>
+                                        <Label TextColor="Black" Text="{Binding Path=Name}" ></Label>
+                                    </StackLayout>
+                                    <Button Grid.Column="1" Text="Delete" WidthRequest="50" TextColor="White" BackgroundColor="Red" Clicked="Button_DeleteProvider" IsVisible="{Binding IsDeleteVisible}"></Button>
+                                </Grid>
+                            </ViewCell>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+                <StackLayout Padding="0" Margin="0"  Orientation="Vertical" BackgroundColor="#2196f3">
+                    <StackLayout Padding="0,0,0,20" Margin="0"  Orientation="Horizontal" BackgroundColor="#2196f3">
+                        <ImageButton Margin="10" BackgroundColor="#2196f3" HorizontalOptions="CenterAndExpand" Source="baseline_add_circle_black.svg" Clicked="Button_Add"></ImageButton>
+                        <ImageButton Margin="10" BackgroundColor="#2196f3" HorizontalOptions="CenterAndExpand" Source="baseline_delete_black.svg" Clicked="Button_ShowDelete" ></ImageButton>
+                    </StackLayout>
                 </StackLayout>
             </StackLayout>
-        </StackLayout>
+        </Grid>
     </mauiApp2:BaseContentPage.Content>
 </mauiApp2:BaseContentPage>

@@ -26,5 +26,10 @@ namespace MauiViewModels.Menu
             //save
             _navigationService.PopModal();
         }
+
+        public void CancelButton_OnClicked()
+        {
+            _navigationService.PopModal();
+        }
     }
 }

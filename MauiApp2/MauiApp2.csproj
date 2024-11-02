@@ -93,6 +93,7 @@
 	<ItemGroup>
 		<None Remove="Platforms\Android\google-services.json" />
 		<None Remove="Resources\Images\icon.png" />
+		<None Remove="Resources\Images\keyboard_arrow_left.svg" />
 	</ItemGroup>
 
 
@@ -115,9 +116,6 @@
 		<Compile Update="MainView.xaml.cs">
 			<DependentUpon>MainView.xaml</DependentUpon>
 		</Compile>
-	</ItemGroup>
-	<ItemGroup>
-		<Folder Include="Admin\" />
 	</ItemGroup>
 	<ItemGroup>
 		<GoogleServicesJson Include="Platforms\Android\google-services.json" />

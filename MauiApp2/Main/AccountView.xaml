@@ -7,24 +7,41 @@
                                xmlns:main="clr-namespace:MauiViewModels.Main;assembly=MauiViewModels"
                                x:DataType="main:AccountViewModel"
                                x:Class="MauiApp2.Main.AccountView">
-    <StackLayout>
-
-        <StackLayout VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand">
-            <Label HorizontalTextAlignment="Center" TextColor="Black" Margin="10" Text="{Binding Path=Message}"></Label>
-
-            <Label TextColor="Black" HorizontalOptions="Center" Text="Current user:" />
-            <Label TextColor="Black" HorizontalOptions="Center" Text="{Binding Path=Email}" />
-            <Label TextColor="Black" HorizontalOptions="Center" Text="Certificate Thumbprint:" />
-            <Label TextColor="Black" HorizontalOptions="Center" Text="{Binding Path=Thumbprint}" />
-            <Label TextColor="Black" HorizontalOptions="Center" Text="Certificate valid from:" />
-            <Label TextColor="Black" HorizontalOptions="Center" Text="{Binding Path=ValidFrom}" />
-            <Label TextColor="Black" HorizontalOptions="Center" Text="Certificate valid to:" />
-            <Label TextColor="Black" HorizontalOptions="Center" Text="{Binding Path=ValidTo}" />
-            <Label TextColor="Black" HorizontalOptions="Center" Text="Identity provider:" />
-            <Label TextColor="Black" HorizontalOptions="Center" Text="{Binding Path=ProviderName}" />
+    <mauiApp2:BaseContentPage.Resources>
+        <ResourceDictionary>
+            <Style TargetType="Label">
+                <Setter Property="Margin" Value="20,5" />
+            </Style>
+        </ResourceDictionary>
+    </mauiApp2:BaseContentPage.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+        </Grid.RowDefinitions>
+        <StackLayout VerticalOptions="CenterAndExpand" BackgroundColor="#2196f3" HorizontalOptions="FillAndExpand">
+            <ImageButton  Margin="10,0,10,10" BackgroundColor="#2196f3" Aspect="Center" HorizontalOptions="Start" Source="keyboard_arrow_left.svg" 
+                          Clicked="BackButton_OnClicked"></ImageButton>
         </StackLayout>
+        <StackLayout Grid.Row="1" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand">
 
-        <Button BackgroundColor="White" TextColor="Black" CornerRadius="100" Margin="10" Text="Update Certificate" Clicked="UpdateCertificate_OnClicked"></Button>
-        <Button BackgroundColor="White" TextColor="Black" CornerRadius="100" Margin="10" Text="Add Fingerprint" Clicked="AddBiometric_Button_OnClicked" ></Button>
-    </StackLayout>
+            <StackLayout VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand">
+                <Label HorizontalTextAlignment="Center" TextColor="Black" Margin="10" Text="{Binding Path=Message}"></Label>
+
+                <Label TextColor="Black" HorizontalOptions="Start" Text="Current user:" />
+                <Label TextColor="Black" HorizontalOptions="Start" Text="{Binding Path=Email}" />
+                <Label TextColor="Black" HorizontalOptions="Start" Text="Certificate Thumbprint:" />
+                <Label TextColor="Black" HorizontalOptions="Start" Text="{Binding Path=Thumbprint}" />
+                <Label TextColor="Black" HorizontalOptions="Start" Text="Certificate valid from:" />
+                <Label TextColor="Black" HorizontalOptions="Start" Text="{Binding Path=ValidFrom}" />
+                <Label TextColor="Black" HorizontalOptions="Start" Text="Certificate valid to:" />
+                <Label TextColor="Black" HorizontalOptions="Start" Text="{Binding Path=ValidTo}" />
+                <Label TextColor="Black" HorizontalOptions="Start" Text="Identity provider:" />
+                <Label TextColor="Black" HorizontalOptions="Start" Text="{Binding Path=ProviderName}" />
+            </StackLayout>
+
+            <Button BackgroundColor="White" TextColor="Black" CornerRadius="100" Margin="10" Text="Update Certificate" Clicked="UpdateCertificate_OnClicked"></Button>
+            <Button BackgroundColor="White" TextColor="Black" CornerRadius="100" Margin="10" Text="Add Fingerprint" Clicked="AddBiometric_Button_OnClicked" ></Button>
+        </StackLayout>
+    </Grid>
 </mauiApp2:BaseContentPage>

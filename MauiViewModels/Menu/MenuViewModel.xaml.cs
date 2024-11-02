@@ -69,5 +69,10 @@ namespace MauiViewModels.Menu
                 OnPropertyChanged();
             }
         }
+
+        public void Back_button()
+        {
+            _navigationService.PopModal();
+        }
     }
 }

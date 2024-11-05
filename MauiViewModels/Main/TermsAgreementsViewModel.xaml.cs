@@ -1,6 +1,6 @@
 ﻿namespace MauiViewModels.Main
 {
-    public class TermsAgreementsViewModel : BaseViewModel
+    public class TermsAgreementsViewModel : PassiBaseViewModel
     {
         public TermsAgreementsViewModel()
         {

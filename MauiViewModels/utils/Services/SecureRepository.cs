@@ -6,6 +6,7 @@ using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using AppConfig;
+using MauiCommonServices;
 using MauiViewModels.StorageModels;
 using MauiViewModels.utils.Services.Certificate;
 using MauiViewModels.ViewModels;

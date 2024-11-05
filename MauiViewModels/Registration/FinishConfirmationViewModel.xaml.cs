@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Threading.Tasks;
+using MauiCommonServices;
 using MauiViewModels.StorageModels;
 using MauiViewModels.Tools;
 using MauiViewModels.utils.Services.Certificate;
@@ -11,7 +12,7 @@ using WebApiDto.SignUp;
 
 namespace MauiViewModels.Registration
 {
-    public class FinishConfirmationViewModel : BaseViewModel
+    public class FinishConfirmationViewModel : PassiBaseViewModel
     {
         private string _pin1Masked;
         private string _pin2Masked;

@@ -1,10 +1,11 @@
 ﻿using System;
+using MauiCommonServices;
 using MauiViewModels.FingerPrint;
 using MauiViewModels.StorageModels;
 
 namespace MauiViewModels.Main
 {
-    public class AccountViewModel : BaseViewModel
+    public class AccountViewModel : PassiBaseViewModel
     {
         public AccountDb AccountDb { get; set; }
         private string _email;

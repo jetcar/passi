@@ -10,13 +10,13 @@ public class BaseContentPage : ContentPage
 
     protected override void OnAppearing()
     {
-        ((BaseViewModel)BindingContext).OnAppearing(null, null);
+        ((PassiBaseViewModel)BindingContext).OnAppearing(null, null);
         base.OnAppearing();
     }
 
     protected override void OnDisappearing()
     {
-        ((BaseViewModel)BindingContext).OnDisappearing(null, null);
+        ((PassiBaseViewModel)BindingContext).OnDisappearing(null, null);
         base.OnDisappearing();
     }
 }

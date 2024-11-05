@@ -8,7 +8,7 @@ using WebApiDto.SignUp;
 
 namespace MauiViewModels.Registration
 {
-    public class RegistrationConfirmationViewModel : BaseViewModel
+    public class RegistrationConfirmationViewModel : PassiBaseViewModel
     {
         private string _code = "";
         private string _responseError;

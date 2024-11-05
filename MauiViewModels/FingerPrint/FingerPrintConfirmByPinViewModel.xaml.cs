@@ -1,10 +1,11 @@
 ﻿using System;
+using MauiCommonServices;
 using MauiViewModels.StorageModels;
 using MauiViewModels.utils.Services.Certificate;
 
 namespace MauiViewModels.FingerPrint
 {
-    public class FingerPrintConfirmByPinViewModel : BaseViewModel
+    public class FingerPrintConfirmByPinViewModel : PassiBaseViewModel
     {
         private readonly AccountDb _accountDb;
         private MySecureString _pin1 = new MySecureString("");

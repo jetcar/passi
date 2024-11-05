@@ -22,8 +22,6 @@ SOFTWARE. */
 
 // ReSharper disable UnusedType.Global
 
-using System;
-
 #pragma warning disable 1591
 // ReSharper disable UnusedMember.Global
 // ReSharper disable MemberCanBePrivate.Global
@@ -32,7 +30,7 @@ using System;
 // ReSharper disable MemberCanBeProtected.Global
 // ReSharper disable InconsistentNaming
 
-namespace MauiViewModels;
+namespace MauiCommonServices;
 
 /// <summary>
 /// Indicates that the value of the marked element could be <c>null</c> sometimes,

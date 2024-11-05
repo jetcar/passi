@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Timers;
+using MauiCommonServices;
 using MauiViewModels.StorageModels;
 using MauiViewModels.Tools;
 using MauiViewModels.utils.Services.Certificate;
@@ -11,7 +12,7 @@ using Timer = System.Timers.Timer;
 
 namespace MauiViewModels.Notifications
 {
-    public class ConfirmByPinViewModel : BaseViewModel
+    public class ConfirmByPinViewModel : PassiBaseViewModel
     {
         private string _requesterName;
         private MySecureString _pin1 = new MySecureString("");

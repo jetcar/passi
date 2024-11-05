@@ -16,6 +16,7 @@
   <ItemGroup>
     <ProjectReference Include="..\AppCommon\AppCommon.csproj" />
     <ProjectReference Include="..\AppConfig\AppConfig.csproj" />
+    <ProjectReference Include="..\MauiCommonServices\MauiCommonServices.csproj" />
     <ProjectReference Include="..\WebApiDto\WebApiDto.csproj" />
   </ItemGroup>
 

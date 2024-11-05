@@ -4,7 +4,7 @@ using MauiViewModels.StorageModels;
 
 namespace MauiViewModels.Menu
 {
-    public class AddProviderViewModel : BaseViewModel
+    public class AddProviderViewModel : PassiBaseViewModel
     {
         public ProviderDb Provider { get; set; }
 

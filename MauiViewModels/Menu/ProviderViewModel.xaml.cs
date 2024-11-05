@@ -3,7 +3,7 @@ using MauiViewModels.utils.Services;
 
 namespace MauiViewModels.Menu
 {
-    public class ProviderViewModel : BaseViewModel
+    public class ProviderViewModel : PassiBaseViewModel
     {
         public ProviderDb Provider { get; set; }
 

@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Mail;
+using MauiCommonServices;
 using MauiViewModels.Registration;
 using MauiViewModels.StorageModels;
 using MauiViewModels.Tools;
@@ -13,7 +14,7 @@ using WebApiDto.SignUp;
 
 namespace MauiViewModels.Main
 {
-    public class AddAccountViewModel : BaseViewModel
+    public class AddAccountViewModel : PassiBaseViewModel
     {
         private string _emailText = "";
         private ValidationError _emailError;

@@ -11,7 +11,7 @@ using WebApiDto;
 
 namespace MauiViewModels.Admin
 {
-    public class AdminView : BaseViewModel
+    public class AdminView : PassiBaseViewModel
     {
         private string _cert64;
         private string _salt;

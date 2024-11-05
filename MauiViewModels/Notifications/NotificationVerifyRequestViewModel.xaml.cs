@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Net;
 using System.Timers;
+using MauiCommonServices;
 using MauiViewModels.StorageModels;
 using MauiViewModels.Tools;
 using Microsoft.Maui.Graphics;
@@ -13,7 +14,7 @@ using Timer = System.Timers.Timer;
 
 namespace MauiViewModels.Notifications
 {
-    public class NotificationVerifyRequestViewModel : BaseViewModel
+    public class NotificationVerifyRequestViewModel : PassiBaseViewModel
     {
         private List<WebApiDto.Auth.Color> possibleCodes = null;
         private Color _color1;

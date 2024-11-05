@@ -1,10 +1,11 @@
-﻿using MauiViewModels.StorageModels;
+﻿using MauiCommonServices;
+using MauiViewModels.StorageModels;
 using MauiViewModels.utils.Services.Certificate;
 using Microsoft.Maui.Graphics;
 
 namespace MauiViewModels.Main
 {
-    public class UpdateCertificateViewModel : BaseViewModel
+    public class UpdateCertificateViewModel : PassiBaseViewModel
     {
         private string _pin1Masked;
         private string _pin2Masked;

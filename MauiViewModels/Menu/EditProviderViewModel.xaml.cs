@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 
 namespace MauiViewModels.Menu
 {
-    public class EditProviderViewModel : BaseViewModel
+    public class EditProviderViewModel : PassiBaseViewModel
     {
         public ProviderDb Provider { get; set; }
 

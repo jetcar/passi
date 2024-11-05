@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace MauiViewModels;
+namespace MauiCommonServices;
 
 public class ValidationError : INotifyPropertyChanged
 {

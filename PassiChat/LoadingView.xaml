@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<passiChat:BaseContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                       xmlns:passiChat="clr-namespace:PassiChat"
+                       BackgroundColor="#FAFAFA"
+                       x:Class="PassiChat.LoadingView">
+    <passiChat:BaseContentPage.Content>
+        <Grid HorizontalOptions="Center" VerticalOptions="Center">
+            <ActivityIndicator IsRunning="true" />
+        </Grid>
+    </passiChat:BaseContentPage.Content>
+</passiChat:BaseContentPage>

@@ -1,7 +1,6 @@
-﻿using System;
-using AppCommon;
+﻿using AppCommon;
 
-namespace MauiViewModels
+namespace MauiCommonServices
 {
     public class CommonApp
     {

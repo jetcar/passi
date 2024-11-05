@@ -5,6 +5,7 @@ using AppCommon;
 using AppConfig;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
+using MauiCommonServices;
 using MauiViewModels;
 using MauiViewModels.StorageModels;
 using MauiViewModels.utils.Services;
@@ -102,7 +103,7 @@ public class TestBase
                     .WithEnvironment("redis", _redisContainer.IpAddress)
                     .WithEnvironment("redisPort", "6379")
                     .WithEnvironment("GOOGLE_APPLICATION_CREDENTIALS", "/home/creds/passi-dev.json")
-                    .WithBindMount("d:/home/creds/", "/home/creds/")
+                    .WithBindMount("c:/home/creds/", "/home/creds/")
                 ;
 
             if (!string.IsNullOrEmpty(dockerEndpoint))
@@ -133,8 +134,8 @@ public class TestBase
                     .WithEnvironment("redisPort", "6379")
                     .WithEnvironment("PassiUrl", passiInternalUrl)
                     .WithEnvironment("GOOGLE_APPLICATION_CREDENTIALS", "/home/creds/passi-dev.json")
-                    .WithBindMount("d:/home/creds/", "/home/creds/")
-                    .WithBindMount("d:/repo/passi/configs/identity", "/myapp/cert")
+                    .WithBindMount("c:/home/creds/", "/home/creds/")
+                    .WithBindMount("c:/repo/passi/configs/identity", "/myapp/cert")
                 ;
 
             if (!string.IsNullOrEmpty(dockerEndpoint))

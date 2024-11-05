@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
+using MauiCommonServices;
 using MauiViewModels.Main;
 using MauiViewModels.Registration;
 using RestSharp;
@@ -8,7 +9,7 @@ using AccountViewModel = MauiViewModels.Main.AccountViewModel;
 
 namespace MauiViewModels;
 
-public class MainView : BaseViewModel
+public class MainView : PassiBaseViewModel
 {
     private ObservableCollection<ViewModels.AccountModel> _accounts = new ObservableCollection<ViewModels.AccountModel>();
     private bool _isDeleteVisible;

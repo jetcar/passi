@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace MauiViewModels.utils.Services;
+﻿namespace MauiCommonServices;
 
 public interface IMainThreadService
 {

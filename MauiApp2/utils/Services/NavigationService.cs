@@ -1,4 +1,5 @@
-﻿using MauiViewModels;
+﻿using MauiCommonServices;
+using MauiViewModels;
 using MauiViewModels.utils.Services;
 
 namespace MauiApp2.utils.Services
@@ -7,14 +8,14 @@ namespace MauiApp2.utils.Services
     {
         private List<BaseContentPage> _pages = new List<BaseContentPage>();
 
-        public async Task PushModalSinglePage(BaseContentPage page)
+        private async Task PushModalSinglePage(BaseContentPage page)
         {
             _pages.Add(page);
             var navigation = App.FirstPage.Navigation;
             await navigation.PushModalSinglePage(page);
         }
 
-        public async Task PushModalSinglePage(MauiViewModels.BaseViewModel viewModel)
+        public async Task PushModalSinglePage(BaseViewModel viewModel)
         {
             var pageType = viewModel.GetType().FullName;
             pageType = pageType.Replace("MauiViewModels", "MauiApp2").Replace("ViewModel", "View");
@@ -41,8 +42,8 @@ namespace MauiApp2.utils.Services
         public async Task PopModal()
         {
             var page = _pages[_pages.Count - 1];
-            page.Appearing -= ((BaseViewModel)page.BindingContext).OnAppearing;
-            page.Disappearing -= ((BaseViewModel)page.BindingContext).OnDisappearing;
+            page.Appearing -= ((PassiBaseViewModel)page.BindingContext).OnAppearing;
+            page.Disappearing -= ((PassiBaseViewModel)page.BindingContext).OnDisappearing;
 
             _pages.RemoveAt(_pages.Count - 1);
             var navigation = App.FirstPage.Navigation;

@@ -2,11 +2,12 @@
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
+using MauiCommonServices;
 using Timer = System.Timers.Timer;
 
 namespace MauiViewModels.Tools
 {
-    public class LoadingViewModel : BaseViewModel
+    public class LoadingViewModel : PassiBaseViewModel
     {
         private readonly Action _callBack;
         private Task _task;

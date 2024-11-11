@@ -1,6 +1,5 @@
-﻿using MauiApp2.Tools;
-
-namespace MauiApp2.utils
+﻿
+namespace MauiApp1.utils
 {
     public static class INavigationExt
     {

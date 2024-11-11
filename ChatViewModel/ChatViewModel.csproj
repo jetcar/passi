@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\MauiCommonServices\MauiCommonServices.csproj" />
+  </ItemGroup>
+
 </Project>

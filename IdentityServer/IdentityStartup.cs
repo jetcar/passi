@@ -273,6 +273,32 @@ namespace IdentityServer
                     AlwaysSendClientClaims = true,
                 };
                 context.Clients.Add(client3);
+                var client4 = new IdentityServer4.EntityFramework.Storage.Entities.Client()
+                {
+                    ClientId = appsettings["PassiChatClientId"],
+                    ClientSecrets = new List<ClientSecret>() { new ClientSecret() { Value = appsettings["PassiChatSecret"].ToSha256() } },
+                    RedirectUris = new List<ClientRedirectUri>()
+                    {
+                        new ClientRedirectUri(){RedirectUri = "myapp://callback"},
+
+                    },
+
+                    RequirePkce = false,
+                    AllowedGrantTypes = new List<ClientGrantType>()
+                    {
+                        new ClientGrantType(){GrantType =GrantType.AuthorizationCode },
+                        new ClientGrantType(){GrantType =GrantType.ClientCredentials }
+                    },
+                    AllowedScopes = new List<ClientScope>() {
+                        new ClientScope(){Scope = "openid"} ,
+                        new ClientScope(){Scope = "email"},
+                        new ClientScope(){Scope = "profile"}
+                    },
+                    AlwaysIncludeUserClaimsInIdToken = true,
+                    ClientUri = "myapp",
+                    AlwaysSendClientClaims = true,
+                };
+                context.Clients.Add(client4);
 
                 if (!context.IdentityResources.Any())
                     context.IdentityResources.AddRange(new List<IdentityServer4.EntityFramework.Storage.Entities.IdentityResource>()

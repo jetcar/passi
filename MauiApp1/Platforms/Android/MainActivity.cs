@@ -1,5 +1,6 @@
 ﻿using Android.App;
 using Android.Content.PM;
+using Android.Gms.Common;
 using Android.Media;
 using Android.OS;
 using AppCommon;
@@ -26,7 +27,7 @@ namespace MauiApp1
         protected override void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
-            //IsPlayServicesAvailable();
+            IsPlayServicesAvailable();
             CommonApp.Version = AppInfo.Current.VersionString;
             CreateNotificationChannel();
             var dateTimeService = CommonApp.Services.GetService<IDateTimeService>();
@@ -83,27 +84,27 @@ namespace MauiApp1
             notificationManager.CreateNotificationChannel(channel);
         }
 
-        //public bool IsPlayServicesAvailable()
-        //{
-        //    var msgText = "";
-        //    int resultCode = GoogleApiAvailability.Instance.IsGooglePlayServicesAvailable(this);
-        //    if (resultCode != ConnectionResult.Success)
-        //    {
-        //        if (GoogleApiAvailability.Instance.IsUserResolvableError(resultCode))
-        //            msgText = GoogleApiAvailability.Instance.GetErrorString(resultCode);
-        //        else
-        //        {
-        //            msgText = "This device is not supported";
-        //            Finish();
-        //        }
-        //        return false;
-        //    }
-        //    else
-        //    {
-        //        msgText = "Google Play Services is available.";
-        //        return true;
-        //    }
-        //}
+        public bool IsPlayServicesAvailable()
+        {
+            var msgText = "";
+            int resultCode = GoogleApiAvailability.Instance.IsGooglePlayServicesAvailable(this);
+            if (resultCode != ConnectionResult.Success)
+            {
+                if (GoogleApiAvailability.Instance.IsUserResolvableError(resultCode))
+                    msgText = GoogleApiAvailability.Instance.GetErrorString(resultCode);
+                else
+                {
+                    msgText = "This device is not supported";
+                    Finish();
+                }
+                return false;
+            }
+            else
+            {
+                msgText = "Google Play Services is available.";
+                return true;
+            }
+        }
     }
 
 

@@ -6,20 +6,20 @@ namespace MauiApp1
     {
 
         private readonly MainView _bindingContext;
-        public MainPage()
+        public MainPage(MainView bindingContext)
         {
+            _bindingContext = bindingContext;
             InitializeComponent();
-            _bindingContext = new MainView();
             BindingContext = _bindingContext;
             App.FirstPage = this;
 
         }
 
-        private void OnCounterClicked(object sender, EventArgs e)
+        private async void OnCounterClicked(object sender, EventArgs e)
         {
-            _bindingContext.OnCounterClicked(sender,e);
+            await _bindingContext.OnCounterClicked(sender, e);
         }
     }
 
-   
+
 }

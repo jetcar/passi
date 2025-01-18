@@ -142,6 +142,15 @@ services:
       mode: replicated
       endpoint_mode: vip
 
+  oletools:
+    logging:
+      driver: json-file
+    env_file:
+      - ./configs/variables/dev.env
+    deploy:
+      mode: replicated
+      endpoint_mode: vip
+
   antispam:
     logging:
       driver: json-file

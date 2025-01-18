@@ -19,6 +19,10 @@ namespace ConfigurationManager
             get
             {
                 var value = _configuration.GetSection("AppSetting").GetSection(key).Value;
+                if (string.IsNullOrEmpty(value))
+                {
+                    value = _configuration.GetSection(key).Value;
+                }
                 var environmentVariable = Environment.GetEnvironmentVariable(key);
                 var result = PrefferAppsettingFile ? value : environmentVariable ?? value;
                 return result;

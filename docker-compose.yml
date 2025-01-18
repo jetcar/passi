@@ -55,7 +55,7 @@ services:
 
   haproxy:
     container_name: haproxy
-    image: haproxy:3.2.1
+    image: haproxy:3.1.2
     volumes:
       - ../passi_cert:/usr/local/etc/haproxy/cert
       - ./configs/haproxy:/usr/local/etc/haproxy

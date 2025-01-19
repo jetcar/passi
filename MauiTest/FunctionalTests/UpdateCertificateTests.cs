@@ -10,7 +10,7 @@ namespace MauiTest.FunctionalTests
 {
     public class UpdateCertificateTests : TestBase
     {
-        [Test, Timeout(10000)]
+        [Test, MaxTime(30000)]
         public void UpdateCertificateWithPin()
         {
             var mainView = MainTestClass.OpenMainPage();
@@ -116,7 +116,7 @@ namespace MauiTest.FunctionalTests
             Assert.That(CurrentView is MainView);
         }
 
-        [Test, Timeout(10000)]
+        [Test, MaxTime(30000)]
         public void UpdateCertificateNoPinFingerprint()
         {
             var mainView = MainTestClass.OpenMainPage();

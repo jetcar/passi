@@ -12,7 +12,7 @@ namespace MauiTest
 {
     public class LoadingViewTests : TestBase
     {
-        [Test, Timeout(100000)]
+        [Test, MaxTime(100000)]
         public void LoadingViewExpired()
         {
             CommonApp.SkipLoadingTimer = false;
@@ -33,7 +33,7 @@ namespace MauiTest
             }
         }
 
-        [Test, Timeout(100000)]
+        [Test, MaxTime(100000)]
         public void LoadingViewNavigateBack()
         {
             TestBase.Navigation.PushModalSinglePage(new MainView());

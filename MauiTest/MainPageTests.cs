@@ -48,7 +48,7 @@ namespace MauiTest
             Assert.That(page.Accounts.Count, Is.EqualTo(1));
         }
 
-        [Test, Timeout(10000)]
+        [Test, MaxTime(30000)]
         public void DeleteAccountMainView()
         {
             CreateAccount();

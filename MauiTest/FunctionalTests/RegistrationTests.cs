@@ -112,7 +112,7 @@ namespace MauiTest.FunctionalTests
             var fingerPrintConfirmByPinView = FingerPrintTestClass.AddFingerPrint(accountView);
             fingerPrintConfirmByPinView = FingerPrintPinViewClass.FinishFingerPrintAddingIncorrectPin(fingerPrintConfirmByPinView);
 
-            Assert.That(!string.IsNullOrEmpty(fingerPrintConfirmByPinView.Pin1Error.Text));
+            Assert.That(!string.IsNullOrEmpty(fingerPrintConfirmByPinView.Pin1Error.Text), Is.True);
             Assert.That(fingerPrintConfirmByPinView.Pin1Error.HasError);
         }
 

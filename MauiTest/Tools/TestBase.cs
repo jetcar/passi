@@ -38,13 +38,22 @@ public class TestBase
     public void TearDown()
     {
         Thread.Sleep(1000);
+        _pgContainer.DisposeAsync();
+        _redisContainer.DisposeAsync();
+        _passiWebApi.DisposeAsync();
+        _identityServer.DisposeAsync();
+        _pgContainer = null;
+        _redisContainer = null;
+        _passiWebApi = null;
+        _identityServer = null;
+
     }
 
     private static IContainer _pgContainer;
     private static IContainer _redisContainer;
     private static IContainer _passiWebApi;
     private static IContainer _identityServer;
-
+    
     private void PrepareDockers()
     {
         var dockerEndpoint = Environment.GetEnvironmentVariable("DOCKER_HOST");

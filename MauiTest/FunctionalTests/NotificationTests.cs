@@ -14,6 +14,7 @@ namespace MauiTest.FunctionalTests
     public class NotificationTests : TestBase
     {
         [Test]
+        [MaxTime(30000)]
         public void NotificationAccountWithPin()
         {
             var page = MainTestClass.OpenMainPage();
@@ -28,18 +29,19 @@ namespace MauiTest.FunctionalTests
             {
                 Thread.Sleep(1);
             }
-            Assert.AreEqual(mainPage.Accounts.Count, 1);
+            Assert.That(mainPage.Accounts.Count, Is.EqualTo(1));
             var notificationPage =
                 NofiticationViewTestClass.PollOpenSessions(mainPage.Accounts[0], out var color);
-            Assert.GreaterOrEqual(Convert.ToInt32(notificationPage.TimeLeft), 100);
+            Assert.That(Convert.ToInt32(notificationPage.TimeLeft) > 100);
 
             var confirmByPinView = NofiticationViewTestClass.ChooseColorWithPin(notificationPage, color);
 
             var mainPage2 = ConfirmByPinTestClass.ConfirmByPin(confirmByPinView);
-            Assert.IsNotNull(mainPage2);
+            Assert.That(mainPage2 != null);
         }
 
         [Test]
+        [MaxTime(30000)]
         public void NotificationAccountWithInvalidPin()
         {
             var page = MainTestClass.OpenMainPage();
@@ -54,20 +56,21 @@ namespace MauiTest.FunctionalTests
             {
                 Thread.Sleep(1);
             }
-            Assert.AreEqual(mainPage.Accounts.Count, 1);
+            Assert.That(mainPage.Accounts.Count, Is.EqualTo(1));
             var notificationPage =
                 NofiticationViewTestClass.PollOpenSessions(mainPage.Accounts[0], out var color);
-            Assert.GreaterOrEqual(Convert.ToInt32(notificationPage.TimeLeft), 100);
+            Assert.That(Convert.ToInt32(notificationPage.TimeLeft) > 100);
 
             var confirmByPinView = NofiticationViewTestClass.ChooseColorWithPin(notificationPage, color);
 
             confirmByPinView = ConfirmByPinTestClass.ConfirmByIncorrectPin(confirmByPinView);
-            Assert.IsNotNull(confirmByPinView);
-            Assert.IsNotEmpty(confirmByPinView.Pin1Error.Text);
-            Assert.IsTrue(confirmByPinView.Pin1Error.HasError);
+            Assert.That(confirmByPinView != null);
+            Assert.That(!string.IsNullOrEmpty(confirmByPinView.Pin1Error.Text));
+            Assert.That(confirmByPinView.Pin1Error.HasError);
         }
 
         [Test]
+        [MaxTime(30000)]
         public void NotificationAccountBadResponse()
         {
             var page = MainTestClass.OpenMainPage();
@@ -82,19 +85,20 @@ namespace MauiTest.FunctionalTests
             {
                 Thread.Sleep(1);
             }
-            Assert.AreEqual(mainPage.Accounts.Count, 1);
+            Assert.That(mainPage.Accounts.Count, Is.EqualTo(1));
             var notificationPage =
                 NofiticationViewTestClass.PollOpenSessions(mainPage.Accounts[0], out var color);
-            Assert.GreaterOrEqual(Convert.ToInt32(notificationPage.TimeLeft), 100);
+            Assert.That(Convert.ToInt32(notificationPage.TimeLeft) > 100);
 
             var confirmByPinView = NofiticationViewTestClass.ChooseColorWithPin(notificationPage, color);
 
             confirmByPinView = ConfirmByPinTestClass.ConfirmByPinBadResponse(confirmByPinView);
-            Assert.IsNotNull(confirmByPinView);
-            Assert.IsNotEmpty(confirmByPinView.ResponseError);
+            Assert.That(confirmByPinView != null);
+            Assert.That(!string.IsNullOrEmpty(confirmByPinView.ResponseError), Is.True);
         }
 
         [Test]
+        [MaxTime(30000)]
         public void NotificationAccountNetworkError()
         {
             var page = MainTestClass.OpenMainPage();
@@ -109,19 +113,20 @@ namespace MauiTest.FunctionalTests
             {
                 Thread.Sleep(1);
             }
-            Assert.AreEqual(mainPage.Accounts.Count, 1);
+            Assert.That(mainPage.Accounts.Count, Is.EqualTo(1));
             var notificationPage =
                 NofiticationViewTestClass.PollOpenSessions(mainPage.Accounts[0], out var color);
-            Assert.GreaterOrEqual(Convert.ToInt32(notificationPage.TimeLeft), 100);
+            Assert.That(Convert.ToInt32(notificationPage.TimeLeft) > 100);
 
             var confirmByPinView = NofiticationViewTestClass.ChooseColorWithPin(notificationPage, color);
 
             confirmByPinView = ConfirmByPinTestClass.ConfirmByPinNetworkError(confirmByPinView);
-            Assert.IsNotNull(confirmByPinView);
-            Assert.IsNotEmpty(confirmByPinView.ResponseError);
+            Assert.That(confirmByPinView != null);
+            Assert.That(!string.IsNullOrEmpty(confirmByPinView.ResponseError), Is.True);
         }
 
         [Test]
+        [MaxTime(30000)]
         public void NotificationAccountWithFingerPrintAndPin()
         {
             var page = MainTestClass.OpenMainPage();
@@ -136,7 +141,7 @@ namespace MauiTest.FunctionalTests
             {
                 Thread.Sleep(1);
             }
-            Assert.AreEqual(mainPage.Accounts.Count, 1);
+            Assert.That(mainPage.Accounts.Count, Is.EqualTo(1));
 
             //add fingerprint
 
@@ -146,15 +151,16 @@ namespace MauiTest.FunctionalTests
 
             var notificationPage =
                 NofiticationViewTestClass.PollOpenSessions(mainPage.Accounts[0], out var color);
-            Assert.GreaterOrEqual(Convert.ToInt32(notificationPage.TimeLeft), 100);
+            Assert.That(Convert.ToInt32(notificationPage.TimeLeft) > 100);
 
             var confirmByPinView = NofiticationViewTestClass.ChooseColorWithPin(notificationPage, color);
 
             var mainPage2 = ConfirmByPinTestClass.ConfirmByFingerprint(confirmByPinView);
-            Assert.IsNotNull(mainPage2);
+            Assert.That(mainPage2 != null);
         }
 
         [Test]
+        [MaxTime(30000)]
         public void NotificationAccountWithFingerPrintNoPin()
         {
             var page = MainTestClass.OpenMainPage();
@@ -169,22 +175,22 @@ namespace MauiTest.FunctionalTests
             {
                 Thread.Sleep(1);
             }
-            Assert.AreEqual(mainPage.Accounts.Count, 1);
+            Assert.That(mainPage.Accounts.Count, Is.EqualTo(1));
 
             //add fingerprint
 
             var accountView = MainTestClass.OpenAccount(mainPage, mainPage.Accounts[0]);
             FingerPrintTestClass.AddFingerPrintNoPin(accountView);
-            Assert.AreEqual(CommonApp.Services.GetService<ISecureRepository>().GetAccount(mainPage.Accounts[0].Guid).HaveFingerprint, true);
+            Assert.That(CommonApp.Services.GetService<ISecureRepository>().GetAccount(mainPage.Accounts[0].Guid).HaveFingerprint, Is.EqualTo(true));
 
             var notificationPage =
                 NofiticationViewTestClass.PollOpenSessions(mainPage.Accounts[0], out var color);
-            Assert.GreaterOrEqual(Convert.ToInt32(notificationPage.TimeLeft), 100);
+            Assert.That(Convert.ToInt32(notificationPage.TimeLeft) > 100);
 
             TestNavigationService.navigationsCount = 0;
             var confirmView = NofiticationViewTestClass.ChooseColorWithoutPinFingerPrint(notificationPage, color);
             TestBase.TouchFingerPrintWithGoodResult();
-            Assert.AreEqual(1, TestNavigationService.navigationsCount);
+            Assert.That(1, Is.EqualTo(TestNavigationService.navigationsCount));
             while (!(TestBase.CurrentView is MainView))
             {
                 Thread.Sleep(1);
@@ -195,10 +201,11 @@ namespace MauiTest.FunctionalTests
                 {
                     Thread.Sleep(1);
                 }
-            Assert.IsNotNull(mainPage2);
+            Assert.That(mainPage2 != null);
         }
 
         [Test]
+        [MaxTime(30000)]
         public void CancelClickConfirmByPin()
         {
             var page = MainTestClass.OpenMainPage();
@@ -213,10 +220,10 @@ namespace MauiTest.FunctionalTests
             {
                 Thread.Sleep(1);
             }
-            Assert.AreEqual(mainPage.Accounts.Count, 1);
+            Assert.That(mainPage.Accounts.Count, Is.EqualTo(1));
             var notificationPage =
                 NofiticationViewTestClass.PollOpenSessions(mainPage.Accounts[0], out Color color);
-            Assert.GreaterOrEqual(Convert.ToInt32(notificationPage.TimeLeft), 80);
+            Assert.That(Convert.ToInt32(notificationPage.TimeLeft) > 80);
 
             var confirmByPinView = NofiticationViewTestClass.ChooseColorWithPin(notificationPage, color);
             confirmByPinView.Cancel_OnClicked();
@@ -225,10 +232,11 @@ namespace MauiTest.FunctionalTests
                 Thread.Sleep(1);
             }
             var mainPage2 = CurrentView as MainView;
-            Assert.IsNotNull(mainPage2);
+            Assert.That(mainPage2 != null);
         }
 
         [Test]
+        [MaxTime(30000)]
         public void CancelNotification()
         {
             var page = MainTestClass.OpenMainPage();
@@ -243,10 +251,10 @@ namespace MauiTest.FunctionalTests
             {
                 Thread.Sleep(1);
             }
-            Assert.AreEqual(mainPage.Accounts.Count, 1);
+            Assert.That(mainPage.Accounts.Count, Is.EqualTo(1));
             var notificationPage =
                 NofiticationViewTestClass.PollOpenSessions(mainPage.Accounts[0], out var color);
-            Assert.GreaterOrEqual(Convert.ToInt32(notificationPage.TimeLeft), 100);
+            Assert.That(Convert.ToInt32(notificationPage.TimeLeft) > 100);
 
             notificationPage.Cancel_OnClicked();
             while (!(CurrentView is MainView))
@@ -254,10 +262,11 @@ namespace MauiTest.FunctionalTests
                 Thread.Sleep(1);
             }
             var mainPage2 = CurrentView as MainView;
-            Assert.IsNotNull(mainPage2);
+            Assert.That(mainPage2 != null);
         }
 
         [Test]
+        [MaxTime(30000)]
         public void ConfirmByPinTimeout()
         {
             var page = MainTestClass.OpenMainPage();
@@ -272,18 +281,19 @@ namespace MauiTest.FunctionalTests
             {
                 Thread.Sleep(1);
             }
-            Assert.AreEqual(mainPage.Accounts.Count, 1);
+            Assert.That(mainPage.Accounts.Count, Is.EqualTo(1));
             var notificationPage =
                 NofiticationViewTestClass.PollOpenSessions(mainPage.Accounts[0], out var color);
-            Assert.GreaterOrEqual(Convert.ToInt32(notificationPage.TimeLeft), 100);
+            Assert.That(Convert.ToInt32(notificationPage.TimeLeft) > 100);
             notificationPage.Message.ExpirationTime = DateTime.UtcNow;
             Thread.Sleep(5000);
-            Assert.AreEqual(TestNavigationService.AlertMessage, "Session Expired");
+            Assert.That(TestNavigationService.AlertMessage, Is.EqualTo("Session Expired"));
             var mainPage2 = CurrentView as MainView;
-            Assert.IsNotNull(mainPage2);
+            Assert.That(mainPage2 != null);
         }
 
         [Test]
+        [MaxTime(30000)]
         public void NotificatioAccountWithoutPin()
         {
             var page = MainTestClass.OpenMainPage();
@@ -298,23 +308,24 @@ namespace MauiTest.FunctionalTests
             {
                 Thread.Sleep(1);
             }
-            Assert.AreEqual(mainPage.Accounts.Count, 1);
+            Assert.That(mainPage.Accounts.Count, Is.EqualTo(1));
 
             var notificationPage =
                 NofiticationViewTestClass.PollOpenSessions(mainPage.Accounts[0], out var color);
-            //Assert.AreEqual(notificationPage.TimeLeft, "9");
+            //Assert.Equal(notificationPage.TimeLeft, "9");
 
             TestNavigationService.navigationsCount = 0;
             var mainPage2 = NofiticationViewTestClass.ChooseColorWithoutPin(notificationPage, color);
-            Assert.AreEqual(2, TestNavigationService.navigationsCount);
+            Assert.That(2, Is.EqualTo(TestNavigationService.navigationsCount));
 
-            Assert.IsNotNull(mainPage2);
+            Assert.That(mainPage2 != null);
             var result = NofiticationViewTestClass.VerifySessionSignature(notificationPage.Message.SessionId,
                 mainPage.Accounts[0].Thumbprint, mainPage.Accounts[0].Email, notificationPage.Message.RandomString);
-            Assert.IsTrue(result);
+            Assert.That(result);
         }
 
         [Test]
+        [MaxTime(30000)]
         public void SameNotificatioAccountWithoutPin()
         {
             var page = MainTestClass.OpenMainPage();
@@ -329,7 +340,7 @@ namespace MauiTest.FunctionalTests
             {
                 Thread.Sleep(1);
             }
-            Assert.AreEqual(mainPage.Accounts.Count, 1);
+            Assert.That(mainPage.Accounts.Count, Is.EqualTo(1));
 
             var newGuid = Guid.NewGuid();
             var notificationPage =
@@ -337,15 +348,16 @@ namespace MauiTest.FunctionalTests
 
             TestNavigationService.navigationsCount = 0;
             var mainPage2 = NofiticationViewTestClass.ChooseColorWithoutPin(notificationPage, color);
-            Assert.AreEqual(2, TestNavigationService.navigationsCount);
+            Assert.That(2, Is.EqualTo(TestNavigationService.navigationsCount));
 
-            Assert.IsNotNull(mainPage2);
+            Assert.That(mainPage2 != null);
 
             var mainPage3 =
                 NofiticationViewTestClass.PollExistingSessionId(mainPage.Accounts[0], WebApiDto.Auth.Color.blue, 10, newGuid);
         }
 
         [Test]
+        [MaxTime(30000)]
         public void NotificationTimeoutTest()
         {
             var page = MainTestClass.OpenMainPage();
@@ -360,20 +372,20 @@ namespace MauiTest.FunctionalTests
             {
                 Thread.Sleep(1);
             }
-            Assert.AreEqual(mainPage.Accounts.Count, 1);
+            Assert.That(mainPage.Accounts.Count, Is.EqualTo(1));
 
             var notificationPage =
                 NofiticationViewTestClass.PollOpenSessions(mainPage.Accounts[0], out var color);
             notificationPage.Message.ExpirationTime = DateTime.UtcNow;
             Thread.Sleep(5000);
-            Assert.LessOrEqual(Convert.ToInt32(notificationPage.TimeLeft), 0);
+            Assert.That(Convert.ToInt32(notificationPage.TimeLeft) <= 0);
 
             while (!(CurrentView is MainView))
             {
                 Thread.Sleep(1);
             }
             var mainPage2 = CurrentView as MainView;
-            Assert.IsNotNull(mainPage2);
+            Assert.That(mainPage2 != null);
         }
     }
 }

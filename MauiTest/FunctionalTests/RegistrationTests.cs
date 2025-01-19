@@ -18,7 +18,7 @@ namespace MauiTest.FunctionalTests
             // TestRestService.Result[ConfigSettings.Signup] = SuccesfullResponce();
             var registrationConfirmation = AddAccountTestClass.ClickConfirm(addAccountView);
             RegistrationConfirmationTestClass.EnterIncorrectCode(registrationConfirmation);
-            Assert.AreEqual(registrationConfirmation.ResponseError, "Code not found");
+            Assert.That(registrationConfirmation.ResponseError, Is.EqualTo("Code not found"));
             var finishConfirmation = RegistrationConfirmationTestClass.EnterCorrectCode(registrationConfirmation);
             // TestRestService.Result[ConfigSettings.SignupConfirmation] = SuccesfullResponce();
             var mainPage = FinishConfirmationTestClass.FinishRegistrationWithPin(finishConfirmation);
@@ -26,7 +26,7 @@ namespace MauiTest.FunctionalTests
             {
                 Thread.Sleep(1);
             }
-            Assert.AreEqual(mainPage.Accounts.Count, 1);
+            Assert.That(mainPage.Accounts.Count, Is.EqualTo(1));
         }
 
         [Test]
@@ -43,7 +43,7 @@ namespace MauiTest.FunctionalTests
             {
                 Thread.Sleep(1);
             }
-            Assert.AreEqual(mainPage.Accounts.Count, 1);
+            Assert.That(mainPage.Accounts.Count, Is.EqualTo(1));
         }
 
         [Test]
@@ -57,7 +57,7 @@ namespace MauiTest.FunctionalTests
             {
                 Thread.Sleep(1);
             }
-            Assert.AreEqual(mainPage.Accounts.Count, 0);
+            Assert.That(mainPage.Accounts.Count, Is.EqualTo(0));
         }
 
         [Test]
@@ -87,7 +87,7 @@ namespace MauiTest.FunctionalTests
                 Thread.Sleep(1);
             }
 
-            Assert.IsTrue(CurrentView is MainView);
+            Assert.That(CurrentView is MainView);
         }
 
         [Test]
@@ -112,8 +112,8 @@ namespace MauiTest.FunctionalTests
             var fingerPrintConfirmByPinView = FingerPrintTestClass.AddFingerPrint(accountView);
             fingerPrintConfirmByPinView = FingerPrintPinViewClass.FinishFingerPrintAddingIncorrectPin(fingerPrintConfirmByPinView);
 
-            Assert.IsNotEmpty(fingerPrintConfirmByPinView.Pin1Error.Text);
-            Assert.IsTrue(fingerPrintConfirmByPinView.Pin1Error.HasError);
+            Assert.That(!string.IsNullOrEmpty(fingerPrintConfirmByPinView.Pin1Error.Text));
+            Assert.That(fingerPrintConfirmByPinView.Pin1Error.HasError);
         }
 
         [Test]
@@ -132,7 +132,7 @@ namespace MauiTest.FunctionalTests
             {
                 Thread.Sleep(1);
             }
-            Assert.AreEqual(mainPage.Accounts.Count, 1);
+            Assert.That(mainPage.Accounts.Count, Is.EqualTo(1));
         }
     }
 }

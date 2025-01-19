@@ -33,14 +33,14 @@ public class NofiticationViewTestClass
         };
         restRequest.AddJsonBody(obj);
         var result = rest.ExecuteAsync(restRequest).Result;
-        Assert.IsTrue(result.IsSuccessful);
+        Assert.That(result.IsSuccessful);
         Console.WriteLine($"{result.StatusCode} {result.Content}");
         var json = JsonConvert.DeserializeObject<dynamic>(result.Content);
         var username = json.username.ToString();
         var checkColor = json.checkColor.ToString();
         Microsoft.Maui.Graphics.Color.TryParse(checkColor, out color);
 
-        Assert.AreEqual(accountViewModel.Email, username);
+        Assert.That(accountViewModel.Email,Is.EqualTo(username));
         var syncService = CommonApp.Services.GetService<ISyncService>();
         syncService.PollNotifications();
         while (!(syncService.PollingTask.IsCompleted))
@@ -53,9 +53,9 @@ public class NofiticationViewTestClass
         var page = TestBase.CurrentView as NotificationVerifyRequestViewModel;
         while (page._account == null)
             Thread.Sleep(1);
-        Assert.AreEqual(page._account.Guid, accountViewModel.Guid);
-        Assert.AreEqual(page.ReturnHost, "localhost");
-        Assert.AreEqual(page.RequesterName, "IdentityServer");
+        Assert.That(page._account.Guid, Is.EqualTo(accountViewModel.Guid));
+        Assert.That(page.ReturnHost, Is.EqualTo("localhost"));
+        Assert.That(page.RequesterName, Is.EqualTo("IdentityServer"));
         return page;
     }
 
@@ -87,7 +87,7 @@ public class NofiticationViewTestClass
         {
             Thread.Sleep(1);
         }
-        // Assert.AreEqual(1, TestNavigationService.navigationsCount);
+        // Assert.That(1, TestNavigationService.navigationsCount);
         var page = TestBase.CurrentView as MainView;
         return page;
     }
@@ -106,7 +106,7 @@ public class NofiticationViewTestClass
         {
             Thread.Sleep(1);
         }
-        Assert.AreEqual(1, TestNavigationService.navigationsCount);
+        Assert.That(1,Is.EqualTo(TestNavigationService.navigationsCount));
 
         var confirmByPin = TestBase.CurrentView as ConfirmByPinViewModel;
         return confirmByPin;

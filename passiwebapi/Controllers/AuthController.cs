@@ -82,12 +82,15 @@ namespace passi_webapi.Controllers
         }
 
         [HttpPost, Route("Authorize")]
-        public LoginResponceDto Authorize([FromBody] AuthorizeDto authorizeDto)
+        public IActionResult Authorize([FromBody] AuthorizeDto authorizeDto)
         {
+            var sessionDb = _sessionsRepository.CheckSessionAndReturnUser(authorizeDto.SessionId);
+            if (sessionDb == null)
+                return BadRequest("Session not found");
             _sessionsRepository.VerifySession(authorizeDto.SessionId, authorizeDto.SignedHash,
                 authorizeDto.PublicCertThumbprint);
 
-            return new LoginResponceDto() { SessionId = authorizeDto.SessionId };
+            return Ok(new LoginResponceDto() { SessionId = authorizeDto.SessionId });
         }
 
         [HttpGet, Route("check")]

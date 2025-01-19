@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>net8.0-android34.0</TargetFrameworks>
+		<TargetFrameworks>net9.0-android35.0</TargetFrameworks>
 		<!-- Uncomment to also build the tizen app. You will need to install tizen by following this: https://github.com/Samsung/Tizen.NET -->
 		<!-- <TargetFrameworks>$(TargetFrameworks);net7.0-tizen</TargetFrameworks> -->
 		<OutputType>Exe</OutputType>
@@ -30,20 +30,8 @@
 		<RunAnalyzersDuringLiveAnalysis>False</RunAnalyzersDuringLiveAnalysis>
 		<EnableNETAnalyzers>False</EnableNETAnalyzers>
 		<AndroidSigningKeyStore>passi.keystore</AndroidSigningKeyStore>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net8.0-android34.0|AnyCPU'">
-		<ApplicationVersion>47</ApplicationVersion>
-		<ApplicationDisplayVersion>1.47</ApplicationDisplayVersion>
-		<ApplicationId>com.passi.cloud.passi_android</ApplicationId>
-		<ApplicationTitle>passi_android.Android</ApplicationTitle>
-		<AndroidSigningKeyStore>passi.keystore</AndroidSigningKeyStore>
-		<ApplicationId>com.passi.cloud.passi_android</ApplicationId>
-		<ApplicationTitle>passi_android.Android</ApplicationTitle>
-		<AndroidSigningStorePass>Curev3st2</AndroidSigningStorePass>
-		<AndroidSigningKeyPass>Curev3st2</AndroidSigningKeyPass>
-		<AndroidSigningKeyAlias>passi</AndroidSigningKeyAlias>
-		<TrimMode>link</TrimMode>
+		<WindowsPackageType>None</WindowsPackageType>
+		<NuGetAudit>False</NuGetAudit>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net8.0-android34.0|AnyCPU'">
@@ -60,6 +48,22 @@
 		<TrimMode>link</TrimMode>
 		<RunAOTCompilation>False</RunAOTCompilation>
 	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net9.0-android35.0|AnyCPU'">
+	  <AndroidKeyStore>True</AndroidKeyStore>
+	  <AndroidSigningStorePass>Curev3st2</AndroidSigningStorePass>
+	  <AndroidSigningKeyAlias>passi</AndroidSigningKeyAlias>
+	  <JavaMaximumHeapSize>2G</JavaMaximumHeapSize>
+	  <AndroidSigningKeyPass>Curev3st2</AndroidSigningKeyPass>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-android35.0|AnyCPU'">
+	  <AndroidKeyStore>True</AndroidKeyStore>
+	  <AndroidSigningStorePass>Curev3st2</AndroidSigningStorePass>
+	  <AndroidSigningKeyAlias>passi</AndroidSigningKeyAlias>
+	  <JavaMaximumHeapSize>2G</JavaMaximumHeapSize>
+	  <AndroidSigningKeyPass>Curev3st2</AndroidSigningKeyPass>
+	</PropertyGroup>
 	<ItemGroup>
 		<!-- App Icon -->
 		<MauiIcon Include="Resources\AppIcon\icon.png" BaseSize="128,128" />
@@ -75,12 +79,9 @@
 		<MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
 	</ItemGroup>
 
-
 	<ItemGroup>
 		<MauiAsset Remove="Resources\Raw\AboutAssets.txt" />
 	</ItemGroup>
-
-
 
 	<ItemGroup>
 		<None Remove="Platforms\Android\google-services.json" />
@@ -91,16 +92,16 @@
 
 	<ItemGroup>
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
-		<PackageReference Include="FirebaseAdmin" Version="2.4.1" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.0" />
+		<PackageReference Include="FirebaseAdmin" Version="3.1.0" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.1" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-		<PackageReference Include="CommunityToolkit.Maui" Version="7.0.1" />
-		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
-		<PackageReference Include="Plugin.Firebase" Version="1.2.5" />
-		<PackageReference Include="Xamarin.AndroidX.Collection" Version="1.4.4" />
-		<PackageReference Include="Xamarin.AndroidX.Collection.Ktx" Version="1.4.4" />
-		<PackageReference Update="Microsoft.Maui.Controls" Version="8.0.91" />
-		<PackageReference Update="Microsoft.Maui.Controls.Compatibility" Version="8.0.91" />
+		<PackageReference Include="CommunityToolkit.Maui" Version="11.0.0" />
+		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+		<PackageReference Include="Plugin.Firebase" Version="3.1.3" />
+		<PackageReference Include="Xamarin.AndroidX.Collection" Version="1.4.5.1" />
+		<PackageReference Include="Xamarin.AndroidX.Collection.Ktx" Version="1.4.5.1" />
+		<PackageReference Include="Microsoft.Maui.Controls" Version="9.0.30" />
+		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="8.0.91" />
 
 	</ItemGroup>
 	<ItemGroup>

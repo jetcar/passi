@@ -11,7 +11,7 @@ public class TermsAgreementsTestClass
     {
         tcView.Button_OnAgreeClicked();
 
-        Assert.IsTrue(TestBase.CurrentView is AddAccountViewModel);
+        Assert.That(TestBase.CurrentView is AddAccountViewModel);
 
         var addAccountView = TestBase.CurrentView as AddAccountViewModel;
         return addAccountView;
@@ -22,10 +22,10 @@ public class TermsAgreementsTestClass
         TestNavigationService.navigationsCount = 0;
         tcView.Button_OnCancelClicked();
 
-        Assert.IsTrue(TestBase.CurrentView is MainView);
+        Assert.That(TestBase.CurrentView is MainView);
 
         var mainView = TestBase.CurrentView as MainView;
-        Assert.AreEqual(1, TestNavigationService.navigationsCount);
+        Assert.That(1, Is.EqualTo(TestNavigationService.navigationsCount));
         return mainView;
     }
 }

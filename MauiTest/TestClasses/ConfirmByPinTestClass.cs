@@ -1,3 +1,4 @@
+using System;
 using System.Threading;
 using AppConfig;
 using MauiTest.Tools;
@@ -20,15 +21,15 @@ public class ConfirmByPinTestClass
         //TestRestService.Result[ConfigSettings.Authorize] = TestBase.SuccesfullResponce();
         TestNavigationService.navigationsCount = 0;
         confirmByPinView.NumbersPad_OnNumberClicked("1");
-        Assert.IsTrue(TestBase.CurrentView is LoadingViewModel);
+        Assert.That(TestBase.CurrentView is LoadingViewModel);
 
         while (!(TestBase.CurrentView is MainView))
         {
             Thread.Sleep(1);
         }
-        Assert.AreEqual(2, TestNavigationService.navigationsCount);
+        Assert.That(2, Is.EqualTo(TestNavigationService.navigationsCount));
 
-        Assert.IsTrue(TestBase.CurrentView is MainView);
+        Assert.That(TestBase.CurrentView is MainView);
         var mainPage = TestBase.CurrentView as MainView;
         if (mainPage._loadAccountTask != null)
             while (!mainPage._loadAccountTask.IsCompleted)
@@ -43,15 +44,15 @@ public class ConfirmByPinTestClass
         TestNavigationService.navigationsCount = 0;
         //TestRestService.Result[ConfigSettings.Authorize] = TestBase.SuccesfullResponce();
         TestBase.TouchFingerPrintWithGoodResult();
-        Assert.IsTrue(TestBase.CurrentView is LoadingViewModel);
+        Assert.That(TestBase.CurrentView is LoadingViewModel);
 
         while (!(TestBase.CurrentView is MainView))
         {
             Thread.Sleep(1);
         }
-        Assert.AreEqual(2, TestNavigationService.navigationsCount);
+        Assert.That(2, Is.EqualTo(TestNavigationService.navigationsCount));
 
-        Assert.IsTrue(TestBase.CurrentView is MainView);
+        Assert.That(TestBase.CurrentView is MainView);
         var mainPage = TestBase.CurrentView as MainView;
         if (mainPage._loadAccountTask != null)
             while (!mainPage._loadAccountTask.IsCompleted)
@@ -75,7 +76,7 @@ public class ConfirmByPinTestClass
             Thread.Sleep(1);
         }
 
-        Assert.IsTrue(TestBase.CurrentView is ConfirmByPinViewModel);
+        Assert.That(TestBase.CurrentView is ConfirmByPinViewModel);
         var pinView = TestBase.CurrentView as ConfirmByPinViewModel;
 
         return pinView;
@@ -83,19 +84,19 @@ public class ConfirmByPinTestClass
 
     public static ConfirmByPinViewModel ConfirmByPinBadResponse(ConfirmByPinViewModel confirmByPinView)
     {
-        confirmByPinView.NumbersPad_OnNumberClicked("2");
-        confirmByPinView.NumbersPad_OnNumberClicked("2");
-        confirmByPinView.NumbersPad_OnNumberClicked("2");
+        confirmByPinView.NumbersPad_OnNumberClicked("1");
+        confirmByPinView.NumbersPad_OnNumberClicked("1");
+        confirmByPinView.NumbersPad_OnNumberClicked("1");
         //TestRestService.Result[ConfigSettings.Authorize] = TestBase.BadResponce("error");
+        confirmByPinView.Message.SessionId =Guid.Empty;
 
-        confirmByPinView.NumbersPad_OnNumberClicked("2");
-
+        confirmByPinView.NumbersPad_OnNumberClicked("1");
         while (!(TestBase.CurrentView is ConfirmByPinViewModel) || !TestBase.CurrentView.Appeared)
         {
             Thread.Sleep(1);
         }
 
-        Assert.IsTrue(TestBase.CurrentView is ConfirmByPinViewModel);
+        Assert.That(TestBase.CurrentView is ConfirmByPinViewModel);
         var pinView = TestBase.CurrentView as ConfirmByPinViewModel;
 
         return pinView;
@@ -116,7 +117,7 @@ public class ConfirmByPinTestClass
             Thread.Sleep(1);
         }
 
-        Assert.IsTrue(TestBase.CurrentView is ConfirmByPinViewModel);
+        Assert.That(TestBase.CurrentView is ConfirmByPinViewModel);
         var pinView = TestBase.CurrentView as ConfirmByPinViewModel;
 
         return pinView;

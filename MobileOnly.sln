@@ -47,6 +47,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MauiCommonServices", "MauiC
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MauiApp1", "MauiApp1\MauiApp1.csproj", "{245E4261-611C-49BD-9910-E11EA1A18529}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RedisClient", "RedisClient\RedisClient.csproj", "{CB4066D8-30D0-4229-A8AD-DD3F42083D5C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -309,6 +311,18 @@ Global
 		{245E4261-611C-49BD-9910-E11EA1A18529}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
 		{245E4261-611C-49BD-9910-E11EA1A18529}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
 		{245E4261-611C-49BD-9910-E11EA1A18529}.Release|iPhoneSimulator.Deploy.0 = Release|Any CPU
+		{CB4066D8-30D0-4229-A8AD-DD3F42083D5C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CB4066D8-30D0-4229-A8AD-DD3F42083D5C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CB4066D8-30D0-4229-A8AD-DD3F42083D5C}.Debug|iPhone.ActiveCfg = Debug|Any CPU
+		{CB4066D8-30D0-4229-A8AD-DD3F42083D5C}.Debug|iPhone.Build.0 = Debug|Any CPU
+		{CB4066D8-30D0-4229-A8AD-DD3F42083D5C}.Debug|iPhoneSimulator.ActiveCfg = Debug|Any CPU
+		{CB4066D8-30D0-4229-A8AD-DD3F42083D5C}.Debug|iPhoneSimulator.Build.0 = Debug|Any CPU
+		{CB4066D8-30D0-4229-A8AD-DD3F42083D5C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CB4066D8-30D0-4229-A8AD-DD3F42083D5C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CB4066D8-30D0-4229-A8AD-DD3F42083D5C}.Release|iPhone.ActiveCfg = Release|Any CPU
+		{CB4066D8-30D0-4229-A8AD-DD3F42083D5C}.Release|iPhone.Build.0 = Release|Any CPU
+		{CB4066D8-30D0-4229-A8AD-DD3F42083D5C}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
+		{CB4066D8-30D0-4229-A8AD-DD3F42083D5C}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -327,6 +341,7 @@ Global
 		{FF64BAAA-940E-43F1-B4D7-5B5F21820EB5} = {961C8457-3D3E-4C60-83B7-9200F4DC3529}
 		{58493943-092E-4D90-B544-19BF13CFDF16} = {961C8457-3D3E-4C60-83B7-9200F4DC3529}
 		{32604B58-3FD4-432A-B484-07D7E78A2028} = {961C8457-3D3E-4C60-83B7-9200F4DC3529}
+		{CB4066D8-30D0-4229-A8AD-DD3F42083D5C} = {961C8457-3D3E-4C60-83B7-9200F4DC3529}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DB02EEF5-A800-4BAB-8846-871886F0273A}

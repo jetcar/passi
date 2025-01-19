@@ -37,14 +37,14 @@ public class RegistrationConfirmationTestClass
         {
             registrationConfirmationViewModel.NumbersPad_OnNumberClicked(str.ToString());
         }
-        Assert.IsTrue(TestBase.CurrentView is LoadingViewModel);
+        Assert.That(TestBase.CurrentView is LoadingViewModel);
 
         while (!(TestBase.CurrentView is FinishConfirmationViewModel))
         {
             Thread.Sleep(1);
         }
 
-        Assert.IsTrue(TestBase.CurrentView is FinishConfirmationViewModel);
+        Assert.That(TestBase.CurrentView is FinishConfirmationViewModel);
 
         var finishConfirmation = TestBase.CurrentView as FinishConfirmationViewModel;
         return finishConfirmation;
@@ -60,10 +60,10 @@ public class RegistrationConfirmationTestClass
             Thread.Sleep(1);
         }
 
-        Assert.IsTrue(TestBase.CurrentView is MainView);
+        Assert.That(TestBase.CurrentView is MainView);
 
         var finishConfirmation = TestBase.CurrentView as MainView;
-        Assert.AreEqual(1, TestNavigationService.navigationsCount);
+        Assert.That(1, Is.EqualTo(TestNavigationService.navigationsCount));
         return finishConfirmation;
     }
 
@@ -77,14 +77,14 @@ public class RegistrationConfirmationTestClass
         registrationConfirmation.NumbersPad_OnNumberClicked("1");
         registrationConfirmation.NumbersPad_OnNumberClicked("1");
         registrationConfirmation.NumbersPad_OnNumberClicked("1");
-        Assert.IsTrue(TestBase.CurrentView is LoadingViewModel);
+        Assert.That(TestBase.CurrentView is LoadingViewModel);
 
         while (!(TestBase.CurrentView is RegistrationConfirmationViewModel) || !TestBase.CurrentView.Appeared)
         {
             Thread.Sleep(1);
         }
 
-        Assert.IsTrue(TestBase.CurrentView is RegistrationConfirmationViewModel);
+        Assert.That(TestBase.CurrentView is RegistrationConfirmationViewModel);
 
         var finishConfirmation = TestBase.CurrentView as RegistrationConfirmationViewModel;
         while (finishConfirmation.ResponseError == "")

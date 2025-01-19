@@ -64,6 +64,11 @@ namespace LoadTests
             Assert.That(stats.AllFailCount == 0);
             Assert.That(stats.ScenarioStats[0].Ok.Latency.Percent99, Is.LessThan(10000));
         }
+        [TearDown]
+        public void TearDown()
+        {
+            _client.Dispose();
+        }
 
         [Test]
         public void LoginRequest()

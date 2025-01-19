@@ -1,6 +1,6 @@
 FROM common_image:latest AS build
 
-FROM mcr.microsoft.com/dotnet/aspnet:8.0
+FROM mcr.microsoft.com/dotnet/aspnet:9.0
 WORKDIR /myapp
 COPY --from=build /src/passiwebapi/publish/publish .
 RUN useradd -m -u 1001 appuser

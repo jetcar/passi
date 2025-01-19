@@ -26,7 +26,7 @@ public class MainTestClass
     public static TermsAgreementsViewModel ClickAddAccount(MainView view)
     {
         view.Button_AddAccount();
-        Assert.IsTrue(TestBase.CurrentView is TermsAgreementsViewModel);
+        Assert.That(TestBase.CurrentView is TermsAgreementsViewModel);
 
         var tcView = TestBase.CurrentView as TermsAgreementsViewModel;
         return tcView;
@@ -41,7 +41,7 @@ public class MainTestClass
             Thread.Sleep(1);
         }
 
-        Assert.IsTrue(TestBase.CurrentView is AccountViewModel);
+        Assert.That(TestBase.CurrentView is AccountViewModel);
 
         var accountView = TestBase.CurrentView as AccountViewModel;
         return accountView;

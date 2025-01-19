@@ -20,7 +20,7 @@ namespace MauiTest.FunctionalTests
             //TestRestService.Result[ConfigSettings.Signup] = SuccesfullResponce();
             var registrationConfirmation = AddAccountTestClass.ClickConfirm(addAccountView);
             RegistrationConfirmationTestClass.EnterIncorrectCode(registrationConfirmation);
-            Assert.AreEqual(registrationConfirmation.ResponseError, "Code not found");
+            Assert.That(registrationConfirmation.ResponseError, Is.EqualTo("Code not found"));
             var finishConfirmation = RegistrationConfirmationTestClass.EnterCorrectCode(registrationConfirmation);
             //TestRestService.Result[ConfigSettings.SignupConfirmation] = SuccesfullResponce();
             var mainPage = FinishConfirmationTestClass.FinishRegistrationWithPin(finishConfirmation);
@@ -28,7 +28,7 @@ namespace MauiTest.FunctionalTests
             {
                 Thread.Sleep(1);
             }
-            Assert.AreEqual(mainPage.Accounts.Count, 1);
+            Assert.That(mainPage.Accounts.Count, Is.EqualTo(1));
 
             var accountView = MainTestClass.OpenAccount(mainPage, mainPage.Accounts[0]);
             accountView.UpdateCertificate_OnClicked();
@@ -46,8 +46,8 @@ namespace MauiTest.FunctionalTests
             updateCertificateView.NumbersPad_OnNumberClicked("1");
             updateCertificateView.NumbersPad_OnNumberClicked("1");
             updateCertificateView.NumbersPad_OnNumberClicked("confirm");
-            Assert.AreEqual(4, updateCertificateView.PinOld.Length);
-            Assert.AreEqual("****", updateCertificateView.PinOldMasked);
+            Assert.That(4, Is.EqualTo(updateCertificateView.PinOld.Length));
+            Assert.That("****", Is.EqualTo(updateCertificateView.PinOldMasked));
 
             updateCertificateView.NumbersPad_OnNumberClicked("1");
             updateCertificateView.ClearPin1_OnClicked();
@@ -58,8 +58,8 @@ namespace MauiTest.FunctionalTests
             updateCertificateView.NumbersPad_OnNumberClicked("1");
             updateCertificateView.NumbersPad_OnNumberClicked("1");
             updateCertificateView.NumbersPad_OnNumberClicked("confirm");
-            Assert.AreEqual(4, updateCertificateView.Pin1.Length);
-            Assert.AreEqual("****", updateCertificateView.Pin1Masked);
+            Assert.That(4, Is.EqualTo(updateCertificateView.Pin1.Length));
+            Assert.That("****", Is.EqualTo(updateCertificateView.Pin1Masked));
 
             updateCertificateView.NumbersPad_OnNumberClicked("1");
             updateCertificateView.ClearPin2_OnClicked();
@@ -73,15 +73,15 @@ namespace MauiTest.FunctionalTests
             //TestRestService.Result[ConfigSettings.UpdateCertificate] = TestBase.SuccesfullResponce();
 
             updateCertificateView.NumbersPad_OnNumberClicked("confirm");
-            Assert.AreEqual(4, updateCertificateView.Pin2.Length);
-            Assert.AreEqual("****", updateCertificateView.Pin2Masked);
+            Assert.That(4, Is.EqualTo(updateCertificateView.Pin2.Length));
+            Assert.That("****", Is.EqualTo(updateCertificateView.Pin2Masked));
 
-            Assert.IsTrue(CurrentView is LoadingViewModel);
+            Assert.That(CurrentView is LoadingViewModel);
             while (!(CurrentView is MainView) || !CurrentView.Appeared)
             {
                 Thread.Sleep(1);
             }
-            Assert.IsTrue(CurrentView is MainView);
+            Assert.That(CurrentView is MainView);
         }
 
         [Test, Timeout(20000)]
@@ -94,7 +94,7 @@ namespace MauiTest.FunctionalTests
             //TestRestService.Result[ConfigSettings.Signup] = SuccesfullResponce();
             var registrationConfirmation = AddAccountTestClass.ClickConfirm(addAccountView);
             RegistrationConfirmationTestClass.EnterIncorrectCode(registrationConfirmation);
-            Assert.AreEqual(registrationConfirmation.ResponseError, "Code not found");
+            Assert.That(registrationConfirmation.ResponseError, Is.EqualTo("Code not found"));
             var finishConfirmation = RegistrationConfirmationTestClass.EnterCorrectCode(registrationConfirmation);
             //TestRestService.Result[ConfigSettings.SignupConfirmation] = SuccesfullResponce();
             var mainPage = FinishConfirmationTestClass.FinishRegistrationSkipPin(finishConfirmation);
@@ -102,18 +102,18 @@ namespace MauiTest.FunctionalTests
             {
                 Thread.Sleep(1);
             }
-            Assert.AreEqual(mainPage.Accounts.Count, 1);
+            Assert.That(mainPage.Accounts.Count, Is.EqualTo(1));
 
             var accountView = MainTestClass.OpenAccount(mainPage, mainPage.Accounts[0]);
             //TestRestService.Result[ConfigSettings.UpdateCertificate] = TestBase.SuccesfullResponce();
             accountView.UpdateCertificate_OnClicked();
 
-            Assert.IsTrue(CurrentView is LoadingViewModel);
+            Assert.That(CurrentView is LoadingViewModel);
             while (!(CurrentView is MainView) || !CurrentView.Appeared)
             {
                 Thread.Sleep(1);
             }
-            Assert.IsTrue(CurrentView is MainView);
+            Assert.That(CurrentView is MainView);
         }
 
         [Test, Timeout(10000)]
@@ -126,7 +126,7 @@ namespace MauiTest.FunctionalTests
             //TestRestService.Result[ConfigSettings.Signup] = SuccesfullResponce();
             var registrationConfirmation = AddAccountTestClass.ClickConfirm(addAccountView);
             RegistrationConfirmationTestClass.EnterIncorrectCode(registrationConfirmation);
-            Assert.AreEqual(registrationConfirmation.ResponseError, "Code not found");
+            Assert.That(registrationConfirmation.ResponseError, Is.EqualTo("Code not found"));
             var finishConfirmation = RegistrationConfirmationTestClass.EnterCorrectCode(registrationConfirmation);
             //TestRestService.Result[ConfigSettings.SignupConfirmation] = SuccesfullResponce();
             var mainPage = FinishConfirmationTestClass.FinishRegistrationSkipPin(finishConfirmation);
@@ -134,7 +134,7 @@ namespace MauiTest.FunctionalTests
             {
                 Thread.Sleep(1);
             }
-            Assert.AreEqual(mainPage.Accounts.Count, 1);
+            Assert.That(mainPage.Accounts.Count, Is.EqualTo(1));
 
             var accountView = MainTestClass.OpenAccount(mainPage, mainPage.Accounts[0]);
 
@@ -145,7 +145,7 @@ namespace MauiTest.FunctionalTests
                 Thread.Sleep(1);
             }
 
-            Assert.IsTrue(CurrentView is MainView);
+            Assert.That(CurrentView is MainView);
 
             accountView = MainTestClass.OpenAccount(mainPage, mainPage.Accounts[0]);
             //TestRestService.Result[ConfigSettings.UpdateCertificate] = TestBase.SuccesfullResponce();
@@ -155,12 +155,12 @@ namespace MauiTest.FunctionalTests
             {
                 Thread.Sleep(1);
             }
-            Assert.IsTrue(CurrentView is LoadingViewModel);
+            Assert.That(CurrentView is LoadingViewModel);
             while (!(CurrentView is MainView) || !CurrentView.Appeared)
             {
                 Thread.Sleep(1);
             }
-            Assert.IsTrue(CurrentView is MainView);
+            Assert.That(CurrentView is MainView);
         }
     }
 }

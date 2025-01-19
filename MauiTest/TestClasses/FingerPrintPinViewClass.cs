@@ -18,18 +18,18 @@ public class FingerPrintPinViewClass
         fingerPrintConfirmByPinView.NumbersPad_OnNumberClicked("1");
         fingerPrintConfirmByPinView.NumbersPad_OnNumberClicked("1");
         fingerPrintConfirmByPinView.NumbersPad_OnNumberClicked("1");
-        Assert.AreEqual("****", fingerPrintConfirmByPinView.Pin1Masked);
+        Assert.That("****",Is.EqualTo(fingerPrintConfirmByPinView.Pin1Masked));
         while (!(TestBase.CurrentView is MainView))
         {
             Thread.Sleep(1);
         }
-        Assert.AreEqual(2, TestNavigationService.navigationsCount);
+        Assert.That(2, Is.EqualTo(TestNavigationService.navigationsCount));
         var mainpage = TestBase.CurrentView as MainView;
         while (!mainpage._loadAccountTask.IsCompleted)
         {
             Thread.Sleep(1);
         }
-        Assert.IsTrue(TestBase.CurrentView is MainView);
+        Assert.That(TestBase.CurrentView is MainView);
     }
 
     public static FingerPrintConfirmByPinViewModel FinishFingerPrintAddingIncorrectPin(FingerPrintConfirmByPinViewModel fingerPrintConfirmByPinView)
@@ -40,8 +40,8 @@ public class FingerPrintPinViewClass
         fingerPrintConfirmByPinView.NumbersPad_OnNumberClicked("1");
         fingerPrintConfirmByPinView.NumbersPad_OnNumberClicked("2");
         fingerPrintConfirmByPinView.NumbersPad_OnNumberClicked("1");
-        Assert.IsTrue(TestBase.CurrentView is LoadingViewModel);
-        Assert.AreEqual("****", fingerPrintConfirmByPinView.Pin1Masked);
+        Assert.That(TestBase.CurrentView is LoadingViewModel);
+        Assert.That("****", Is.EqualTo(fingerPrintConfirmByPinView.Pin1Masked));
         while (!(TestBase.CurrentView is FingerPrintConfirmByPinViewModel) || !TestBase.CurrentView.Appeared)
         {
             Thread.Sleep(1);

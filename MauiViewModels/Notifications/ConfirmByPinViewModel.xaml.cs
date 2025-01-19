@@ -211,8 +211,7 @@ namespace MauiViewModels.Notifications
                             {
                                 _navigationService.PopModal().ContinueWith((task =>
                                 {
-                                    ResponseError = JsonConvert
-                                        .DeserializeObject<ApiResponseDto<string>>(response.Result.Content).errors;
+                                    ResponseError = response.Result.Content;
                                 }));
                             });
                         }

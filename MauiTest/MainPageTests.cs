@@ -27,10 +27,10 @@ namespace MauiTest
             }
             page.Button_ShowDeleteAccount();
             page.Button_PreDeleteAccount(page.Accounts[0]);
-            Assert.AreEqual(true, page.Accounts[0].IsDeleteVisible);
-            Assert.AreEqual(page.Accounts.Count, 3);
+            Assert.That(true, Is.EqualTo(page.Accounts[0].IsDeleteVisible));
+            Assert.That(page.Accounts.Count, Is.EqualTo(3));
             Thread.Sleep(2000);
-            Assert.AreEqual(true, page.Accounts[0].IsDeleteVisible);
+            Assert.That(true, Is.EqualTo(page.Accounts[0].IsDeleteVisible));
         }
 
         [Test]
@@ -45,7 +45,7 @@ namespace MauiTest
                 Thread.Sleep(1);
             }
             page.Button_Sync();
-            Assert.AreEqual(page.Accounts.Count, 1);
+            Assert.That(page.Accounts.Count, Is.EqualTo(1));
         }
 
         [Test, Timeout(10000)]
@@ -66,7 +66,7 @@ namespace MauiTest
             {
                 Thread.Sleep(1);
             }
-            Assert.AreEqual(page.Accounts.Count, 0);
+            Assert.That(page.Accounts.Count, Is.EqualTo(0));
         }
     }
 }

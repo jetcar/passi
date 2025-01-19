@@ -1,11 +1,14 @@
 ﻿using Android.Runtime;
 using CommunityToolkit.Maui;
 using Firebase;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Maui.Controls.Hosting;
+using Microsoft.Maui.Hosting;
 using Microsoft.Maui.LifecycleEvents;
-using Plugin.Firebase.Android;
 using Plugin.Firebase.Auth;
-using Plugin.Firebase.Shared;
+using Plugin.Firebase.Bundled.Platforms.Android;
+using Plugin.Firebase.Bundled.Shared;
 
 
 
@@ -39,7 +42,7 @@ namespace MauiApp2
             {
 
                 events.AddAndroid(android => android.OnCreate((activity, state) =>
-                    CrossFirebase.Initialize(activity,state, CreateCrossFirebaseSettings())));
+                    CrossFirebase.Initialize(activity, CreateCrossFirebaseSettings())));
             });
 
             builder.Services.AddSingleton(_ => CrossFirebaseAuth.Current);

@@ -4,6 +4,7 @@ using MauiViewModels;
 using MauiViewModels.Registration;
 using MauiViewModels.Tools;
 using NUnit.Framework;
+using NUnit.Framework.Legacy;
 
 namespace MauiTest.TestClasses;
 
@@ -21,8 +22,8 @@ public class FinishConfirmationTestClass
         finishConfirmationViewModel.NumbersPad_OnNumberClicked("1");
         finishConfirmationViewModel.NumbersPad_OnNumberClicked("1");
         finishConfirmationViewModel.NumbersPad_OnNumberClicked("confirm");
-        Assert.AreEqual(4, finishConfirmationViewModel.Pin1.Length);
-        Assert.AreEqual("****", finishConfirmationViewModel.Pin1Masked);
+        Assert.That(4,Is.EqualTo(finishConfirmationViewModel.Pin1.Length));
+        Assert.That("****", Is.EqualTo(finishConfirmationViewModel.Pin1Masked));
 
         finishConfirmationViewModel.NumbersPad_OnNumberClicked("1");
         finishConfirmationViewModel.ClearPin2_OnClicked();
@@ -32,20 +33,20 @@ public class FinishConfirmationTestClass
         finishConfirmationViewModel.NumbersPad_OnNumberClicked("del");
         finishConfirmationViewModel.NumbersPad_OnNumberClicked("1");
         finishConfirmationViewModel.NumbersPad_OnNumberClicked("1");
-        Assert.AreEqual(4, finishConfirmationViewModel.Pin2.Length);
-        Assert.AreEqual("****", finishConfirmationViewModel.Pin2Masked);
+        Assert.That(4, Is.EqualTo(finishConfirmationViewModel.Pin2.Length));
+        Assert.That("****", Is.EqualTo(finishConfirmationViewModel.Pin2Masked));
         //TestRestService.Result[ConfigSettings.SignupConfirmation] = TestBase.SuccesfullResponce();
 
         finishConfirmationViewModel.NumbersPad_OnNumberClicked("confirm");
-        Assert.IsTrue(TestBase.CurrentView is LoadingViewModel);
+        Assert.That(TestBase.CurrentView is LoadingViewModel);
 
         while (!(TestBase.CurrentView is MainView))
         {
             Thread.Sleep(1);
         }
 
-        Assert.IsTrue(TestBase.CurrentView is MainView);
-        Assert.AreEqual(2, TestNavigationService.navigationsCount);
+        Assert.That(TestBase.CurrentView is MainView);
+        Assert.That(2, Is.EqualTo(TestNavigationService.navigationsCount));
         var mainPage = TestBase.CurrentView as MainView;
         if (mainPage._loadAccountTask != null)
             while (!mainPage._loadAccountTask.IsCompleted)
@@ -60,15 +61,15 @@ public class FinishConfirmationTestClass
         TestNavigationService.navigationsCount = 0;
         //TestRestService.Result[ConfigSettings.SignupConfirmation] = TestBase.SuccesfullResponce();
         finishConfirmationViewModel.SkipButton_OnClicked();
-        Assert.IsTrue(TestBase.CurrentView is LoadingViewModel);
+        Assert.That(TestBase.CurrentView is LoadingViewModel);
 
         while (!(TestBase.CurrentView is MainView))
         {
             Thread.Sleep(1);
         }
-        Assert.AreEqual(2, TestNavigationService.navigationsCount);
+        Assert.That(2, Is.EqualTo(TestNavigationService.navigationsCount));
 
-        Assert.IsTrue(TestBase.CurrentView is MainView);
+        Assert.That(TestBase.CurrentView is MainView);
         var mainPage = TestBase.CurrentView as MainView;
         if (mainPage._loadAccountTask != null)
             while (!mainPage._loadAccountTask.IsCompleted)

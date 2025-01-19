@@ -20,7 +20,7 @@ namespace MauiTest.FunctionalTests
             }
 
             var menuView = CurrentView as MenuViewModel;
-            Assert.GreaterOrEqual(menuView.Providers.Count, 1);
+            Assert.That(menuView.Providers.Count>= 1);
             menuView.Cell_OnTapped(menuView.Providers[0]);
 
             while (!(CurrentView is ProviderViewModel) || !CurrentView.Appeared)

@@ -13,14 +13,14 @@ public class AddAccountTestClass
     {
         addAccountView.Button_OnClicked();
 
-        Assert.IsTrue(TestBase.CurrentView is LoadingViewModel);
+        Assert.That(TestBase.CurrentView is LoadingViewModel);
 
         while (!(TestBase.CurrentView is RegistrationConfirmationViewModel))
         {
             Thread.Sleep(1);
         }
 
-        Assert.IsTrue(TestBase.CurrentView is RegistrationConfirmationViewModel);
+        Assert.That(TestBase.CurrentView is RegistrationConfirmationViewModel);
 
         var registrationConfirmation = TestBase.CurrentView as RegistrationConfirmationViewModel;
         return registrationConfirmation;

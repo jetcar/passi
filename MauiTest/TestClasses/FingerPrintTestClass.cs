@@ -21,7 +21,7 @@ public class FingerPrintTestClass
             Thread.Sleep(1);
         }
 
-        Assert.IsTrue(TestBase.CurrentView is FingerPrintConfirmByPinViewModel);
+        Assert.That(TestBase.CurrentView is FingerPrintConfirmByPinViewModel);
 
         var fingerPrintConfirmByPinView = TestBase.CurrentView as FingerPrintConfirmByPinViewModel;
         return fingerPrintConfirmByPinView;
@@ -32,18 +32,18 @@ public class FingerPrintTestClass
         TestNavigationService.navigationsCount = 0;
         accountView.AddBiometric_Button_OnClicked();
         TestBase.TouchFingerPrintWithGoodResult();
-        Assert.IsTrue(TestBase.CurrentView is LoadingViewModel);
+        Assert.That(TestBase.CurrentView is LoadingViewModel);
 
         while (!(TestBase.CurrentView is MainView))
         {
             Thread.Sleep(1);
         }
-        Assert.AreEqual(2, TestNavigationService.navigationsCount);
+        Assert.That(2, Is.EqualTo(TestNavigationService.navigationsCount));
         var mainpage = TestBase.CurrentView as MainView;
         while (!mainpage._loadAccountTask.IsCompleted)
         {
             Thread.Sleep(1);
         }
-        Assert.IsTrue(TestBase.CurrentView is MainView);
+        Assert.That(TestBase.CurrentView is MainView);
     }
 }

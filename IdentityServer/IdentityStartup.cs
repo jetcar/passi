@@ -273,6 +273,7 @@ namespace IdentityServer
                     AlwaysSendClientClaims = true,
                 };
                 context.Clients.Add(client3);
+
                 var client4 = new IdentityServer4.EntityFramework.Storage.Entities.Client()
                 {
                     ClientId = appsettings["PassiChatClientId"],
@@ -299,6 +300,35 @@ namespace IdentityServer
                     AlwaysSendClientClaims = true,
                 };
                 context.Clients.Add(client4);
+
+                var client5 = new IdentityServer4.EntityFramework.Storage.Entities.Client()
+                {
+                    ClientId = appsettings["MailuClientId"],
+                    ClientSecrets = new List<ClientSecret>() { new ClientSecret() { Value = appsettings["MailluSecret"].ToSha256() } },
+                    RedirectUris = new List<ClientRedirectUri>()
+                    {
+                        new ClientRedirectUri(){RedirectUri = "http://localhost/webmail/oauth2/authorize"},
+                        new ClientRedirectUri(){RedirectUri = "https://localhost/webmail/oauth2/authorize"},
+                        new ClientRedirectUri(){RedirectUri = "http://passi.cloud/webmail/oauth2/authorize"},
+                        new ClientRedirectUri(){RedirectUri = "https://passi.cloud/webmail/oauth2/authorize"}
+                    },
+
+                    RequirePkce = false,
+                    AllowedGrantTypes = new List<ClientGrantType>()
+                    {
+                        new ClientGrantType(){GrantType =GrantType.AuthorizationCode },
+                        new ClientGrantType(){GrantType =GrantType.ClientCredentials }
+                    },
+                    AllowedScopes = new List<ClientScope>() {
+                        new ClientScope(){Scope = "openid"} ,
+                        new ClientScope(){Scope = "email"},
+                        new ClientScope(){Scope = "profile"}
+                    },
+                    AlwaysIncludeUserClaimsInIdToken = true,
+                    ClientUri = "https://passi.cloud/webmail",
+                    AlwaysSendClientClaims = true,
+                };
+                context.Clients.Add(client5);
 
                 if (!context.IdentityResources.Any())
                     context.IdentityResources.AddRange(new List<IdentityServer4.EntityFramework.Storage.Entities.IdentityResource>()

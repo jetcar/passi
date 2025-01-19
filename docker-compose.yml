@@ -117,7 +117,7 @@ services:
 
   # Core services
   front:
-    image: ${DOCKER_ORG:-ghcr.io/mailu}/${DOCKER_PREFIX:-}nginx:${MAILU_VERSION:-2.0}
+    image: ${DOCKER_ORG:-ghcr.io/heviat}/${DOCKER_PREFIX:-}nginx:${MAILU_VERSION:-2024.06}
     restart: always
     env_file:
       - ../passi_config/dev.env
@@ -129,6 +129,7 @@ services:
       - "995:995"
       - "143:143"
       - "993:993"
+      - "4190:4190"
       - "8008:8008"
     networks:
       - default
@@ -142,7 +143,7 @@ services:
       - 192.168.202.254
 
   resolver:
-    image: ${DOCKER_ORG:-ghcr.io/mailu}/${DOCKER_PREFIX:-}unbound:${MAILU_VERSION:-2024.06}
+    image: ${DOCKER_ORG:-ghcr.io/heviat}/${DOCKER_PREFIX:-}unbound:${MAILU_VERSION:-2024.06}
     env_file:
       - ../passi_config/dev.env
     restart: always
@@ -151,7 +152,7 @@ services:
         ipv4_address: 192.168.202.254
         
   admin:
-    image: ${DOCKER_ORG:-ghcr.io/mailu}/${DOCKER_PREFIX:-}admin:${MAILU_VERSION:-2024.06}
+    image: ${DOCKER_ORG:-ghcr.io/heviat}/${DOCKER_PREFIX:-}admin:${MAILU_VERSION:-2024.06}
     restart: always
     env_file:
       - ../passi_config/dev.env
@@ -169,7 +170,7 @@ services:
       - 192.168.202.254
 
   imap:
-    image: ${DOCKER_ORG:-ghcr.io/mailu}/${DOCKER_PREFIX:-}dovecot:${MAILU_VERSION:-2024.06}
+    image: ${DOCKER_ORG:-ghcr.io/heviat}/${DOCKER_PREFIX:-}dovecot:${MAILU_VERSION:-2024.06}
     restart: always
     env_file:
       - ../passi_config/dev.env
@@ -186,7 +187,7 @@ services:
       - 192.168.202.254
 
   smtp:
-    image: ${DOCKER_ORG:-ghcr.io/mailu}/${DOCKER_PREFIX:-}postfix:${MAILU_VERSION:-2024.06}
+    image: ${DOCKER_ORG:-ghcr.io/heviat}/${DOCKER_PREFIX:-}postfix:${MAILU_VERSION:-2024.06}
     restart: always
     env_file:
       - ../passi_config/dev.env
@@ -203,7 +204,7 @@ services:
       - 192.168.202.254
       
   oletools:
-    image: ${DOCKER_ORG:-ghcr.io/mailu}/${DOCKER_PREFIX:-}oletools:${MAILU_VERSION:-2024.06}
+    image: ${DOCKER_ORG:-ghcr.io/heviat}/${DOCKER_PREFIX:-}oletools:${MAILU_VERSION:-2024.06}
     hostname: oletools
     restart: always
     networks:
@@ -214,7 +215,7 @@ services:
       - 192.168.202.254
 
   antispam:
-    image: ${DOCKER_ORG:-ghcr.io/mailu}/${DOCKER_PREFIX:-}rspamd:${MAILU_VERSION:-2024.06}
+    image: ${DOCKER_ORG:-ghcr.io/heviat}/${DOCKER_PREFIX:-}rspamd:${MAILU_VERSION:-2024.06}
     hostname: antispam
     restart: always
     env_file:
@@ -234,7 +235,7 @@ services:
       - 192.168.202.254
 
   webmail:
-    image: ${DOCKER_ORG:-ghcr.io/mailu}/${DOCKER_PREFIX:-}webmail:${MAILU_VERSION:-2024.06}
+    image: ${DOCKER_ORG:-ghcr.io/heviat}/${DOCKER_PREFIX:-}webmail:${MAILU_VERSION:-2024.06}
     restart: always
     env_file:
       - ../passi_config/dev.env

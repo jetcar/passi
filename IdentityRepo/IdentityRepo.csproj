@@ -20,11 +20,12 @@
 	    </PackageReference>
 	    <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.1" />
 	    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.3" />
+	    <PackageReference Include="OpenIddict.EntityFrameworkCore" Version="6.0.0" />
 
     </ItemGroup>
     <ItemGroup>
       <ProjectReference Include="..\ConfigurationManager\ConfigurationManager.csproj" />
-      <ProjectReference Include="..\identityserver4\IdentityServer4.EntityFramework.Storage\IdentityServer4.EntityFramework.Storage.csproj" />
+      <ProjectReference Include="..\GoogleTracer\GoogleTracer.csproj" />
     </ItemGroup>
 
 </Project>

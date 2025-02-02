@@ -1,20 +1,22 @@
 ﻿using ConfigurationManager;
-using Google.Cloud.Diagnostics.AspNetCore3;
 using Google.Cloud.Diagnostics.Common;
 using GoogleTracer;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.OpenApi.Models;
-using OpenIdLib.OpenId;
 using Serilog;
 using Serilog.Events;
 using Services;
 using System;
 using System.Net.Http;
+using OpenIdLib.OpenId;
 using TraceServiceOptions = Google.Cloud.Diagnostics.Common.TraceServiceOptions;
 
 namespace WebApp
@@ -58,7 +60,6 @@ namespace WebApp
                 // The next call guarantees that trace information is propagated for outgoing
                 // requests that are already being traced.
                 .AddOutgoingGoogleTraceHandler();
-
             services.AddAuthentication(options =>
                 {
                     options.DefaultAuthenticateScheme = "Cookies";
@@ -75,6 +76,46 @@ namespace WebApp
                 {
                     x.RevokeRefreshTokenOnSignout = true;
                 });
+            //services.AddAuthentication(options =>
+            //    {
+            //        options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+            //        options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
+            //    })
+            //    .AddCookie("Cookies",
+            //        options =>
+            //        {
+            //            options.AccessDeniedPath = "/Home/Error";
+            //            options.SlidingExpiration = true;
+            //            options.ExpireTimeSpan = System.TimeSpan.FromDays(30);
+            //        })
+            //    .AddOpenIdConnect(options =>
+            //    {
+            //        options.Authority = identityUrl; // Replace with your OpenIddict server URL
+            //        options.ClientId = clientId;
+            //        options.ClientSecret = secret;
+            //        options.ResponseType = "code"; // Authorization Code Flow
+            //        options.SaveTokens = true;
+            //        options.Scope.Add("openid");
+            //        options.Scope.Add("profile");
+            //        options.Scope.Add("email"); // 🔹 Request email (optional)
+
+
+            //        options.SaveTokens = true; // 🔹 Store tokens in authentication cookie
+
+
+            //        options.GetClaimsFromUserInfoEndpoint = true; // 🔹 Fetch additional claims from UserInfo endpoint
+            //        options.MapInboundClaims = false; // 🔹 Prevents claim name transformation
+
+            //        options.CallbackPath = "/signin-oidc"; // 🔹 Must match redirect URI registered in OpenIddict
+            //        options.SignedOutCallbackPath = "/signout-callback-oidc"; // 🔹 Logout callback
+            //        options.RequireHttpsMetadata = true;
+            //        options.UsePkce = true; // 🔹 Enforce Proof Key for Code Exchange (PKCE)
+            //        options.BackchannelHttpHandler = new HttpClientHandler
+            //        {
+            //            ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
+            //        };
+            //    })
+            //    ;
 
             services.AddHttpContextAccessor();
             services.AddHttpClient();
@@ -114,6 +155,7 @@ namespace WebApp
                         context.Context.Response.Headers["Expires"] = "-1";
                     }
                 });
+                
                 applicationBuilder.UseAuthentication();
                 applicationBuilder.UseSerilogRequestLogging(options =>
                             {

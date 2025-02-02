@@ -66,30 +66,30 @@ namespace OpenIdLib.AutomaticTokenManagement
                 var shouldRefresh = _pendingRefreshTokenRequests.TryAdd(refreshToken.Value, true);
                 if (shouldRefresh)
                 {
-                    try
-                    {
-                        var response = await _service.RefreshTokenAsync(refreshToken.Value);
+                    //try
+                    //{
+                    //    var response = await _service.RefreshTokenAsync(refreshToken.Value);
 
-                        if (response.IsError)
-                        {
-                            _logger.LogWarning("Error refreshing token: {error}", response.Error);
-                            // Sign-out user in case refresh token is no longer valid
-                            await context.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-                            return;
-                        }
+                    //    if (response.IsError)
+                    //    {
+                    //        _logger.LogWarning("Error refreshing token: {error}", response.Error);
+                    //        // Sign-out user in case refresh token is no longer valid
+                    //        await context.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                    //        return;
+                    //    }
 
-                        context.Properties.UpdateTokenValue("access_token", response.AccessToken);
-                        context.Properties.UpdateTokenValue("refresh_token", response.RefreshToken);
+                    //    context.Properties.UpdateTokenValue("access_token", response.AccessToken);
+                    //    context.Properties.UpdateTokenValue("refresh_token", response.RefreshToken);
 
-                        var newExpiresAt = DateTime.UtcNow + TimeSpan.FromSeconds(response.ExpiresIn);
-                        context.Properties.UpdateTokenValue("expires_at", newExpiresAt.ToString("o", CultureInfo.InvariantCulture));
-                        _logger.LogInformation("successfully got new refresh token");
-                        await context.HttpContext.SignInAsync(context.Principal, context.Properties);
-                    }
-                    finally
-                    {
-                        _pendingRefreshTokenRequests.TryRemove(refreshToken.Value, out _);
-                    }
+                    //    var newExpiresAt = DateTime.UtcNow + TimeSpan.FromSeconds(response.ExpiresIn);
+                    //    context.Properties.UpdateTokenValue("expires_at", newExpiresAt.ToString("o", CultureInfo.InvariantCulture));
+                    //    _logger.LogInformation("successfully got new refresh token");
+                    //    await context.HttpContext.SignInAsync(context.Principal, context.Properties);
+                    //}
+                    //finally
+                    //{
+                    //    _pendingRefreshTokenRequests.TryRemove(refreshToken.Value, out _);
+                    //}
                 }
             }
         }
@@ -120,13 +120,13 @@ namespace OpenIdLib.AutomaticTokenManagement
                 return;
             }
 
-            var response = await _service.RevokeTokenAsync(refreshToken.Value);
+            //var response = await _service.RevokeTokenAsync(refreshToken.Value);
 
-            if (response.IsError)
-            {
-                _logger.LogWarning("Error revoking token: {error}", response.Error);
-                return;
-            }
+            //if (response.IsError)
+            //{
+            //    _logger.LogWarning("Error revoking token: {error}", response.Error);
+            //    return;
+            //}
         }
     }
 }

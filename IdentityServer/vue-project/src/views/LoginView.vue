@@ -8,7 +8,9 @@
             return {
                 LoginInput: {
                     Username: "",
-                    ReturnUrl: this.$route.query.returnUrl,
+                    ReturnUrl: this.$route.query.redirect_uri,
+                    ClientId: this.$route.query.client_id,
+                    Nonce: this.$route.query.nonce,
                 },
                 LoginResponse: {
                     checkColor: "red"
@@ -67,7 +69,9 @@
             async handleLoginClick() {
                 this.errorMessage = false
                 this.loading = true
-                this.LoginInput.ReturnUrl = this.$route.query.ReturnUrl
+                this.LoginInput.ReturnUrl = this.$route.query.redirect_uri
+                this.LoginInput.ClientId = this.$route.query.client_id
+                this.LoginInput.Nonce = this.$route.query.nonce
                 const requestOptions = {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },

@@ -39,8 +39,8 @@
 	<ItemGroup>
 		<ProjectReference Include="..\ConfigurationManager\ConfigurationManager.csproj" />
 		<ProjectReference Include="..\GoogleTracer\GoogleTracer.csproj" />
-		<ProjectReference Include="..\identityserver4\IdentityServer4.EntityFramework\IdentityServer4.EntityFramework.csproj" />
 		<ProjectReference Include="..\Models\Models.csproj" />
+		<ProjectReference Include="..\RedisClient\RedisClient.csproj" />
 	</ItemGroup>
 
 </Project>

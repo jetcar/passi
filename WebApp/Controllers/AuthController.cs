@@ -16,18 +16,14 @@ namespace WebApp.Controllers
         {
         }
 
-        public async Task Login(string returnUrl = "/")
+        public IActionResult Login(string returnUrl = "/")
         {
             foreach (var key in Request.Cookies.Keys)
             {
                 Response.Cookies.Delete(key, new CookieOptions() { Secure = true });
             }
+            return Challenge(new AuthenticationProperties { RedirectUri = "/" }, OpenIdConnectDefaults.AuthenticationScheme);
 
-            await HttpContext.ChallengeAsync(OpenIdConnectDefaults.AuthenticationScheme,
-                new AuthenticationProperties
-                {
-                    RedirectUri = returnUrl,
-                });
         }
 
         [Authorize]

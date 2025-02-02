@@ -1,6 +1,6 @@
 ﻿using Android.App;
 using Android.Content.PM;
-using Android.Gms.Common;
+//using Android.Gms.Common;
 using Android.OS;
 using AppCommon;
 using MauiApp2.FingerPrint;
@@ -11,7 +11,6 @@ using MauiViewModels.FingerPrint;
 using MauiViewModels.Notifications;
 using MauiViewModels.utils.Services;
 using MauiViewModels.utils.Services.Certificate;
-using Plugin.Firebase.CloudMessaging;
 using Timer = System.Timers.Timer;
 
 namespace MauiApp2.Platforms.Android
@@ -55,10 +54,9 @@ namespace MauiApp2.Platforms.Android
             {
                 dateTimeService.Init();
                 secureRepository.GetDeviceId();
-                CrossFirebaseCloudMessaging.Current.CheckIfValidAsync().GetAwaiter().GetResult();
-                var token = CrossFirebaseCloudMessaging.Current.GetTokenAsync().Result;
+                //var token = CrossFirebaseCloudMessaging.Current.GetTokenAsync().Result;
 
-                MyFirebaseIIDService.SendRegistrationToServer(token);
+                //MyFirebaseIIDService.SendRegistrationToServer(token);
             });
 
             CommonApp.CloseApp = () =>
@@ -122,22 +120,22 @@ namespace MauiApp2.Platforms.Android
 
         public bool IsPlayServicesAvailable()
         {
-            var msgText = "";
-            int resultCode = GoogleApiAvailability.Instance.IsGooglePlayServicesAvailable(this);
-            if (resultCode != ConnectionResult.Success)
+            //var msgText = "";
+            //int resultCode = GoogleApiAvailability.Instance.IsGooglePlayServicesAvailable(this);
+            //if (resultCode != ConnectionResult.Success)
+            //{
+            //    if (GoogleApiAvailability.Instance.IsUserResolvableError(resultCode))
+            //        msgText = GoogleApiAvailability.Instance.GetErrorString(resultCode);
+            //    else
+            //    {
+            //        msgText = "This device is not supported";
+            //        Finish();
+            //    }
+            //    return false;
+            //}
+            //else
             {
-                if (GoogleApiAvailability.Instance.IsUserResolvableError(resultCode))
-                    msgText = GoogleApiAvailability.Instance.GetErrorString(resultCode);
-                else
-                {
-                    msgText = "This device is not supported";
-                    Finish();
-                }
-                return false;
-            }
-            else
-            {
-                msgText = "Google Play Services is available.";
+                //msgText = "Google Play Services is available.";
                 return true;
             }
         }

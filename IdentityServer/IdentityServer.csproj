@@ -26,10 +26,14 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Compile Remove="Controllers\ClientRegistration\ClientController.cs" />
 	  <Compile Remove="Controllers\LoginController.cs" />
+	  <Compile Remove="services\MyProfileService.cs" />
+	  <Compile Remove="UserSession.cs" />
 	</ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="AspNet.Security.OpenId.Steam" Version="9.0.0" />
 		<PackageReference Include="Google.Cloud.Diagnostics.AspNetCore3" Version="5.2.0" />
 		<PackageReference Include="Google.Cloud.Diagnostics.Common" Version="5.2.0" />
 		<PackageReference Include="Microsoft.AspNetCore.DataProtection.EntityFrameworkCore" Version="9.0.1" />
@@ -47,6 +51,12 @@
 		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.3" />
 
 		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
+
+		<PackageReference Include="OpenIddict.AspNetCore" Version="6.0.0" />
+
+		<PackageReference Include="OpenIddict.EntityFrameworkCore" Version="6.0.0" />
+
+		<PackageReference Include="OpenIddict.Validation.AspNetCore" Version="6.0.0" />
 
 
 		<PackageReference Include="RestSharp" Version="112.1.0" />
@@ -71,9 +81,7 @@
 	  <ProjectReference Include="..\ConfigurationManager\ConfigurationManager.csproj" />
 	  <ProjectReference Include="..\GoogleTracer\GoogleTracer.csproj" />
 	  <ProjectReference Include="..\IdentityRepo\IdentityRepo.csproj" />
-	  <ProjectReference Include="..\identityserver4\IdentityServer4.EntityFramework.Storage\IdentityServer4.EntityFramework.Storage.csproj" />
-	  <ProjectReference Include="..\identityserver4\IdentityServer4.EntityFramework\IdentityServer4.EntityFramework.csproj" />
-	  <ProjectReference Include="..\identityserver4\IdentityServer4\IdentityServer4.csproj" />
+	  <ProjectReference Include="..\RedisClient\RedisClient.csproj" />
 	  <ProjectReference Include="..\Services\Services.csproj" />
 	  <ProjectReference Include="..\WebApiDto\WebApiDto.csproj" />
 	</ItemGroup>

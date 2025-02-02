@@ -2,11 +2,8 @@ using ConfigurationManager;
 using Google.Cloud.Diagnostics.AspNetCore3;
 using Google.Cloud.Diagnostics.Common;
 using GoogleTracer;
-using IdentityModel;
 using IdentityRepo.DbContext;
 using IdentityServer.services;
-using IdentityServer4.Configuration;
-using IdentityServer4.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
@@ -22,17 +19,21 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
+using AspNet.Security.OpenId.Steam;
 using Google.Cloud.Trace.V1;
-using IdentityServer4.Configuration.DependencyInjection;
-using IdentityServer4.Configuration.DependencyInjection.BuilderExtensions;
-using IdentityServer4.Configuration.DependencyInjection.Options;
-using IdentityServer4.EntityFramework;
-using IdentityServer4.EntityFramework.Storage.Entities;
-using IdentityServer4.EntityFramework.Storage.Mappers;
-using IdentityServer4.Storage.Models;
 using RedisClient;
 using TraceServiceOptions = Google.Cloud.Diagnostics.Common.TraceServiceOptions;
+using Google;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.IdentityModel.Tokens;
+using OpenIddict.Abstractions;
+using OpenIddict.Server;
+using OpenIddict.Server.AspNetCore;
+using OpenIddict.Validation.AspNetCore;
+using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Routing;
 
 namespace IdentityServer
 {
@@ -54,33 +55,19 @@ namespace IdentityServer
         {
             var projectId = Environment.GetEnvironmentVariable("projectId") ?? Configuration.GetValue<string>("AppSetting:projectId");
             var identityCertPass = Environment.GetEnvironmentVariable("IdentityCertPassword") ?? Configuration.GetValue<string>("AppSetting:IdentityCertPassword");
+            var identityBaseUrl = Environment.GetEnvironmentVariable("IdentityUrlBase") ?? Configuration.GetValue<string>("AppSetting:IdentityUrlBase");
+
             //services.AddControllersWithViews();
             services.AddSingleton<AppSetting>();
             services.AddSingleton<IMyRestClient, MyRestClient>();
             services.AddSingleton<IRedisService, RedisService>();
-            services.AddScoped<IdentityDbContext>();
             services.AddScoped<IIdentityClientsRepository, IdentityClientsRepository>();
             services.AddSingleton<IStartupFilter, MigrationStartupFilter<IdentityDbContext>>();
             services.AddSingleton<IRandomGenerator, RandomGenerator>();
-
+            services.AddDbContext<IdentityDbContext>();
             // Register a method that sets the updated trace context information on the response.
             Tracer.SetupTracer(services, projectId, "Identity");
 
-            byte[] certData = File.ReadAllBytes("/myapp/cert/your_certificate.pfx");
-            services.AddIdentityServer(options =>
-                {
-                    options.UserInteraction = new UserInteractionOptions() { ConsentUrl = "/Account/Login", LoginUrl = "/Account/Login" };
-                    options.Authentication = new IdentityServer4.Configuration.DependencyInjection.Options.AuthenticationOptions()
-                    {
-                        CookieSlidingExpiration = true,
-                    };
-                })
-                .AddSigningCredential(new X509Certificate2(certData, identityCertPass))
-                .AddProfileService<MyProfileService>()
-                .AddUserSession<UserSession>()
-                .AddConfigurationStore<IdentityDbContext>()
-                //.AddDeveloperSigningCredential()
-                .AddOperationalStore<IdentityDbContext>();
             services.AddDataProtection()
                 .SetApplicationName("***")
                 .AddKeyManagementOptions(options =>
@@ -89,9 +76,57 @@ namespace IdentityServer
                     options.NewKeyLifetime = TimeSpan.FromDays(7);
                 })
                 .PersistKeysToDbContext<IdentityDbContext>();
+
             services.AddHttpContextAccessor();
             services.AddMvc(x => { x.EnableEndpointRouting = false; });
+            services.AddOpenIddict()
+            .AddCore(options =>
+            {
+                options.UseEntityFrameworkCore()
+                    .UseDbContext<IdentityDbContext>();
 
+            })
+            .AddServer(options =>
+            {
+                options.SetIssuer(new Uri($"{identityBaseUrl}/identity"));
+                options.SetAuthorizationEndpointUris(new Uri($"{identityBaseUrl}/identity/Account/Login"));
+                options.SetTokenEndpointUris(new Uri($"{identityBaseUrl}/identity/token"));
+                options.SetJsonWebKeySetEndpointUris(new Uri($"{identityBaseUrl}/identity/.well-known/jwks"), new Uri("http://host.docker.internal/identity/.well-known/jwks"));
+
+                options.AllowClientCredentialsFlow();
+                options.RegisterScopes(OpenIddictConstants.Scopes.OpenId, OpenIddictConstants.Scopes.Profile);
+                var readOnlySpan = File.ReadAllText("/myapp/cert/self-signed-certificate.pem");
+                var readAllText = File.ReadAllText("/myapp/cert/private-key.pem");
+                //options.AddEncryptionCertificate(X509Certificate2.CreateFromPem(readOnlySpan, readAllText));
+                //options.AddSigningCertificate(X509Certificate2.CreateFromPem(readOnlySpan, readAllText));
+                options.AddDevelopmentEncryptionCertificate();
+                options.AddDevelopmentSigningCertificate();
+                options.UseAspNetCore().EnableTokenEndpointPassthrough().DisableTransportSecurityRequirement();
+
+                options.AddEventHandler<OpenIddictServerEvents.HandleConfigurationRequestContext>(builder =>
+                    builder.UseInlineHandler(context =>
+                    {
+                        // Attach custom metadata to the configuration document.
+                        context.Metadata["custom_metadata"] = 42;
+
+                        return default;
+                    }));
+            })
+            .AddValidation(options =>
+            {
+                // Import the configuration from the local OpenIddict server instance.
+                options.UseLocalServer();
+
+                // Register the ASP.NET Core host.
+                options.UseAspNetCore();
+
+                // Enable authorization entry validation, which is required to be able
+                // to reject access tokens retrieved from a revoked authorization code.
+                options.EnableAuthorizationEntryValidation();
+            });
+
+            services.AddAuthentication(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme);
+            services.AddAuthorization();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
@@ -106,10 +141,7 @@ namespace IdentityServer
             {
                 Tracer.CurrentTracer = app.ApplicationServices.GetService<IManagedTracer>();
 
-                var appSetting = applicationBuilder.ApplicationServices.GetService<AppSetting>();
                 applicationBuilder.UseRouting();
-
-                applicationBuilder.UseMiddleware<PublicFacingUrlMiddleware>(appSetting["IdentityUrlBase"]);
                 applicationBuilder.UseDefaultFiles();
                 applicationBuilder.UseStaticFiles(new StaticFileOptions()
                 {
@@ -124,19 +156,16 @@ namespace IdentityServer
                 /* app.UseForwardedHeaders(new ForwardedHeadersOptions {
                      ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedHost | ForwardedHeaders.XForwardedProto
                  });*/
-                applicationBuilder.UseIdentityServer();
                 applicationBuilder.UseAuthentication();
                 applicationBuilder.UseCookiePolicy(
                     new CookiePolicyOptions
                     {
                         Secure = CookieSecurePolicy.Always
                     });
-                //applicationBuilder.UseEndpoints(endpoints =>
-                //{
-                //    endpoints.MapControllerRoute(
-                //        name: "default",
-                //        pattern: "{controller=Home}/{action=Index}/{id?}");
-                //});
+
+                applicationBuilder.UseAuthentication();
+                applicationBuilder.UseAuthorization();
+
                 applicationBuilder.UseSwagger();
                 applicationBuilder.UseSwaggerUI(c => { c.SwaggerEndpoint("v1/swagger.json", "My API V1"); });
                 applicationBuilder.UseMvc(routes =>
@@ -149,6 +178,7 @@ namespace IdentityServer
                 {
                     endpoints.MapFallbackToFile("/index.html");
                 });
+
             });
         }
 
@@ -157,194 +187,116 @@ namespace IdentityServer
             using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
             {
                 var appsettings = serviceScope.ServiceProvider.GetRequiredService<AppSetting>();
-                var context = serviceScope.ServiceProvider.GetRequiredService<IdentityDbContext>();
+                var manager = serviceScope.ServiceProvider.GetRequiredService<OpenIddict.Abstractions.IOpenIddictApplicationManager>();
 
-                context.Clients.RemoveRange(context.Clients.Where(x => x.ClientId == appsettings["ClientId"])
-                    .Include(x => x.RedirectUris).Include(x => x.PostLogoutRedirectUris)
-                    .Include(x => x.AllowedScopes)
-                    .Include(x => x.ClientSecrets));
-                context.UserClients.RemoveRange(
-                    context.UserClients.Where(x => x.Client.ClientId == appsettings["ClientId"]));
+                var client1 = manager.FindByClientIdAsync(appsettings["ClientId"]).Result;
+                if (client1 != null) manager.DeleteAsync(client1).GetAwaiter().GetResult();
 
-                context.Clients.RemoveRange(context.Clients.Where(x => x.ClientId == appsettings["PassiClientId"])
-                    .Include(x => x.RedirectUris).Include(x => x.PostLogoutRedirectUris)
-                    .Include(x => x.AllowedScopes)
-                    .Include(x => x.ClientSecrets));
-                context.UserClients.RemoveRange(
-                    context.UserClients.Where(x => x.Client.ClientId == appsettings["PassiClientId"]));
+                var oldPassiClient = manager.FindByClientIdAsync(appsettings["PassiClientId"]).Result;
+                if (oldPassiClient != null) manager.DeleteAsync(oldPassiClient).GetAwaiter().GetResult();
 
-                var includableQueryable = context.Clients.Where(x => x.ClientId == appsettings["PgAdminClientId"])
-                    .Include(x => x.RedirectUris).Include(x => x.PostLogoutRedirectUris)
-                    .Include(x => x.AllowedScopes)
-                    .Include(x => x.ClientSecrets).ToList();
-                context.Clients.RemoveRange(includableQueryable);
-                context.UserClients.RemoveRange(
-                    context.UserClients.Where(x => x.Client.ClientId == appsettings["PgAdminClientId"]));
+                var oldPgAdminClient = manager.FindByClientIdAsync(appsettings["PgAdminClientId"]).Result;
+                if (oldPgAdminClient != null) manager.DeleteAsync(oldPgAdminClient).GetAwaiter().GetResult();
 
-                var client = new IdentityServer4.EntityFramework.Storage.Entities.Client()
+                var oldPassiChatClient = manager.FindByClientIdAsync(appsettings["PassiChatClientId"]).Result;
+                if (oldPassiChatClient != null) manager.DeleteAsync(oldPassiChatClient).GetAwaiter().GetResult();
+
+                var oldMailluClient = manager.FindByClientIdAsync(appsettings["MailuClientId"]).Result;
+                if (oldMailluClient != null) manager.DeleteAsync(oldMailluClient).GetAwaiter().GetResult();
+
+
+                manager.CreateAsync(new OpenIddict.Abstractions.OpenIddictApplicationDescriptor
                 {
                     ClientId = appsettings["ClientId"],
-                    ClientSecrets = new List<ClientSecret>()
+                    ClientSecret = appsettings["ClientSecret"],
+                    RedirectUris = { new Uri("https://localhost/passiweb/oauth/callback"),
+                        new Uri("http://host.docker.internal/signin-oidc"),
+                        new Uri("https://localhost/signin-oidc"),
+                        new Uri("https://localhost/oauth/callback"),
+                        new Uri("https://127.0.0.1:5002/oauth/callback"),
+                        new Uri("https://localhost:5002/oauth/callback"),
+                        new Uri("https://192.168.0.208/oauth/callback"),
+                        new Uri("https://passi.cloud/oauth/callback"),
+                        new Uri("https://192.168.0.208:5002/oauth/callback") },
+
+                    Permissions =
                     {
-                        new ClientSecret() { Value = appsettings["ClientSecret"].ToSha256() }
-                    },
-                    RedirectUris = new List<ClientRedirectUri>()
-                    {
-                        new ClientRedirectUri(){RedirectUri = "https://localhost/passiweb/oauth/callback"},
-                        new ClientRedirectUri(){RedirectUri = "https://localhost/oauth/callback"},
-                        new ClientRedirectUri(){RedirectUri = "https://127.0.0.1:5002/oauth/callback"},
-                        new ClientRedirectUri(){RedirectUri = "https://localhost:5002/oauth/callback"},
-                        new ClientRedirectUri(){RedirectUri = "https://192.168.0.208/oauth/callback"},
-                        new ClientRedirectUri(){RedirectUri = "https://passi.cloud/oauth/callback"},
-                        new ClientRedirectUri(){RedirectUri = "https://192.168.0.208:5002/oauth/callback"}
-                    },
-                    RequirePkce = false,
-                    AllowedGrantTypes = new List<ClientGrantType>()
-                    {
-                        new ClientGrantType(){GrantType =GrantType.AuthorizationCode },
-                        new ClientGrantType(){GrantType =GrantType.ClientCredentials }
-                    },
-                    AllowedScopes = new List<ClientScope>() {
-                        new ClientScope(){Scope = "openid"} ,
-                        new ClientScope(){Scope = "email"},
-                        new ClientScope(){Scope = "profile"}
-                    },
-                    AlwaysIncludeUserClaimsInIdToken = true,
-                    ClientUri = "https://passi.cloud",
-                    AlwaysSendClientClaims = true,
-                };
-                context.Clients.Add(client);
-                var client2 = new IdentityServer4.EntityFramework.Storage.Entities.Client()
-                {
-                    ClientId = appsettings["PassiClientId"],
-                    ClientSecrets = new List<ClientSecret>() { new ClientSecret() { Value = appsettings["PassiSecret"].ToSha256() } },
-                    RedirectUris = new List<ClientRedirectUri>()
-                    {
-                        new ClientRedirectUri(){RedirectUri = "https://localhost/passiapi/oauth/callback"},
-                        new ClientRedirectUri(){RedirectUri = "https://127.0.0.1:5004/passiapi/oauth/callback"},
-                        new ClientRedirectUri(){RedirectUri = "https://localhost:5004/passiapi/oauth/callback"},
-                        new ClientRedirectUri(){RedirectUri ="https://192.168.0.208/passiapi/oauth/callback"},
-                        new ClientRedirectUri(){RedirectUri = "https://passi.cloud/passiapi/oauth/callback"},
-                        new ClientRedirectUri(){RedirectUri = "https://192.168.0.208:5004/passiapi/oauth/callback"},
+                        OpenIddictConstants.Permissions.Endpoints.Token,
+                        OpenIddictConstants.Permissions.GrantTypes.ClientCredentials
                     },
 
-                    RequirePkce = false,
-                    AllowedGrantTypes = new List<ClientGrantType>()
-                    {
-                        new ClientGrantType(){GrantType =GrantType.AuthorizationCode },
-                        new ClientGrantType(){GrantType =GrantType.ClientCredentials }
-                    },
-                    AllowedScopes = new List<ClientScope>() {
-                        new ClientScope(){Scope = "openid"} ,
-                        new ClientScope(){Scope = "email"},
-                        new ClientScope(){Scope = "profile"}
-                    },
-                    AlwaysIncludeUserClaimsInIdToken = true,
-                    ClientUri = "https://passi.cloud",
-                    AlwaysSendClientClaims = true,
-                };
-                context.Clients.Add(client2);
-
-                var client3 = new IdentityServer4.EntityFramework.Storage.Entities.Client()
+                }).GetAwaiter().GetResult();
+                manager.CreateAsync(new OpenIddict.Abstractions.OpenIddictApplicationDescriptor
                 {
                     ClientId = appsettings["PgAdminClientId"],
-                    ClientSecrets = new List<ClientSecret>() { new ClientSecret() { Value = appsettings["PgAdminSecret"].ToSha256() } },
-                    RedirectUris = new List<ClientRedirectUri>()
+                    ClientSecret = appsettings["PgAdminSecret"],
+                    RedirectUris =
                     {
-                        new ClientRedirectUri(){RedirectUri = "http://localhost/pgadmin4/oauth2/authorize"},
-                        new ClientRedirectUri(){RedirectUri = "https://localhost/pgadmin4/oauth2/authorize"},
-                        new ClientRedirectUri(){RedirectUri ="http://passi.cloud/pgadmin4/oauth2/authorize"},
-                        new ClientRedirectUri(){RedirectUri ="https://passi.cloud/pgadmin4/oauth2/authorize"}
-                    },
+                        new Uri("http://localhost/pgadmin4/oauth2/authorize"),
+                        new Uri("https://localhost/pgadmin4/oauth2/authorize"),
+                        new Uri("http://passi.cloud/pgadmin4/oauth2/authoriz"),
+                        new Uri("https://passi.cloud/pgadmin4/oauth2/authorize"),
 
-                    RequirePkce = false,
-                    AllowedGrantTypes = new List<ClientGrantType>()
+                    },
+                    Permissions =
                     {
-                        new ClientGrantType(){GrantType =GrantType.AuthorizationCode },
-                        new ClientGrantType(){GrantType =GrantType.ClientCredentials }
-                    },
-                    AllowedScopes = new List<ClientScope>() {
-                        new ClientScope(){Scope = "openid"} ,
-                        new ClientScope(){Scope = "email"},
-                        new ClientScope(){Scope = "profile"}
-                    },
-                    AlwaysIncludeUserClaimsInIdToken = true,
-                    ClientUri = "https://passi.cloud/pgadmin4",
-                    AlwaysSendClientClaims = true,
-                };
-                context.Clients.Add(client3);
+                        OpenIddictConstants.Permissions.Endpoints.Token,
+                        OpenIddictConstants.Permissions.GrantTypes.ClientCredentials
+                    }
+                }).GetAwaiter().GetResult();
+                manager.CreateAsync(new OpenIddict.Abstractions.OpenIddictApplicationDescriptor
+                {
+                    ClientId = appsettings["PassiClientId"],
+                    ClientSecret = appsettings["PassiSecret"],
+                    RedirectUris = {
+                        new Uri("https://localhost/passiapi/oauth/callback"),
+                        new Uri("https://127.0.0.1:5004/passiapi/oauth/callback"),
+                        new Uri("https://localhost:5004/passiapi/oauth/callback"),
+                        new Uri("https://192.168.0.208/passiapi/oauth/callback"),
+                        new Uri("https://passi.cloud/passiapi/oauth/callback"),
+                        new Uri("https://192.168.0.208:5004/passiapi/oauth/callback")
 
-                var client4 = new IdentityServer4.EntityFramework.Storage.Entities.Client()
+                    },
+                    Permissions =
+                    {
+                        OpenIddictConstants.Permissions.Endpoints.Token,
+                        OpenIddictConstants.Permissions.GrantTypes.ClientCredentials
+                    }
+                }).GetAwaiter().GetResult();
+                manager.CreateAsync(new OpenIddict.Abstractions.OpenIddictApplicationDescriptor
                 {
                     ClientId = appsettings["PassiChatClientId"],
-                    ClientSecrets = new List<ClientSecret>() { new ClientSecret() { Value = appsettings["PassiChatSecret"].ToSha256() } },
-                    RedirectUris = new List<ClientRedirectUri>()
+                    ClientSecret = appsettings["PassiChatSecret"],
+                    RedirectUris =
                     {
-                        new ClientRedirectUri(){RedirectUri = "myapp://callback"},
+                        new Uri("myapp://callback"),
 
                     },
-
-                    RequirePkce = false,
-                    AllowedGrantTypes = new List<ClientGrantType>()
+                    Permissions =
                     {
-                        new ClientGrantType(){GrantType =GrantType.AuthorizationCode },
-                        new ClientGrantType(){GrantType =GrantType.ClientCredentials }
-                    },
-                    AllowedScopes = new List<ClientScope>() {
-                        new ClientScope(){Scope = "openid"} ,
-                        new ClientScope(){Scope = "email"},
-                        new ClientScope(){Scope = "profile"}
-                    },
-                    AlwaysIncludeUserClaimsInIdToken = true,
-                    ClientUri = "myapp",
-                    AlwaysSendClientClaims = true,
-                };
-                context.Clients.Add(client4);
-
-                var client5 = new IdentityServer4.EntityFramework.Storage.Entities.Client()
+                        OpenIddictConstants.Permissions.Endpoints.Token,
+                        OpenIddictConstants.Permissions.GrantTypes.ClientCredentials
+                    }
+                }).GetAwaiter().GetResult();
+                manager.CreateAsync(new OpenIddict.Abstractions.OpenIddictApplicationDescriptor
                 {
                     ClientId = appsettings["MailuClientId"],
-                    ClientSecrets = new List<ClientSecret>() { new ClientSecret() { Value = appsettings["MailluSecret"].ToSha256() } },
-                    RedirectUris = new List<ClientRedirectUri>()
+                    ClientSecret = appsettings["MailluSecret"],
+                    RedirectUris =
                     {
-                        new ClientRedirectUri(){RedirectUri = "http://localhost/webmail/oauth2/authorize"},
-                        new ClientRedirectUri(){RedirectUri = "https://localhost/webmail/oauth2/authorize"},
-                        new ClientRedirectUri(){RedirectUri = "http://passi.cloud/webmail/oauth2/authorize"},
-                        new ClientRedirectUri(){RedirectUri = "https://passi.cloud/webmail/oauth2/authorize"}
-                    },
+                        new Uri("http://localhost/webmail/oauth2/authorize"),
+                        new Uri("https://localhost/webmail/oauth2/authorize"),
+                        new Uri("http://passi.cloud/webmail/oauth2/authorize"),
+                        new Uri("https://passi.cloud/webmail/oauth2/authorize"),
 
-                    RequirePkce = false,
-                    AllowedGrantTypes = new List<ClientGrantType>()
+                    },
+                    Permissions =
                     {
-                        new ClientGrantType(){GrantType =GrantType.AuthorizationCode },
-                        new ClientGrantType(){GrantType =GrantType.ClientCredentials }
-                    },
-                    AllowedScopes = new List<ClientScope>() {
-                        new ClientScope(){Scope = "openid"} ,
-                        new ClientScope(){Scope = "email"},
-                        new ClientScope(){Scope = "profile"}
-                    },
-                    AlwaysIncludeUserClaimsInIdToken = true,
-                    ClientUri = "https://passi.cloud/webmail",
-                    AlwaysSendClientClaims = true,
-                };
-                context.Clients.Add(client5);
+                        OpenIddictConstants.Permissions.Endpoints.Token,
+                        OpenIddictConstants.Permissions.GrantTypes.ClientCredentials
+                    }
+                }).GetAwaiter().GetResult();
 
-                if (!context.IdentityResources.Any())
-                    context.IdentityResources.AddRange(new List<IdentityServer4.EntityFramework.Storage.Entities.IdentityResource>()
-                {
-                    new IdentityResources.OpenId().ToEntity(),
-                });
-                context.UserClients.Add(new UserClient() { Client = client, UserId = "your@email.com" });
-
-                var scope = context.ApiScopes.FirstOrDefault(x => x.Name == "email");
-                if (scope == null)
-                    context.ApiScopes.Add(new IdentityServer4.EntityFramework.Storage.Entities.ApiScope() { Name = "email", Enabled = true, DisplayName = "email" });
-                var profileScope = context.ApiScopes.FirstOrDefault(x => x.Name == "profile");
-                if (profileScope != null)
-                    context.ApiScopes.Remove(profileScope);
-
-                context.SaveChanges();
             }
         }
     }

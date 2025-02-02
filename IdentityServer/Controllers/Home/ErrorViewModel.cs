@@ -1,5 +1,4 @@
-﻿using IdentityServer4.Models;
-using IdentityServer4.Models.Messages;
+﻿
 
 namespace IdentityServer.Controllers.Home
 {
@@ -15,5 +14,10 @@ namespace IdentityServer.Controllers.Home
         }
 
         public ErrorMessage Error { get; set; }
+    }
+
+    public class ErrorMessage
+    {
+        public string Error { get; set; }
     }
 }

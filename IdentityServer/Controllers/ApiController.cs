@@ -1,10 +1,5 @@
 ﻿using ConfigurationManager;
 using IdentityServer.Controllers.ViewInputs;
-using IdentityServer4;
-using IdentityServer4.Events;
-using IdentityServer4.Services;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -21,12 +16,17 @@ using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using System.Web;
 using GoogleTracer;
-using IdentityServer4.Extensions;
+using Microsoft.AspNetCore;
+using OpenIddict.Abstractions;
 using Repos;
 using WebApiDto;
 using WebApiDto.Auth;
 using WebApiDto.Auth.Dto;
 using WebApiDto.SignUp;
+using Microsoft.IdentityModel.Tokens;
+using OpenIddict.Server.AspNetCore;
+using static OpenIddict.Abstractions.OpenIddictConstants;
+using AspNet.Security.OpenId.Steam;
 
 namespace IdentityServer.Controllers
 {
@@ -38,20 +38,19 @@ namespace IdentityServer.Controllers
         private AppSetting _appSetting;
         private IMyRestClient _myRestClient;
         private IRandomGenerator _randomGenerator;
-        private IIdentityServerInteractionService _interaction;
-        private IEventService _events;
+        private readonly IOpenIddictApplicationManager _applicationManager;
+        private OpenIddict.Abstractions.IOpenIddictScopeManager _manager;
         public ILogger<ApiController> Logger { get; set; }
 
-        public ApiController(IRandomGenerator randomGenerator, IMyRestClient myRestClient, AppSetting appSetting, IIdentityServerInteractionService interaction, IEventService events, ILogger<ApiController> logger)
+        public ApiController(IRandomGenerator randomGenerator, IMyRestClient myRestClient, AppSetting appSetting, ILogger<ApiController> logger, IOpenIddictApplicationManager applicationManager)
         {
             ServicePointManager.ServerCertificateValidationCallback +=
                 (sender, cert, chain, sslPolicyErrors) => true;
             _randomGenerator = randomGenerator;
             _myRestClient = myRestClient;
             _appSetting = appSetting;
-            _interaction = interaction;
-            _events = events;
             Logger = logger;
+            _applicationManager = applicationManager;
         }
 
         [HttpGet]
@@ -66,6 +65,62 @@ namespace IdentityServer.Controllers
         }
 
         [HttpPost]
+        [Route("login")]
+        public async Task<IActionResult> Login(LoginInputDto model)
+        {
+            var foundObj = await _applicationManager.FindByClientIdAsync(model.ClientId);
+            var application = (dynamic)foundObj ?? throw new InvalidOperationException("The application cannot be found.");
+            var validation = await _applicationManager.ValidateRedirectUriAsync(foundObj, model.ReturnUrl);
+            if (!validation)
+                throw new InvalidOperationException("invalid redirect url");
+
+            var request = new RestRequest(_appSetting["startRequest"], Method.Post);
+            var possibleCodes = new List<Color>()
+                {
+                    Color.blue,
+                    Color.green,
+                    Color.red,
+                    Color.yellow
+                };
+            var nonce = model.Nonce;
+            var index = new Random().Next(0, possibleCodes.Count - 1);
+            var startLoginDto = new StartLoginDto()
+            {
+                Username = model.Username,
+                ClientId = application.ClientId ?? "IdentityServer",
+                ReturnUrl = model.ReturnUrl,
+                CheckColor = possibleCodes[index],
+                RandomString = nonce ?? _randomGenerator.GetNumbersString(10)
+            };
+            request.AddJsonBody(startLoginDto);
+            var result = await _myRestClient.ExecuteAsync(request);
+            if (result.IsSuccessful)
+            {
+                Logger.LogDebug("response:" + result.Content);
+                var loginResponceDto = JsonConvert.DeserializeObject<LoginResponceDto>(result.Content);
+                var color = startLoginDto.CheckColor.ToString();
+                return Ok(new CheckInputModel
+                {
+                    SessionId = loginResponceDto.SessionId,
+                    ReturnUrl = model.ReturnUrl,
+                    Username = model.Username,
+                    CheckColor = color,
+                    RandomString = startLoginDto.RandomString
+                });
+            }
+
+            Logger.LogDebug("response:" + result.Content);
+            if (result.Content != null)
+            {
+                var errorResult = JsonConvert.DeserializeObject<ApiResponseDto>(result.Content);
+
+                return BadRequest(new ApiResponseDto() { errors = errorResult?.errors });
+            }
+
+            return BadRequest(new ApiResponseDto() { errors = "Internal error" });
+        }
+
+        [HttpPost]
         [Route("check")]
         public async Task<IActionResult> Check(CheckInputModel model)
         {
@@ -75,15 +130,11 @@ namespace IdentityServer.Controllers
 
             if (result.IsSuccessful)
             {
-                var context = await _interaction.GetAuthorizationContextAsync(model.ReturnUrl);
+                var application = _applicationManager.FindByRedirectUriAsync(model.ReturnUrl) ??
+                                  throw new InvalidOperationException("The application cannot be found.");
 
                 var checkResponceDto = JsonConvert.DeserializeObject<CheckResponceDto>(result.Content);
-                await _events.RaiseAsync(new UserLoginSuccessEvent(model.Username, model.Username, model.Username,
-                    clientId: context?.Client.ClientId));
-                var isuser = new IdentityServerUser(model.Username)
-                {
-                    DisplayName = model.Username,
-                };
+
                 if (checkResponceDto.PublicCertThumbprint != null)
                 {
                     var request2 =
@@ -116,19 +167,30 @@ namespace IdentityServer.Controllers
                                 cert.PublicCert);
                             if (isValid)
                             {
-                                isuser.AdditionalClaims.Add(new Claim("Thumbprint",
-                                    checkResponceDto.PublicCertThumbprint));
-                                isuser.AdditionalClaims.Add(new Claim("sessionId", model.SessionId.ToString()));
-                                await AuthenticationManagerExtensions.SignInAsync(HttpContext, isuser,
-                                    new AuthenticationProperties()
-                                    {
-                                        IsPersistent = true,
-                                        AllowRefresh = true,
-                                        ExpiresUtc =
-                                            DateTimeOffset.UtcNow.AddMinutes(
-                                                Convert.ToDouble(_appSetting["SessionLength"]))
-                                    });
-                                return Ok(new { Redirect = model.ReturnUrl });
+
+
+                                var identity = new ClaimsIdentity(TokenValidationParameters.DefaultAuthenticationType, Claims.Name, Claims.Role);
+
+                                // Use the client_id as the subject identifier.
+                                identity.SetClaim("Thumbprint", checkResponceDto.PublicCertThumbprint);
+                                identity.SetClaim("sessionId", model.SessionId.ToString());
+                                identity.SetClaim("email", model.Username);
+                                identity.SetClaim(Claims.Subject, model.Username);
+
+                                identity.SetDestinations(static claim => claim.Type switch
+                                {
+                                    // Allow the "name" claim to be stored in both the access and identity tokens
+                                    // when the "profile" scope was granted (by calling principal.SetScopes(...)).
+                                    Claims.Name when claim.Subject.HasScope(Scopes.Profile)
+                                        => [Destinations.AccessToken, Destinations.IdentityToken],
+
+                                    // Otherwise, only store the claim in the access tokens.
+                                    _ => [Destinations.AccessToken]
+                                });
+
+                                var res = SignIn(new ClaimsPrincipal(identity), OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+                                if (res.Principal.Identity.IsAuthenticated)
+                                    return Ok(new { Redirect = model.ReturnUrl });
                             }
                             else
                             {
@@ -193,59 +255,7 @@ namespace IdentityServer.Controllers
             return Ok(new { Redirect = false });
         }
 
-        [HttpPost]
-        [Route("login")]
-        public async Task<IActionResult> Login(LoginInputDto model)
-        {
-            var context = await _interaction.GetAuthorizationContextAsync(model.ReturnUrl);
 
-            var request = new RestRequest(_appSetting["startRequest"], Method.Post);
-            var possibleCodes = new List<Color>()
-                {
-                    Color.blue,
-                    Color.green,
-                    Color.red,
-                    Color.yellow
-                };
-            var queryString = HttpUtility.ParseQueryString(model.ReturnUrl);
-            var redirect_uri = queryString.Get("redirect_uri");
-            var nonce = HttpUtility.ParseQueryString(model.ReturnUrl).Get("nonce");
-            var index = new Random().Next(0, possibleCodes.Count - 1);
-            var startLoginDto = new StartLoginDto()
-            {
-                Username = model.Username,
-                ClientId = context?.Client.ClientId ?? "IdentityServer",
-                ReturnUrl = redirect_uri,
-                CheckColor = possibleCodes[index],
-                RandomString = nonce ?? _randomGenerator.GetNumbersString(10)
-            };
-            request.AddJsonBody(startLoginDto);
-            var result = await _myRestClient.ExecuteAsync(request);
-            if (result.IsSuccessful)
-            {
-                Logger.LogDebug("response:" + result.Content);
-                var loginResponceDto = JsonConvert.DeserializeObject<LoginResponceDto>(result.Content);
-                var color = startLoginDto.CheckColor.ToString();
-                return Ok(new CheckInputModel
-                {
-                    SessionId = loginResponceDto.SessionId,
-                    ReturnUrl = model.ReturnUrl,
-                    Username = model.Username,
-                    CheckColor = color,
-                    RandomString = startLoginDto.RandomString
-                });
-            }
-
-            Logger.LogDebug("response:" + result.Content);
-            if (result.Content != null)
-            {
-                var errorResult = JsonConvert.DeserializeObject<ApiResponseDto>(result.Content);
-
-                return BadRequest(new ApiResponseDto() { errors = errorResult?.errors });
-            }
-
-            return BadRequest(new ApiResponseDto() { errors = "Internal error" });
-        }
     }
 
     public class UserDto

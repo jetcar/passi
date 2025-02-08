@@ -11,6 +11,7 @@
                     ReturnUrl: this.$route.query.redirect_uri,
                     ClientId: this.$route.query.client_id,
                     Nonce: this.$route.query.nonce,
+                    query: new URLSearchParams(this.$route.query).toString()
                 },
                 LoginResponse: {
                     checkColor: "red"
@@ -37,10 +38,12 @@
             async fetchCheck() {
                 const checkRequestOptions = {
                     method: "POST",
+                    credentials: "include",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(this.LoginResponse)
                 };
-                fetch(API_CHECK_URL, checkRequestOptions).then(
+                var queiry = new URLSearchParams(this.$route.query).toString()
+                fetch(API_CHECK_URL + "?" + queiry, checkRequestOptions).then(
                     (data) => {
                         if (data.ok) {
                             data.json().then((json) => {
@@ -74,11 +77,13 @@
                 this.LoginInput.Nonce = this.$route.query.nonce
                 const requestOptions = {
                     method: "POST",
+                    credentials: "include",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(this.LoginInput)
                 };
+                var queiry = new URLSearchParams(this.$route.query).toString()
 
-                var resp = await fetch(API_URL, requestOptions)
+                var resp = await fetch(API_URL + "?" + queiry, requestOptions)
                 if (resp.ok) {
                     resp.json().then((data) => {
                         this.LoginResponse = data

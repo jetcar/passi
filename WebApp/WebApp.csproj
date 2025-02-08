@@ -14,6 +14,12 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="OpenIddict.AspNetCore" Version="6.0.0" />
+
+		<PackageReference Include="OpenIddict.EntityFrameworkCore" Version="6.0.0" />
+
+		<PackageReference Include="OpenIddict.Validation.AspNetCore" Version="6.0.0" />
+
 		<PackageReference Include="MrAdvice" Version="2.17.0" />
 		<PackageReference Include="Google.Cloud.Diagnostics.AspNetCore3" Version="5.2.0" />
 		<PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.3.1" />

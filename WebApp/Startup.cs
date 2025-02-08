@@ -16,6 +16,8 @@ using Serilog.Events;
 using Services;
 using System;
 using System.Net.Http;
+using OpenIddict.Abstractions;
+using OpenIddict.Client;
 using OpenIdLib.OpenId;
 using TraceServiceOptions = Google.Cloud.Diagnostics.Common.TraceServiceOptions;
 
@@ -33,6 +35,10 @@ namespace WebApp
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var handler = new HttpClientHandler
+            {
+                ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
+            };
             var passiUrl = Environment.GetEnvironmentVariable("PassiUrl") ?? Configuration.GetValue<string>("AppSetting:PassiUrl");
             var identityUrl = Environment.GetEnvironmentVariable("IdentityUrl") ?? Configuration.GetValue<string>("AppSetting:IdentityUrl");
             var returnUrl = Environment.GetEnvironmentVariable("returnUrl") ?? Configuration.GetValue<string>("AppSetting:returnUrl");
@@ -72,50 +78,71 @@ namespace WebApp
                         options.ExpireTimeSpan = System.TimeSpan.FromDays(30);
                     })
                 .AddOpenIdAuthentication(identityUrl, returnUrl, passiUrl, clientId, secret)
-                .AddOpenIdTokenManagement(x =>
+                
+                ;
+           services.AddOpenIddict()
+                
+            // Register the OpenIddict core components.
+            .AddCore(options =>
+            {
+                // Configure OpenIddict to use the Entity Framework Core stores and models.
+                // Note: call ReplaceDefaultEntities() to replace the default OpenIddict entities.
+                options.UseEntityFrameworkCore()
+                       .UseDbContext<WebAppDbContext>();
+
+                // Developers who prefer using MongoDB can remove the previous lines
+                // and configure OpenIddict to use the specified MongoDB database:
+                // options.UseMongoDb()
+                //        .UseDatabase(new MongoClient().GetDatabase("openiddict"));
+
+                // Enable Quartz.NET integration.
+            }).AddClient(options =>
+            {
+                // Note: this sample uses the code flow, but you can enable the other flows if necessary.
+                options.AllowAuthorizationCodeFlow();
+
+                // Register the signing and encryption credentials used to protect
+                // sensitive data like the state tokens produced by OpenIddict.
+                options.AddDevelopmentEncryptionCertificate()
+                       .AddDevelopmentSigningCertificate();
+                // Register the ASP.NET Core host and configure the ASP.NET Core-specific options.
+                options.UseAspNetCore()
+                    .DisableTransportSecurityRequirement()
+                       .EnableStatusCodePagesIntegration()
+                       .EnableRedirectionEndpointPassthrough()
+                       .EnablePostLogoutRedirectionEndpointPassthrough();
+                // Register the System.Net.Http integration and use the identity of the current
+                // assembly as a more specific user agent, which can be useful when dealing with
+                // providers that use the user agent as a way to throttle requests (e.g Reddit).
+                options.UseSystemNetHttp()
+                    
+                       .SetProductInformation(typeof(Startup).Assembly);
+                options.UseSystemNetHttp(x =>
                 {
-                    x.RevokeRefreshTokenOnSignout = true;
+                    x.ConfigureHttpClientHandler(a =>
+                        a.ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true);
                 });
-            //services.AddAuthentication(options =>
-            //    {
-            //        options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-            //        options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
-            //    })
-            //    .AddCookie("Cookies",
-            //        options =>
-            //        {
-            //            options.AccessDeniedPath = "/Home/Error";
-            //            options.SlidingExpiration = true;
-            //            options.ExpireTimeSpan = System.TimeSpan.FromDays(30);
-            //        })
-            //    .AddOpenIdConnect(options =>
-            //    {
-            //        options.Authority = identityUrl; // Replace with your OpenIddict server URL
-            //        options.ClientId = clientId;
-            //        options.ClientSecret = secret;
-            //        options.ResponseType = "code"; // Authorization Code Flow
-            //        options.SaveTokens = true;
-            //        options.Scope.Add("openid");
-            //        options.Scope.Add("profile");
-            //        options.Scope.Add("email"); // 🔹 Request email (optional)
 
 
-            //        options.SaveTokens = true; // 🔹 Store tokens in authentication cookie
 
+                // Add a client registration matching the client application definition in the server project.
+                options.AddRegistration(new OpenIddictClientRegistration
+                {
+                    Issuer = new Uri(identityUrl, UriKind.Absolute),
 
-            //        options.GetClaimsFromUserInfoEndpoint = true; // 🔹 Fetch additional claims from UserInfo endpoint
-            //        options.MapInboundClaims = false; // 🔹 Prevents claim name transformation
+                    ClientId = clientId,
+                    ClientSecret = secret,
+                    Scopes = { OpenIddictConstants.Permissions.Scopes.Email, OpenIddictConstants.Permissions.Scopes.Profile },
 
-            //        options.CallbackPath = "/signin-oidc"; // 🔹 Must match redirect URI registered in OpenIddict
-            //        options.SignedOutCallbackPath = "/signout-callback-oidc"; // 🔹 Logout callback
-            //        options.RequireHttpsMetadata = true;
-            //        options.UsePkce = true; // 🔹 Enforce Proof Key for Code Exchange (PKCE)
-            //        options.BackchannelHttpHandler = new HttpClientHandler
-            //        {
-            //            ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
-            //        };
-            //    })
-            //    ;
+                    // Note: to mitigate mix-up attacks, it's recommended to use a unique redirection endpoint
+                    // URI per provider, unless all the registered providers support returning a special "iss"
+                    // parameter containing their URL as part of authorization responses. For more information,
+                    // see https://datatracker.ietf.org/doc/html/draft-ietf-oauth-security-topics#section-4.4.
+                    RedirectUri = new Uri("callback/login/local", UriKind.Relative),
+                    PostLogoutRedirectUri = new Uri("callback/logout/local", UriKind.Relative)
+                });
+            });
+
 
             services.AddHttpContextAccessor();
             services.AddHttpClient();

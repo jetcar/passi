@@ -6,6 +6,8 @@ using MessagePack;
 using MessagePack.Formatters;
 using MessagePack.Resolvers;
 using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,49 +18,49 @@ using ILogger = Serilog.ILogger;
 namespace IdentityRepo.DbContext
 {
     [GoogleTracer.Profile]
-    public class IdentityDbContext : Microsoft.EntityFrameworkCore.DbContext, IDataProtectionKeyContext
+    public class IdentityDbContext : IdentityDbContext<IdentityUser>, IDataProtectionKeyContext
     {
         private readonly AppSetting _appSetting;
         private ILogger _logger;
 
-        public IdentityDbContext()
-        {
-            var myConfiguration = new Dictionary<string, string>
-            {
-                {"AppSetting:IdentityDbName", "Identity"},
-                {"AppSetting:DbUser", "postgres"},
-                {"AppSetting:DbPassword", "q"},
-                {"AppSetting:DbHost", "localhost"},
-            };
-            var config = new ConfigurationBuilder().AddInMemoryCollection(myConfiguration).Build();
-            var appSetting = new AppSetting(config);
-            appSetting.PrefferAppsettingFile = true;
-            _logger = Logger.None;
-            _appSetting = appSetting;
-        }
+        //public IdentityDbContext()
+        //{
+        //    var myConfiguration = new Dictionary<string, string>
+        //    {
+        //        {"AppSetting:IdentityDbName", "Identity"},
+        //        {"AppSetting:DbUser", "postgres"},
+        //        {"AppSetting:DbPassword", "q"},
+        //        {"AppSetting:DbHost", "localhost"},
+        //    };
+        //    var config = new ConfigurationBuilder().AddInMemoryCollection(myConfiguration).Build();
+        //    var appSetting = new AppSetting(config);
+        //    appSetting.PrefferAppsettingFile = true;
+        //    _logger = Logger.None;
+        //    _appSetting = appSetting;
+        //}
         public IdentityDbContext(AppSetting appSetting, ILogger logger)
         {
             _appSetting = appSetting;
             _logger = logger;
         }
 
-        public IdentityDbContext(ILogger logger) : base(new DbContextOptions<IdentityDbContext>())
-        {
-            AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
-            _logger = logger;
-            var myConfiguration = new Dictionary<string, string>
-            {
-                {"AppSetting:IdentityDbName", "Identity"},
-                {"AppSetting:DbUser", "postgres"},
-                {"AppSetting:DbPassword", "q"},
-                {"AppSetting:DbHost", "localhost"},
-                {"AppSetting:DbPort", "5432"},
-            };
-            var config = new ConfigurationBuilder().AddInMemoryCollection(myConfiguration).Build();
-            var appSetting = new AppSetting(config);
-            appSetting.PrefferAppsettingFile = true;
-            _appSetting = appSetting;
-        }
+        //public IdentityDbContext(ILogger logger) : base(new DbContextOptions<IdentityDbContext>())
+        //{
+        //    AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+        //    _logger = logger;
+        //    var myConfiguration = new Dictionary<string, string>
+        //    {
+        //        {"AppSetting:IdentityDbName", "Identity"},
+        //        {"AppSetting:DbUser", "postgres"},
+        //        {"AppSetting:DbPassword", "q"},
+        //        {"AppSetting:DbHost", "localhost"},
+        //        {"AppSetting:DbPort", "5432"},
+        //    };
+        //    var config = new ConfigurationBuilder().AddInMemoryCollection(myConfiguration).Build();
+        //    var appSetting = new AppSetting(config);
+        //    appSetting.PrefferAppsettingFile = true;
+        //    _appSetting = appSetting;
+        //}
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

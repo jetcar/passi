@@ -13,6 +13,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Models;
 using NodaTime;
+using OpenIdLib.OpenId;
 using Repos;
 using Serilog;
 using Serilog.Events;
@@ -98,15 +99,10 @@ namespace passi_webapi
                     options.SlidingExpiration = true;
                     options.ExpireTimeSpan = System.TimeSpan.FromDays(30);
                 })
-            .AddOpenIdConnect(options =>
+            .AddOpenIdAuthentication(identityUrl, returnUrl, passiUrl, clientId, secret)
+            .AddOpenIdTokenManagement(x =>
             {
-                options.Authority = identityUrl; // Replace with your OpenIddict server URL
-                options.ClientId = clientId;
-                options.ClientSecret = secret;
-                options.ResponseType = "code"; // Authorization Code Flow
-                options.SaveTokens = true;
-                options.Scope.Add("openid");
-                options.Scope.Add("profile");
+                x.RevokeRefreshTokenOnSignout = true;
             });
             services.AddHttpContextAccessor();
             services.AddHealthChecks();

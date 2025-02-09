@@ -1,0 +1,14 @@
+{
+  "profiles": {
+    "WebApp": {
+      "commandName": "Project",
+      "applicationUrl": "https://localhost"
+    },
+    "Docker": {
+      "commandName": "Docker",
+      "launchUrl": "https://localhost",
+      "publishAllPorts": false,
+      "useSSL": true
+    }
+  }
+}

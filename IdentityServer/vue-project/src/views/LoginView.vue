@@ -8,10 +8,7 @@
             return {
                 LoginInput: {
                     Username: "",
-                    ReturnUrl: this.$route.query.redirect_uri,
-                    ClientId: this.$route.query.client_id,
-                    Nonce: this.$route.query.nonce,
-                    query: new URLSearchParams(this.$route.query).toString()
+                    ReturnUrl: this.$route.query.returnUrl,
                 },
                 LoginResponse: {
                     checkColor: "red"
@@ -38,12 +35,10 @@
             async fetchCheck() {
                 const checkRequestOptions = {
                     method: "POST",
-                    credentials: "include",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(this.LoginResponse)
                 };
-                var queiry = new URLSearchParams(this.$route.query).toString()
-                fetch(API_CHECK_URL + "?" + queiry, checkRequestOptions).then(
+                fetch(API_CHECK_URL, checkRequestOptions).then(
                     (data) => {
                         if (data.ok) {
                             data.json().then((json) => {
@@ -72,18 +67,14 @@
             async handleLoginClick() {
                 this.errorMessage = false
                 this.loading = true
-                this.LoginInput.ReturnUrl = this.$route.query.redirect_uri
-                this.LoginInput.ClientId = this.$route.query.client_id
-                this.LoginInput.Nonce = this.$route.query.nonce
+                this.LoginInput.ReturnUrl = this.$route.query.ReturnUrl
                 const requestOptions = {
                     method: "POST",
-                    credentials: "include",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(this.LoginInput)
                 };
-                var queiry = new URLSearchParams(this.$route.query).toString()
 
-                var resp = await fetch(API_URL + "?" + queiry, requestOptions)
+                var resp = await fetch(API_URL, requestOptions)
                 if (resp.ok) {
                     resp.json().then((data) => {
                         this.LoginResponse = data

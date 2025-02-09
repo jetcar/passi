@@ -62,46 +62,14 @@ namespace OpenIdLib.OpenId
                         context.ProtocolMessage.SetParameter("audience", options.ClientId);
                         return Task.FromResult(0);
                     },
-                    OnAuthorizationCodeReceived = _ =>
-                    {
-                        return Task.FromResult(0);
-
-                    },
-                    OnUserInformationReceived = _ =>
-                    {
-                        return Task.FromResult(0);
-
-                    },
-                    OnMessageReceived = _ =>
-                    {
-                        return Task.FromResult(0);
-
-                    },
-                    OnTicketReceived = _ =>
-                    {
-                        return Task.FromResult(0);
-
-                    },
-                    OnTokenResponseReceived = _ =>
-                    {
-                        return Task.FromResult(0);
-
-                    },
-                    OnRedirectToIdentityProviderForSignOut = _ =>
-                    {
-                        return Task.FromResult(0);
-
-                    },
-                    OnRemoteSignOut = _ =>
-                    {
-                        return Task.FromResult(0);
-
-                    },
-                    OnSignedOutCallbackRedirect = _ =>
-                    {
-                        return Task.FromResult(0);
-
-                    },
+                    OnAuthorizationCodeReceived = _ => Task.FromResult(0),
+                    OnUserInformationReceived = _ => Task.FromResult(0),
+                    OnMessageReceived = _ => Task.FromResult(0),
+                    OnTicketReceived = _ => Task.FromResult(0),
+                    OnTokenResponseReceived = _ => Task.FromResult(0),
+                    OnRedirectToIdentityProviderForSignOut = _ => Task.FromResult(0),
+                    OnRemoteSignOut = _ => Task.FromResult(0),
+                    OnSignedOutCallbackRedirect = _ => Task.FromResult(0)
                 };
             });
         }

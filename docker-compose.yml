@@ -100,6 +100,23 @@ services:
       - passiwebapi
     restart: always
 
+  openidc:
+    image: jetcar/openidc:1.0.38
+    networks:
+      - haproxy_net
+      - database_net
+      - redis_net
+    container_name: openidc
+    env_file:
+    - ../passi_config/dev.env
+    volumes:
+      - ../passi_identity_cert:/myapp/cert
+      - ../creds:/home/creds
+    depends_on:
+      - database
+      - passiwebapi
+    restart: always
+
   passiwebapi:
     image: jetcar/passiwebapi:1.0.38
     networks:

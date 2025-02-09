@@ -1,11 +1,15 @@
 using ConfigurationManager;
+using IdentityModel;
 using IdentityServer.services;
+using IdentityServer4.Extensions;
+using IdentityServer4.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using IdentityServer4.Storage.Models;
 
 namespace IdentityServer.Controllers.ClientRegistration
 {

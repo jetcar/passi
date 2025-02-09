@@ -13,6 +13,7 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
 COPY --from=vueWeb /src .
 
+RUN dotnet dev-certs https -ep /src/aspnetcore.pfx -p mypassword
 
 RUN dotnet restore passi.sln
 RUN dotnet publish passi.sln -c Release /p:UseAppHost=false

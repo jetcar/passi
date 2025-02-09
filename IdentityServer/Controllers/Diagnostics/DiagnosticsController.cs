@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace IdentityServer.Controllers.Diagnostics
 {
+    [SecurityHeaders]
     [Authorize]
     [GoogleTracer.Profile]
     public class DiagnosticsController : Controller

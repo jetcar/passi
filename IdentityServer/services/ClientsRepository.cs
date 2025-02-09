@@ -1,78 +1,71 @@
-﻿using IdentityRepo.DbContext;
+﻿using IdentityModel;
+using IdentityRepo.DbContext;
 using Microsoft.EntityFrameworkCore;
 using Repos;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using OpenIddict.Abstractions;
-using OpenIddict.Core;
+using IdentityServer4.EntityFramework.Storage.Entities;
+using IdentityServer4.EntityFramework.Storage.Mappers;
+using Client = IdentityServer4.EntityFramework.Storage.Entities.Client;
 
 namespace IdentityServer.services
 {
     [GoogleTracer.Profile]
     public class IdentityClientsRepository : BaseRepo<IdentityDbContext>, IIdentityClientsRepository
     {
-        private OpenIddict.Abstractions.IOpenIddictApplicationManager _manager;
-        public IdentityClientsRepository(IdentityDbContext dbContext, IOpenIddictApplicationManager manager) : base(dbContext)
+        public IdentityClientsRepository(IdentityDbContext dbContext) : base(dbContext)
         {
-            _manager = manager;
         }
 
-        public List<UserClient> GetUserRegisteredClients(string userId)
+        public List<Client> GetUserRegisteredClients(string userId)
         {
-            return _dbContext.UserClients.Where(x => x.UserId == userId).ToList();
-
+            List<Client> list = _dbContext.UserClients.Where(x => x.UserId == userId).Select(x => x.Client).ToList();
+            return list;
         }
 
-        public UserClient GetUserRegisteredClientsById(string client_Id, string userId)
+        public Client GetUserRegisteredClientsById(int id, string userId)
         {
-            var queryable = _dbContext.UserClients.Where(x => x.UserId.ToLower() == userId.ToLower() && x.ClientId_new == client_Id);
+            var queryable = _dbContext.UserClients.Include(x => x.Client.RedirectUris).Where(x => x.UserId.ToLower() == userId.ToLower() && x.ClientId == id).Select(x => x.Client);
             return queryable.FirstOrDefault();
         }
 
-        public UserClient AddClient(UserClient client, string userId)
+        public Client AddClient(IdentityServer4.Storage.Models.Client client, string userId)
         {
-            OpenIddictApplicationDescriptor savedClientEntity = null;
+            Client savedClientEntity = null;
             var strategy = GetExecutionStrategy();
             strategy.Execute(() =>
             {
                 using (var transaction = _dbContext.Database.BeginTransaction())
                 {
+                    var savedClient = _dbContext.Clients.Add(client.ToEntity());
 
-
-                    _manager.CreateAsync(new OpenIddict.Abstractions.OpenIddictApplicationDescriptor
+                    var user = new UserClient()
                     {
-                        ClientId = client.ClientId_new,
-                        ClientSecret = client.ClientSecret,
-                        Permissions =
-                        {
-                            OpenIddictConstants.Permissions.Endpoints.Token,
-                            OpenIddictConstants.Permissions.GrantTypes.ClientCredentials
-                        }
-                    }).GetAwaiter().GetResult();
-
-                    var savedClient = _manager.FindByClientIdAsync("my-client").Result;
-
-                    _dbContext.UserClients.Add(client);
+                        UserId = userId.ToLower(),
+                        Client = savedClient.Entity
+                    };
+                    _dbContext.UserClients.Add(user);
                     _dbContext.SaveChanges();
                     transaction.Commit();
+                    savedClientEntity = savedClient.Entity;
                 }
             });
-            return client;
+            return savedClientEntity;
         }
 
         public bool IsClientIdTaken(string clientId)
         {
-            var isClientIdAvailable = _dbContext.UserClients.Any(x => x.ClientId_new == clientId);
+            var isClientIdAvailable = _dbContext.Clients.Any(x => x.ClientId == clientId);
             return isClientIdAvailable;
         }
 
-        public bool Exists(string id, string userId)
+        public bool Exists(int id, string userId)
         {
-            return _dbContext.UserClients.Any(x => x.ClientId_new == id && x.UserId == userId.ToLower());
+            return _dbContext.UserClients.Any(x => x.ClientId == id && x.UserId == userId.ToLower());
         }
 
-        public void Update(string id, string userId, string clientSecret, string returnUrls, string url)
+        public void Update(int id, string userId, string clientSecret, string returnUrls, string url)
         {
             var strategy = GetExecutionStrategy();
             strategy.Execute(() =>
@@ -80,13 +73,42 @@ namespace IdentityServer.services
                 using (var transaction = _dbContext.Database.BeginTransaction())
                 {
                     var client = _dbContext.UserClients
-                        .Where(x => x.UserId == userId.ToLower() && x.ClientId_new == id).FirstOrDefault();
+                        .Include(x => x.Client.ClientSecrets)
+                        .Include(x => x.Client.RedirectUris)
+                        .Where(x => x.UserId == userId.ToLower() && x.ClientId == id).Select(x => x.Client)
+                        .FirstOrDefault();
                     if (client != null)
                     {
+                        if (!string.IsNullOrEmpty(clientSecret))
+                        {
+                            foreach (var secret in client.ClientSecrets)
+                            {
+                                secret.Expiration = DateTime.Today;
+                            }
 
+                            client.ClientSecrets.Add(new ClientSecret() { Value = clientSecret.ToSha256() });
+                        }
 
-                        client.ClientSecret = clientSecret;
+                        client.ClientUri = url;
 
+                        var urls = returnUrls.Split(',').Select(x => x.Trim());
+                        foreach (var returnUrl in urls)
+                        {
+                            if (client.RedirectUris.Any(x => x.RedirectUri == returnUrl))
+                                continue;
+                            client.RedirectUris.Add(new ClientRedirectUri() { RedirectUri = returnUrl });
+                        }
+
+                        var urlsToRemove = new List<ClientRedirectUri>();
+                        foreach (var clientRedirectUri in client.RedirectUris)
+                        {
+                            if (urls.Contains(clientRedirectUri.RedirectUri))
+                                continue;
+                            urlsToRemove.Add(clientRedirectUri);
+                        }
+
+                        foreach (var clientRedirectUri in urlsToRemove)
+                            client.RedirectUris.Remove(clientRedirectUri);
 
                         _dbContext.SaveChanges();
                         transaction.Commit();
@@ -95,26 +117,26 @@ namespace IdentityServer.services
             });
         }
 
-        public List<UserClient> GetAllClients()
+        public List<Client> GetAllClients()
         {
-            return _dbContext.UserClients.ToList();
+            return _dbContext.Clients.ToList();
         }
     }
 
     public interface IIdentityClientsRepository : ITransaction
     {
-        List<UserClient> GetUserRegisteredClients(string userId);
+        List<Client> GetUserRegisteredClients(string userId);
 
-        UserClient GetUserRegisteredClientsById(string id, string userId);
+        Client GetUserRegisteredClientsById(int id, string userId);
 
-        UserClient AddClient(UserClient client, string userId);
+        Client AddClient(IdentityServer4.Storage.Models.Client client, string userId);
 
         bool IsClientIdTaken(string clientId);
 
-        bool Exists(string id, string userId);
+        bool Exists(int id, string userId);
 
-        void Update(string id, string userId, string clientSecret, string returnUrls, string url);
+        void Update(int id, string userId, string clientSecret, string returnUrls, string url);
 
-        List<UserClient> GetAllClients();
+        List<Client> GetAllClients();
     }
 }

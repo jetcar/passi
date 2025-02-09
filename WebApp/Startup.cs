@@ -40,7 +40,7 @@ namespace WebApp
                 ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
             };
             var passiUrl = Environment.GetEnvironmentVariable("PassiUrl") ?? Configuration.GetValue<string>("AppSetting:PassiUrl");
-            var identityUrl = Environment.GetEnvironmentVariable("IdentityUrl") ?? Configuration.GetValue<string>("AppSetting:IdentityUrl");
+            var identityUrl = Environment.GetEnvironmentVariable("openIdcUrl") ?? Configuration.GetValue<string>("AppSetting:openIdcUrl");
             var returnUrl = Environment.GetEnvironmentVariable("returnUrl") ?? Configuration.GetValue<string>("AppSetting:returnUrl");
             var clientId = Environment.GetEnvironmentVariable("ClientId") ?? Configuration.GetValue<string>("AppSetting:ClientId");
             var secret = Environment.GetEnvironmentVariable("ClientSecret") ?? Configuration.GetValue<string>("AppSetting:ClientSecret");
@@ -68,19 +68,17 @@ namespace WebApp
                 .AddOutgoingGoogleTraceHandler();
             services.AddAuthentication(options =>
                 {
-                    options.DefaultAuthenticateScheme = "Cookies";
+                    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 })
-                .AddCookie("Cookies",
-                    options =>
-                    {
-                        options.AccessDeniedPath = "/Home/Error";
-                        options.SlidingExpiration = true;
-                        options.ExpireTimeSpan = System.TimeSpan.FromDays(30);
-                    })
-                .AddOpenIdAuthentication(identityUrl, returnUrl, passiUrl, clientId, secret)
-                
-                ;
-           services.AddOpenIddict()
+
+              .AddCookie(options =>
+                {
+                    options.LoginPath = "/login";
+                    options.LogoutPath = "/logout";
+                    options.ExpireTimeSpan = TimeSpan.FromMinutes(50);
+                    options.SlidingExpiration = false;
+                });
+            services.AddOpenIddict()
                 
             // Register the OpenIddict core components.
             .AddCore(options =>
@@ -107,7 +105,7 @@ namespace WebApp
                        .AddDevelopmentSigningCertificate();
                 // Register the ASP.NET Core host and configure the ASP.NET Core-specific options.
                 options.UseAspNetCore()
-                    .DisableTransportSecurityRequirement()
+                    //.DisableTransportSecurityRequirement()
                        .EnableStatusCodePagesIntegration()
                        .EnableRedirectionEndpointPassthrough()
                        .EnablePostLogoutRedirectionEndpointPassthrough();
@@ -132,8 +130,8 @@ namespace WebApp
 
                     ClientId = clientId,
                     ClientSecret = secret,
-                    Scopes = { OpenIddictConstants.Permissions.Scopes.Email, OpenIddictConstants.Permissions.Scopes.Profile },
-
+                    Scopes = {},
+                    
                     // Note: to mitigate mix-up attacks, it's recommended to use a unique redirection endpoint
                     // URI per provider, unless all the registered providers support returning a special "iss"
                     // parameter containing their URL as part of authorization responses. For more information,
@@ -184,6 +182,7 @@ namespace WebApp
                 });
                 
                 applicationBuilder.UseAuthentication();
+                applicationBuilder.UseAuthorization();
                 applicationBuilder.UseSerilogRequestLogging(options =>
                             {
                                 // Customize the message template
@@ -212,6 +211,7 @@ namespace WebApp
                             });
                 applicationBuilder.UseEndpoints(endpoints =>
                 {
+
                     endpoints.MapFallbackToFile("/index.html");
                 });
             });

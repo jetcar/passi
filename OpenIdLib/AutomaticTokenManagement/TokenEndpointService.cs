@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Authentication;
+﻿using IdentityModel;
+using IdentityModel.Client;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -6,6 +8,8 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using GoogleTracer;
+using IdentityModel.Client.Extensions;
+using IdentityModel.Client.Messages;
 
 using Repos;
 
@@ -34,39 +38,39 @@ namespace OpenIdLib.AutomaticTokenManagement
             _logger = logger;
         }
 
-        //public async Task<TokenResponse> RefreshTokenAsync(string refreshToken)
-        //{
-        //    var oidcOptions = await GetOidcOptionsAsync();
-        //    var configuration = await oidcOptions.ConfigurationManager.GetConfigurationAsync(default(CancellationToken));
+        public async Task<TokenResponse> RefreshTokenAsync(string refreshToken)
+        {
+            var oidcOptions = await GetOidcOptionsAsync();
+            var configuration = await oidcOptions.ConfigurationManager.GetConfigurationAsync(default(CancellationToken));
 
-        //    var tokenClient = _httpClientFactory.CreateClient("tokenClient");
+            var tokenClient = _httpClientFactory.CreateClient("tokenClient");
 
-        //    return await tokenClient.RequestRefreshTokenAsync(new RefreshTokenRequest
-        //    {
-        //        Address = configuration.TokenEndpoint,
+            return await tokenClient.RequestRefreshTokenAsync(new RefreshTokenRequest
+            {
+                Address = configuration.TokenEndpoint,
 
-        //        ClientId = oidcOptions.ClientId,
-        //        ClientSecret = oidcOptions.ClientSecret,
-        //        RefreshToken = refreshToken
-        //    });
-        //}
+                ClientId = oidcOptions.ClientId,
+                ClientSecret = oidcOptions.ClientSecret,
+                RefreshToken = refreshToken
+            });
+        }
 
-        //public async Task<TokenRevocationResponse> RevokeTokenAsync(string refreshToken)
-        //{
-        //    var oidcOptions = await GetOidcOptionsAsync();
-        //    var configuration = await oidcOptions.ConfigurationManager.GetConfigurationAsync(default(CancellationToken));
+        public async Task<TokenRevocationResponse> RevokeTokenAsync(string refreshToken)
+        {
+            var oidcOptions = await GetOidcOptionsAsync();
+            var configuration = await oidcOptions.ConfigurationManager.GetConfigurationAsync(default(CancellationToken));
 
-        //    var tokenClient = _httpClientFactory.CreateClient("tokenClient");
+            var tokenClient = _httpClientFactory.CreateClient("tokenClient");
 
-        //    return await tokenClient.RevokeTokenAsync(new TokenRevocationRequest
-        //    {
-        //        Address = configuration.AdditionalData[OidcConstants.Discovery.RevocationEndpoint].ToString(),
-        //        ClientId = oidcOptions.ClientId,
-        //        ClientSecret = oidcOptions.ClientSecret,
-        //        Token = refreshToken,
-        //        TokenTypeHint = OidcConstants.TokenTypes.RefreshToken
-        //    });
-        //}
+            return await tokenClient.RevokeTokenAsync(new TokenRevocationRequest
+            {
+                Address = configuration.AdditionalData[OidcConstants.Discovery.RevocationEndpoint].ToString(),
+                ClientId = oidcOptions.ClientId,
+                ClientSecret = oidcOptions.ClientSecret,
+                Token = refreshToken,
+                TokenTypeHint = OidcConstants.TokenTypes.RefreshToken
+            });
+        }
 
         private async Task<OpenIdConnectOptions> GetOidcOptionsAsync()
         {
@@ -78,14 +82,5 @@ namespace OpenIdLib.AutomaticTokenManagement
             var scheme = await _schemeProvider.GetDefaultChallengeSchemeAsync();
             return _oidcOptions.Get(scheme.Name);
         }
-    }
-
-    public class TokenResponse
-    {
-        public bool IsError { get; set; }
-        public string Error { get; set; }
-        public string AccessToken { get; set; }
-        public string RefreshToken { get; set; }
-        public int ExpiresIn { get; set; }
     }
 }

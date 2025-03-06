@@ -43,7 +43,7 @@ public class Worker : IHostedService
                 ClientSecret = _appSetting["ClientSecret"],
                 ConsentType = ConsentTypes.Explicit,
                 DisplayName = "SampleApp client application",
-
+                
                 RedirectUris =
                 {
                     new Uri("https://localhost/callback/login/local"),

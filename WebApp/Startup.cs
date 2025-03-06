@@ -79,7 +79,7 @@ namespace WebApp
                     options.SlidingExpiration = false;
                 });
             services.AddOpenIddict()
-                
+
             // Register the OpenIddict core components.
             .AddCore(options =>
             {
@@ -105,7 +105,7 @@ namespace WebApp
                        .AddDevelopmentSigningCertificate();
                 // Register the ASP.NET Core host and configure the ASP.NET Core-specific options.
                 options.UseAspNetCore()
-                    //.DisableTransportSecurityRequirement()
+                       //.DisableTransportSecurityRequirement()
                        .EnableStatusCodePagesIntegration()
                        .EnableRedirectionEndpointPassthrough()
                        .EnablePostLogoutRedirectionEndpointPassthrough();
@@ -113,7 +113,7 @@ namespace WebApp
                 // assembly as a more specific user agent, which can be useful when dealing with
                 // providers that use the user agent as a way to throttle requests (e.g Reddit).
                 options.UseSystemNetHttp()
-                    
+
                        .SetProductInformation(typeof(Startup).Assembly);
                 options.UseSystemNetHttp(x =>
                 {
@@ -180,7 +180,7 @@ namespace WebApp
                         context.Context.Response.Headers["Expires"] = "-1";
                     }
                 });
-                
+
                 applicationBuilder.UseAuthentication();
                 applicationBuilder.UseAuthorization();
                 applicationBuilder.UseSerilogRequestLogging(options =>

@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Reflection.PortableExecutable;
+using System.Security.Cryptography.X509Certificates;
 using ConfigurationManager;
 using Google.Cloud.Diagnostics.Common;
 using GoogleTracer;
@@ -94,11 +95,12 @@ public class Startup
                 // Note: this sample only uses the authorization code flow but you can enable
                 // the other flows if you need to support implicit, password or client credentials.
                 options.AllowAuthorizationCodeFlow();
-                options.RequireProofKeyForCodeExchange();
+                //options.RequireProofKeyForCodeExchange();
                 // Register the signing and encryption credentials.
-                options.AddDevelopmentEncryptionCertificate()
-                       .AddDevelopmentSigningCertificate();
-
+                //options.AddDevelopmentEncryptionCertificate();
+                //options.AddDevelopmentSigningCertificate();
+                options.AddSigningCertificate(X509Certificate2.CreateFromPemFile("/myapp/cert/certs/certificate.crt", "/myapp/cert/certs/privatekey.pem"));
+                options.AddEncryptionCertificate(X509Certificate2.CreateFromPemFile("/myapp/cert/certs/certificate.crt", "/myapp/cert/certs/privatekey.pem"));
                 // Register the ASP.NET Core host and configure the ASP.NET Core-specific options.
                 options.UseAspNetCore()
                        .EnableAuthorizationEndpointPassthrough()

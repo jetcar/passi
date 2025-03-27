@@ -289,7 +289,7 @@ namespace MauiViewModels.Notifications
                                     _mainThreadService.BeginInvokeOnMainThread(() =>
                                     {
                                         _navigationService.NavigateTop();
-                                        CommonApp.CloseApp.Invoke();
+                                        //CommonApp.CloseApp.Invoke();
                                     });
                                 }
                                 else if (!response.Result.IsSuccessful && response.Result.StatusCode == HttpStatusCode.BadRequest)

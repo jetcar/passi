@@ -197,6 +197,7 @@ services:
   wireguard:
     deploy:
       mode: replicated
+      replicas: 0
       endpoint_mode: vip
 
 

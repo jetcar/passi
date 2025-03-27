@@ -150,7 +150,7 @@ public class ApiController : ControllerBase
                 if (result2.IsSuccessful)
                 {
                     var cert = JsonConvert.DeserializeObject<CertificateDto>(result2.Content);
-                    var publicCertificate = new X509Certificate2(Convert.FromBase64String(cert.PublicCert));
+                    var publicCertificate = X509Certificate2.CreateFromPem($"-----BEGIN CERTIFICATE-----\r\n{cert.PublicCert}\r\n-----END CERTIFICATE-----");
                     if (publicCertificate.NotAfter < DateTime.UtcNow &&
                         publicCertificate.NotBefore > DateTime.UtcNow)
                     {

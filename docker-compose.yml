@@ -131,6 +131,7 @@ services:
     - ../passi_config/dev.env
     volumes:
       - ../creds:/home/creds
+      - ../passi_identity_cert:/myapp/cert
     restart: always
 
   # Core services

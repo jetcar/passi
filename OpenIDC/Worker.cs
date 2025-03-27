@@ -87,6 +87,7 @@ public class Worker : IHostedService
                     new Uri("https://localhost/webmail/oauth2/authorize"),
                     new Uri("https://host.docker.internal/webmail/oauth2/authorize"),
                     new Uri("https://passi.cloud/webmail/oauth2/authorize"),
+                    new Uri("https://passi.cloud/sso/login"),
                 },
                 Permissions =
                 {

@@ -99,10 +99,6 @@ public class Worker : IHostedService
                     Permissions.Scopes.Email,
                     Permissions.Scopes.Profile,
                     Permissions.Scopes.Roles
-                },
-                Requirements =
-                {
-                    Requirements.Features.ProofKeyForCodeExchange
                 }
             });
         }

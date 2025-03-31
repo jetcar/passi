@@ -20,6 +20,7 @@ using OpenIddict.Abstractions;
 using OpenIddict.Client;
 using OpenIdLib.OpenId;
 using TraceServiceOptions = Google.Cloud.Diagnostics.Common.TraceServiceOptions;
+using System.Security.Cryptography.X509Certificates;
 
 namespace WebApp
 {
@@ -101,8 +102,8 @@ namespace WebApp
 
                 // Register the signing and encryption credentials used to protect
                 // sensitive data like the state tokens produced by OpenIddict.
-                options.AddDevelopmentEncryptionCertificate()
-                       .AddDevelopmentSigningCertificate();
+                options.AddSigningCertificate(X509Certificate2.CreateFromPemFile("/myapp/cert/certs/certificate.crt", "/myapp/cert/certs/privatekey.pem"));
+                options.AddEncryptionCertificate(X509Certificate2.CreateFromPemFile("/myapp/cert/certs/certificate.crt", "/myapp/cert/certs/privatekey.pem"));
                 // Register the ASP.NET Core host and configure the ASP.NET Core-specific options.
                 options.UseAspNetCore()
                        //.DisableTransportSecurityRequirement()

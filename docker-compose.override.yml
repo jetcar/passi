@@ -151,6 +151,7 @@ services:
       - ./configs/variables/dev.env
     deploy:
       mode: replicated
+      replicas: 0
       endpoint_mode: vip
 
   smtp:
@@ -160,6 +161,7 @@ services:
       - ./configs/variables/dev.env
     deploy:
       mode: replicated
+      replicas: 0
       endpoint_mode: vip
 
   oletools:
@@ -191,6 +193,7 @@ services:
   ddclient:
     deploy:
       mode: replicated
+      replicas: 0
       endpoint_mode: vip
 
 

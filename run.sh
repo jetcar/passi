@@ -7,9 +7,6 @@ git fetch
 git pull
 #sudo ./run_deploy.sh
 
-sudo docker system prune -a -f
-sudo docker image prune -f
-sudo docker volume prune -f
 
 sudo docker compose -f docker-compose.yml build
 sudo docker compose -f docker-compose.yml up -d --remove-orphans

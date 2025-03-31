@@ -187,50 +187,7 @@ services:
       - resolver
     dns:
       - 192.168.202.254
-
-  imap:
-    image: ${DOCKER_ORG:-ghcr.io/heviat}/${DOCKER_PREFIX:-}dovecot:${MAILU_VERSION:-2024.06}
-    restart: always
-    env_file:
-      - ../passi_config/dev.env
-    volumes:
-      - "/mnt/newdisk/mailu/mail:/mail"
-      - "/mnt/newdisk/mailu/overrides/dovecot:/overrides:ro"
-    networks:
-      - haproxy_net
-      - default
-    depends_on:
-      - front
-      - resolver
-    dns:
-      - 192.168.202.254
-    deploy:
-      mode: replicated
-      replicas: 0
-      endpoint_mode: vip
-
-  smtp:
-    image: ${DOCKER_ORG:-ghcr.io/heviat}/${DOCKER_PREFIX:-}postfix:${MAILU_VERSION:-2024.06}
-    restart: always
-    env_file:
-      - ../passi_config/dev.env
-    networks:
-      - haproxy_net
-      - default
-    volumes:
-      - "/mnt/newdisk/mailu/mailqueue:/queue"
-      - "/mnt/newdisk/mailu/overrides/postfix:/overrides:ro"
-    depends_on:
-      - front
-      - resolver
-    dns:
-      - 192.168.202.254
-    deploy:
-      mode: replicated
-      replicas: 0
-      endpoint_mode: vip
-
-      
+              
   oletools:
     image: ${DOCKER_ORG:-ghcr.io/heviat}/${DOCKER_PREFIX:-}oletools:${MAILU_VERSION:-2024.06}
     hostname: oletools

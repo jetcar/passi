@@ -133,6 +133,7 @@ services:
   # Core services
   front:
     image: ${DOCKER_ORG:-ghcr.io/heviat}/${DOCKER_PREFIX:-}nginx:${MAILU_VERSION:-2024.06}
+    container_name: front
     restart: always
     env_file:
       - ../passi_config/dev.env
@@ -168,6 +169,7 @@ services:
         
   admin:
     image: ${DOCKER_ORG:-ghcr.io/heviat}/${DOCKER_PREFIX:-}admin:${MAILU_VERSION:-2024.06}
+    container_name: admin
     restart: always
     env_file:
       - ../passi_config/dev.env
@@ -186,6 +188,7 @@ services:
               
   oletools:
     image: ${DOCKER_ORG:-ghcr.io/heviat}/${DOCKER_PREFIX:-}oletools:${MAILU_VERSION:-2024.06}
+    container_name: oletools
     hostname: oletools
     restart: always
     networks:
@@ -197,6 +200,7 @@ services:
 
   antispam:
     image: ${DOCKER_ORG:-ghcr.io/heviat}/${DOCKER_PREFIX:-}rspamd:${MAILU_VERSION:-2024.06}
+    container_name: antispam
     hostname: antispam
     restart: always
     env_file:
@@ -217,6 +221,7 @@ services:
 
   webmail:
     image: ${DOCKER_ORG:-ghcr.io/heviat}/${DOCKER_PREFIX:-}webmail:${MAILU_VERSION:-2024.06}
+    container_name: webmail
     restart: always
     env_file:
       - ../passi_config/dev.env

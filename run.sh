@@ -6,7 +6,8 @@ git checkout .
 git fetch
 git pull
 #sudo ./run_deploy.sh
-
+sudo docker stop $(docker ps -q)
+sudo docker rm $(docker ps -a -q)
 
 sudo docker compose -f docker-compose.yml build
 sudo docker compose -f docker-compose.yml up -d --remove-orphans

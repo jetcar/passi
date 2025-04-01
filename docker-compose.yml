@@ -6,8 +6,6 @@ services:
     container_name: postgres
     logging:
       driver: gcplogs
-      options:
-        gcp-meta: postgres
     networks:
       - database_net
     env_file:
@@ -20,10 +18,6 @@ services:
 
   porkbun-ddns:
     image: "mietzen/porkbun-ddns:latest"
-    logging:
-      driver: gcplogs
-      options:
-        gcp-meta: ddns
     container_name: porkbun-ddns
     env_file:
       - ../passi_config/ddclient.env      
@@ -34,10 +28,6 @@ services:
   pgadmin:
     image: 'dpage/pgadmin4:8.5'
     container_name: pgadmin
-    logging:
-      driver: gcplogs
-      options:
-        gcp-meta: pgadmin
     networks:
       - haproxy_net
       - database_net
@@ -53,10 +43,6 @@ services:
   redis:
     image: 'redis/redis-stack-server:7.0.6-RC5'
     container_name: redis
-    logging:
-      driver: gcplogs
-      options:
-        gcp-meta: redis
     networks:
       - redis_net
     restart: always
@@ -66,10 +52,6 @@ services:
   haproxy:
     container_name: haproxy
     image: haproxy:3.1.2
-    logging:
-      driver: gcplogs
-      options:
-        gcp-meta: haproxy
     volumes:
       - ../passi_cert:/usr/local/etc/haproxy/cert
       - ./configs/haproxy:/usr/local/etc/haproxy
@@ -152,10 +134,6 @@ services:
   front:
     image: ${DOCKER_ORG:-ghcr.io/heviat}/${DOCKER_PREFIX:-}nginx:${MAILU_VERSION:-2024.06}
     container_name: front
-    logging:
-      driver: gcplogs
-      options:
-        gcp-meta: maillu-front
     restart: always
     env_file:
       - ../passi_config/dev.env
@@ -182,10 +160,6 @@ services:
 
   resolver:
     image: ${DOCKER_ORG:-ghcr.io/heviat}/${DOCKER_PREFIX:-}unbound:${MAILU_VERSION:-2024.06}
-    logging:
-      driver: gcplogs
-      options:
-        gcp-meta: resolver
     env_file:
       - ../passi_config/dev.env
     restart: always
@@ -196,10 +170,6 @@ services:
   admin:
     image: ${DOCKER_ORG:-ghcr.io/heviat}/${DOCKER_PREFIX:-}admin:${MAILU_VERSION:-2024.06}
     container_name: admin
-    logging:
-      driver: gcplogs
-      options:
-        gcp-meta: admin
     restart: always
     env_file:
       - ../passi_config/dev.env
@@ -219,10 +189,6 @@ services:
   imap:
     image: ${DOCKER_ORG:-ghcr.io/heviat}/${DOCKER_PREFIX:-}dovecot:${MAILU_VERSION:-2024.06}
     restart: always
-    logging:
-      driver: gcplogs
-      options:
-        gcp-meta: imap
     env_file:
       - ../passi_config/dev.env
     volumes:
@@ -244,10 +210,6 @@ services:
   smtp:
     image: ${DOCKER_ORG:-ghcr.io/heviat}/${DOCKER_PREFIX:-}postfix:${MAILU_VERSION:-2024.06}
     restart: always
-    logging:
-      driver: gcplogs
-      options:
-        gcp-meta: smtp
     env_file:
       - ../passi_config/dev.env
     networks:
@@ -270,10 +232,6 @@ services:
   oletools:
     image: ${DOCKER_ORG:-ghcr.io/heviat}/${DOCKER_PREFIX:-}oletools:${MAILU_VERSION:-2024.06}
     container_name: oletools
-    logging:
-      driver: gcplogs
-      options:
-        gcp-meta: oletools
     hostname: oletools
     restart: always
     networks:
@@ -286,10 +244,6 @@ services:
   antispam:
     image: ${DOCKER_ORG:-ghcr.io/heviat}/${DOCKER_PREFIX:-}rspamd:${MAILU_VERSION:-2024.06}
     container_name: antispam
-    logging:
-      driver: gcplogs
-      options:
-        gcp-meta: antispam
     hostname: antispam
     restart: always
     env_file:
@@ -311,10 +265,6 @@ services:
   webmail:
     image: ${DOCKER_ORG:-ghcr.io/heviat}/${DOCKER_PREFIX:-}webmail:${MAILU_VERSION:-2024.06}
     container_name: webmail
-    logging:
-      driver: gcplogs
-      options:
-        gcp-meta: webmail
     restart: always
     env_file:
       - ../passi_config/dev.env
@@ -331,10 +281,6 @@ services:
   wireguard:
     image: lscr.io/linuxserver/wireguard
     container_name: wireguard
-    logging:
-      driver: gcplogs
-      options:
-        gcp-meta: wireguard
     cap_add:
       - NET_ADMIN
       - SYS_MODULE

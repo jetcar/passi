@@ -16,16 +16,12 @@ services:
         target: /var/lib/postgresql/data/
     restart: always
 
-  ddclient:
-    image: linuxserver/ddclient:4.0.0
-    container_name: ddclient
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Etc/UTC
-    volumes:
-    - ../passi_config_ddlclient:/config
-    restart: always
+  porkbun-ddns:
+    image: "mietzen/porkbun-ddns:latest"
+    container_name: porkbun-ddns
+    env_file:
+      - ../passi_config/ddclient.env      
+    restart: unless-stopped
     networks:
       - haproxy_net
     

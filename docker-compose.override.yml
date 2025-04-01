@@ -172,7 +172,7 @@ services:
       endpoint_mode: vip
 
 
-  ddclient:
+  porkbun-ddns:
     deploy:
       mode: replicated
       replicas: 0

@@ -4,8 +4,6 @@ services:
   database:
     image: 'postgres:15.5'
     container_name: postgres
-    logging:
-      driver: gcplogs
     networks:
       - database_net
     env_file:
@@ -75,7 +73,7 @@ services:
     volumes:
       - ../creds:/home/creds
       - ../passi_identity_cert:/myapp/cert
-      - ../.well-known:/app/wwwroot/.well-known
+      - ../.well-known:/myapp/wwwroot/.well-known
     depends_on:
       - database
     restart: always

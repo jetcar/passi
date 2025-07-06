@@ -1,5 +1,4 @@
 version: '3.4'
-
 services:
   database:
     image: 'postgres:15.5'
@@ -13,7 +12,6 @@ services:
         source: /mnt/newdisk/db-data3/
         target: /var/lib/postgresql/data/
     restart: always
-
   porkbun-ddns:
     image: "mietzen/porkbun-ddns:latest"
     container_name: porkbun-ddns
@@ -37,7 +35,6 @@ services:
     volumes:
       - ../passi_config/pgadmin/:/etc/pgadmin/:ro #config
       - ../pgadmin/:/var/lib/pgadmin/:rw
-
   redis:
     image: 'redis/redis-stack-server:7.0.6-RC5'
     container_name: redis
@@ -46,7 +43,6 @@ services:
     restart: always
     volumes:
       - ../redis_data/:/data
-
   haproxy:
     container_name: haproxy
     image: haproxy:3.1.2
@@ -62,9 +58,8 @@ services:
       - identityserver
     networks:
       - haproxy_net
-
   webapp:
-    image: jetcar/webapp:1.0.44
+    image: jetcar/webapp:1.0.46
     networks:
       - haproxy_net
       - database_net
@@ -77,9 +72,8 @@ services:
     depends_on:
       - database
     restart: always
-
   identityserver:
-    image: jetcar/identityserver:1.0.44
+    image: jetcar/identityserver:1.0.46
     networks:
       - haproxy_net
       - database_net
@@ -94,9 +88,8 @@ services:
       - database
       - passiwebapi
     restart: always
-
   openidc:
-    image: jetcar/openidc:1.0.44
+    image: jetcar/openidc:1.0.46
     networks:
       - haproxy_net
       - database_net
@@ -111,9 +104,8 @@ services:
       - database
       - passiwebapi
     restart: always
-
   passiwebapi:
-    image: jetcar/passiwebapi:1.0.44
+    image: jetcar/passiwebapi:1.0.46
     networks:
       - haproxy_net
       - database_net
@@ -127,7 +119,6 @@ services:
       - ../creds:/home/creds
       - ../passi_identity_cert:/myapp/cert
     restart: always
-
   # Core services
   front:
     image: ${DOCKER_ORG:-ghcr.io/heviat}/${DOCKER_PREFIX:-}nginx:${MAILU_VERSION:-2024.06}
@@ -155,7 +146,6 @@ services:
       - resolver
     dns:
       - 192.168.202.254
-
   resolver:
     image: ${DOCKER_ORG:-ghcr.io/heviat}/${DOCKER_PREFIX:-}unbound:${MAILU_VERSION:-2024.06}
     env_file:
@@ -183,7 +173,6 @@ services:
       - resolver
     dns:
       - 192.168.202.254
-
   imap:
     image: ${DOCKER_ORG:-ghcr.io/heviat}/${DOCKER_PREFIX:-}dovecot:${MAILU_VERSION:-2024.06}
     restart: always
@@ -204,7 +193,6 @@ services:
       mode: replicated
       replicas: 0
       endpoint_mode: vip
-
   smtp:
     image: ${DOCKER_ORG:-ghcr.io/heviat}/${DOCKER_PREFIX:-}postfix:${MAILU_VERSION:-2024.06}
     restart: always
@@ -225,7 +213,6 @@ services:
       mode: replicated
       replicas: 0
       endpoint_mode: vip
-
       
   oletools:
     image: ${DOCKER_ORG:-ghcr.io/heviat}/${DOCKER_PREFIX:-}oletools:${MAILU_VERSION:-2024.06}
@@ -238,7 +225,6 @@ services:
       - resolver
     dns:
       - 192.168.202.254
-
   antispam:
     image: ${DOCKER_ORG:-ghcr.io/heviat}/${DOCKER_PREFIX:-}rspamd:${MAILU_VERSION:-2024.06}
     container_name: antispam
@@ -259,7 +245,6 @@ services:
       - resolver
     dns:
       - 192.168.202.254
-
   webmail:
     image: ${DOCKER_ORG:-ghcr.io/heviat}/${DOCKER_PREFIX:-}webmail:${MAILU_VERSION:-2024.06}
     container_name: webmail
@@ -275,7 +260,6 @@ services:
       - front
     dns:
       - 192.168.202.254
-
   wireguard:
     image: lscr.io/linuxserver/wireguard
     container_name: wireguard
@@ -303,17 +287,14 @@ services:
     sysctls:
       - net.ipv4.conf.all.src_valid_mark=1
     restart: unless-stopped
-
 networks:
   haproxy_net:
     driver: bridge
-
   database_net:
     driver: bridge
     internal: true
     attachable: false
     enable_ipv6: false
-
   redis_net:
     driver: bridge
     internal: true
@@ -325,8 +306,3 @@ networks:
       driver: default
       config:
         - subnet: 192.168.202.0/24
-
-
-
-
-

@@ -36,7 +36,7 @@ namespace Services
                 email = _appSetting["testMail"];
             if (email == null)
                 return "ok";
-            var message = new MailMessage(_appSetting["smtpUsername"], email)
+            var message = new MailMessage(_appSetting["emailFrom"], email)
             {
                 IsBodyHtml = true,
                 Subject = $"Passi code {code}",

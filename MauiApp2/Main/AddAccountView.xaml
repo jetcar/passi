@@ -9,11 +9,11 @@
                                x:Class="MauiApp2.Main.AddAccountView">
     <StackLayout VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand">
         <StackLayout VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand">
-            <Picker HorizontalOptions="FillAndExpand" Title="IdentityProvider" HorizontalTextAlignment="Center" ItemsSource="{Binding Path=Providers}"  SelectedIndexChanged="Picker_OnSelectedIndexChanged" SelectedItem="{Binding CurrentProvider}" ItemDisplayBinding="{Binding Name}"></Picker>
+            <Picker HorizontalOptions="FillAndExpand" TextColor="Black" Title="IdentityProvider" HorizontalTextAlignment="Center" ItemsSource="{Binding Path=Providers}"  SelectedIndexChanged="Picker_OnSelectedIndexChanged" SelectedItem="{Binding CurrentProvider}" ItemDisplayBinding="{Binding Name}"></Picker>
             <Label TextColor="Black" HorizontalOptions="Center" Text="{ Binding Path=ResponseError}" />
             <Label TextColor="Black" HorizontalOptions="Center" Text="{ Binding Path=EmailError.Text}" />
             <Label TextColor="Black" HorizontalOptions="Center" Text="Email" />
-            <Entry HorizontalOptions="FillAndExpand" Margin="5" Text="{Binding Path=EmailText}">
+            <Entry HorizontalOptions="FillAndExpand" Margin="5" Text="{Binding Path=EmailText}" TextColor="Black">
                 <Entry.Triggers>
                     <DataTrigger  Binding="{Binding Path=EmailError.HasError}" TargetType="Entry" Value="true">
                         <Setter Property="Editor.BackgroundColor"

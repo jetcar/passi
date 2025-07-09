@@ -12,7 +12,7 @@ namespace MauiApp2.Menu
 
         private void Button_PreDeleteProvider(object sender, EventArgs e)
         {
-            var provider = (ProviderDb)((Button)sender).BindingContext;
+            var provider = (ProviderDb)((ImageButton)sender).BindingContext;
             ((MenuViewModel)BindingContext).Button_PreDeleteProvider(provider);
         }
 

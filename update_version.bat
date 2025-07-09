@@ -2,8 +2,8 @@
 setlocal enabledelayedexpansion
 
 :: === CONFIGURATION ===
-set "OLD_VERSION=1.0.45"
-set "NEW_VERSION=1.0.46"
+set "OLD_VERSION=1.0.46"
+set "NEW_VERSION=1.0.47"
 set "FILE_LIST=file-list.txt"
 
 :: === PROCESS EACH FILE ===

@@ -59,7 +59,7 @@ services:
     networks:
       - haproxy_net
   webapp:
-    image: jetcar/webapp:1.0.46
+    image: jetcar/webapp:1.0.47
     networks:
       - haproxy_net
       - database_net
@@ -73,7 +73,7 @@ services:
       - database
     restart: always
   identityserver:
-    image: jetcar/identityserver:1.0.46
+    image: jetcar/identityserver:1.0.47
     networks:
       - haproxy_net
       - database_net
@@ -89,7 +89,7 @@ services:
       - passiwebapi
     restart: always
   openidc:
-    image: jetcar/openidc:1.0.46
+    image: jetcar/openidc:1.0.47
     networks:
       - haproxy_net
       - database_net
@@ -105,7 +105,7 @@ services:
       - passiwebapi
     restart: always
   passiwebapi:
-    image: jetcar/passiwebapi:1.0.46
+    image: jetcar/passiwebapi:1.0.47
     networks:
       - haproxy_net
       - database_net

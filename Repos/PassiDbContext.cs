@@ -85,7 +85,7 @@ namespace Repos
             if (string.IsNullOrEmpty(_connectionString))
             {
                 var trustMode = _appSetting["DbSslMode"] == "Require" ? "Trust Server Certificate=true;" : "";
-                _connectionString = $"host={_appSetting["DbHost"]};port={_appSetting["DbPort"]};database={_appSetting["DbName"]};user id={_appSetting["DbUser"]};password={_appSetting["DbPassword"]};Ssl Mode={_appSetting["DbSslMode"]};{trustMode}";
+                _connectionString = $"host={_appSetting["DbHost"]};port={_appSetting["DbPort"]};database={_appSetting["PassiDbName"]};user id={_appSetting["DbUser"]};password={_appSetting["DbPassword"]};Ssl Mode={_appSetting["DbSslMode"]};{trustMode}";
             }
 
             optionsBuilder.UseNpgsql(_connectionString, o =>
@@ -208,6 +208,7 @@ namespace Repos
                 entity.Property(e => e.SignedHashNew).HasMaxLength(1024);
 
                 entity.Property(e => e.CreationTime);
+                entity.Property(e => e.Status);
 
                 entity.Property(e => e.ExpirationTime)
                     ;

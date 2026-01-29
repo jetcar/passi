@@ -2,180 +2,207 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using OpenIddict.Abstractions;
-using OpenIddict.Client.AspNetCore;
 using RestSharp;
 using Services;
 using WebApiDto.Auth.Dto;
-using static OpenIddict.Abstractions.OpenIddictConstants;
+using WebApp.Services;
 
 namespace WebApp.Controllers;
 
 public class AuthenticationController : Controller
 {
+    private readonly IMyRestClient _myRest;
+    private readonly ILogger<AuthenticationController> _logger;
+    private readonly IOidcClient _oidcClient;
+    private const string CodeVerifierSessionKey = "code_verifier";
+    private const string StateSessionKey = "oauth_state";
+    private const string NonceSessionKey = "oauth_nonce";
+    private const string ReturnUrlSessionKey = "return_url";
 
-    IMyRestClient _myRest;
-
-    public AuthenticationController(IMyRestClient myRest)
+    public AuthenticationController(IMyRestClient myRest, ILogger<AuthenticationController> logger, IOidcClient oidcClient)
     {
         _myRest = myRest;
+        _logger = logger;
+        _oidcClient = oidcClient;
     }
 
     [HttpGet("~/login")]
     public ActionResult LogIn(string returnUrl)
     {
-        var properties = new AuthenticationProperties
-        {
-            // Only allow local return URLs to prevent open redirect attacks.
-            RedirectUri = Url.IsLocalUrl(returnUrl) ? returnUrl : "/"
-        };
+        _logger.LogInformation("Login initiated - ReturnUrl: {ReturnUrl}", returnUrl);
 
-        // Ask the OpenIddict client middleware to redirect the user agent to the identity provider.
-        return Challenge(properties, OpenIddictClientAspNetCoreDefaults.AuthenticationScheme);
+        // Generate state and nonce for CSRF and replay protection
+        var state = GenerateRandomString(32);
+        var nonce = GenerateRandomString(32);
+        var codeVerifier = GenerateRandomString(43);
+
+        // Store in session for validation during callback
+        HttpContext.Session.SetString(StateSessionKey, state);
+        HttpContext.Session.SetString(NonceSessionKey, nonce);
+        HttpContext.Session.SetString(CodeVerifierSessionKey, codeVerifier);
+        HttpContext.Session.SetString(ReturnUrlSessionKey, Url.IsLocalUrl(returnUrl) ? returnUrl : "/");
+
+        var authorizationUrl = _oidcClient.BuildAuthorizationUrl(returnUrl, state, nonce);
+
+        _logger.LogDebug("Redirecting to authorization endpoint");
+
+        return Redirect(authorizationUrl);
+    }
+
+    private string GenerateRandomString(int length)
+    {
+        var bytes = new byte[length];
+        using var rng = RandomNumberGenerator.Create();
+        rng.GetBytes(bytes);
+        return Convert.ToBase64String(bytes).Replace("+", "-").Replace("/", "_").Replace("=", "").Substring(0, length);
     }
 
     [HttpPost("~/logout"), ValidateAntiForgeryToken]
     public async Task<ActionResult> LogOut(string returnUrl)
     {
-        // Retrieve the identity stored in the local authentication cookie. If it's not available,
-        // this indicate that the user is already logged out locally (or has not logged in yet).
-        //
-        // For scenarios where the default authentication handler configured in the ASP.NET Core
-        // authentication options shouldn't be used, a specific scheme can be specified here.
-        var result = await HttpContext.AuthenticateAsync();
-        if (result is not { Succeeded: true })
-        {
-            // Only allow local return URLs to prevent open redirect attacks.
-            return Redirect(Url.IsLocalUrl(returnUrl) ? returnUrl : "/");
-        }
+        _logger.LogInformation("Logout initiated");
 
-        // Remove the local authentication cookie before triggering a redirection to the remote server.
-        //
-        // For scenarios where the default sign-out handler configured in the ASP.NET Core
-        // authentication options shouldn't be used, a specific scheme can be specified here.
-        await HttpContext.SignOutAsync();
+        await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
-        var properties = new AuthenticationProperties(new Dictionary<string, string>
-        {
-            // While not required, the specification encourages sending an id_token_hint
-            // parameter containing an identity token returned by the server for this user.
-            [OpenIddictClientAspNetCoreConstants.Properties.IdentityTokenHint] =
-                result.Properties.GetTokenValue(OpenIddictClientAspNetCoreConstants.Tokens.BackchannelIdentityToken)
-        })
-        {
-            // Only allow local return URLs to prevent open redirect attacks.
-            RedirectUri = Url.IsLocalUrl(returnUrl) ? returnUrl : "/"
-        };
-
-        // Ask the OpenIddict client middleware to redirect the user agent to the identity provider.
-        return SignOut(properties, OpenIddictClientAspNetCoreDefaults.AuthenticationScheme);
+        return Redirect(Url.IsLocalUrl(returnUrl) ? returnUrl : "/");
     }
 
-    // Note: this controller uses the same callback action for all providers
-    // but for users who prefer using a different action per provider,
-    // the following action can be split into separate actions.
-    [HttpGet("~/callback/login/{provider}"), HttpPost("~/callback/login/{provider}"), IgnoreAntiforgeryToken]
-    public async Task<ActionResult> LogInCallback()
+    [HttpGet("~/callback/login/{provider}"), IgnoreAntiforgeryToken]
+    public async Task<ActionResult> LogInCallback(string code, string state)
     {
-        // Retrieve the authorization data validated by OpenIddict as part of the callback handling.
-        var result = await HttpContext.AuthenticateAsync(OpenIddictClientAspNetCoreDefaults.AuthenticationScheme);
+        _logger.LogInformation("Login callback received - Code: {Code}, State: {State}",
+            code?.Substring(0, Math.Min(8, code?.Length ?? 0)) + "...", state);
 
-        if (result.Principal is not ClaimsPrincipal { Identity.IsAuthenticated: true })
+        // Validate state to prevent CSRF
+        var expectedState = HttpContext.Session.GetString(StateSessionKey);
+        if (string.IsNullOrEmpty(expectedState) || expectedState != state)
         {
-            throw new InvalidOperationException("The external authorization data cannot be used for authentication.");
+            _logger.LogError("State mismatch or missing. Expected: {Expected}, Got: {Got}", expectedState, state);
+            throw new InvalidOperationException("Invalid state parameter");
         }
 
-        // Build an identity based on the external claims and that will be used to create the authentication cookie.
-        var identity = new ClaimsIdentity(
-            authenticationType: "ExternalLogin",
-            nameType: ClaimTypes.Name,
-            roleType: ClaimTypes.Role);
+        var nonce = HttpContext.Session.GetString(NonceSessionKey);
+        var codeVerifier = HttpContext.Session.GetString(CodeVerifierSessionKey);
+        var returnUrl = HttpContext.Session.GetString(ReturnUrlSessionKey) ?? "/";
 
-
-        var thumbprint = result.Principal.GetClaim("Thumbprint");
-        var sessionId = result.Principal.GetClaim("SessionId");
-        var username = result.Principal.GetClaim(Claims.Subject);
-        if (thumbprint != null)
+        if (string.IsNullOrEmpty(code))
         {
+            _logger.LogError("Authorization code is missing");
+            throw new InvalidOperationException("Authorization code is required");
+        }
+
+        // Exchange code for tokens
+        var tokenResponse = await _oidcClient.ExchangeCodeForTokensAsync(code, codeVerifier);
+        var principal = await _oidcClient.ValidateTokensAsync(tokenResponse);
+
+        _logger.LogDebug("Tokens validated, building claims identity");
+
+        // Build identity with claims from ID token
+        var identity = new ClaimsIdentity(CookieAuthenticationDefaults.AuthenticationScheme);
+
+        var username = principal.FindFirst("sub")?.Value ?? principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var thumbprint = principal.FindFirst("Thumbprint")?.Value;
+        var sessionId = principal.FindFirst("sessionId")?.Value;
+
+        _logger.LogInformation("Processing claims - Username: {Username}, Thumbprint: {Thumbprint}, SessionId: {SessionId}",
+            username, thumbprint?.Substring(0, Math.Min(8, thumbprint?.Length ?? 0)), sessionId);
+
+        if (!string.IsNullOrEmpty(thumbprint))
+        {
+            _logger.LogDebug("Validating session and certificate");
             var request = new RestRequest($"api/Auth/session?sessionId={sessionId}&thumbprint={thumbprint}&username={username}", Method.Get);
-            var requestResult = _myRest.ExecuteAsync(request).Result;
+            var requestResult = await _myRest.ExecuteAsync(request);
+
+            _logger.LogDebug("Session validation response - Success: {Success}, StatusCode: {StatusCode}",
+                requestResult.IsSuccessful, requestResult.StatusCode);
+
             if (requestResult.IsSuccessful)
             {
                 var cert = JsonConvert.DeserializeObject<SessionMinDto>(requestResult.Content);
                 var publicCertificate = new X509Certificate2(Convert.FromBase64String(cert.PublicCert));
-                var nonce = result.Principal.GetClaim(Claims.Nonce);
 
-                // ComputeHash - returns byte array
+                // Verify signature
                 var isValid = CertHelper.VerifyData(nonce, cert.SignedHash, cert.PublicCert);
 
+                _logger.LogInformation("Signature validation result: {IsValid}", isValid);
+
                 if (!isValid)
+                {
+                    _logger.LogError("Invalid signature for user: {Username}", username);
                     throw new UnauthorizedAccessException("Invalid signature");
+                }
+
                 identity.AddClaim(new Claim("PublicCert", cert.PublicCert));
                 identity.AddClaim(new Claim("ValidFrom", publicCertificate.NotBefore.ToShortDateString()));
                 identity.AddClaim(new Claim("ValidTo", publicCertificate.NotAfter.ToShortDateString()));
             }
         }
-        else{
-            throw new UnauthorizedAccessException("Invalid signature");
+        else
+        {
+            _logger.LogError("Missing thumbprint claim for user: {Username}", username);
+            throw new UnauthorizedAccessException("Missing thumbprint");
         }
 
-            // By default, OpenIddict will automatically try to map the email/name and name identifier claims from
-            // their standard OpenID Connect or provider-specific equivalent, if available. If needed, additional
-            // claims can be resolved from the external identity and copied to the final authentication cookie.
-            identity.SetClaim(ClaimTypes.Email, result.Principal.GetClaim(ClaimTypes.Email))
-                .SetClaim(ClaimTypes.Name, result.Principal.GetClaim(ClaimTypes.Name))
-                .SetClaim(Claims.Subject, result.Principal.GetClaim(Claims.Subject))
-                .SetClaim("Thumbprint", result.Principal.GetClaim("Thumbprint"))
-                .SetClaim("sessionId", result.Principal.GetClaim("sessionId"))
-                .SetClaim(ClaimTypes.NameIdentifier, result.Principal.GetClaim(ClaimTypes.NameIdentifier));
-
-        // Preserve the registration details to be able to resolve them later.
-        identity.SetClaim(Claims.Private.RegistrationId, result.Principal.GetClaim(Claims.Private.RegistrationId))
-                .SetClaim(Claims.Private.ProviderName, result.Principal.GetClaim(Claims.Private.ProviderName));
-
-        
-
-        // Build the authentication properties based on the properties that were added when the challenge was triggered.
-        var properties = new AuthenticationProperties(result.Properties.Items)
+        // Add all claims from the principal
+        foreach (var claim in principal.Claims)
         {
-            RedirectUri = result.Properties.RedirectUri ?? "/"
+            identity.AddClaim(claim);
+        }
+
+        // Add standard claims
+        if (principal.FindFirst(ClaimTypes.Email) != null)
+            identity.AddClaim(new Claim(ClaimTypes.Email, principal.FindFirst(ClaimTypes.Email).Value));
+        if (principal.FindFirst(ClaimTypes.Name) != null)
+            identity.AddClaim(new Claim(ClaimTypes.Name, principal.FindFirst(ClaimTypes.Name).Value));
+        if (principal.FindFirst(ClaimTypes.NameIdentifier) == null && !string.IsNullOrEmpty(username))
+            identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, username));
+
+        // Store tokens
+        var authProperties = new AuthenticationProperties
+        {
+            IsPersistent = true,
+            ExpiresUtc = DateTimeOffset.UtcNow.AddSeconds(tokenResponse.ExpiresIn),
+            RedirectUri = returnUrl
         };
 
-        // If needed, the tokens returned by the authorization server can be stored in the authentication cookie.
-        //
-        // To make cookies less heavy, tokens that are not used are filtered out before creating the cookie.
-        properties.StoreTokens(result.Properties.GetTokens().Where(token => token.Name is
-            // Preserve the access, identity and refresh tokens returned in the token response, if available.
-            OpenIddictClientAspNetCoreConstants.Tokens.BackchannelAccessToken   or
-            OpenIddictClientAspNetCoreConstants.Tokens.BackchannelIdentityToken or
-            OpenIddictClientAspNetCoreConstants.Tokens.RefreshToken));
+        authProperties.StoreTokens(new[]
+        {
+            new AuthenticationToken { Name = "access_token", Value = tokenResponse.AccessToken },
+            new AuthenticationToken { Name = "id_token", Value = tokenResponse.IdToken },
+            new AuthenticationToken { Name = "refresh_token", Value = tokenResponse.RefreshToken ?? "" }
+        });
 
-        // Ask the default sign-in handler to return a new cookie and redirect the
-        // user agent to the return URL stored in the authentication properties.
-        //
-        // For scenarios where the default sign-in handler configured in the ASP.NET Core
-        // authentication options shouldn't be used, a specific scheme can be specified here.
-        return SignIn(new ClaimsPrincipal(identity), properties);
+        // Clear session
+        HttpContext.Session.Remove(StateSessionKey);
+        HttpContext.Session.Remove(NonceSessionKey);
+        HttpContext.Session.Remove(CodeVerifierSessionKey);
+        HttpContext.Session.Remove(ReturnUrlSessionKey);
+
+        _logger.LogInformation("Login successful for user: {Username}, redirecting to: {RedirectUri}",
+            username, returnUrl);
+
+        await HttpContext.SignInAsync(
+            CookieAuthenticationDefaults.AuthenticationScheme,
+            new ClaimsPrincipal(identity),
+            authProperties);
+
+        return Redirect(returnUrl);
     }
 
-    // Note: this controller uses the same callback action for all providers
-    // but for users who prefer using a different action per provider,
-    // the following action can be split into separate actions.
-    [HttpGet("~/callback/logout/{provider}"), HttpPost("~/callback/logout/{provider}"), IgnoreAntiforgeryToken]
-    public async Task<ActionResult> LogOutCallback()
+    [HttpGet("~/callback/logout/{provider}"), IgnoreAntiforgeryToken]
+    public ActionResult LogOutCallback()
     {
-        // Retrieve the data stored by OpenIddict in the state token created when the logout was triggered.
-        var result = await HttpContext.AuthenticateAsync(OpenIddictClientAspNetCoreDefaults.AuthenticationScheme);
-
-        // In this sample, the local authentication cookie is always removed before the user agent is redirected
-        // to the authorization server. Applications that prefer delaying the removal of the local cookie can
-        // remove the corresponding code from the logout action and remove the authentication cookie in this action.
-
-        return Redirect(result!.Properties!.RedirectUri);
+        _logger.LogInformation("Logout callback received");
+        return Redirect("/");
     }
 }

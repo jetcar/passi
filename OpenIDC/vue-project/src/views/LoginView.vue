@@ -47,16 +47,20 @@
                     (data) => {
                         if (data.ok) {
                             data.json().then((json) => {
-                                if (json.continue) {
+                                if (json.redirect_url) {
+                                    // Redirect to the OAuth callback URL with authorization code
+                                    window.location.href = json.redirect_url;
+                                }
+                                else if (json.continue) {
                                     this.timer = setTimeout(() => this.fetchCheck(), 1000)
                                 }
-                                
+
 
                             })
                         }
                         else if (data.type == "opaqueredirect")
-                        {                           
-                            window.location.replace(data.url)                        
+                        {
+                            window.location.replace(data.url)
                         }
                         else {
                             data.json().then((error) => {
@@ -83,7 +87,7 @@
                 };
                 var queiry = new URLSearchParams(this.$route.query).toString()
 
-                var resp = await fetch(API_URL + "?" + queiry + "&username=" + this.LoginInput.username, requestOptions)
+                var resp = await fetch(API_URL + "?" + queiry + "&username=" + this.LoginInput.Username, requestOptions)
                 if (resp.ok) {
                     resp.json().then((data) => {
                         this.LoginResponse = data
@@ -138,7 +142,7 @@
                                     <br />
                                     <div class="form-group" v-if="!loading">
                                         <label for="username">Username</label>
-                                        <input class="form-control" placeholder="Username" v-model="LoginInput.username" name="username" id="username" autofocus>
+                                        <input class="form-control" placeholder="Username" v-model="LoginInput.Username" name="username" id="username" autofocus>
                                     </div>
                                     <button class="btn btn-primary" name="button" v-if="!loading" @click="handleLoginClick" value="login">Login</button>
                                     <button class="btn btn-secondary" name="button" @click="handleCancelClick" value="cancel">Cancel</button>

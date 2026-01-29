@@ -10,12 +10,17 @@ export default defineConfig({
     ],
     resolve: {
         alias: {
-            '@': fileURLToPath(new URL('./src', import.meta.url)),
-            vue: '@vue/compat',
+            '@': fileURLToPath(new URL('./src', import.meta.url))
         }
     },
     build: {
-        outDir: '../wwwroot'
+        outDir: '../wwwroot',
+        emptyOutDir: true,
+        rollupOptions: {
+            output: {
+                manualChunks: undefined
+            }
+        }
     },
 
     server: {

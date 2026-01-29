@@ -1,17 +1,19 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using ConfigurationManager;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using OpenIddict.Abstractions;
-using static OpenIddict.Abstractions.OpenIddictConstants;
+using OpenIDC.Models;
+using OpenIDC.Services;
 
 
 public class Worker : IHostedService
 {
     private readonly IServiceProvider _serviceProvider;
-    private AppSetting _appSetting;
+    private readonly AppSetting _appSetting;
+
     public Worker(IServiceProvider serviceProvider, AppSetting appSetting)
     {
         _serviceProvider = serviceProvider;
@@ -21,87 +23,46 @@ public class Worker : IHostedService
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         await using var scope = _serviceProvider.CreateAsyncScope();
+        var clientStore = scope.ServiceProvider.GetRequiredService<IClientStore>();
 
-        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        await context.Database.EnsureCreatedAsync();
-
-        var manager = scope.ServiceProvider.GetRequiredService<IOpenIddictApplicationManager>();
-        var sampleapp = _appSetting["ClientId"];
-        var oldClient = await manager.FindByClientIdAsync(sampleapp);
-        if (oldClient != null)
+        // Initialize SampleApp client
+        var sampleAppId = _appSetting["ClientId"];
+        var sampleAppClient = new OidcClient
         {
-            await manager.DeleteAsync(oldClient);
-        }
-       
-
-
-        if (await manager.FindByClientIdAsync(sampleapp) == null)
-        {
-            await manager.CreateAsync(new OpenIddictApplicationDescriptor
+            ClientId = sampleAppId,
+            ClientSecret = _appSetting["ClientSecret"],
+            DisplayName = "SampleApp client application",
+            RedirectUris = new List<string>
             {
-                ClientId = sampleapp,
-                ClientSecret = _appSetting["ClientSecret"],
-                ConsentType = ConsentTypes.Explicit,
-                DisplayName = "SampleApp client application",
-                
-                RedirectUris =
-                {
-                    new Uri("https://localhost/callback/login/local"),
-                    new Uri("https://host.docker.internal/callback/login/local"),
-                    new Uri("https://passi.cloud/callback/login/local"),
-                },
-                Permissions =
-                {
-                    Permissions.Endpoints.Authorization,
-                    Permissions.Endpoints.EndSession,
-                    Permissions.Endpoints.Token,
-                    Permissions.GrantTypes.AuthorizationCode,
-                    Permissions.ResponseTypes.Code,
-                    Permissions.Scopes.Email,
-                    Permissions.Scopes.Profile,
-                    Permissions.Scopes.Roles
-                },
-                Requirements =
-                {
-                    Requirements.Features.ProofKeyForCodeExchange
-                }
-            });
-        }
-        var mailLu = _appSetting["MailuClientId"];
-        var mailuOldClient = await manager.FindByClientIdAsync(mailLu);
-        if (mailuOldClient != null)
-        {
-            await manager.DeleteAsync(mailuOldClient);
-        }
-        if (await manager.FindByClientIdAsync(mailLu) == null)
-        {
-            await manager.CreateAsync(new OpenIddictApplicationDescriptor
-            {
-                ClientId = mailLu,
-                ClientSecret = _appSetting["MailluSecret"],
-                ConsentType = ConsentTypes.Explicit,
-                DisplayName = "Maillu client application",
+                "https://localhost/callback/login/local",
+                "https://host.docker.internal/callback/login/local",
+                "https://passi.cloud/callback/login/local"
+            },
+            AllowedScopes = new List<string> { "openid", "profile", "email", "roles" },
+            RequiresPkce = true,
+            CreatedAt = DateTime.UtcNow
+        };
+        await clientStore.CreateClientAsync(sampleAppClient);
 
-                RedirectUris =
-                {
-                    new Uri("https://localhost/webmail/oauth2/authorize"),
-                    new Uri("https://host.docker.internal/webmail/oauth2/authorize"),
-                    new Uri("https://passi.cloud/webmail/oauth2/authorize"),
-                    new Uri("https://passi.cloud/sso/login"),
-                },
-                Permissions =
-                {
-                    Permissions.Endpoints.Authorization,
-                    Permissions.Endpoints.EndSession,
-                    Permissions.Endpoints.Token,
-                    Permissions.GrantTypes.AuthorizationCode,
-                    Permissions.ResponseTypes.Code,
-                    Permissions.Scopes.Email,
-                    Permissions.Scopes.Profile,
-                    Permissions.Scopes.Roles
-                }
-            });
-        }
+        // Initialize Mailu client
+        var mailuId = _appSetting["MailuClientId"];
+        var mailuClient = new OidcClient
+        {
+            ClientId = mailuId,
+            ClientSecret = _appSetting["MailluSecret"],
+            DisplayName = "Maillu client application",
+            RedirectUris = new List<string>
+            {
+                "https://localhost/webmail/oauth2/authorize",
+                "https://host.docker.internal/webmail/oauth2/authorize",
+                "https://passi.cloud/webmail/oauth2/authorize",
+                "https://passi.cloud/sso/login"
+            },
+            AllowedScopes = new List<string> { "openid", "profile", "email", "roles" },
+            RequiresPkce = false,
+            CreatedAt = DateTime.UtcNow
+        };
+        await clientStore.CreateClientAsync(mailuClient);
     }
 
 

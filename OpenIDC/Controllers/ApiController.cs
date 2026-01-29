@@ -1,5 +1,4 @@
 ﻿using ConfigurationManager;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -7,27 +6,15 @@ using RestSharp;
 using Services;
 using System;
 using System.Collections.Generic;
-using System.Net;
-using System.Reflection;
-using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
-using System.Web;
 using GoogleTracer;
-using Microsoft.AspNetCore;
-using OpenIddict.Client.AspNetCore;
-using Repos;
 using WebApiDto;
 using WebApiDto.Auth;
 using WebApiDto.Auth.Dto;
 using WebApiDto.SignUp;
-using Microsoft.AspNetCore.Authentication.OAuth;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.IdentityModel.Tokens;
-using OpenIddict.Abstractions;
-using OpenIddict.Server.AspNetCore;
-using static OpenIddict.Abstractions.OpenIddictConstants;
-using System.Linq;
+using OpenIDC.Models;
+using OpenIDC.Services;
 
 
 [ApiController]
@@ -35,27 +22,27 @@ using System.Linq;
 [Profile]
 public class ApiController : ControllerBase
 {
-    private AppSetting _appSetting;
-    private IMyRestClient _myRestClient;
-    private IRandomGenerator _randomGenerator;
-    public ILogger<ApiController> Logger { get; set; }
-    private readonly SignInManager<IdentityUser> _signInManager;
-    private readonly IOpenIddictApplicationManager _applicationManager;
-    private readonly IOpenIddictAuthorizationManager _authorizationManager;
-    private readonly IOpenIddictScopeManager _scopeManager;
+    private readonly AppSetting _appSetting;
+    private readonly IMyRestClient _myRestClient;
+    private readonly IRandomGenerator _randomGenerator;
+    private readonly ILogger<ApiController> _logger;
+    private readonly IClientStore _clientStore;
+    private readonly IAuthorizationCodeStore _authCodeStore;
 
-    public ApiController(IRandomGenerator randomGenerator, IMyRestClient myRestClient, AppSetting appSetting, ILogger<ApiController> logger, SignInManager<IdentityUser> signInManager, IOpenIddictApplicationManager applicationManager, IOpenIddictAuthorizationManager authorizationManager, IOpenIddictScopeManager scopeManager)
+    public ApiController(
+        IRandomGenerator randomGenerator,
+        IMyRestClient myRestClient,
+        AppSetting appSetting,
+        ILogger<ApiController> logger,
+        IClientStore clientStore,
+        IAuthorizationCodeStore authCodeStore)
     {
-        ServicePointManager.ServerCertificateValidationCallback +=
-            (sender, cert, chain, sslPolicyErrors) => true;
         _randomGenerator = randomGenerator;
         _myRestClient = myRestClient;
         _appSetting = appSetting;
-        Logger = logger;
-        _signInManager = signInManager;
-        _applicationManager = applicationManager;
-        _authorizationManager = authorizationManager;
-        _scopeManager = scopeManager;
+        _logger = logger;
+        _clientStore = clientStore;
+        _authCodeStore = authCodeStore;
     }
 
 
@@ -75,11 +62,8 @@ public class ApiController : ControllerBase
     [HttpPost]
     [HttpGet]
     [Route("login")]
-    public async Task<IActionResult> Login([FromQuery] string redirect_uri, [FromQuery] string nonce, [FromQuery] string username)
+    public async Task<IActionResult> Login([FromQuery] string redirect_uri, [FromQuery] string nonce, [FromQuery] string username, [FromQuery] string client_id)
     {
-
-        var context = HttpContext.GetOpenIddictServerRequest();
-
         var request = new RestRequest(_appSetting["startRequest"], Method.Post);
         var possibleCodes = new List<Color>()
         {
@@ -92,7 +76,7 @@ public class ApiController : ControllerBase
         var startLoginDto = new StartLoginDto()
         {
             Username = username,
-            ClientId = context?.ClientId ?? "IdentityServer",
+            ClientId = client_id ?? "SampleApp",
             ReturnUrl = redirect_uri,
             CheckColor = possibleCodes[index],
             RandomString = nonce ?? _randomGenerator.GetNumbersString(10)
@@ -101,7 +85,7 @@ public class ApiController : ControllerBase
         var result = await _myRestClient.ExecuteAsync(request);
         if (result.IsSuccessful)
         {
-            Logger.LogDebug("response:" + result.Content);
+            _logger.LogDebug("response:" + result.Content);
             var loginResponceDto = JsonConvert.DeserializeObject<LoginResponceDto>(result.Content);
             var color = startLoginDto.CheckColor.ToString();
             return Ok(new CheckInputModel
@@ -114,7 +98,7 @@ public class ApiController : ControllerBase
             });
         }
 
-        Logger.LogDebug("response:" + result.Content);
+        _logger.LogDebug("response:" + result.Content);
         if (result.Content != null)
         {
             var errorResult = JsonConvert.DeserializeObject<ApiResponseDto>(result.Content);
@@ -128,16 +112,27 @@ public class ApiController : ControllerBase
     [HttpPost]
     [HttpGet]
     [Route("check")]
-    public async Task<IActionResult> Check([FromQuery] string sessionId, [FromQuery] string nonce)
+    public async Task<IActionResult> Check(
+        [FromQuery] string sessionId,
+        [FromQuery] string nonce,
+        [FromQuery] string client_id,
+        [FromQuery] string redirect_uri,
+        [FromQuery] string scope,
+        [FromQuery] string code_challenge,
+        [FromQuery] string code_challenge_method)
     {
+        _logger.LogInformation("Check endpoint called - SessionId: {SessionId}, ClientId: {ClientId}, RedirectUri: {RedirectUri}",
+            sessionId, client_id, redirect_uri);
+
         var request = new RestRequest(_appSetting["checkRequest"] + "?sessionId=" + sessionId,
             Method.Get);
         var result = await _myRestClient.ExecuteAsync(request);
 
+        _logger.LogDebug("Check request response - Success: {Success}, StatusCode: {StatusCode}",
+            result.IsSuccessful, result.StatusCode);
+
         if (result.IsSuccessful)
         {
-            var context = HttpContext.GetOpenIddictServerRequest();
-
             var checkResponceDto = JsonConvert.DeserializeObject<CheckResponceDto>(result.Content);
 
             if (checkResponceDto.PublicCertThumbprint != null)
@@ -170,52 +165,49 @@ public class ApiController : ControllerBase
                         // ComputeHash - returns byte array
                         var isValid = CertHelper.VerifyData(nonce, session.SignedHash,
                             cert.PublicCert);
+
+                        _logger.LogDebug("Signature validation result: {IsValid}, Username: {Username}",
+                            isValid, checkResponceDto.Username);
+
                         if (isValid)
                         {
-                            IdentityUser identityUser = new IdentityUser(checkResponceDto.Username);
-                            await _signInManager.SignInAsync(identityUser, new OAuthChallengeProperties());
-                            var authResult = await HttpContext.AuthenticateAsync();
-                            var application = await _applicationManager.FindByClientIdAsync(context.ClientId) ??
-                                              throw new InvalidOperationException("Details concerning the calling client application cannot be found.");
+                            // Create authorization code using new OIDC services
+                            List<string> scopes = !string.IsNullOrEmpty(scope)
+                                ? [.. scope.Split(' ')]
+                                : ["openid", "profile", "email"];
 
+                            var authCode = new AuthorizationCode
+                            {
+                                ClientId = client_id,
+                                Subject = checkResponceDto.Username,
+                                RedirectUri = redirect_uri,
+                                Scopes = scopes,
+                                CodeChallenge = code_challenge,
+                                CodeChallengeMethod = code_challenge_method ?? "S256",
+                                Nonce = nonce,
+                                Claims = new Dictionary<string, string>
+                                {
+                                    ["email"] = checkResponceDto.Username,
+                                    ["name"] = checkResponceDto.Username,
+                                    ["preferred_username"] = checkResponceDto.Username,
+                                    ["Thumbprint"] = checkResponceDto.PublicCertThumbprint,
+                                    ["sessionId"] = sessionId
+                                }
+                            };
 
-                            var authorizations = await _authorizationManager.FindAsync(
-                                subject: identityUser.UserName,
-                                client: await _applicationManager.GetIdAsync(application),
-                                status: OpenIddictConstants.Statuses.Valid,
-                                type: OpenIddictConstants.AuthorizationTypes.Permanent,
-                                scopes: context.GetScopes()).ToListAsync();
+                            var code = await _authCodeStore.CreateAuthorizationCodeAsync(authCode);
 
+                            _logger.LogInformation("Authorization code created: {Code}, redirecting to: {RedirectUri}",
+                                code.Substring(0, Math.Min(8, code.Length)) + "...", redirect_uri);
 
-                            var identity = new ClaimsIdentity(
-                                authenticationType: TokenValidationParameters.DefaultAuthenticationType,
-                                nameType: OpenIddictConstants.Claims.Name,
-                                roleType: OpenIddictConstants.Claims.Role);
+                            // Return authorization code to redirect
+                            var redirectUrl = $"{redirect_uri}?code={code}";
+                            if (!string.IsNullOrEmpty(session.RandomString))
+                            {
+                                redirectUrl += $"&state={session.RandomString}";
+                            }
 
-                            // Add the claims that will be persisted in the tokens.
-                            identity.SetClaim(OpenIddictConstants.Claims.Subject, identityUser.UserName)
-                                .SetClaim(OpenIddictConstants.Claims.Email, identityUser.UserName)
-                                .SetClaim("Thumbprint", checkResponceDto.PublicCertThumbprint)
-                                .SetClaim("sessionId", sessionId)
-                                ;
-
-
-                            identity.SetScopes(context.GetScopes());
-                            identity.SetResources(await _scopeManager.ListResourcesAsync(identity.GetScopes()).ToListAsync());
-
-                            // Automatically create a permanent authorization to avoid requiring explicit consent
-                            // for future authorization or token requests containing the same scopes.
-                            var authorization = authorizations.LastOrDefault();
-                            authorization ??= await _authorizationManager.CreateAsync(
-                                identity: identity,
-                                subject: identityUser.UserName,
-                                client: await _applicationManager.GetIdAsync(application),
-                                type: AuthorizationTypes.Permanent,
-                                scopes: identity.GetScopes());
-
-                            identity.SetAuthorizationId(await _authorizationManager.GetIdAsync(authorization));
-
-                            return SignIn(new ClaimsPrincipal(identity), OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+                            return Ok(new { redirect_url = redirectUrl });
                         }
                         else
                         {

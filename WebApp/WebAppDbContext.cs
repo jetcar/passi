@@ -46,7 +46,6 @@ namespace WebApp
             var trustMode = _appSetting["DbSslMode"] == "Require" ? "Trust Server Certificate=true;" : "";
             //optionsBuilder.AddInterceptors(new TaggedQueryCommandInterceptor(_logger));
             _connectionString = $"host={_appSetting["DbHost"]};port={_appSetting["DbPort"]};database={_appSetting["WebAppDbName"]};user id={_appSetting["DbUser"]};password={_appSetting["DbPassword"]};Ssl Mode={_appSetting["DbSslMode"]};{trustMode}";
-            optionsBuilder.UseOpenIddict();
 
             optionsBuilder.UseNpgsql(_connectionString, c =>
             {

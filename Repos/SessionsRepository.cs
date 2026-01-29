@@ -70,11 +70,13 @@ namespace Repos
                 if (sessionDb != null)
                 {
                     sessionDb.SignedHashNew = signedHash;
+                    sessionDb.Status = SessionStatus.Confirmed;
                     _dbContext.SaveChanges();
                 }
                 session.PublicCertThumbprint = publicCertThumbprint;
                 session.Status = SessionStatus.Confirmed;
                 _redisService.Add(session.Guid.ToString(), session);
+
             }
         }
 

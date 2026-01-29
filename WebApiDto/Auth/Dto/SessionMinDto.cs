@@ -7,5 +7,6 @@ namespace WebApiDto.Auth.Dto
         public string SignedHash { get; set; }
         public string PublicCert { get; set; }
         public DateTime ExpirationTime { get; set; }
+        public string RandomString { get; set; }
     }
 }

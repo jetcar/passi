@@ -2,25 +2,21 @@
 using Google.Cloud.Diagnostics.Common;
 using GoogleTracer;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Caching.StackExchangeRedis;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.OpenApi.Models;
 using Serilog;
 using Serilog.Events;
 using Services;
 using System;
 using System.Net.Http;
-using OpenIddict.Abstractions;
-using OpenIddict.Client;
-using OpenIdLib.OpenId;
 using TraceServiceOptions = Google.Cloud.Diagnostics.Common.TraceServiceOptions;
-using System.Security.Cryptography.X509Certificates;
+using WebApp.Services;
 
 namespace WebApp
 {
@@ -53,6 +49,9 @@ namespace WebApp
             services.AddScoped<WebAppDbContext>();
             services.AddSingleton<IStartupFilter, MigrationStartupFilter<WebAppDbContext>>();
             services.AddSingleton<IMyRestClient, MyRestClient>();
+            services.AddSingleton<IOidcClient, OidcClient>();
+
+            // Use PostgreSQL only for long-term static data (DataProtectionKeys)
             services.AddDataProtection()
                 .SetApplicationName("WebApp")
                 .AddKeyManagementOptions(options =>
@@ -67,11 +66,38 @@ namespace WebApp
                 // The next call guarantees that trace information is propagated for outgoing
                 // requests that are already being traced.
                 .AddOutgoingGoogleTraceHandler();
+
+            // Use Redis for session storage (temporary data like OIDC state, nonce, code_verifier)
+            var redisHost = Environment.GetEnvironmentVariable("RedisHost") ?? Configuration.GetValue<string>("AppSetting:RedisHost") ?? "localhost";
+            var redisPort = Environment.GetEnvironmentVariable("RedisPort") ?? Configuration.GetValue<string>("AppSetting:RedisPort") ?? "6379";
+            var redisPassword = Environment.GetEnvironmentVariable("RedisPassword") ?? Configuration.GetValue<string>("AppSetting:RedisPassword") ?? "";
+
+            var redisConfiguration = $"{redisHost}:{redisPort}";
+            if (!string.IsNullOrEmpty(redisPassword))
+            {
+                redisConfiguration += $",password={redisPassword}";
+            }
+            redisConfiguration += ",abortConnect=false,connectTimeout=5000,syncTimeout=5000";
+
+            services.AddStackExchangeRedisCache(options =>
+            {
+                options.Configuration = redisConfiguration;
+                options.InstanceName = "WebAppSession_";
+            });
+
+            services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromMinutes(10);
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
+                options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+            });
+
             services.AddAuthentication(options =>
                 {
                     options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 })
-
               .AddCookie(options =>
                 {
                     options.LoginPath = "/login";
@@ -79,68 +105,6 @@ namespace WebApp
                     options.ExpireTimeSpan = TimeSpan.FromMinutes(50);
                     options.SlidingExpiration = false;
                 });
-            services.AddOpenIddict()
-
-            // Register the OpenIddict core components.
-            .AddCore(options =>
-            {
-                // Configure OpenIddict to use the Entity Framework Core stores and models.
-                // Note: call ReplaceDefaultEntities() to replace the default OpenIddict entities.
-                options.UseEntityFrameworkCore()
-                       .UseDbContext<WebAppDbContext>();
-
-                // Developers who prefer using MongoDB can remove the previous lines
-                // and configure OpenIddict to use the specified MongoDB database:
-                // options.UseMongoDb()
-                //        .UseDatabase(new MongoClient().GetDatabase("openiddict"));
-
-                // Enable Quartz.NET integration.
-            }).AddClient(options =>
-            {
-                // Note: this sample uses the code flow, but you can enable the other flows if necessary.
-                options.AllowAuthorizationCodeFlow();
-
-                // Register the signing and encryption credentials used to protect
-                // sensitive data like the state tokens produced by OpenIddict.
-                options.AddSigningCertificate(X509Certificate2.CreateFromPemFile("/myapp/cert/certs/certificate.crt", "/myapp/cert/certs/privatekey.pem"));
-                options.AddEncryptionCertificate(X509Certificate2.CreateFromPemFile("/myapp/cert/certs/certificate.crt", "/myapp/cert/certs/privatekey.pem"));
-                // Register the ASP.NET Core host and configure the ASP.NET Core-specific options.
-                options.UseAspNetCore()
-                       //.DisableTransportSecurityRequirement()
-                       .EnableStatusCodePagesIntegration()
-                       .EnableRedirectionEndpointPassthrough()
-                       .EnablePostLogoutRedirectionEndpointPassthrough();
-                // Register the System.Net.Http integration and use the identity of the current
-                // assembly as a more specific user agent, which can be useful when dealing with
-                // providers that use the user agent as a way to throttle requests (e.g Reddit).
-                options.UseSystemNetHttp()
-
-                       .SetProductInformation(typeof(Startup).Assembly);
-                options.UseSystemNetHttp(x =>
-                {
-                    x.ConfigureHttpClientHandler(a =>
-                        a.ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true);
-                });
-
-
-
-                // Add a client registration matching the client application definition in the server project.
-                options.AddRegistration(new OpenIddictClientRegistration
-                {
-                    Issuer = new Uri(identityUrl, UriKind.Absolute),
-
-                    ClientId = clientId,
-                    ClientSecret = secret,
-                    Scopes = {},
-                    
-                    // Note: to mitigate mix-up attacks, it's recommended to use a unique redirection endpoint
-                    // URI per provider, unless all the registered providers support returning a special "iss"
-                    // parameter containing their URL as part of authorization responses. For more information,
-                    // see https://datatracker.ietf.org/doc/html/draft-ietf-oauth-security-topics#section-4.4.
-                    RedirectUri = new Uri("callback/login/local", UriKind.Relative),
-                    PostLogoutRedirectUri = new Uri("callback/logout/local", UriKind.Relative)
-                });
-            });
 
 
             services.AddHttpContextAccessor();
@@ -170,6 +134,7 @@ namespace WebApp
                                 Secure = CookieSecurePolicy.Always
                             });
 
+                applicationBuilder.UseSession();
                 applicationBuilder.UseDefaultFiles();
                 applicationBuilder.UseStaticFiles(new StaticFileOptions()
                 {

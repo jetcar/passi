@@ -16,11 +16,11 @@ services:
     image: "mietzen/porkbun-ddns:latest"
     container_name: porkbun-ddns
     env_file:
-      - ../passi_config/ddclient.env      
+      - ../passi_config/ddclient.env
     restart: unless-stopped
     networks:
       - haproxy_net
-    
+
   pgadmin:
     image: 'dpage/pgadmin4:8.5'
     container_name: pgadmin
@@ -55,7 +55,6 @@ services:
     depends_on:
       - passiwebapi
       - webapp
-      - identityserver
     networks:
       - haproxy_net
   webapp:
@@ -64,29 +63,13 @@ services:
       - haproxy_net
       - database_net
     env_file:
-    - ../passi_config/dev.env
+      - ../passi_config/dev.env
     volumes:
       - ../creds:/home/creds
       - ../passi_identity_cert:/myapp/cert
       - ../.well-known:/myapp/wwwroot/.well-known
     depends_on:
       - database
-    restart: always
-  identityserver:
-    image: jetcar/identityserver:1.0.47
-    networks:
-      - haproxy_net
-      - database_net
-      - redis_net
-    container_name: identityserver
-    env_file:
-    - ../passi_config/dev.env
-    volumes:
-      - ../passi_identity_cert:/myapp/cert
-      - ../creds:/home/creds
-    depends_on:
-      - database
-      - passiwebapi
     restart: always
   openidc:
     image: jetcar/openidc:1.0.47
@@ -96,7 +79,7 @@ services:
       - redis_net
     container_name: openidc
     env_file:
-    - ../passi_config/dev.env
+      - ../passi_config/dev.env
     volumes:
       - ../passi_identity_cert:/myapp/cert
       - ../creds:/home/creds
@@ -114,7 +97,7 @@ services:
       - database
       - redis
     env_file:
-    - ../passi_config/dev.env
+      - ../passi_config/dev.env
     volumes:
       - ../creds:/home/creds
       - ../passi_identity_cert:/myapp/cert
@@ -154,7 +137,7 @@ services:
     networks:
       default:
         ipv4_address: 192.168.202.254
-        
+
   admin:
     image: ${DOCKER_ORG:-ghcr.io/heviat}/${DOCKER_PREFIX:-}admin:${MAILU_VERSION:-2024.06}
     container_name: admin
@@ -213,7 +196,7 @@ services:
       mode: replicated
       replicas: 1
       endpoint_mode: vip
-      
+
   oletools:
     image: ${DOCKER_ORG:-ghcr.io/heviat}/${DOCKER_PREFIX:-}oletools:${MAILU_VERSION:-2024.06}
     container_name: oletools

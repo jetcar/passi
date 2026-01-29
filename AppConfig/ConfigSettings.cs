@@ -4,7 +4,7 @@ namespace AppConfig
 {
     public class ConfigSettings
     {
-        public static string WebApiUrlLocal = "http://192.168.0.208:5004/passiapi";
+        public static string WebApiUrlLocal = "http://192.168.0.101:5004/passiapi";
         public static string PassiUrl = "https://passi.cloud/passiapi";
 
         [Obsolete("for testing only")]

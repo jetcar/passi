@@ -4,7 +4,7 @@ WORKDIR /src/WebApp/vue-project
 RUN npm install
 RUN npm run build
 
-WORKDIR /src/IdentityServer/vue-project
+WORKDIR /src/OpenIDC/vue-project
 RUN npm install
 RUN npm run build
 

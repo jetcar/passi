@@ -17,8 +17,8 @@ jobs:
     - name: Build the WebApp Docker image
       run: docker build . --file WebApp/Dockerfile --tag samplewebapp:$(date +%s)
     - uses: actions/checkout@v3
-    - name: Build the Idenetity Docker image
-      run: docker build . --file IdentityServer/Dockerfile --tag identityserver:$(date +%s)
+    - name: Build the Identity Docker image
+      run: docker build . --file OpenIDC/Dockerfile --tag openidc:$(date +%s)
     - uses: actions/checkout@v3
     - name: Build the PassiWebApi Docker image
       run: docker build . --file passiwebapi/Dockerfile --tag passi:$(date +%s)

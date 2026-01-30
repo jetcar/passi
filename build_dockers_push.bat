@@ -1,4 +1,4 @@
-docker push jetcar/webapp:1.0.47
-docker push jetcar/passiwebapi:1.0.47
-docker push jetcar/openidc:1.0.47
+docker push jetcar/webapp:latest
+docker push jetcar/passiwebapi:latest
+docker push jetcar/openidc:latest
 pause

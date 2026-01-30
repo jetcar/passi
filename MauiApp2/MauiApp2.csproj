@@ -55,6 +55,8 @@
 		<AndroidSigningKeyAlias>passi</AndroidSigningKeyAlias>
 		<JavaMaximumHeapSize>2G</JavaMaximumHeapSize>
 		<AndroidSigningKeyPass>Curev3st2</AndroidSigningKeyPass>
+		<ApplicationDisplayVersion>1.53</ApplicationDisplayVersion>
+		<ApplicationVersion>53</ApplicationVersion>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net9.0-android35.0|AnyCPU'">
@@ -63,6 +65,8 @@
 		<AndroidSigningKeyAlias>passi</AndroidSigningKeyAlias>
 		<JavaMaximumHeapSize>2G</JavaMaximumHeapSize>
 		<AndroidSigningKeyPass>Curev3st2</AndroidSigningKeyPass>
+		<ApplicationDisplayVersion>1.53</ApplicationDisplayVersion>
+		<ApplicationVersion>53</ApplicationVersion>
 	</PropertyGroup>
 	<ItemGroup>
 		<!-- App Icon -->

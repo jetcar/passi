@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Net.Http;
-using System.Reflection;
-using System.Threading.Tasks;
 using ArxOne.MrAdvice.Advice;
 using Google.Cloud.Diagnostics.AspNetCore3;
 using Google.Cloud.Diagnostics.Common;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
-using TraceOptions = Google.Cloud.Diagnostics.Common.TraceOptions;
 
 namespace GoogleTracer
 {
@@ -31,7 +28,7 @@ namespace GoogleTracer
                 ServiceOptions = new TraceServiceOptions()
                 {
                     ProjectId = projectId,
-                    Options = TraceOptions.Create(0.1d, BufferOptions.TimedBuffer(TimeSpan.FromSeconds(5)))
+                    Options =  Google.Cloud.Diagnostics.Common.TraceOptions.Create(0.1d, BufferOptions.TimedBuffer(TimeSpan.FromSeconds(5)))
                 },
                 TraceFallbackPredicate = TraceDecisionPredicate.Create(request =>
                 {

@@ -1,11 +1,11 @@
 ﻿using ConfigurationManager;
-using Microsoft.EntityFrameworkCore;
 using Models;
 using NodaTime;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using GoogleTracer;
+using Microsoft.EntityFrameworkCore;
 using RedisClient;
 
 namespace Repos

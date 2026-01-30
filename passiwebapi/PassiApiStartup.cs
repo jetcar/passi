@@ -1,7 +1,5 @@
 using AutoMapper;
 using ConfigurationManager;
-using Google.Cloud.Diagnostics.AspNetCore3;
-using Google.Cloud.Diagnostics.Common;
 using GoogleTracer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
@@ -13,15 +11,15 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Models;
 using NodaTime;
-using OpenIdLib.OpenId;
 using Repos;
-using Serilog;
 using Serilog.Events;
 using Services;
 using System;
 using System.Linq;
+using Google.Cloud.Diagnostics.Common;
 using NotificationsService;
 using RedisClient;
+using Serilog;
 using WebApiDto.Auth.Dto;
 
 namespace passi_webapi
@@ -38,7 +36,7 @@ namespace passi_webapi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            var config = new MapperConfiguration(cfg =>
+            services.AddAutoMapper(cfg =>
             {
                 cfg.CreateMap<UserDb, UserDto>();
                 cfg.CreateMap<DeviceDb, DeviceDto>();
@@ -47,7 +45,6 @@ namespace passi_webapi
                 cfg.CreateMap<SessionTempRecord, SessionDto>();
                 cfg.CreateMap<Instant, DateTime>().ConvertUsing(s => s.ToDateTimeUtc());
             });
-            var mapper = config.CreateMapper();
 
             var identityUrl = Environment.GetEnvironmentVariable("IdentityUrl") ?? Configuration.GetValue<string>("AppSetting:IdentityUrl");
             var returnUrl = Environment.GetEnvironmentVariable("returnUrl") ?? Configuration.GetValue<string>("AppSetting:returnUrl");
@@ -60,7 +57,6 @@ namespace passi_webapi
 
             services.AddControllers();
             services.AddSingleton<AppSetting>(new AppSetting(Configuration));
-            services.AddSingleton(mapper);
             services.AddSingleton<IMyRestClient, MyRestClient>();
 
             services.AddSingleton<IRedisService, RedisService>();
@@ -77,7 +73,6 @@ namespace passi_webapi
             services.AddScoped<ICertificateRepository, CertificateRepository>();
             services.AddScoped<ICertificatesService, CertificatesService>();
             services.AddSingleton<IStartupFilter, MigrationStartupFilter<PassiDbContext>>();
-            services.AddSwaggerGenNewtonsoftSupport();
 
             services.AddDataProtection()
                 .SetApplicationName("PassiApp")
@@ -89,21 +84,16 @@ namespace passi_webapi
                 .PersistKeysToDbContext<PassiDbContext>();
 
             services.AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme = "Cookies";
-            })
-            .AddCookie("Cookies",
-                options =>
                 {
-                    options.AccessDeniedPath = "/Home/Error";
-                    options.SlidingExpiration = true;
-                    options.ExpireTimeSpan = System.TimeSpan.FromDays(30);
+                    options.DefaultAuthenticateScheme = "Cookies";
                 })
-            .AddOpenIdAuthentication(identityUrl, returnUrl, passiUrl, clientId, secret)
-            .AddOpenIdTokenManagement(x =>
-            {
-                x.RevokeRefreshTokenOnSignout = true;
-            });
+                .AddCookie("Cookies",
+                    options =>
+                    {
+                        options.AccessDeniedPath = "/Home/Error";
+                        options.SlidingExpiration = true;
+                        options.ExpireTimeSpan = System.TimeSpan.FromDays(30);
+                    });
             services.AddHttpContextAccessor();
             services.AddHealthChecks();
             services.AddSwaggerGen(c =>

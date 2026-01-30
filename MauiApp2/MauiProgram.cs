@@ -1,11 +1,7 @@
-﻿using Android.Runtime;
-using CommunityToolkit.Maui;
+﻿using CommunityToolkit.Maui;
 //using Firebase;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Maui.Controls.Hosting;
-using Microsoft.Maui.Hosting;
-using Microsoft.Maui.LifecycleEvents;
+
 //using Plugin.Firebase.Auth;
 //using Plugin.Firebase.Bundled.Platforms.Android;
 //using Plugin.Firebase.Bundled.Shared;

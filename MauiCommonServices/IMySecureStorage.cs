@@ -1,4 +1,6 @@
-﻿namespace MauiCommonServices;
+﻿using System.Threading.Tasks;
+
+namespace MauiCommonServices;
 
 public interface IMySecureStorage
 {

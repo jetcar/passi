@@ -1,9 +1,7 @@
-﻿using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Hosting;
-using Serilog;
-using System.IO;
-using System;
+﻿using Microsoft.Extensions.Hosting;
 using System.Threading;
+using Microsoft.AspNetCore.Hosting;
+using Serilog;
 
 namespace WebApp
 {

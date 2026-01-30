@@ -11,7 +11,6 @@ using Java.Security;
 using Java.Security.Spec;
 using MauiApp2.Platforms.Android;
 using MauiCommonServices;
-using MauiViewModels;
 using MauiViewModels.FingerPrint;
 using MauiViewModels.utils.Services;
 using Signature = Java.Security.Signature;

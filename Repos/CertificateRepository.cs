@@ -1,8 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Linq;
 using Models;
-
-using System.Linq;
 using GoogleTracer;
+using Microsoft.EntityFrameworkCore;
 
 namespace Repos
 {

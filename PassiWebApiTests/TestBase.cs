@@ -15,7 +15,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using ILogger = Serilog.ILogger;
 using Logger = Serilog.Core.Logger;
-using Message = FirebaseAdmin.Messaging.Message;
 
 namespace PassiWebApiTests;
 
@@ -128,9 +127,28 @@ public class TestBase
     }
 
     [OneTimeTearDown]
-    public void OnetimeTearDown()
+    public void InstanceOnetimeTearDown()
     {
+        if (ServiceProvider is IDisposable disposable)
+        {
+            disposable.Dispose();
+        }
         ServiceProvider = null;
+    }
+
+    [OneTimeTearDown]
+    public static void OnetimeTearDown()
+    {
+        if (_pgContainer != null)
+        {
+            _pgContainer.DisposeAsync().AsTask().GetAwaiter().GetResult();
+            _pgContainer = null;
+        }
+        if (_redisContainer != null)
+        {
+            _redisContainer.DisposeAsync().AsTask().GetAwaiter().GetResult();
+            _redisContainer = null;
+        }
     }
 
     public IServiceScope CurrentScope
@@ -159,12 +177,12 @@ public class TestEmailSender : IEmailSender
 {
     public static string Code;
 
-    public string SendInvitationEmail(string email, string code)
+    public string SendInvitationEmail(String email, String code)
     {
         return Code = code;
     }
 
-    public string SendDeletingEmail(string email, string code)
+    public string SendDeletingEmail(String email, String code)
     {
         return Code = code;
     }

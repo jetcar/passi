@@ -5,7 +5,6 @@ using System.Threading;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using MauiTest.Tools;
 using MauiViewModels.utils.Services.Certificate;
 using Microsoft.EntityFrameworkCore;
 using Models;

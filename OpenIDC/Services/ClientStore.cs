@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using OpenIDC.Models;
 using RedisClient;
@@ -10,6 +8,7 @@ namespace OpenIDC.Services
     public interface IClientStore
     {
         Task<OidcClient> FindByClientIdAsync(string clientId);
+        Task<OidcClient> GetClientAsync(string clientId);
         Task CreateClientAsync(OidcClient client);
         Task DeleteClientAsync(string clientId);
         Task<bool> ValidateClientAsync(string clientId, string clientSecret);
@@ -29,6 +28,11 @@ namespace OpenIDC.Services
         {
             var client = _redisService.Get<OidcClient>($"{ClientPrefix}{clientId}");
             return Task.FromResult(client);
+        }
+
+        public Task<OidcClient> GetClientAsync(string clientId)
+        {
+            return FindByClientIdAsync(clientId);
         }
 
         public Task CreateClientAsync(OidcClient client)

@@ -1,15 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using RestSharp;
@@ -24,20 +21,18 @@ public class AuthenticationController : Controller
     private readonly IMyRestClient _myRest;
     private readonly ILogger<AuthenticationController> _logger;
     private readonly IOidcClient _oidcClient;
-    private const string CodeVerifierSessionKey = "code_verifier";
-    private const string StateSessionKey = "oauth_state";
-    private const string NonceSessionKey = "oauth_nonce";
-    private const string ReturnUrlSessionKey = "return_url";
+    private readonly IDistributedCache _cache;
 
-    public AuthenticationController(IMyRestClient myRest, ILogger<AuthenticationController> logger, IOidcClient oidcClient)
+    public AuthenticationController(IMyRestClient myRest, ILogger<AuthenticationController> logger, IOidcClient oidcClient, IDistributedCache cache)
     {
         _myRest = myRest;
         _logger = logger;
         _oidcClient = oidcClient;
+        _cache = cache;
     }
 
     [HttpGet("~/login")]
-    public ActionResult LogIn(string returnUrl)
+    public async Task<ActionResult> LogIn(string returnUrl)
     {
         _logger.LogInformation("Login initiated - ReturnUrl: {ReturnUrl}", returnUrl);
 
@@ -46,13 +41,20 @@ public class AuthenticationController : Controller
         var nonce = GenerateRandomString(32);
         var codeVerifier = GenerateRandomString(43);
 
-        // Store in session for validation during callback
-        HttpContext.Session.SetString(StateSessionKey, state);
-        HttpContext.Session.SetString(NonceSessionKey, nonce);
-        HttpContext.Session.SetString(CodeVerifierSessionKey, codeVerifier);
-        HttpContext.Session.SetString(ReturnUrlSessionKey, Url.IsLocalUrl(returnUrl) ? returnUrl : "/");
+        // Store in Redis with state as key for validation during callback
+        var cacheOptions = new DistributedCacheEntryOptions
+        {
+            AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10)
+        };
 
-        var authorizationUrl = _oidcClient.BuildAuthorizationUrl(returnUrl, state, nonce);
+        await _cache.SetStringAsync($"oauth:state:{state}", state, cacheOptions);
+        await _cache.SetStringAsync($"oauth:nonce:{state}", nonce, cacheOptions);
+        await _cache.SetStringAsync($"oauth:verifier:{state}", codeVerifier, cacheOptions);
+        await _cache.SetStringAsync($"oauth:returnurl:{state}", Url.IsLocalUrl(returnUrl) ? returnUrl : "/", cacheOptions);
+
+        // Build redirect_uri from current request
+        var redirectUri = $"{Request.Scheme}://{Request.Host}/callback/login/local";
+        var authorizationUrl = await _oidcClient.BuildAuthorizationUrlAsync(redirectUri, returnUrl, state, nonce, codeVerifier);
 
         _logger.LogDebug("Redirecting to authorization endpoint");
 
@@ -64,7 +66,8 @@ public class AuthenticationController : Controller
         var bytes = new byte[length];
         using var rng = RandomNumberGenerator.Create();
         rng.GetBytes(bytes);
-        return Convert.ToBase64String(bytes).Replace("+", "-").Replace("/", "_").Replace("=", "").Substring(0, length);
+        var base64 = Convert.ToBase64String(bytes);
+        return base64.Replace("+", "-").Replace("/", "_").Replace("=", "");
     }
 
     [HttpPost("~/logout"), ValidateAntiForgeryToken]
@@ -83,17 +86,17 @@ public class AuthenticationController : Controller
         _logger.LogInformation("Login callback received - Code: {Code}, State: {State}",
             code?.Substring(0, Math.Min(8, code?.Length ?? 0)) + "...", state);
 
-        // Validate state to prevent CSRF
-        var expectedState = HttpContext.Session.GetString(StateSessionKey);
+        // Validate state to prevent CSRF - retrieve from Redis
+        var expectedState = await _cache.GetStringAsync($"oauth:state:{state}");
         if (string.IsNullOrEmpty(expectedState) || expectedState != state)
         {
             _logger.LogError("State mismatch or missing. Expected: {Expected}, Got: {Got}", expectedState, state);
             throw new InvalidOperationException("Invalid state parameter");
         }
 
-        var nonce = HttpContext.Session.GetString(NonceSessionKey);
-        var codeVerifier = HttpContext.Session.GetString(CodeVerifierSessionKey);
-        var returnUrl = HttpContext.Session.GetString(ReturnUrlSessionKey) ?? "/";
+        var nonce = await _cache.GetStringAsync($"oauth:nonce:{state}");
+        var codeVerifier = await _cache.GetStringAsync($"oauth:verifier:{state}");
+        var returnUrl = await _cache.GetStringAsync($"oauth:returnurl:{state}") ?? "/";
 
         if (string.IsNullOrEmpty(code))
         {
@@ -101,8 +104,11 @@ public class AuthenticationController : Controller
             throw new InvalidOperationException("Authorization code is required");
         }
 
+        // Build redirect_uri from current request (must match the one used in authorization)
+        var redirectUri = $"{Request.Scheme}://{Request.Host}/callback/login/local";
+
         // Exchange code for tokens
-        var tokenResponse = await _oidcClient.ExchangeCodeForTokensAsync(code, codeVerifier);
+        var tokenResponse = await _oidcClient.ExchangeCodeForTokensAsync(redirectUri, code, codeVerifier);
         var principal = await _oidcClient.ValidateTokensAsync(tokenResponse);
 
         _logger.LogDebug("Tokens validated, building claims identity");
@@ -182,11 +188,11 @@ public class AuthenticationController : Controller
             new AuthenticationToken { Name = "refresh_token", Value = tokenResponse.RefreshToken ?? "" }
         });
 
-        // Clear session
-        HttpContext.Session.Remove(StateSessionKey);
-        HttpContext.Session.Remove(NonceSessionKey);
-        HttpContext.Session.Remove(CodeVerifierSessionKey);
-        HttpContext.Session.Remove(ReturnUrlSessionKey);
+        // Clear Redis cache entries
+        await _cache.RemoveAsync($"oauth:state:{state}");
+        await _cache.RemoveAsync($"oauth:nonce:{state}");
+        await _cache.RemoveAsync($"oauth:verifier:{state}");
+        await _cache.RemoveAsync($"oauth:returnurl:{state}");
 
         _logger.LogInformation("Login successful for user: {Username}, redirecting to: {RedirectUri}",
             username, returnUrl);

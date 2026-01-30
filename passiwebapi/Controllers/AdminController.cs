@@ -1,15 +1,14 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using passi_webapi.Filters;
 
 using Repos;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using WebApiDto.Auth.Dto;
 
 namespace passi_webapi.Controllers
@@ -29,20 +28,7 @@ namespace passi_webapi.Controllers
             _mapper = mapper;
         }
 
-        [HttpGet, Route("Login")]
-        public async Task Login(string returnUrl = "/passiapi")
-        {
-            foreach (var key in Request.Cookies.Keys)
-            {
-                Response.Cookies.Delete(key, new CookieOptions() { Secure = true });
-            }
-
-            await HttpContext.ChallengeAsync(OpenIdConnectDefaults.AuthenticationScheme, new AuthenticationProperties
-            {
-                RedirectUri = returnUrl,
-            });
-        }
-
+      
         [HttpGet, Route("Logout")]
         public async Task<RedirectResult> Logout()
         {

@@ -1,4 +1,6 @@
-﻿namespace MauiCommonServices;
+﻿using System;
+
+namespace MauiCommonServices;
 
 public interface IMainThreadService
 {

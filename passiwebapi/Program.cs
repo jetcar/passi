@@ -1,9 +1,7 @@
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
-using Serilog;
-using System.IO;
-using System;
 using System.Threading;
+using Microsoft.AspNetCore.Hosting;
+using Serilog;
 
 namespace passi_webapi
 {

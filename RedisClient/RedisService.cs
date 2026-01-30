@@ -1,42 +1,53 @@
-﻿using System.Text;
+﻿using System;
 using ConfigurationManager;
-using CSRedis;
 using GoogleTracer;
 using Newtonsoft.Json;
+using ServiceStack.Redis;
 
 namespace RedisClient
 {
     [Profile]
     public class RedisService : IRedisService
     {
-        private AppSetting _appSetting;
-        private readonly CSRedisClient _redis;
+        private readonly AppSetting _appSetting;
+        private readonly IRedisClientsManager _redisManager;
 
         public RedisService(AppSetting appSetting)
         {
             _appSetting = appSetting;
-            _redis = new CSRedis.CSRedisClient($"{_appSetting["redis"]}:{_appSetting["redisPort"]}"); ;
+            var redisHost = _appSetting["redis"];
+            var redisPort = _appSetting["redisPort"];
+            var redisPassword = _appSetting["redisPassword"];
+
+            var connectionString = string.IsNullOrEmpty(redisPassword)
+                ? $"{redisHost}:{redisPort}"
+                : $"{redisPassword}@{redisHost}:{redisPort}";
+
+            _redisManager = new RedisManagerPool(connectionString);
         }
 
         public void Add<T>(string key, T item, TimeSpan expire)
         {
+            using var redis = _redisManager.GetClient();
             var json = JsonConvert.SerializeObject(item);
             var newKey = typeof(T).FullName + "." + key;
-            _redis.Set(newKey, json, expire);
+            redis.Set(newKey, json, expire);
         }
 
         public void Add<T>(string key, T item)
         {
+            using var redis = _redisManager.GetClient();
             var json = JsonConvert.SerializeObject(item);
             var newKey = typeof(T).FullName + "." + key;
-            _redis.Set(newKey, json, new TimeSpan(0, 5, 0));
+            redis.Set(newKey, json, TimeSpan.FromMinutes(5));
         }
 
         public T Get<T>(string key)
         {
+            using var redis = _redisManager.GetClient();
             var newKey = typeof(T).FullName + "." + key;
+            var redisValue = redis.Get<string>(newKey);
 
-            var redisValue = _redis.Get(newKey);
             if (redisValue != null)
             {
                 return JsonConvert.DeserializeObject<T>(redisValue);
@@ -47,8 +58,9 @@ namespace RedisClient
 
         public void Delete<T>(string key)
         {
+            using var redis = _redisManager.GetClient();
             var newKey = typeof(T).FullName + "." + key;
-            _redis.Del(newKey);
+            redis.Remove(newKey);
         }
     }
 

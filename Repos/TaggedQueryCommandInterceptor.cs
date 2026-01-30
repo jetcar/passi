@@ -1,8 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore.Diagnostics;
-using Serilog;
+﻿using Serilog;
 using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace Repos
 {

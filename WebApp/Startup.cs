@@ -1,21 +1,18 @@
 ﻿using ConfigurationManager;
-using Google.Cloud.Diagnostics.Common;
 using GoogleTracer;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Caching.StackExchangeRedis;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
-using Serilog;
 using Serilog.Events;
 using Services;
 using System;
 using System.Net.Http;
-using TraceServiceOptions = Google.Cloud.Diagnostics.Common.TraceServiceOptions;
+using Google.Cloud.Diagnostics.Common;
+using Serilog;
 using WebApp.Services;
 
 namespace WebApp
@@ -47,7 +44,6 @@ namespace WebApp
 
             services.AddSingleton<AppSetting>();
             services.AddScoped<WebAppDbContext>();
-            services.AddSingleton<IStartupFilter, MigrationStartupFilter<WebAppDbContext>>();
             services.AddSingleton<IMyRestClient, MyRestClient>();
             services.AddSingleton<IOidcClient, OidcClient>();
 
@@ -66,24 +62,6 @@ namespace WebApp
                 // The next call guarantees that trace information is propagated for outgoing
                 // requests that are already being traced.
                 .AddOutgoingGoogleTraceHandler();
-
-            // Use Redis for session storage (temporary data like OIDC state, nonce, code_verifier)
-            var redisHost = Environment.GetEnvironmentVariable("RedisHost") ?? Configuration.GetValue<string>("AppSetting:RedisHost") ?? "localhost";
-            var redisPort = Environment.GetEnvironmentVariable("RedisPort") ?? Configuration.GetValue<string>("AppSetting:RedisPort") ?? "6379";
-            var redisPassword = Environment.GetEnvironmentVariable("RedisPassword") ?? Configuration.GetValue<string>("AppSetting:RedisPassword") ?? "";
-
-            var redisConfiguration = $"{redisHost}:{redisPort}";
-            if (!string.IsNullOrEmpty(redisPassword))
-            {
-                redisConfiguration += $",password={redisPassword}";
-            }
-            redisConfiguration += ",abortConnect=false,connectTimeout=5000,syncTimeout=5000";
-
-            services.AddStackExchangeRedisCache(options =>
-            {
-                options.Configuration = redisConfiguration;
-                options.InstanceName = "WebAppSession_";
-            });
 
             services.AddSession(options =>
             {

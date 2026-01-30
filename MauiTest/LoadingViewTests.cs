@@ -4,7 +4,6 @@ using MauiCommonServices;
 using MauiTest.Tools;
 using MauiViewModels;
 using MauiViewModels.Tools;
-using MauiViewModels.utils.Services;
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
 

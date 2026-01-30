@@ -11,7 +11,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using Serilog.Events;
@@ -136,9 +135,21 @@ public class Startup
             {
                 // Map API controllers (will match routes like /api/*, /connect/*, /.well-known/*)
                 endpoints.MapControllers();
+            });
 
-                // Fallback to index.html for all other routes (SPA routing)
-                endpoints.MapFallbackToFile("index.html");
+            // SPA fallback - serve index.html for non-API routes
+            appBuilder.Run(async context =>
+            {
+                var path = context.Request.Path;
+                // Don't serve index.html for API/controller routes
+                if (!path.StartsWithSegments("/api") &&
+                    !path.StartsWithSegments("/connect") &&
+                    !path.StartsWithSegments("/.well-known") &&
+                    !System.IO.Path.HasExtension(path.Value))
+                {
+                    context.Request.Path = "/index.html";
+                    await context.Response.SendFileAsync("wwwroot/index.html");
+                }
             });
         });
     }

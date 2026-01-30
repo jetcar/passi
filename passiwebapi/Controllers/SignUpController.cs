@@ -1,13 +1,12 @@
 ﻿using ConfigurationManager;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-
 using Repos;
 using Serilog;
 using Services;
 using System;
 using System.Threading.Tasks;
 using GoogleTracer;
+using Microsoft.EntityFrameworkCore;
 using WebApiDto.SignUp;
 
 namespace passi_webapi.Controllers

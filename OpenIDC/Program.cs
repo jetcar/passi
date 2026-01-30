@@ -1,7 +1,7 @@
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
-using Serilog;
 using System.Threading;
+using Microsoft.AspNetCore.Hosting;
+using Serilog;
 
 
 public static class Program

@@ -1,10 +1,9 @@
 ﻿using ConfigurationManager;
-
-using SendGrid;
-using SendGrid.Helpers.Mail;
 using System;
 using System.Net.Http;
 using GoogleTracer;
+using SendGrid;
+using SendGrid.Helpers.Mail;
 
 namespace Services
 {

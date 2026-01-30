@@ -1,8 +1,6 @@
 ﻿using ConfigurationManager;
-using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Models;
 using NodaTime;
 
@@ -13,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using GoogleTracer;
+using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 
 namespace Repos
 {

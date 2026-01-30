@@ -6,7 +6,6 @@ using AppConfig;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
 using MauiCommonServices;
-using MauiViewModels;
 using MauiViewModels.StorageModels;
 using MauiViewModels.utils.Services;
 using MauiViewModels.utils.Services.Certificate;
@@ -64,7 +63,7 @@ public class TestBase
             var containerBuilder = new ContainerBuilder()
                 .WithImage("postgres:15.5")
                 .WithPortBinding(5432, true)
-                .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(5432))
+                .WithWaitStrategy(Wait.ForUnixContainer().UntilExternalTcpPortIsAvailable(5432))
                 .WithEnvironment("POSTGRES_PASSWORD", pgpassword);
             if (!string.IsNullOrEmpty(dockerEndpoint))
                 containerBuilder.WithDockerEndpoint(dockerEndpoint);
@@ -82,7 +81,7 @@ public class TestBase
             var containerBuilder = new ContainerBuilder()
                 .WithImage("redis:latest")
                 .WithPortBinding(6379, true)
-                .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(6379));
+                .WithWaitStrategy((Wait.ForUnixContainer().UntilExternalTcpPortIsAvailable(6379)));
             if (!string.IsNullOrEmpty(dockerEndpoint))
                 containerBuilder.WithDockerEndpoint(dockerEndpoint);
 
@@ -100,7 +99,7 @@ public class TestBase
             var containerBuilder = new ContainerBuilder()
                     .WithImage("jetcar/passiwebapi:latest")
                     .WithPortBinding(5004, true)
-                    .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(5004))
+                    .WithWaitStrategy((Wait.ForUnixContainer().UntilExternalTcpPortIsAvailable(5004)))
                     .WithEnvironment("DbHost", _pgContainer.IpAddress)
                     .WithEnvironment("DbPort", "5432")
                     .WithEnvironment("DoNotSendMail", "true")
@@ -134,7 +133,7 @@ public class TestBase
             var containerBuilder = new ContainerBuilder()
                     .WithImage("jetcar/identityserver:latest")
                     .WithPortBinding(5003, true)
-                    .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(5003))
+                    .WithWaitStrategy((Wait.ForUnixContainer().UntilExternalTcpPortIsAvailable(5003)))
                     .WithEnvironment("DbHost", _pgContainer.IpAddress)
                     .WithEnvironment("DbPort", "5432")
                     .WithEnvironment("DoNotSendMail", "true")

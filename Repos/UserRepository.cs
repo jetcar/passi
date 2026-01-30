@@ -1,10 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Models;
+﻿using Models;
 
 using System;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using GoogleTracer;
+using Microsoft.EntityFrameworkCore;
 
 namespace Repos
 {

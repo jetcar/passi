@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
@@ -6,13 +6,8 @@
 		<TargetFramework>net9.0</TargetFramework>
 	</PropertyGroup>
 
-	<ItemGroup>
-		<PackageReference Include="RestSharp" Version="112.1.0" />
-	</ItemGroup>
-
 
 	<ItemGroup>
-		<ProjectReference Include="..\MauiTest\MauiTest.csproj" />
 		<ProjectReference Include="..\MauiViewModels\MauiViewModels.csproj" />
 		<ProjectReference Include="..\Models\Models.csproj" />
 		<ProjectReference Include="..\Repos\Repos.csproj" />

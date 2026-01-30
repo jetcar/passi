@@ -1,4 +1,5 @@
-﻿using AppCommon;
+﻿using System;
+using AppCommon;
 
 namespace MauiCommonServices
 {

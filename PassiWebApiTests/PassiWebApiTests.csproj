@@ -1,57 +1,50 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+	<PropertyGroup>
+		<TargetFramework>net9.0</TargetFramework>
+		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 
-    <IsTestProject>true</IsTestProject>
+		<IsTestProject>true</IsTestProject>
 
-    <RunAnalyzersDuringBuild>False</RunAnalyzersDuringBuild>
+		<EnableNETAnalyzers>False</EnableNETAnalyzers>
 
-    <RunAnalyzersDuringLiveAnalysis>False</RunAnalyzersDuringLiveAnalysis>
+		<RunAnalyzersDuringLiveAnalysis>False</RunAnalyzersDuringLiveAnalysis>
 
-    <EnableNETAnalyzers>False</EnableNETAnalyzers>
+		<RunAnalyzersDuringBuild>False</RunAnalyzersDuringBuild>
 
-    <OutputType>Library</OutputType>
-  </PropertyGroup>
 
-  <ItemGroup>
-    <None Remove="test.appsettings.json" />
-  </ItemGroup>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <Content Include="test.appsettings.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Content>
-  </ItemGroup>
+	<ItemGroup>
+		<None Remove="test.appsettings.json" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="CSRedisCore" Version="3.8.804" />
-    <PackageReference Include="MessagePack" Version="3.1.3" />
-    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.1" />
-    <PackageReference Include="ServiceStack.Redis" Version="8.6.0" />
-    <PackageReference Include="Testcontainers" Version="4.1.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.2" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.13.0" />
-    <PackageReference Include="NUnit" Version="4.3.2" />
-    <PackageReference Include="NUnit3TestAdapter" Version="4.6.0" />
-    <PackageReference Include="NUnit.Analyzers" Version="4.6.0">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="coverlet.collector" Version="6.0.4">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
+	<ItemGroup>
+		<Content Include="test.appsettings.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+		</Content>
+	</ItemGroup>
 
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.5.0" />
+	<ItemGroup>
+		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.22.1" />
+		<PackageReference Include="Testcontainers" Version="4.1.0" />
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.13.0" />
+		<PackageReference Include="NUnit" Version="4.3.2" />
+		<PackageReference Include="NUnit3TestAdapter" Version="4.6.0" />
+		<PackageReference Include="NUnit.Analyzers" Version="4.6.0">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="coverlet.collector" Version="6.0.4">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+	</ItemGroup>
 
-    <PackageReference Include="Z.EntityFramework.Extensions.EFCore" Version="9.103.7.1" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\passiwebapi\passiwebapi.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\passiwebapi\passiwebapi.csproj" />
+	</ItemGroup>
 
 </Project>

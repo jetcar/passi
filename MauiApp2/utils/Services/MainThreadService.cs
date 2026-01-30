@@ -1,5 +1,4 @@
 ﻿using MauiCommonServices;
-using MauiViewModels.utils.Services;
 
 namespace MauiApp2.utils.Services
 {

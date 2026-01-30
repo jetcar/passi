@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using MauiCommonServices;
-using MauiViewModels.utils.Services;
 using Newtonsoft.Json;
 
 namespace MauiTest.Tools;

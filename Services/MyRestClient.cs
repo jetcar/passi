@@ -1,13 +1,12 @@
 ﻿using ConfigurationManager;
-using Google.Cloud.Diagnostics.Common;
 using Newtonsoft.Json;
-
 using RestSharp;
 using Serilog;
 using System;
 using System.Diagnostics;
 using System.Net;
 using System.Threading.Tasks;
+using Google.Cloud.Diagnostics.Common;
 using GoogleTracer;
 
 namespace Services;

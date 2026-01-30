@@ -1,8 +1,5 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using System.Web;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using OpenIDC.Models;
@@ -57,10 +54,18 @@ namespace OpenIDC.Controllers
         {
             _logger.LogInformation("Handling authorization code exchange for client: {ClientId}", request.ClientId);
 
-            // Validate client
-            if (!await _clientStore.ValidateClientAsync(request.ClientId, request.ClientSecret))
+            // Validate PKCE is present (required for public clients)
+            if (string.IsNullOrEmpty(request.CodeVerifier))
             {
-                _logger.LogWarning("Client validation failed for: {ClientId}", request.ClientId);
+                _logger.LogWarning("Code verifier required but not provided");
+                return BadRequest(new { error = "invalid_request", error_description = "Code verifier required for PKCE" });
+            }
+
+            // Validate client exists (but don't require secret for PKCE-protected public clients)
+            var client = await _clientStore.GetClientAsync(request.ClientId);
+            if (client == null)
+            {
+                _logger.LogWarning("Client not found: {ClientId}", request.ClientId);
                 return Unauthorized(new { error = "invalid_client" });
             }
 
@@ -92,23 +97,20 @@ namespace OpenIDC.Controllers
 
             _logger.LogDebug("Authorization code validations passed. Subject: {Subject}", authCode.Subject);
 
-            // Validate PKCE if present
-            if (!string.IsNullOrEmpty(authCode.CodeChallenge))
+            // Validate PKCE (required)
+            if (string.IsNullOrEmpty(authCode.CodeChallenge))
             {
-                if (string.IsNullOrEmpty(request.CodeVerifier))
-                {
-                    _logger.LogWarning("Code verifier required but not provided");
-                    return BadRequest(new { error = "invalid_grant", error_description = "Code verifier required" });
-                }
-
-                if (!PkceHelper.ValidateCodeChallenge(request.CodeVerifier, authCode.CodeChallenge, authCode.CodeChallengeMethod))
-                {
-                    _logger.LogWarning("PKCE validation failed");
-                    return BadRequest(new { error = "invalid_grant", error_description = "Invalid code verifier" });
-                }
-
-                _logger.LogDebug("PKCE validation successful");
+                _logger.LogWarning("Authorization code missing code challenge");
+                return BadRequest(new { error = "invalid_grant", error_description = "Authorization code missing PKCE challenge" });
             }
+
+            if (!PkceHelper.ValidateCodeChallenge(request.CodeVerifier, authCode.CodeChallenge, authCode.CodeChallengeMethod))
+            {
+                _logger.LogWarning("PKCE validation failed");
+                return BadRequest(new { error = "invalid_grant", error_description = "Invalid code verifier" });
+            }
+
+            _logger.LogDebug("PKCE validation successful");
 
             // Revoke the authorization code (one-time use)
             await _authCodeStore.RevokeAuthorizationCodeAsync(request.Code);

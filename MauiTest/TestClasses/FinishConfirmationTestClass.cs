@@ -4,7 +4,6 @@ using MauiViewModels;
 using MauiViewModels.Registration;
 using MauiViewModels.Tools;
 using NUnit.Framework;
-using NUnit.Framework.Legacy;
 
 namespace MauiTest.TestClasses;
 

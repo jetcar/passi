@@ -4,8 +4,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MauiCommonServices;
-using MauiViewModels;
-using MauiViewModels.utils.Services;
 
 namespace MauiTest.Tools;
 

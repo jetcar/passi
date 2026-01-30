@@ -5,7 +5,6 @@ using MauiCommonServices;
 using MauiViewModels.StorageModels;
 using MauiViewModels.Tools;
 using MauiViewModels.utils.Services.Certificate;
-using Newtonsoft.Json;
 using WebApiDto;
 using WebApiDto.Auth;
 using Timer = System.Timers.Timer;

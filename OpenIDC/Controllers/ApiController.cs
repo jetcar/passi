@@ -12,7 +12,6 @@ using GoogleTracer;
 using WebApiDto;
 using WebApiDto.Auth;
 using WebApiDto.Auth.Dto;
-using WebApiDto.SignUp;
 using OpenIDC.Models;
 using OpenIDC.Services;
 
@@ -118,6 +117,7 @@ public class ApiController : ControllerBase
         [FromQuery] string client_id,
         [FromQuery] string redirect_uri,
         [FromQuery] string scope,
+        [FromQuery] string state,
         [FromQuery] string code_challenge,
         [FromQuery] string code_challenge_method)
     {
@@ -201,11 +201,7 @@ public class ApiController : ControllerBase
                                 code.Substring(0, Math.Min(8, code.Length)) + "...", redirect_uri);
 
                             // Return authorization code to redirect
-                            var redirectUrl = $"{redirect_uri}?code={code}";
-                            if (!string.IsNullOrEmpty(session.RandomString))
-                            {
-                                redirectUrl += $"&state={session.RandomString}";
-                            }
+                            var redirectUrl = $"{redirect_uri}?code={code}&state={state}";
 
                             return Ok(new { redirect_url = redirectUrl });
                         }

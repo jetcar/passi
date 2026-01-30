@@ -1,6 +1,5 @@
 using ConfigurationManager;
 using Microsoft.Extensions.Logging;
-using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using RestSharp;
 using Services;
@@ -12,7 +11,6 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
-using System.Web;
 
 namespace WebApp.Services
 {
@@ -23,9 +21,9 @@ namespace WebApp.Services
         private readonly ILogger<OidcClient> _logger;
         private readonly string _clientId;
         private readonly string _clientSecret;
-        private readonly string _redirectUri;
-        private readonly string _authorizationEndpoint;
-        private readonly string _tokenEndpoint;
+        private readonly string _discoveryUrl;
+        private string _authorizationEndpoint;
+        private string _tokenEndpoint;
 
         public OidcClient(
             AppSetting appSetting,
@@ -40,20 +38,40 @@ namespace WebApp.Services
             _clientId = Environment.GetEnvironmentVariable("ClientId") ?? appSetting["ClientId"];
             _clientSecret = Environment.GetEnvironmentVariable("ClientSecret") ?? appSetting["ClientSecret"];
 
-            _authorizationEndpoint = $"{openIdcUrl}/api/login";
-            _tokenEndpoint = $"{openIdcUrl}/connect/token";
-            _redirectUri = "https://" + (Environment.GetEnvironmentVariable("WebAppHost") ?? appSetting["WebAppHost"]) + "/callback/login/local";
+            _discoveryUrl = $"{openIdcUrl}/.well-known/openid-configuration";
         }
 
-        public string BuildAuthorizationUrl(string returnUrl, string state, string nonce)
+        private async Task<Dictionary<string, object>> GetDiscoveryDocumentAsync()
         {
-            var codeVerifier = GenerateCodeVerifier();
+            _logger.LogDebug("Fetching discovery document from: {DiscoveryUrl}", _discoveryUrl);
+
+            var request = new RestRequest(_discoveryUrl, Method.Get);
+            var result = await _myRestClient.ExecuteAsync(request);
+
+            if (!result.IsSuccessful)
+            {
+                _logger.LogError("Failed to fetch discovery document: {Content}", result.Content);
+                throw new InvalidOperationException($"Failed to fetch discovery document: {result.Content}");
+            }
+
+            return JsonConvert.DeserializeObject<Dictionary<string, object>>(result.Content);
+        }
+
+        public async Task<string> BuildAuthorizationUrlAsync(string redirectUri, string returnUrl, string state, string nonce, string codeVerifier)
+        {
+            // Fetch discovery document to get authorization endpoint
+            var discovery = await GetDiscoveryDocumentAsync();
+            _authorizationEndpoint = discovery["authorization_endpoint"]?.ToString();
+            _tokenEndpoint = discovery["token_endpoint"]?.ToString();
+
+            _logger.LogDebug("Using authorization_endpoint: {Endpoint}", _authorizationEndpoint);
+
             var codeChallenge = GenerateCodeChallenge(codeVerifier);
 
             var queryParams = new Dictionary<string, string>
             {
                 ["client_id"] = _clientId,
-                ["redirect_uri"] = _redirectUri,
+                ["redirect_uri"] = redirectUri,
                 ["response_type"] = "code",
                 ["scope"] = "openid profile email",
                 ["state"] = state,
@@ -69,17 +87,23 @@ namespace WebApp.Services
             return $"{_authorizationEndpoint}?{query}";
         }
 
-        public async Task<OidcTokenResponse> ExchangeCodeForTokensAsync(string code, string codeVerifier)
+        public async Task<OidcTokenResponse> ExchangeCodeForTokensAsync(string redirectUri, string code, string codeVerifier)
         {
+            // Ensure we have token endpoint from discovery
+            if (string.IsNullOrEmpty(_tokenEndpoint))
+            {
+                var discovery = await GetDiscoveryDocumentAsync();
+                _tokenEndpoint = discovery["token_endpoint"]?.ToString();
+            }
+
             _logger.LogInformation("Exchanging authorization code for tokens");
 
             var request = new RestRequest(_tokenEndpoint, Method.Post);
             request.AddHeader("Content-Type", "application/x-www-form-urlencoded");
             request.AddParameter("grant_type", "authorization_code");
             request.AddParameter("code", code);
-            request.AddParameter("redirect_uri", _redirectUri);
+            request.AddParameter("redirect_uri", redirectUri);
             request.AddParameter("client_id", _clientId);
-            request.AddParameter("client_secret", _clientSecret);
             request.AddParameter("code_verifier", codeVerifier);
 
             var result = await _myRestClient.ExecuteAsync(request);

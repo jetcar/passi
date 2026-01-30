@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -7,8 +6,8 @@ namespace WebApp.Services
 {
     public interface IOidcClient
     {
-        string BuildAuthorizationUrl(string returnUrl, string state, string nonce);
-        Task<OidcTokenResponse> ExchangeCodeForTokensAsync(string code, string codeVerifier);
+        Task<string> BuildAuthorizationUrlAsync(string redirectUri, string returnUrl, string state, string nonce, string codeVerifier);
+        Task<OidcTokenResponse> ExchangeCodeForTokensAsync(string redirectUri, string code, string codeVerifier);
         Task<ClaimsPrincipal> ValidateTokensAsync(OidcTokenResponse tokenResponse);
     }
 

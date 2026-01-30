@@ -1,5 +1,5 @@
 
-FROM common_image:latest AS build
+FROM jetcar/common_image:latest AS build
 
 FROM mcr.microsoft.com/dotnet/aspnet:9.0
 WORKDIR /myapp

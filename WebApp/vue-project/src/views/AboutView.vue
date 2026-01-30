@@ -4,44 +4,39 @@
             <div class="row justify-content-center">
                 <div class="col-lg-10">
                     <div class="text-center mb-5">
-                        <h1 class="display-4 fw-bold mb-3">About This Project</h1>
-                        <p class="lead text-muted">Building secure authentication solutions for the modern web</p>
+                        <h1 class="display-4 fw-bold mb-3">About Me</h1>
+                        <p class="lead text-muted">Solutions Architect & .NET Developer | Estonia</p>
+                        <p class="text-muted">
+                            <i class="bi bi-envelope me-2"></i>admin@passi.cloud
+                        </p>
                     </div>
 
                     <div class="card shadow-sm mb-4">
                         <div class="card-body p-5">
                             <h2 class="h3 mb-4">
-                                <i class="bi bi-lightbulb text-primary me-2"></i>
-                                The Vision
+                                <i class="bi bi-person text-primary me-2"></i>
+                                Professional Summary
                             </h2>
                             <p class="lead">
-                                Passi was born from a simple observation: passwords are fundamentally broken. They're hard to remember, 
-                                easy to steal, and create friction in the user experience. There had to be a better way.
+                                I am a highly experienced .NET developer and architect with over 15 years of expertise in designing, 
+                                developing, and implementing scalable software solutions.
                             </p>
                             <p>
-                                This project explores passwordless authentication using public-key cryptography and OAuth2 standards. 
-                                By combining certificate-based authentication with modern web protocols, we've created a system that's 
-                                both more secure and more convenient than traditional passwords.
+                                My career has been built on a deep understanding of the .NET ecosystem, from full-stack development 
+                                to cloud-based architecture and microservices. I thrive on solving complex technical challenges and 
+                                delivering innovative solutions that drive business success.
                             </p>
-                        </div>
-                    </div>
-
-                    <div class="card shadow-sm mb-4">
-                        <div class="card-body p-5">
-                            <h2 class="h3 mb-4">
-                                <i class="bi bi-gear text-primary me-2"></i>
-                                The Technology
-                            </h2>
                             <p>
-                                Passi is built on proven cryptographic principles and open standards:
+                                I leverage AI extensively in my development workflow, integrating AI agents and tools to maximize 
+                                productivity and code quality. My approach combines traditional software engineering expertise with 
+                                modern AI-assisted development practices.
                             </p>
-                            <ul class="feature-list">
-                                <li><strong>Public Key Infrastructure (PKI):</strong> Using X.509 certificates for authentication</li>
-                                <li><strong>OAuth2 & OpenID Connect:</strong> Standard protocols for secure authorization</li>
-                                <li><strong>Modern Web Stack:</strong> ASP.NET Core, Vue.js, Redis, and PostgreSQL</li>
-                                <li><strong>Mobile First:</strong> Native Android app for seamless authentication on the go</li>
-                                <li><strong>Open Source:</strong> Fully transparent and available on GitHub</li>
-                            </ul>
+                            <p class="mb-0">
+                                With a strong background in software architecture, I excel in leading development teams, optimizing 
+                                systems for performance, and ensuring seamless integration across diverse platforms. My passion for 
+                                continuous learning keeps me up-to-date with the latest industry trends and technologies, allowing 
+                                me to design forward-thinking, efficient systems.
+                            </p>
                         </div>
                     </div>
 
@@ -49,17 +44,24 @@
                         <div class="card-body p-5">
                             <h2 class="h3 mb-4">
                                 <i class="bi bi-code-slash text-primary me-2"></i>
-                                Open Source Philosophy
+                                Technical Expertise
                             </h2>
                             <p>
-                                Security through obscurity doesn't work. That's why Passi is completely open source. 
-                                Anyone can review the code, audit the security, and contribute improvements.
+                                Core competencies and technologies:
                             </p>
-                            <p class="mb-0">
-                                The project is hosted on <a href="https://github.com/jetcar/passi" target="_blank" class="text-decoration-none">
-                                GitHub <i class="bi bi-box-arrow-up-right"></i></a>, where you can explore the implementation, 
-                                report issues, or submit pull requests.
-                            </p>
+                            <ul class="feature-list">
+                                <li><strong>.NET Ecosystem:</strong> ASP.NET Core, .NET Framework, C#</li>
+                                <li><strong>Java:</strong> Java development, Spring Framework, Maven/Gradle</li>
+                                <li><strong>AI & Automation:</strong> AI agent development, AI-assisted coding, GitHub Copilot integration</li>
+                                <li><strong>Open Source:</strong> OpenID Connect (OIDC) implementations, OAuth2 authorization servers</li>
+                                <li><strong>Architecture:</strong> Microservices, Cloud-based architecture, Scalable systems</li>
+                                <li><strong>Databases:</strong> PostgreSQL, MS SQL, AuroraDB, Redis</li>
+                                <li><strong>Cloud & DevOps:</strong> Cloud migration, Docker, CI/CD pipelines</li>
+                                <li><strong>Frontend:</strong> Vue.js, WPF, JavaScript/TypeScript</li>
+                                <li><strong>APIs:</strong> RESTful services, OAuth2/OIDC</li>
+                                <li><strong>Mobile:</strong> Android (MAUI), native development</li>
+                                <li><strong>Authentication:</strong> PKI, Certificate-based systems, Passwordless solutions</li>
+                            </ul>
                         </div>
                     </div>
 
@@ -67,20 +69,23 @@
                         <div class="card-body p-5">
                             <h2 class="h3 mb-4">
                                 <i class="bi bi-rocket text-primary me-2"></i>
-                                The Journey
+                                Personal Projects
                             </h2>
                             <p>
-                                What started as an exploration of certificate-based authentication evolved into a full-featured 
-                                passwordless authentication platform. Along the way, several challenges were solved:
+                                <strong>Passi</strong> - A passwordless OAuth2 2FA authentication solution demonstrating my passion 
+                                for security and user experience:
                             </p>
                             <ul class="feature-list">
-                                <li>How to make certificate authentication user-friendly on mobile devices</li>
-                                <li>Integrating with existing OAuth2/OIDC ecosystems</li>
-                                <li>Building a secure yet performant authentication flow</li>
-                                <li>Creating developer-friendly APIs and documentation</li>
+                                <li>Certificate-based authentication with public-key cryptography</li>
+                                <li>Custom OpenID Connect (OIDC) server implementation from scratch</li>
+                                <li>OAuth2 authorization server with PKCE-only authentication</li>
+                                <li>Native Android application for mobile authentication</li>
+                                <li>Full-stack implementation: ASP.NET Core, Vue.js, PostgreSQL, Redis</li>
+                                <li>Open source projects available on GitHub</li>
                             </ul>
                             <p class="mb-0">
-                                Each challenge led to new insights and improvements, resulting in the system you see today.
+                                This project showcases my ability to bridge complex security requirements with practical, 
+                                user-friendly solutions—eliminating passwords while enhancing security.
                             </p>
                         </div>
                     </div>
@@ -89,23 +94,23 @@
                         <div class="card-body p-5">
                             <h2 class="h3 mb-4">
                                 <i class="bi bi-chat-quote text-primary me-2"></i>
-                                Why It Matters
+                                Why I Build
                             </h2>
                             <blockquote class="blockquote mb-0">
                                 <p class="fs-5">
-                                    "Authentication should be invisible when it works, and unbreakable when it matters. 
-                                    Passwords fail at both."
+                                    "The best technology is the technology you don't notice—until you realize 
+                                    you can't live without it."
                                 </p>
                             </blockquote>
                             <p class="mt-4 mb-0">
-                                Passi demonstrates that we can do better. By removing passwords from the equation, we eliminate 
-                                an entire class of security vulnerabilities while simultaneously improving the user experience.
+                                I create tools that disappear into the background, making people's digital lives easier 
+                                while keeping them safe. That's what drives me every day.
                             </p>
                         </div>
                     </div>
 
                     <div class="text-center mt-5">
-                        <h3 class="mb-4">Get Involved</h3>
+                        <h3 class="mb-4">Let's Connect</h3>
                         <div class="d-flex justify-content-center gap-3 flex-wrap">
                             <a href="https://github.com/jetcar/passi" target="_blank" 
                                class="btn btn-outline-dark btn-lg">

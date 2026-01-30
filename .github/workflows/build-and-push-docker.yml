@@ -38,6 +38,7 @@ jobs:
           context: .
           file: Dockerfile
           push: true
+          provenance: false
           tags: |
             common_image:latest
             common_image:${{ steps.version.outputs.sha_short }}
@@ -88,6 +89,7 @@ jobs:
           context: .
           file: ${{ matrix.dockerfile }}
           push: true
+          provenance: false
           tags: |
             ${{ matrix.image }}:latest
             ${{ matrix.image }}:${{ steps.version.outputs.sha_short }}

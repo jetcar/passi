@@ -40,10 +40,10 @@ jobs:
           push: true
           provenance: false
           tags: |
-            common_image:latest
-            common_image:${{ steps.version.outputs.sha_short }}
-            common_image:${{ steps.version.outputs.branch }}
-          cache-from: type=registry,ref=common_image:latest
+            jetcar/common_image:latest
+            jetcar/common_image:${{ steps.version.outputs.sha_short }}
+            jetcar/common_image:${{ steps.version.outputs.branch }}
+          cache-from: type=registry,ref=jetcar/common_image:latest
           cache-to: type=inline
 
   build-and-push:

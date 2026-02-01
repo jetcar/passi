@@ -34,6 +34,35 @@ namespace OpenIDC.Controllers
         [Consumes("application/x-www-form-urlencoded")]
         public async Task<IActionResult> Token([FromForm] TokenRequest request)
         {
+            // Extract client credentials from Basic Auth header if not in form
+            if (string.IsNullOrEmpty(request.ClientId) || string.IsNullOrEmpty(request.ClientSecret))
+            {
+                var authHeader = Request.Headers["Authorization"].ToString();
+                if (!string.IsNullOrEmpty(authHeader) && authHeader.StartsWith("Basic ", StringComparison.OrdinalIgnoreCase))
+                {
+                    try
+                    {
+                        var encodedCredentials = authHeader.Substring("Basic ".Length).Trim();
+                        var decodedCredentials = System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(encodedCredentials));
+                        var parts = decodedCredentials.Split(':', 2);
+
+                        if (parts.Length == 2)
+                        {
+                            if (string.IsNullOrEmpty(request.ClientId))
+                                request.ClientId = parts[0];
+                            if (string.IsNullOrEmpty(request.ClientSecret))
+                                request.ClientSecret = parts[1];
+
+                            _logger.LogDebug("Client credentials extracted from Basic Auth header");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Failed to parse Basic Auth header");
+                    }
+                }
+            }
+
             _logger.LogInformation("Token request received - GrantType: {GrantType}, ClientId: {ClientId}, Code: {Code}",
                 request.GrantType, request.ClientId, request.Code?.Substring(0, Math.Min(8, request.Code?.Length ?? 0)) + "...");
 

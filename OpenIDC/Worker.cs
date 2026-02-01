@@ -49,7 +49,7 @@ public class Worker : IHostedService
         var mailuClient = new OidcClient
         {
             ClientId = mailuId,
-            ClientSecret = _appSetting["MailluSecret"],
+            ClientSecret = _appSetting["MailuSecret"],
             DisplayName = "Maillu client application",
             RedirectUris = new List<string>
             {

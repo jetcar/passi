@@ -54,14 +54,7 @@ namespace OpenIDC.Controllers
         {
             _logger.LogInformation("Handling authorization code exchange for client: {ClientId}", request.ClientId);
 
-            // Validate PKCE is present (required for public clients)
-            if (string.IsNullOrEmpty(request.CodeVerifier))
-            {
-                _logger.LogWarning("Code verifier required but not provided");
-                return BadRequest(new { error = "invalid_request", error_description = "Code verifier required for PKCE" });
-            }
-
-            // Validate client exists (but don't require secret for PKCE-protected public clients)
+            // Validate client exists
             var client = await _clientStore.GetClientAsync(request.ClientId);
             if (client == null)
             {
@@ -71,7 +64,7 @@ namespace OpenIDC.Controllers
 
             _logger.LogDebug("Client validated successfully: {ClientId}", request.ClientId);
 
-            // Get authorization code
+            // Get authorization code first to check if PKCE was used
             var authCode = await _authCodeStore.GetAuthorizationCodeAsync(request.Code);
             if (authCode == null || authCode.ExpiresAt < DateTime.UtcNow)
             {
@@ -79,6 +72,29 @@ namespace OpenIDC.Controllers
                     request.Code?.Substring(0, Math.Min(8, request.Code?.Length ?? 0)) + "...",
                     authCode?.ExpiresAt < DateTime.UtcNow);
                 return BadRequest(new { error = "invalid_grant", error_description = "Invalid or expired authorization code" });
+            }
+
+            // Determine authentication method
+            bool hasPkce = !string.IsNullOrEmpty(authCode.CodeChallenge);
+            bool hasClientSecret = !string.IsNullOrEmpty(request.ClientSecret);
+            bool clientHasSecretConfigured = !string.IsNullOrEmpty(client.ClientSecret);
+
+            // Require at least one authentication method
+            if (!hasPkce && !hasClientSecret)
+            {
+                _logger.LogWarning("No authentication method provided (neither PKCE nor client secret)");
+                return BadRequest(new { error = "invalid_request", error_description = "Authentication required: provide either PKCE or client secret" });
+            }
+
+            // If client secret is provided, validate it
+            if (hasClientSecret)
+            {
+                if (!await _clientStore.ValidateClientAsync(request.ClientId, request.ClientSecret))
+                {
+                    _logger.LogWarning("Client secret validation failed for client: {ClientId}", request.ClientId);
+                    return Unauthorized(new { error = "invalid_client" });
+                }
+                _logger.LogDebug("Client authenticated with secret successfully");
             }
 
             // Validate client ID matches
@@ -97,20 +113,23 @@ namespace OpenIDC.Controllers
 
             _logger.LogDebug("Authorization code validations passed. Subject: {Subject}", authCode.Subject);
 
-            // Validate PKCE (required)
-            if (string.IsNullOrEmpty(authCode.CodeChallenge))
+            // Validate PKCE if it was used during authorization
+            if (hasPkce)
             {
-                _logger.LogWarning("Authorization code missing code challenge");
-                return BadRequest(new { error = "invalid_grant", error_description = "Authorization code missing PKCE challenge" });
-            }
+                if (string.IsNullOrEmpty(request.CodeVerifier))
+                {
+                    _logger.LogWarning("Code verifier required but not provided (PKCE was used during authorization)");
+                    return BadRequest(new { error = "invalid_request", error_description = "Code verifier required for PKCE" });
+                }
 
-            if (!PkceHelper.ValidateCodeChallenge(request.CodeVerifier, authCode.CodeChallenge, authCode.CodeChallengeMethod))
-            {
-                _logger.LogWarning("PKCE validation failed");
-                return BadRequest(new { error = "invalid_grant", error_description = "Invalid code verifier" });
-            }
+                if (!PkceHelper.ValidateCodeChallenge(request.CodeVerifier, authCode.CodeChallenge, authCode.CodeChallengeMethod))
+                {
+                    _logger.LogWarning("PKCE validation failed");
+                    return BadRequest(new { error = "invalid_grant", error_description = "Invalid code verifier" });
+                }
 
-            _logger.LogDebug("PKCE validation successful");
+                _logger.LogDebug("PKCE validation successful");
+            }
 
             // Revoke the authorization code (one-time use)
             await _authCodeStore.RevokeAuthorizationCodeAsync(request.Code);

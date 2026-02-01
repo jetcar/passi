@@ -35,6 +35,7 @@ public class Worker : IHostedService
             RedirectUris = new List<string>
             {
                 "https://localhost/callback/login/local",
+                "https://localhost/sampleapi/callback/login/local",
                 "https://host.docker.internal/callback/login/local",
                 "https://passi.cloud/callback/login/local"
             },
@@ -63,6 +64,25 @@ public class Worker : IHostedService
             CreatedAt = DateTime.UtcNow
         };
         await clientStore.CreateClientAsync(mailuClient);
+
+        // Initialize SampleApi client
+        var sampleApiId = _appSetting["SampleApiClientId"];
+        var sampleApiClient = new OidcClient
+        {
+            ClientId = sampleApiId,
+            ClientSecret = _appSetting["SampleApiSecret"],
+            DisplayName = "Sample API client application",
+            RedirectUris = new List<string>
+            {
+                "https://localhost/sampleapi/callback",
+                "https://host.docker.internal/sampleapi/callback",
+                "https://passi.cloud/sampleapi/callback"
+            },
+            AllowedScopes = new List<string> { "openid", "profile", "email", "api" },
+            RequiresPkce = false,
+            CreatedAt = DateTime.UtcNow
+        };
+        await clientStore.CreateClientAsync(sampleApiClient);
     }
 
 

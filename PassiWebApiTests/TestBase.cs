@@ -77,7 +77,7 @@ public class TestBase
             var containerBuilder = new ContainerBuilder()
                 .WithImage("postgres:15.5")
                 .WithPortBinding(5432, true)
-                .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(5432))
+                .WithWaitStrategy(Wait.ForUnixContainer().UntilExternalTcpPortIsAvailable(5432))
                 .WithEnvironment("POSTGRES_PASSWORD", pgpassword);
             if (!string.IsNullOrEmpty(dockerEndpoint))
                 containerBuilder.WithDockerEndpoint(dockerEndpoint);
@@ -98,7 +98,7 @@ public class TestBase
             var containerBuilder = new ContainerBuilder()
                 .WithImage("redis:latest")
                 .WithPortBinding(6379, true)
-                .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(6379));
+                .WithWaitStrategy(Wait.ForUnixContainer().UntilExternalTcpPortIsAvailable(6379));
             if (!string.IsNullOrEmpty(dockerEndpoint))
                 containerBuilder.WithDockerEndpoint(dockerEndpoint);
 

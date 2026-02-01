@@ -33,11 +33,6 @@ namespace WebApp
             {
                 ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
             };
-            var passiUrl = Environment.GetEnvironmentVariable("PassiUrl") ?? Configuration.GetValue<string>("AppSetting:PassiUrl");
-            var identityUrl = Environment.GetEnvironmentVariable("openIdcUrl") ?? Configuration.GetValue<string>("AppSetting:openIdcUrl");
-            var returnUrl = Environment.GetEnvironmentVariable("returnUrl") ?? Configuration.GetValue<string>("AppSetting:returnUrl");
-            var clientId = Environment.GetEnvironmentVariable("ClientId") ?? Configuration.GetValue<string>("AppSetting:ClientId");
-            var secret = Environment.GetEnvironmentVariable("ClientSecret") ?? Configuration.GetValue<string>("AppSetting:ClientSecret");
             var projectId = Environment.GetEnvironmentVariable("projectId") ?? Configuration.GetValue<string>("AppSetting:projectId");
 
             Tracer.SetupTracer(services, projectId, "PassiWebApp");

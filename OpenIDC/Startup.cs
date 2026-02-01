@@ -5,6 +5,7 @@ using System.Security.Cryptography.X509Certificates;
 using ConfigurationManager;
 using Google.Cloud.Diagnostics.Common;
 using GoogleTracer;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -54,11 +55,11 @@ public class Startup
         {
             // Load certificate from PEM files
             var cert = X509Certificate2.CreateFromPemFile(certPath, keyPath);
-            var signingKey = new X509SecurityKey(cert)
+            var securityKey = new X509SecurityKey(cert)
             {
                 KeyId = "default-key-" + DateTime.UtcNow.ToString("yyyyMMdd")
             };
-            signingCredentials = new SigningCredentials(signingKey, SecurityAlgorithms.RsaSha256);
+            signingCredentials = new SigningCredentials(securityKey, SecurityAlgorithms.RsaSha256);
             Log.Information("Loaded signing credentials from X.509 certificate");
         }
         else
@@ -82,6 +83,25 @@ public class Startup
         services.AddHttpContextAccessor();
         services.AddHttpClient();
         services.AddHealthChecks();
+
+        // Add Bearer authentication for userinfo endpoint
+        var signingKey = signingCredentials.Key;
+        services.AddAuthentication("Bearer")
+            .AddJwtBearer("Bearer", options =>
+            {
+                options.Authority = identityBaseUrl + "/openidc";
+                options.RequireHttpsMetadata = false;
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateAudience = false,
+                    ValidateIssuer = true,
+                    ValidIssuer = identityBaseUrl + "/openidc",
+                    IssuerSigningKey = signingKey,
+                    ValidateIssuerSigningKey = true
+                };
+            });
+
+        services.AddAuthorization();
 
         // Register the worker responsible for seeding clients
         services.AddHostedService<Worker>();

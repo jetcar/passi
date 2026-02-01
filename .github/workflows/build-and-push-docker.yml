@@ -62,6 +62,9 @@ jobs:
           - name: openidc
             dockerfile: OpenIDC/Dockerfile
             image: jetcar/openidc
+          - name: sampleapi
+            dockerfile: SampleApi/Dockerfile
+            image: jetcar/sampleapi
 
     steps:
       - name: Checkout code

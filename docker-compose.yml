@@ -20,7 +20,6 @@ services:
     restart: unless-stopped
     networks:
       - haproxy_net
-
   pgadmin:
     image: 'dpage/pgadmin4:8.5'
     container_name: pgadmin
@@ -138,7 +137,6 @@ services:
     networks:
       default:
         ipv4_address: 192.168.202.254
-
   admin:
     image: ${DOCKER_ORG:-ghcr.io/heviat}/${DOCKER_PREFIX:-}admin:${MAILU_VERSION:-2024.06}
     container_name: admin
@@ -197,7 +195,6 @@ services:
       mode: replicated
       replicas: 1
       endpoint_mode: vip
-
   oletools:
     image: ${DOCKER_ORG:-ghcr.io/heviat}/${DOCKER_PREFIX:-}oletools:${MAILU_VERSION:-2024.06}
     container_name: oletools

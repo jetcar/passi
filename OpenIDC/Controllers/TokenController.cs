@@ -120,7 +120,7 @@ namespace OpenIDC.Controllers
             {
                 if (!await _clientStore.ValidateClientAsync(request.ClientId, request.ClientSecret))
                 {
-                    _logger.LogWarning("Client secret validation failed for client: {ClientId}", request.ClientId);
+                    _logger.LogWarning("Client secret validation failed for client: {ClientId},{ClientSecret}", request.ClientId, request.ClientSecret);
                     return Unauthorized(new { error = "invalid_client" });
                 }
                 _logger.LogDebug("Client authenticated with secret successfully");

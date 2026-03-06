@@ -1,3 +1,5 @@
 build_dockers.bat
 build_dockers_push.bat
 docker-compose.yml
+WebApp\wwwroot\version.txt
+OpenIDC\wwwroot\version.txt

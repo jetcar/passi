@@ -1,4 +1,4 @@
-name: Build and Push Docker Images
+name: Build and Push Docker Images With Build Number
 
 on:
   push:
@@ -13,9 +13,18 @@ env:
 jobs:
   build-common:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Write build number to version files
+        run: |
+          BUILD_NUMBER="${{ github.run_number }}"
+          printf "%s\n" "$BUILD_NUMBER" > WebApp/wwwroot/version.txt
+          printf "%s\n" "$BUILD_NUMBER" > OpenIDC/wwwroot/version.txt
+          echo "WebApp version.txt=$(cat WebApp/wwwroot/version.txt)"
+          echo "OpenIDC version.txt=$(cat OpenIDC/wwwroot/version.txt)"
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -26,7 +35,7 @@ jobs:
           username: ${{ env.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Extract version
+      - name: Extract version tags
         id: version
         run: |
           echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
@@ -42,6 +51,7 @@ jobs:
           sbom: false
           tags: |
             jetcar/common_image:latest
+            jetcar/common_image:${{ github.run_number }}
             jetcar/common_image:${{ steps.version.outputs.sha_short }}
             jetcar/common_image:${{ steps.version.outputs.branch }}
           cache-from: type=registry,ref=jetcar/common_image:latest
@@ -76,12 +86,10 @@ jobs:
           username: ${{ env.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Extract version
+      - name: Extract version tags
         id: version
         run: |
-          # Get short commit SHA
           echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-          # Get branch name
           echo "branch=${GITHUB_REF##*/}" >> $GITHUB_OUTPUT
 
       - name: Build and push Docker image
@@ -94,6 +102,7 @@ jobs:
           sbom: false
           tags: |
             ${{ matrix.image }}:latest
+            ${{ matrix.image }}:${{ github.run_number }}
             ${{ matrix.image }}:${{ steps.version.outputs.sha_short }}
             ${{ matrix.image }}:${{ steps.version.outputs.branch }}
           cache-from: type=registry,ref=${{ matrix.image }}:latest

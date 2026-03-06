@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using ConfigurationManager;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using OpenIDC.Models;
 using OpenIDC.Services;
 
@@ -12,12 +14,14 @@ using OpenIDC.Services;
 public class Worker : IHostedService
 {
     private readonly IServiceProvider _serviceProvider;
-    private readonly AppSetting _appSetting;
+    private readonly IConfiguration _configuration;
+    private readonly ILogger<Worker> _logger;
 
-    public Worker(IServiceProvider serviceProvider, AppSetting appSetting)
+    public Worker(IServiceProvider serviceProvider, IConfiguration configuration, ILogger<Worker> logger)
     {
         _serviceProvider = serviceProvider;
-        _appSetting = appSetting;
+        _configuration = configuration;
+        _logger = logger;
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)
@@ -25,66 +29,68 @@ public class Worker : IHostedService
         await using var scope = _serviceProvider.CreateAsyncScope();
         var clientStore = scope.ServiceProvider.GetRequiredService<IClientStore>();
 
-        // Initialize SampleApp client
-        var sampleAppId = _appSetting["ClientId"];
-        var sampleAppClient = new OidcClient
-        {
-            ClientId = sampleAppId,
-            ClientSecret = _appSetting["ClientSecret"],
-            DisplayName = "SampleApp client application",
-            RedirectUris = new List<string>
-            {
-                "https://localhost/callback/login/local",
-                "https://localhost/sampleapi/callback/login/local",
-                "https://host.docker.internal/callback/login/local",
-                "https://passi.cloud/callback/login/local"
-            },
-            AllowedScopes = new List<string> { "openid", "profile", "email", "roles" },
-            RequiresPkce = true,
-            CreatedAt = DateTime.UtcNow
-        };
-        await clientStore.CreateClientAsync(sampleAppClient);
+        var configuredClients = _configuration
+            .GetSection("AppSetting:OidcClients")
+            .Get<List<OidcClientSeed>>()
+            ?? new List<OidcClientSeed>();
 
-        // Initialize Mailu client
-        var mailuId = _appSetting["MailuClientId"];
-        var mailuClient = new OidcClient
+        foreach (var configuredClient in configuredClients.Where(c => !string.IsNullOrWhiteSpace(c.ClientId)))
         {
-            ClientId = mailuId,
-            ClientSecret = _appSetting["MailuSecret"],
-            DisplayName = "Maillu client application",
-            RedirectUris = new List<string>
-            {
-                "https://localhost/webmail/oauth2/authorize",
-                "https://host.docker.internal/webmail/oauth2/authorize",
-                "https://passi.cloud/webmail/oauth2/authorize",
-                "https://passi.cloud/sso/login"
-            },
-            AllowedScopes = new List<string> { "openid", "profile", "email", "roles" },
-            RequiresPkce = false,
-            CreatedAt = DateTime.UtcNow
-        };
-        await clientStore.CreateClientAsync(mailuClient);
+            var resolvedClientSecret = ResolveClientSecret(configuredClient);
 
-        // Initialize SampleApi client
-        var sampleApiId = _appSetting["SampleApiClientId"];
-        var sampleApiClient = new OidcClient
-        {
-            ClientId = sampleApiId,
-            ClientSecret = _appSetting["SampleApiSecret"],
-            DisplayName = "Sample API client application",
-            RedirectUris = new List<string>
+            var client = new OidcClient
             {
-                "https://localhost/sampleapi/callback",
-                "https://host.docker.internal/sampleapi/callback",
-                "https://passi.cloud/sampleapi/callback"
-            },
-            AllowedScopes = new List<string> { "openid", "profile", "email", "api" },
-            RequiresPkce = false,
-            CreatedAt = DateTime.UtcNow
-        };
-        await clientStore.CreateClientAsync(sampleApiClient);
+                ClientId = configuredClient.ClientId,
+                ClientSecret = resolvedClientSecret,
+                DisplayName = configuredClient.DisplayName,
+                RedirectUris = configuredClient.RedirectUris ?? new List<string>(),
+                AllowedScopes = configuredClient.AllowedScopes ?? new List<string>(),
+                GrantTypes = configuredClient.GrantTypes ?? new List<string>(),
+                RequiresPkce = configuredClient.RequiresPkce,
+                ConsentType = configuredClient.ConsentType,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            await clientStore.CreateClientAsync(client);
+        }
+    }
+
+    private string ResolveClientSecret(OidcClientSeed configuredClient)
+    {
+        if (!string.IsNullOrWhiteSpace(configuredClient.ClientSecretEnvVar))
+        {
+            var envValue = Environment.GetEnvironmentVariable(configuredClient.ClientSecretEnvVar)
+                           ?? _configuration[configuredClient.ClientSecretEnvVar];
+
+            if (string.IsNullOrWhiteSpace(envValue))
+            {
+                _logger.LogWarning(
+                    "Client secret env var '{SecretEnvVar}' is not set for client '{ClientId}'. Falling back to ClientSecret in config.",
+                    configuredClient.ClientSecretEnvVar,
+                    configuredClient.ClientId);
+            }
+            else
+            {
+                return envValue;
+            }
+        }
+
+        return configuredClient.ClientSecret;
     }
 
 
     public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+}
+
+public class OidcClientSeed
+{
+    public string ClientId { get; set; }
+    public string ClientSecret { get; set; }
+    public string ClientSecretEnvVar { get; set; }
+    public string DisplayName { get; set; }
+    public List<string> RedirectUris { get; set; }
+    public List<string> AllowedScopes { get; set; }
+    public List<string> GrantTypes { get; set; }
+    public bool RequiresPkce { get; set; }
+    public string ConsentType { get; set; }
 }

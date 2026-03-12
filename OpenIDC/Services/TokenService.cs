@@ -15,6 +15,7 @@ namespace OpenIDC.Services
         string GenerateAccessToken(string subject, string clientId, List<string> scopes, Dictionary<string, string> claims);
         string GenerateIdToken(string subject, string clientId, List<string> scopes, Dictionary<string, string> claims, string nonce);
         ClaimsPrincipal ValidateToken(string token);
+        ClaimsPrincipal ValidateIdToken(string token, string expectedClientId);
         object GetJsonWebKeySet();
     }
 
@@ -66,7 +67,10 @@ namespace OpenIDC.Services
                 new Claim(JwtRegisteredClaimNames.Sub, subject),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64),
-                new Claim(JwtRegisteredClaimNames.Aud, clientId)
+                new Claim(JwtRegisteredClaimNames.Aud, clientId),
+                // Add azp (authorized party) claim - OIDC spec requires it when there are multiple audiences
+                // Including it for single-audience tokens is allowed and improves compatibility
+                new Claim(JwtRegisteredClaimNames.Azp, clientId)
             };
 
             if (!string.IsNullOrEmpty(nonce))
@@ -130,6 +134,66 @@ namespace OpenIDC.Services
             catch
             {
                 return null;
+            }
+        }
+
+        /// <summary>
+        /// Validates an ID token according to OIDC spec, including proper azp claim validation.
+        /// Per OIDC spec section 3.1.3.7:
+        /// - azp is REQUIRED when the ID token has multiple audiences (multiple aud values)
+        /// - azp is OPTIONAL for single-audience tokens
+        /// - When azp is present, it must match the client_id to which the token was issued
+        /// </summary>
+        public ClaimsPrincipal ValidateIdToken(string token, string expectedClientId)
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+
+            var validationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidIssuer = _issuer,
+                ValidateAudience = true,
+                ValidAudience = expectedClientId,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = _signingCredentials.Key
+            };
+
+            try
+            {
+                var principal = tokenHandler.ValidateToken(token, validationParameters, out SecurityToken validatedToken);
+                
+                // Additional azp validation per OIDC spec
+                var jwtToken = validatedToken as JwtSecurityToken;
+                if (jwtToken != null)
+                {
+                    // Get all audience claims
+                    var audiences = jwtToken.Audiences?.ToList() ?? new List<string>();
+                    
+                    // Get azp claim if present
+                    var azpClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Azp);
+                    
+                    // Per OIDC spec: azp is REQUIRED when there are multiple audiences
+                    if (audiences.Count > 1 && azpClaim == null)
+                    {
+                        throw new SecurityTokenValidationException(
+                            "ID token has multiple audiences but missing required 'azp' claim");
+                    }
+                    
+                    // If azp is present, it must match the expected client_id
+                    if (azpClaim != null && azpClaim.Value != expectedClientId)
+                    {
+                        throw new SecurityTokenValidationException(
+                            $"ID token 'azp' claim '{azpClaim.Value}' does not match expected client_id '{expectedClientId}'");
+                    }
+                }
+                
+                return principal;
+            }
+            catch (Exception ex)
+            {
+                // Log or handle validation errors as needed
+                throw new SecurityTokenValidationException($"ID token validation failed: {ex.Message}", ex);
             }
         }
 

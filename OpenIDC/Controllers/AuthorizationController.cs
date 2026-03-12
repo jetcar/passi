@@ -53,6 +53,7 @@ namespace OpenIDC.Controllers
         }
 
         [HttpGet("connect/userinfo")]
+        [HttpPost("connect/userinfo")]  // OIDC spec allows both GET and POST
         [Authorize]
         public Task<IActionResult> UserInfo()
         {

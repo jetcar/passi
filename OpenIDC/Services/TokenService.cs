@@ -162,24 +162,24 @@ namespace OpenIDC.Services
             try
             {
                 var principal = tokenHandler.ValidateToken(token, validationParameters, out SecurityToken validatedToken);
-                
+
                 // Additional azp validation per OIDC spec
                 var jwtToken = validatedToken as JwtSecurityToken;
                 if (jwtToken != null)
                 {
                     // Get all audience claims
                     var audiences = jwtToken.Audiences?.ToList() ?? new List<string>();
-                    
+
                     // Get azp claim if present
                     var azpClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Azp);
-                    
+
                     // Per OIDC spec: azp is REQUIRED when there are multiple audiences
                     if (audiences.Count > 1 && azpClaim == null)
                     {
                         throw new SecurityTokenValidationException(
                             "ID token has multiple audiences but missing required 'azp' claim");
                     }
-                    
+
                     // If azp is present, it must match the expected client_id
                     if (azpClaim != null && azpClaim.Value != expectedClientId)
                     {
@@ -187,7 +187,7 @@ namespace OpenIDC.Services
                             $"ID token 'azp' claim '{azpClaim.Value}' does not match expected client_id '{expectedClientId}'");
                     }
                 }
-                
+
                 return principal;
             }
             catch (Exception ex)

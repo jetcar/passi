@@ -103,6 +103,20 @@ public class Startup
 
         services.AddAuthorization();
 
+        // Add CORS policy to allow credentials for cross-origin OIDC flows
+        services.AddCors(options =>
+        {
+            options.AddPolicy("AllowOIDCClients", builder =>
+            {
+                builder
+                    .AllowAnyOrigin()  // In production, specify exact origins from client configuration
+                    .AllowAnyMethod()
+                    .AllowAnyHeader();
+                // Note: When using AllowAnyOrigin(), AllowCredentials() cannot be used together
+                // If you need credentials (cookies), you must specify exact origins instead
+            });
+        });
+
         // Register the worker responsible for seeding clients
         services.AddHostedService<Worker>();
     }
@@ -147,6 +161,9 @@ public class Startup
             });
 
             appBuilder.UseRouting();
+
+            // Enable CORS before authentication/authorization
+            appBuilder.UseCors("AllowOIDCClients");
 
             appBuilder.UseAuthentication();
             appBuilder.UseAuthorization();

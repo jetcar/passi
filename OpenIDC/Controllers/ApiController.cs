@@ -124,6 +124,22 @@ public class ApiController : ControllerBase
         _logger.LogInformation("Check endpoint called - SessionId: {SessionId}, ClientId: {ClientId}, RedirectUri: {RedirectUri}",
             sessionId, client_id, redirect_uri);
 
+        // Validate client and redirect_uri BEFORE processing authentication
+        var client = await _clientStore.GetClientAsync(client_id);
+        if (client == null)
+        {
+            _logger.LogWarning("Client not found: {ClientId}", client_id);
+            return BadRequest(new ApiResponseDto() { errors = "Invalid client_id" });
+        }
+
+        // Validate redirect_uri against registered URIs (exact match including protocol)
+        if (!IsValidRedirectUri(redirect_uri, client.RedirectUris))
+        {
+            _logger.LogWarning("Invalid redirect_uri: {RedirectUri} for client: {ClientId}. Registered URIs: {RegisteredUris}",
+                redirect_uri, client_id, string.Join(", ", client.RedirectUris ?? new List<string>()));
+            return BadRequest(new ApiResponseDto() { errors = "Invalid redirect_uri - must exactly match registered URI including protocol (http/https)" });
+        }
+
         var request = new RestRequest(_appSetting["checkRequest"] + "?sessionId=" + sessionId,
             Method.Get);
         var result = await _myRestClient.ExecuteAsync(request);
@@ -232,6 +248,51 @@ public class ApiController : ControllerBase
         return Ok(new { Continue = true });
     }
 
+    /// <summary>
+    /// Validates redirect URI against registered URIs with exact match including protocol.
+    /// Per OIDC spec, redirect URIs must match exactly including scheme (http/https).
+    /// </summary>
+    private bool IsValidRedirectUri(string redirectUri, List<string> registeredUris)
+    {
+        if (string.IsNullOrEmpty(redirectUri) || registeredUris == null || registeredUris.Count == 0)
+        {
+            return false;
+        }
+
+        // Exact match required (case-sensitive for path, case-insensitive for domain)
+        foreach (var registeredUri in registeredUris)
+        {
+            if (Uri.TryCreate(redirectUri, UriKind.Absolute, out var redirectUriObj) &&
+                Uri.TryCreate(registeredUri, UriKind.Absolute, out var registeredUriObj))
+            {
+                // Compare scheme (http vs https) - must match exactly
+                if (!string.Equals(redirectUriObj.Scheme, registeredUriObj.Scheme, StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                // Compare host (case-insensitive)
+                if (!string.Equals(redirectUriObj.Host, registeredUriObj.Host, StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                // Compare port
+                if (redirectUriObj.Port != registeredUriObj.Port)
+                {
+                    continue;
+                }
+
+                // Compare path (case-sensitive)
+                if (string.Equals(redirectUriObj.AbsolutePath, registeredUriObj.AbsolutePath, StringComparison.Ordinal))
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
 
 }
 

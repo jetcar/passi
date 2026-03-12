@@ -13,5 +13,6 @@ RUN chmod +x /scripts/*.sh
 # Create cron job for automatic renewal (runs twice daily at 2am and 2pm)
 RUN echo "0 2,14 * * * /scripts/renew-certs.sh >> /var/log/certbot-renew.log 2>&1" > /etc/crontabs/root
 
-# Keep container running with crond
-CMD ["sh", "-c", "crond -f -l 2"]
+# Override certbot entrypoint and run crond instead
+ENTRYPOINT []
+CMD ["crond", "-f", "-l", "2"]

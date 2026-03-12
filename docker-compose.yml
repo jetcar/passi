@@ -67,7 +67,7 @@ services:
       - ../creds:/home/creds
       - ../passi_identity_cert:/myapp/cert
       - ../.well-known:/myapp/wwwroot/.well-known
-      - ../assets:/myapp/wwwroot/assets
+      - ../public:/myapp/wwwroot/public
     depends_on:
       - database
     restart: always

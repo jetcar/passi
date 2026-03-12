@@ -20,20 +20,6 @@ services:
     restart: unless-stopped
     networks:
       - haproxy_net
-  pgadmin:
-    image: 'dpage/pgadmin4:8.5'
-    container_name: pgadmin
-    networks:
-      - haproxy_net
-      - database_net
-    env_file:
-      - ../passi_config/dev.env
-    restart: always
-    depends_on:
-      - database
-    volumes:
-      - ../passi_config/pgadmin/:/etc/pgadmin/:ro #config
-      - ../pgadmin/:/var/lib/pgadmin/:rw
   redis:
     image: 'redis/redis-stack-server:7.0.6-RC5'
     container_name: redis
@@ -56,6 +42,24 @@ services:
       - webapp
     networks:
       - haproxy_net
+  certbot:
+    container_name: certbot
+    build:
+      context: .
+      dockerfile: Dockerfile.certbot
+    volumes:
+      - ../letsencrypt:/etc/letsencrypt
+      - ../.well-known:/var/www/certbot
+      - ../passi_cert:/certs
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - DOMAIN=passi.cloud
+      - CERTBOT_EMAIL=admin@passi.cloud
+    networks:
+      - haproxy_net
+    restart: unless-stopped
+    depends_on:
+      - haproxy
   webapp:
     image: jetcar/webapp:latest
     networks:

@@ -21,19 +21,6 @@ services:
         source: ../db-data/
         target: /var/lib/postgresql/data/
 
-  pgadmin:
-    networks:
-      - haproxy_net
-    env_file:
-      - ./configs/variables/dev.env
-    volumes:
-      - ./configs/pgadmin/:/etc/pgadmin/:ro #config
-      - ../pgadmin/:/var/lib/pgadmin/:rw
-    deploy:
-      mode: replicated
-      replicas: 1
-      endpoint_mode: vip
-
   haproxy:
     networks:
       - haproxy_net

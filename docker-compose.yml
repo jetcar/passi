@@ -52,9 +52,8 @@ services:
       - ../.well-known:/var/www/certbot
       - ../passi_cert:/certs
       - /var/run/docker.sock:/var/run/docker.sock:ro
-    environment:
-      - DOMAIN=passi.cloud
-      - CERTBOT_EMAIL=admin@passi.cloud
+    env_file:
+      - ../passi_config/dev.env
     networks:
       - haproxy_net
     restart: unless-stopped

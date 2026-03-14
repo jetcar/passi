@@ -44,8 +44,7 @@ done
 echo ""
 echo "Requesting certificate..."
 # Request certificate with verbose output
-echo "Full command: $CMD -d <domains>"
-echo "Webroot: /var/www/certbot"
+echo "Certbot command: certbot certonly --webroot --webroot-path=/var/www/certbot -d $DOMAIN"
 echo ""
 eval $CMD -v
 

@@ -8,10 +8,6 @@ COPY scripts/renew-certs.sh /scripts/renew-certs.sh
 COPY scripts/deploy-cert.sh /scripts/deploy-cert.sh
 COPY scripts/request-cert.sh /scripts/request-cert.sh
 COPY scripts/entrypoint.sh /scripts/entrypoint.sh
-COPY scripts/monitor-webroot.sh /scripts/monitor-webroot.sh
-COPY scripts/diagnose-certbot.sh /scripts/diagnose-certbot.sh
-COPY scripts/test-manual-challenge.sh /scripts/test-manual-challenge.sh
-COPY scripts/certbot-with-monitoring.sh /scripts/certbot-with-monitoring.sh
 
 RUN chmod +x /scripts/*.sh
 

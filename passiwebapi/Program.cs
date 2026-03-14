@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Hosting;
 using System.Threading;
 using Microsoft.AspNetCore.Hosting;
-using Serilog;
+using Services;
 
 namespace passi_webapi
 {
@@ -15,11 +15,7 @@ namespace passi_webapi
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
-                .UseSerilog((hostingContext, loggerConfiguration) =>
-                {
-                    loggerConfiguration.ReadFrom.Configuration(hostingContext.Configuration);
-                    // loggerConfiguration.WriteTo.LogDNA(apiKey: SecretsLoader.GetValueFromKeyVault("dnaLogKey"), appName: "passiApi");
-                })
+                .UseLog4Net()
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<PassiApiStartup>();

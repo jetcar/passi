@@ -1,7 +1,7 @@
 ﻿using ConfigurationManager;
 using Newtonsoft.Json;
 using RestSharp;
-using Serilog;
+using log4net;
 using System;
 using System.Diagnostics;
 using System.Net;
@@ -14,18 +14,20 @@ namespace Services;
 [Profile]
 public class MyRestClient : IMyRestClient
 {
+    internal const int DefaultTimeoutSeconds = 10;
+    internal const int DefaultMaxRetryAttempts = 10;
+    internal const int DefaultRetryDelaySeconds = 1;
+
     private static RestClient _client;
     private AppSetting _appSetting;
     private IManagedTracer _tracer;
-    private readonly ILogger _logger;
+    private static readonly ILog _logger = LogManager.GetLogger(typeof(MyRestClient));
 
-    public MyRestClient(AppSetting appSetting, IManagedTracer tracer, ILogger logger)
+    public MyRestClient(AppSetting appSetting, IManagedTracer tracer)
     {
-        var passiUrl = Environment.GetEnvironmentVariable("PassiUrl") ?? _appSetting["PassiUrl"];
-
         _appSetting = appSetting;
+        var passiUrl = Environment.GetEnvironmentVariable("PassiUrl") ?? _appSetting["PassiUrl"];
         _tracer = tracer;
-        _logger = logger;
         var options = new RestClientOptions(passiUrl);
         if (Debugger.IsAttached)
             options.RemoteCertificateValidationCallback = (sender, certificate, chain, sslPolicyErrors) => true;
@@ -37,7 +39,7 @@ public class MyRestClient : IMyRestClient
     {
         var currentTraceId = _tracer.GetCurrentTraceId() ?? Guid.NewGuid().ToString();
         request.AddHeader("custom_trace_id", currentTraceId);
-        request.Timeout = TimeSpan.FromSeconds(10);
+        request.Timeout = TimeSpan.FromSeconds(DefaultTimeoutSeconds);
         _logger.Debug($"{_client.Options.BaseUrl} {request.Resource}: {JsonConvert.SerializeObject(request.Parameters)}");
         return _client.ExecuteWithRetryAsync(request);
     }
@@ -46,7 +48,7 @@ public class MyRestClient : IMyRestClient
 public static class RestClientExtensions
 {
     // Extension method to retry a request
-    public static async Task<RestResponse> ExecuteWithRetryAsync(this RestClient client, RestRequest request, int maxAttempts = 10, int delayBetweenAttemptsInSeconds = 1)
+    public static async Task<RestResponse> ExecuteWithRetryAsync(this RestClient client, RestRequest request, int maxAttempts = MyRestClient.DefaultMaxRetryAttempts, int delayBetweenAttemptsInSeconds = MyRestClient.DefaultRetryDelaySeconds)
     {
         if (client == null)
             throw new ArgumentNullException(nameof(client));
@@ -66,11 +68,7 @@ public static class RestClientExtensions
                 // Success, no need to retry
                 return response;
             }
-            else
-            {
-                // Log or handle non-success status codes as needed
-                Console.WriteLine($"Attempt {attempt} failed: {response.StatusCode}");
-            }
+            // Note: Logging handled by caller
 
             if (attempt < maxAttempts)
             {

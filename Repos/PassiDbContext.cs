@@ -5,8 +5,7 @@ using Models;
 using NodaTime;
 
 using Repos.CompiledModels;
-using Serilog;
-using Serilog.Core;
+using log4net;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,32 +20,31 @@ namespace Repos
         private AppSetting _appSetting;
         private CurrentContext _currentContext;
         public string _connectionString;
-        private ILogger _logger;
+        private static readonly ILog _logger = LogManager.GetLogger(typeof(PassiDbContext));
         private readonly Guid _id;
 
-        public PassiDbContext()
-        {
-            _logger = Logger.None;
-            var myConfiguration = new Dictionary<string, string>
-            {
-                {"AppSetting:DbName", "Passi"},
-                {"AppSetting:DbUser", "postgres"},
-                {"AppSetting:DbPassword", "test1"},
-                {"AppSetting:DbHost", "localhost"},
-                {"AppSetting:DbPort", "5432"},
-                {"AppSetting:DbSslMode", "prefer"},
-            };
-            var config = new ConfigurationBuilder().AddInMemoryCollection(myConfiguration).Build();
-            var appSetting = new AppSetting(config);
-            appSetting.PrefferAppsettingFile = true;
-            _appSetting = appSetting;
-        }
+        //public PassiDbContext()
+        //{
+        //    _logger = LogManager.GetLogger(typeof(PassiDbContext));
+        //    var myConfiguration = new Dictionary<string, string>
+        //    {
+        //        {"AppSetting:DbName", "Passi"},
+        //        {"AppSetting:DbUser", "postgres"},
+        //        {"AppSetting:DbPassword", "test1"},
+        //        {"AppSetting:DbHost", "database"},
+        //        {"AppSetting:DbPort", "5432"},
+        //        {"AppSetting:DbSslMode", "prefer"},
+        //    };
+        //    var config = new ConfigurationBuilder().AddInMemoryCollection(myConfiguration).Build();
+        //    var appSetting = new AppSetting(config);
+        //    appSetting.PrefferAppsettingFile = true;
+        //    _appSetting = appSetting;
+        //}
 
-        public PassiDbContext(AppSetting appSetting, CurrentContext currentContext, ILogger logger)
+        public PassiDbContext(AppSetting appSetting, CurrentContext currentContext)
         {
             _appSetting = appSetting;
             _currentContext = currentContext;
-            _logger = logger;
             _id = Guid.NewGuid();
         }
 

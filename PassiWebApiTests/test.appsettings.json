@@ -8,7 +8,6 @@
     }
   },
   "Urls": "http://0.0.0.0:5004",
-
   "AllowedHosts": "*",
   "AppSetting": {
     "DoNotSendMail": "false",
@@ -29,25 +28,5 @@
     "redisPort": "6379",
     "IsTest": "false",
     "projectId": "projectId"
-  },
-
-  "Serilog": {
-    "Using": [ "Serilog.Sinks.Console", "Serilog.Sinks.GoogleCloudLogging" ],
-    "MinimumLevel": "Verbose",
-    "WriteTo": [
-      { "Name": "Console" },
-      {
-        "Name": "GoogleCloudLogging",
-        "Args": {
-          "projectID": "passi-165ca",
-          "restrictedToMinimumLevel": "Information"
-        }
-      }
-    ],
-    "Enrich": [ "FromLogContext", "WithMachineName", "WithThreadId" ],
-
-    "Properties": {
-      "Application": "Passi webapi"
-    }
   }
 }

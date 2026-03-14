@@ -13,8 +13,8 @@ using Services;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using ILogger = Serilog.ILogger;
-using Logger = Serilog.Core.Logger;
+using log4net;
+using ILogger = log4net.ILog;
 
 namespace PassiWebApiTests;
 
@@ -29,7 +29,7 @@ public class TestBase
         IServiceCollection services = new ServiceCollection();
         services.AddScoped<SignUpController>();
         services.AddScoped<CertificateController>();
-        services.AddSingleton<ILogger>(Logger.None);
+        services.AddSingleton<ILog>(LogManager.GetLogger(typeof(TestBase)));
         //IConfiguration configuration = new ConfigurationBuilder().AddInMemoryCollection(myConfiguration).Build();
         IConfiguration configuration = new ConfigurationBuilder().AddJsonFile("test.appsettings.json").Build();
 

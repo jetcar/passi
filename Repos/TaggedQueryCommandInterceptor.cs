@@ -1,4 +1,4 @@
-﻿using Serilog;
+﻿using log4net;
 using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
@@ -8,11 +8,10 @@ namespace Repos
 {
     public class TaggedQueryCommandInterceptor : DbCommandInterceptor
     {
-        private ILogger _logger;
+        private static readonly ILog _logger = LogManager.GetLogger(typeof(TaggedQueryCommandInterceptor));
 
-        public TaggedQueryCommandInterceptor(ILogger logger)
+        public TaggedQueryCommandInterceptor()
         {
-            _logger = logger;
         }
 
         public override DbDataReader ReaderExecuted(DbCommand command, CommandExecutedEventData eventData, DbDataReader result)

@@ -12,22 +12,21 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
-using Serilog;
-using Serilog.Events;
+using log4net;
+using Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configure Serilog
-Log.Logger = new LoggerConfiguration()
-    .MinimumLevel.Information()
-    .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
-    .Enrich.FromLogContext()
-    .WriteTo.Console()
-    .CreateLogger();
+// Configure Log4net
+var logRepository = LogManager.GetRepository(System.Reflection.Assembly.GetEntryAssembly());
+var configFile = new System.IO.FileInfo("../log4net.config");
+if (configFile.Exists)
+{
+    log4net.Config.XmlConfigurator.Configure(logRepository, configFile);
+}
 
-builder.Host.UseSerilog();
-
-Log.Information("Starting SampleApi application...");
+var log = LogManager.GetLogger(typeof(Program));
+log.Info("Starting SampleApi application...");
 
 builder.WebHost.ConfigureKestrel(options =>
 {
@@ -55,10 +54,10 @@ var virtualPath = Environment.GetEnvironmentVariable("VirtualPath")
     ?? configuration["AppSetting:VirtualPath"]
     ?? "";
 
-Log.Information("OIDC Configuration - Authority: {OidcUrl}, Audience: {Audience}", oidcUrl, audience);
+log.Info($"OIDC Configuration - Authority: {oidcUrl}, Audience: {audience}");
 if (!string.IsNullOrEmpty(virtualPath))
 {
-    Log.Information("Virtual path configured: {VirtualPath}", virtualPath);
+    log.Info($"Virtual path configured: {virtualPath}");
 }
 
 builder.Services.AddAuthentication(options =>
@@ -101,17 +100,17 @@ builder.Services.AddAuthentication(options =>
         {
             OnRedirectToIdentityProvider = context =>
             {
-                Log.Information("Redirecting to OIDC provider");
+                log.Info("Redirecting to OIDC provider");
                 return Task.CompletedTask;
             },
             OnAuthenticationFailed = context =>
             {
-                Log.Error("Authentication failed: {Error}", context.Exception.Message);
+                log.Error("Authentication failed", context.Exception);
                 return Task.CompletedTask;
             },
             OnTokenValidated = context =>
             {
-                Log.Information("Token validated for user: {User}", context.Principal?.Identity?.Name ?? "Unknown");
+                log.Info($"Token validated for user: {context.Principal?.Identity?.Name ?? "Unknown"}");
                 return Task.CompletedTask;
             }
         };
@@ -121,26 +120,17 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
-Log.Information("Application built successfully");
+log.Info("Application built successfully");
 
 // Configure virtual path if specified
 if (!string.IsNullOrEmpty(virtualPath))
 {
     app.UsePathBase(new PathString(virtualPath));
-    Log.Information("Using path base: {PathBase}", virtualPath);
+    log.Info($"Using path base: {virtualPath}");
 }
 
-// Use Serilog request logging (following solution pattern)
-app.UseSerilogRequestLogging(options =>
-{
-    options.MessageTemplate = "Handled {RequestPath}";
-    options.GetLevel = (httpContext, elapsed, ex) => LogEventLevel.Verbose;
-    options.EnrichDiagnosticContext = (diagnosticContext, httpContext) =>
-    {
-        diagnosticContext.Set("RequestHost", httpContext.Request.Host.Value);
-        diagnosticContext.Set("RequestScheme", httpContext.Request.Scheme);
-    };
-});
+// Use correlation ID middleware for request tracking
+app.UseCorrelationId();
 
 // Configure the HTTP request pipeline
 app.UseSwagger();
@@ -194,6 +184,6 @@ app.MapGet("/api/user", [Authorize] (HttpContext context) =>
     .WithName("UserInfo")
     .WithOpenApi();
 
-Log.Information("Application starting on port 5006");
-Log.Information("Swagger UI available at /swagger");
+log.Info("Application starting on port 5006");
+log.Info("Swagger UI available at /swagger");
 app.Run();

@@ -12,6 +12,12 @@ services:
         source: /mnt/newdisk/db-data3/
         target: /var/lib/postgresql/data/
     restart: always
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
   porkbun-ddns:
     image: "mietzen/porkbun-ddns:latest"
     container_name: porkbun-ddns
@@ -72,7 +78,8 @@ services:
       - ../wwwroot/.well-known:/myapp/wwwroot/.well-known
       - ../public:/myapp/wwwroot/public
     depends_on:
-      - database
+      database:
+        condition: service_healthy
     restart: always
   openidc:
     image: jetcar/openidc:latest
@@ -87,8 +94,10 @@ services:
       - ../passi_identity_cert:/myapp/cert
       - ../creds:/home/creds
     depends_on:
-      - database
-      - passiwebapi
+      database:
+        condition: service_healthy
+      passiwebapi:
+        condition: service_started
     restart: always
   passiwebapi:
     image: jetcar/passiwebapi:latest
@@ -97,8 +106,10 @@ services:
       - database_net
       - redis_net
     depends_on:
-      - database
-      - redis
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_started
     env_file:
       - ../passi_config/dev.env
     volumes:

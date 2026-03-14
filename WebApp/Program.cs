@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Hosting;
 using System.Threading;
 using Microsoft.AspNetCore.Hosting;
-using Serilog;
+using Services;
 
 namespace WebApp
 {
@@ -16,11 +16,7 @@ namespace WebApp
 
         public static IHostBuilder CreateWebHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
-                .UseSerilog((hostingContext, loggerConfiguration) =>
-                {
-                    loggerConfiguration.ReadFrom.Configuration(hostingContext.Configuration);
-                    //loggerConfiguration.WriteTo.LogDNA(apiKey: SecretsLoader.GetValueFromKeyVault("dnaLogKey"), appName: "samplewebapp");
-                })
+                .UseLog4Net()
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();

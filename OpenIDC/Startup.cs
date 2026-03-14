@@ -13,8 +13,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
-using Serilog;
-using Serilog.Events;
+using log4net;
 using Services;
 using RedisClient;
 using OpenIDC.Services;
@@ -50,6 +49,7 @@ public class Startup
         var keyPath = "/myapp/cert/certs/privatekey.pem";
 
         SigningCredentials signingCredentials;
+        var log = LogManager.GetLogger(typeof(Startup));
 
         if (File.Exists(certPath) && File.Exists(keyPath))
         {
@@ -60,12 +60,12 @@ public class Startup
                 KeyId = "default-key-" + DateTime.UtcNow.ToString("yyyyMMdd")
             };
             signingCredentials = new SigningCredentials(securityKey, SecurityAlgorithms.RsaSha256);
-            Log.Information("Loaded signing credentials from X.509 certificate");
+            log.Info("Loaded signing credentials from X.509 certificate");
         }
         else
         {
             // Fallback: Generate RSA key for development
-            Log.Warning("Certificate files not found, generating RSA key for signing (not recommended for production)");
+            log.Warn("Certificate files not found, generating RSA key for signing (not recommended for production)");
             var rsa = RSA.Create(2048);
             var rsaKey = new RsaSecurityKey(rsa)
             {
@@ -73,6 +73,8 @@ public class Startup
             };
             signingCredentials = new SigningCredentials(rsaKey, SecurityAlgorithms.RsaSha256);
         }
+
+        log.Info("Signing credentials configured successfully");
 
         services.AddSingleton(signingCredentials);
         services.AddSingleton<ITokenService, TokenService>();
@@ -132,21 +134,7 @@ public class Startup
         {
             Tracer.CurrentTracer = app.ApplicationServices.GetService<IManagedTracer>();
 
-            appBuilder.UseSerilogRequestLogging(options =>
-            {
-                // Customize the message template
-                options.MessageTemplate = "Handled {RequestPath}";
-
-                // Emit debug-level events instead of the defaults
-                options.GetLevel = (httpContext, elapsed, ex) => LogEventLevel.Verbose;
-
-                // Attach additional properties to the request completion event
-                options.EnrichDiagnosticContext = (diagnosticContext, httpContext) =>
-                {
-                    diagnosticContext.Set("RequestHost", httpContext.Request.Host.Value);
-                    diagnosticContext.Set("RequestScheme", httpContext.Request.Scheme);
-                };
-            });
+            appBuilder.UseCorrelationId(); // Add correlation ID tracking for all requests
 
             // Serve static files BEFORE routing (for CSS, JS, images, etc.)
             appBuilder.UseStaticFiles(new StaticFileOptions()

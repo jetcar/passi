@@ -7,12 +7,11 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
-using Serilog.Events;
 using Services;
 using System;
 using System.Net.Http;
 using Google.Cloud.Diagnostics.Common;
-using Serilog;
+using Services;
 using WebApp.Services;
 
 namespace WebApp
@@ -82,7 +81,8 @@ namespace WebApp
 
             services.AddHttpContextAccessor();
             services.AddHttpClient();
-            services.AddHealthChecks();
+            services.AddHealthChecks()
+                .AddDbContextCheck<WebAppDbContext>("database", tags: new[] { "db", "ready" });
             services.AddMvc(x => { x.EnableEndpointRouting = false; });
 
             services.AddSwaggerGen(c =>
@@ -122,21 +122,7 @@ namespace WebApp
 
                 applicationBuilder.UseAuthentication();
                 applicationBuilder.UseAuthorization();
-                applicationBuilder.UseSerilogRequestLogging(options =>
-                            {
-                                // Customize the message template
-                                options.MessageTemplate = "Handled {RequestPath}";
-
-                                // Emit debug-level events instead of the defaults
-                                options.GetLevel = (httpContext, elapsed, ex) => LogEventLevel.Verbose;
-
-                                // Attach additional properties to the request completion event
-                                options.EnrichDiagnosticContext = (diagnosticContext, httpContext) =>
-                                {
-                                    diagnosticContext.Set("RequestHost", httpContext.Request.Host.Value);
-                                    diagnosticContext.Set("RequestScheme", httpContext.Request.Scheme);
-                                };
-                            });
+                applicationBuilder.UseCorrelationId(); // Add correlation ID tracking for all requests
 
                 applicationBuilder.UseHealthChecks("/health");
                 applicationBuilder.UseSwagger();

@@ -1,7 +1,7 @@
 ﻿using ConfigurationManager;
 using Microsoft.AspNetCore.Mvc;
 using Repos;
-using Serilog;
+using log4net;
 using Services;
 using System;
 using System.Threading.Tasks;
@@ -20,15 +20,14 @@ namespace passi_webapi.Controllers
         private IUserService _userService;
         private ICertValidator _certValidator;
         private AppSetting _appSetting;
-        private ILogger _logger;
+        private static readonly ILog _logger = LogManager.GetLogger(typeof(SignUpController));
 
-        public SignUpController(IUserRepository userRepository, IUserService userService, ICertValidator certValidator, AppSetting appSetting, ILogger logger)
+        public SignUpController(IUserRepository userRepository, IUserService userService, ICertValidator certValidator, AppSetting appSetting)
         {
             _userRepository = userRepository;
             _userService = userService;
             _certValidator = certValidator;
             _appSetting = appSetting;
-            _logger = logger;
         }
 
         [HttpPost, Route("signup")]

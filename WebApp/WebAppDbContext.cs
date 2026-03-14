@@ -1,6 +1,6 @@
 ﻿using ConfigurationManager;
 using Microsoft.Extensions.Configuration;
-using Serilog;
+using log4net;
 using System;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
@@ -11,31 +11,30 @@ namespace WebApp
     [GoogleTracer.Profile]
     public class WebAppDbContext : DbContext, IDataProtectionKeyContext
     {
-        private ILogger _logger;
+        private static readonly ILog _logger = LogManager.GetLogger(typeof(WebAppDbContext));
         private AppSetting _appSetting;
         private string _connectionString;
 
-        public WebAppDbContext()
-        {
-            //_logger = logger;
-            var myConfiguration = new Dictionary<string, string>
-            {
-                {"AppSetting:DbName", "WebApp"},
-                {"AppSetting:DbUser", "postgres"},
-                {"AppSetting:DbPassword", "q"},
-                {"AppSetting:DbHost", "localhost"},
-                {"AppSetting:DbPort", "5432"},
-            };
-            var config = new ConfigurationBuilder().AddInMemoryCollection(myConfiguration).Build();
-            var appSetting = new AppSetting(config);
-            appSetting.PrefferAppsettingFile = true;
-            _appSetting = appSetting;
-        }
+        //public WebAppDbContext()
+        //{
+        //    //_logger = logger;
+        //    var myConfiguration = new Dictionary<string, string>
+        //    {
+        //        {"AppSetting:DbName", "WebApp"},
+        //        {"AppSetting:DbUser", "postgres"},
+        //        {"AppSetting:DbPassword", "q"},
+        //        {"AppSetting:DbHost", "database"},
+        //        {"AppSetting:DbPort", "5432"},
+        //    };
+        //    var config = new ConfigurationBuilder().AddInMemoryCollection(myConfiguration).Build();
+        //    var appSetting = new AppSetting(config);
+        //    appSetting.PrefferAppsettingFile = true;
+        //    _appSetting = appSetting;
+        //}
 
-        public WebAppDbContext(AppSetting appSetting, ILogger logger)
+        public WebAppDbContext(AppSetting appSetting)
         {
             _appSetting = appSetting;
-            _logger = logger;
         }
 
         public DbSet<DataProtectionKey> DataProtectionKeys { get; set; }

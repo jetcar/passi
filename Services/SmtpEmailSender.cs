@@ -4,21 +4,25 @@ using System.Net;
 using GoogleTracer;
 using System.Net.Mail;
 using System.Threading;
-using Serilog;
+using log4net;
 
 namespace Services
 {
     [Profile]
     public class SmtpEmailSender : IEmailSender
     {
+        private const int MaxRetryAttempts = 10;
+        private const int RetryDelayMilliseconds = 1000;
+        private const string SuccessResult = "ok";
+        private const string FailureResult = "failed";
+
         private SmtpClient client;
         private AppSetting _appSetting;
-        private readonly ILogger _logger;
+        private static readonly ILog _logger = LogManager.GetLogger(typeof(SmtpEmailSender));
 
-        public SmtpEmailSender(AppSetting appSetting, ILogger logger)
+        public SmtpEmailSender(AppSetting appSetting)
         {
             _appSetting = appSetting;
-            _logger = logger;
             var host = _appSetting["smtpHost"];
             var boolean = Convert.ToBoolean(_appSetting["DoNotSendMail"]);
             if (!boolean || (!string.IsNullOrEmpty(host) && host != "-"))
@@ -35,7 +39,7 @@ namespace Services
             if (Convert.ToBoolean(_appSetting["DoNotSendMail"]))
                 email = _appSetting["testMail"];
             if (email == null)
-                return "ok";
+                return SuccessResult;
             var message = new MailMessage(_appSetting["emailFrom"], email)
             {
                 IsBodyHtml = true,
@@ -45,22 +49,22 @@ namespace Services
                 $"<tr><td><b>{code}</b></td></tr>" +
                 "</table></body></html>"
             };
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < MaxRetryAttempts; i++)
             {
                 try
                 {
                     client.Send(message);
-                    return "ok";
+                    return SuccessResult;
                 }
                 catch (Exception e)
                 {
-                    _logger.Error(e, e.Message);
-                    Thread.Sleep(1000);
+                    _logger.Error(e.Message, e);
+                    Thread.Sleep(RetryDelayMilliseconds);
                 }
 
             }
 
-            return "failed";
+            return FailureResult;
         }
 
         public string SendDeletingEmail(string email, string code)
@@ -68,7 +72,7 @@ namespace Services
             if (Convert.ToBoolean(_appSetting["DoNotSendMail"]))
                 email = _appSetting["testMail"];
             if (email == null)
-                return "ok";
+                return SuccessResult;
             var message = new MailMessage(_appSetting["smtpUsername"], email)
             {
                 IsBodyHtml = true,
@@ -84,10 +88,10 @@ namespace Services
             }
             catch (Exception e)
             {
-                _logger.Error(e, e.Message);
-                return "failed";
+                _logger.Error(e.Message, e);
+                return FailureResult;
             }
-            return "ok";
+            return SuccessResult;
         }
     }
 }

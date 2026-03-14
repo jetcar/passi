@@ -12,14 +12,12 @@ using Microsoft.OpenApi.Models;
 using Models;
 using NodaTime;
 using Repos;
-using Serilog.Events;
 using Services;
 using System;
 using System.Linq;
 using Google.Cloud.Diagnostics.Common;
 using NotificationsService;
 using RedisClient;
-using Serilog;
 using WebApiDto.Auth.Dto;
 
 namespace passi_webapi
@@ -95,7 +93,8 @@ namespace passi_webapi
                         options.ExpireTimeSpan = System.TimeSpan.FromDays(30);
                     });
             services.AddHttpContextAccessor();
-            services.AddHealthChecks();
+            services.AddHealthChecks()
+                .AddDbContextCheck<PassiDbContext>("database", tags: new[] { "db", "ready" });
             services.AddAntiforgery();
             services.AddSwaggerGen(c =>
             {
@@ -118,6 +117,7 @@ namespace passi_webapi
                 applicationBuilder.UseRouting();
 
                 //applicationBuilder.UseMiddleware<MyAuthenticationMiddleware>();
+                applicationBuilder.UseCorrelationId(); // Add correlation ID tracking for all requests
                 applicationBuilder.UseMiddleware<ErrorHandlerMiddleware>();
                 applicationBuilder.UseForwardedHeaders();
                 applicationBuilder.UseAuthentication();
@@ -127,21 +127,6 @@ namespace passi_webapi
                     {
                         Secure = CookieSecurePolicy.Always
                     });
-                applicationBuilder.UseSerilogRequestLogging(options =>
-                {
-                    // Customize the message template
-                    options.MessageTemplate = "Handled {RequestPath}";
-
-                    // Emit debug-level events instead of the defaults
-                    options.GetLevel = (httpContext, elapsed, ex) => LogEventLevel.Verbose;
-
-                    // Attach additional properties to the request completion event
-                    options.EnrichDiagnosticContext = (diagnosticContext, httpContext) =>
-                    {
-                        diagnosticContext.Set("RequestHost", httpContext.Request.Host.Value);
-                        diagnosticContext.Set("RequestScheme", httpContext.Request.Scheme);
-                    };
-                });
                 applicationBuilder.UseEndpoints(endpoints =>
                 {
                     endpoints.MapControllers();

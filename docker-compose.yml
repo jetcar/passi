@@ -49,7 +49,7 @@ services:
       dockerfile: Dockerfile.certbot
     volumes:
       - ../letsencrypt:/etc/letsencrypt
-      - ../.well-known:/var/www/certbot
+      - ../wwwroot:/var/www/certbot
       - ../passi_cert:/certs
       - /var/run/docker.sock:/var/run/docker.sock:ro
     env_file:
@@ -69,7 +69,7 @@ services:
     volumes:
       - ../creds:/home/creds
       - ../passi_identity_cert:/myapp/cert
-      - ../.well-known:/myapp/wwwroot/.well-known
+      - ../wwwroot/.well-known:/myapp/wwwroot/.well-known
       - ../public:/myapp/wwwroot/public
     depends_on:
       - database

@@ -26,6 +26,15 @@ else
     echo "✓ Using Let's Encrypt PRODUCTION server"
 fi
 
+echo ""
+echo "Checking webroot setup..."
+echo "Webroot path: /var/www/certbot"
+ls -la /var/www/certbot/ || echo "ERROR: Webroot doesn't exist!"
+mkdir -p /var/www/certbot/.well-known/acme-challenge
+echo "test" > /var/www/certbot/.well-known/acme-challenge/pre-flight-test.txt
+echo "Pre-flight test file created"
+ls -la /var/www/certbot/.well-known/acme-challenge/
+
 # Add all domains
 for d in $DOMAIN; do
     CMD="$CMD -d $d"
@@ -34,8 +43,8 @@ done
 
 echo ""
 echo "Requesting certificate..."
-# Request certificate
-eval $CMD
+# Request certificate with verbose output
+eval $CMD -v
 
 if [ $? -eq 0 ]; then
     echo ""

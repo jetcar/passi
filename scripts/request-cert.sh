@@ -44,6 +44,9 @@ done
 echo ""
 echo "Requesting certificate..."
 # Request certificate with verbose output
+echo "Full command: $CMD -d <domains>"
+echo "Webroot: /var/www/certbot"
+echo ""
 eval $CMD -v
 
 if [ $? -eq 0 ]; then

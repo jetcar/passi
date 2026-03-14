@@ -15,6 +15,13 @@ touch /var/log/certbot-renew.log
 echo "✓ Directories ready"
 echo ""
 
+# Start simple HTTP server for ACME challenges on port 80
+echo "Starting HTTP server for ACME challenges on port 80..."
+httpd -f -p 80 -h /var/www/certbot &
+HTTPD_PID=$!
+echo "✓ HTTP server running (PID: $HTTPD_PID)"
+echo ""
+
 # Check if certificates already exist
 DOMAIN_DIR="/etc/letsencrypt/live/${DOMAIN:-passi.cloud}"
 if [ -d "$DOMAIN_DIR" ]; then

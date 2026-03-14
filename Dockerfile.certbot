@@ -1,7 +1,7 @@
 FROM certbot/certbot:latest
 
-# Install docker CLI to reload haproxy
-RUN apk add --no-cache docker-cli
+# Install docker CLI to reload haproxy and busybox-extras for httpd
+RUN apk add --no-cache docker-cli busybox-extras
 
 # Copy renewal scripts
 COPY scripts/renew-certs.sh /scripts/renew-certs.sh

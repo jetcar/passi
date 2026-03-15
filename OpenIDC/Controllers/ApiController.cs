@@ -173,6 +173,10 @@ public class ApiController : ControllerBase
                             $"api/Auth/session?sessionId={sessionId}&thumbprint={checkResponceDto.PublicCertThumbprint}&username={checkResponceDto.Username}",
                             Method.Get);
                     var requestCurrentSessionResult = await _myRestClient.ExecuteAsync(requestCurrentSessionReq);
+
+                    _logger.LogDebug("Current session request - Success: {Success}, Content: {Content}",
+                        requestCurrentSessionResult.IsSuccessful, requestCurrentSessionResult.Content);
+
                     if (requestCurrentSessionResult.IsSuccessful)
                     {
                         var session =

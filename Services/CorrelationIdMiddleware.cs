@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Threading.Tasks;
+using NLog;
 
 namespace Services
 {
@@ -32,6 +33,9 @@ namespace Services
             // Set correlation ID in Log4net's LogicalThreadContext (supports async operations)
             log4net.LogicalThreadContext.Properties[CorrelationIdPropertyName] = correlationId;
 
+            // Set correlation ID in NLog's context (supports async operations)
+            MappedDiagnosticsLogicalContext.Set(CorrelationIdPropertyName, correlationId);
+
             // Also add to HttpContext for other middleware/controllers to access
             context.Items[CorrelationIdPropertyName] = correlationId;
 
@@ -46,6 +50,7 @@ namespace Services
 
             // Clean up after request
             log4net.LogicalThreadContext.Properties.Remove(CorrelationIdPropertyName);
+            MappedDiagnosticsLogicalContext.Remove(CorrelationIdPropertyName);
         }
     }
 }

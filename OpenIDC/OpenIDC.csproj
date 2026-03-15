@@ -35,8 +35,8 @@
 		<PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="9.0.12" />
 		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.22.1" />
 		<PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="9.0.12" />
-		<PackageReference Include="log4net" Version="3.0.1" />
-		<PackageReference Include="log4net.Ext.Json" Version="3.0.1" />
+		<PackageReference Include="NLog" Version="5.3.4" />
+		<PackageReference Include="NLog.Web.AspNetCore" Version="5.3.14" />
 		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.15.0" />
 	</ItemGroup>
 
@@ -46,8 +46,12 @@
 		<ProjectReference Include="..\Services\Services.csproj" />
 	</ItemGroup>
 
-	<ItemGroup>
-		<None Remove="..\.dockerignore" />
+	<ItemGroup>		<None Update="nlog.config">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+
+	<ItemGroup>		<None Remove="..\.dockerignore" />
 	</ItemGroup>
 
 	<ItemGroup>

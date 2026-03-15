@@ -3,6 +3,7 @@ using GoogleTracer;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,8 +12,8 @@ using Services;
 using System;
 using System.Net.Http;
 using Google.Cloud.Diagnostics.Common;
-using Services;
 using WebApp.Services;
+using WebApp.Middleware;
 
 namespace WebApp
 {
@@ -40,6 +41,7 @@ namespace WebApp
             services.AddScoped<WebAppDbContext>();
             services.AddSingleton<IMyRestClient, MyRestClient>();
             services.AddSingleton<IOidcClient, OidcClient>();
+            services.AddSingleton<IStartupFilter, MigrationStartupFilter<WebAppDbContext>>();
 
             // Use PostgreSQL only for long-term static data (DataProtectionKeys)
             services.AddDataProtection()
@@ -99,6 +101,7 @@ namespace WebApp
                 Tracer.CurrentTracer = app.ApplicationServices.GetService<IManagedTracer>();
 
                 applicationBuilder.UseRouting();
+                applicationBuilder.UseMiddleware<RequestLoggingMiddleware>();
 
                 applicationBuilder.UseForwardedHeaders();
                 applicationBuilder.UseCookiePolicy(

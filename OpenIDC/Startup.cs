@@ -13,10 +13,11 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
-using log4net;
+using NLog;
 using Services;
 using RedisClient;
 using OpenIDC.Services;
+using OpenIDC.Middleware;
 
 
 public class Startup
@@ -49,7 +50,7 @@ public class Startup
         var keyPath = "/myapp/cert/certs/privatekey.pem";
 
         SigningCredentials signingCredentials;
-        var log = LogManager.GetLogger(typeof(Startup));
+        var log = LogManager.GetCurrentClassLogger();
 
         if (File.Exists(certPath) && File.Exists(keyPath))
         {
@@ -134,6 +135,7 @@ public class Startup
         {
             Tracer.CurrentTracer = app.ApplicationServices.GetService<IManagedTracer>();
 
+            appBuilder.UseMiddleware<RequestLoggingMiddleware>();
             appBuilder.UseCorrelationId(); // Add correlation ID tracking for all requests
 
             // Serve static files BEFORE routing (for CSS, JS, images, etc.)

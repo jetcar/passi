@@ -2,6 +2,7 @@ using Microsoft.Extensions.Hosting;
 using System.Threading;
 using Microsoft.AspNetCore.Hosting;
 using Services;
+using NLog.Web;
 
 namespace passi_webapi
 {
@@ -15,7 +16,7 @@ namespace passi_webapi
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
-                .UseLog4Net()
+                .UseNLog()
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<PassiApiStartup>();

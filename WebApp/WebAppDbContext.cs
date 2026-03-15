@@ -1,6 +1,6 @@
 ﻿using ConfigurationManager;
 using Microsoft.Extensions.Configuration;
-using log4net;
+using NLog;
 using System;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
@@ -11,7 +11,7 @@ namespace WebApp
     [GoogleTracer.Profile]
     public class WebAppDbContext : DbContext, IDataProtectionKeyContext
     {
-        private static readonly ILog _logger = LogManager.GetLogger(typeof(WebAppDbContext));
+        private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
         private AppSetting _appSetting;
         private string _connectionString;
 

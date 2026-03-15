@@ -1,0 +1,43 @@
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Threading;
+using Microsoft.EntityFrameworkCore;
+
+namespace WebApp
+{
+    public class MigrationStartupFilter<TContext> : IStartupFilter where TContext : DbContext
+    {
+        public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next)
+        {
+            return app =>
+            {
+                using (var scope = app.ApplicationServices.CreateScope())
+                {
+                    foreach (var context in scope.ServiceProvider.GetServices<TContext>())
+                    {
+                        while (true)
+                        {
+                            try
+                            {
+                                while (context.Database.GetDbConnection() == null)
+                                    Thread.Sleep(100);
+                                break;
+                            }
+                            catch
+                            {
+                                Thread.Sleep(100);
+                            }
+                        }
+
+                        context.Database.SetCommandTimeout(1000);
+                        context.Database.Migrate();
+                    }
+                }
+
+                next(app);
+            };
+        }
+    }
+}

@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Authentication;
+﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using passi_webapi.Filters;
@@ -19,16 +18,16 @@ namespace passi_webapi.Controllers
     public class AdminController : Controller
     {
         private PassiDbContext _db;
-        private IMapper _mapper;
+        private Services.IMapper _mapper;
         private static int pagesize = 100;
 
-        public AdminController(PassiDbContext db, IMapper mapper)
+        public AdminController(PassiDbContext db, Services.IMapper mapper)
         {
             this._db = db;
             _mapper = mapper;
         }
 
-      
+
         [HttpGet, Route("Logout")]
         public async Task<RedirectResult> Logout()
         {

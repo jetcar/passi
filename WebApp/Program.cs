@@ -2,6 +2,7 @@
 using System.Threading;
 using Microsoft.AspNetCore.Hosting;
 using Services;
+using NLog.Web;
 
 namespace WebApp
 {
@@ -16,7 +17,7 @@ namespace WebApp
 
         public static IHostBuilder CreateWebHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
-                .UseLog4Net()
+                .UseNLog()
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();

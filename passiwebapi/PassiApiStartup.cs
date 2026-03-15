@@ -1,4 +1,3 @@
-using AutoMapper;
 using ConfigurationManager;
 using GoogleTracer;
 using Microsoft.AspNetCore.Builder;
@@ -19,6 +18,7 @@ using Google.Cloud.Diagnostics.Common;
 using NotificationsService;
 using RedisClient;
 using WebApiDto.Auth.Dto;
+using passi_webapi.Middleware;
 
 namespace passi_webapi
 {
@@ -34,15 +34,7 @@ namespace passi_webapi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddAutoMapper(cfg =>
-            {
-                cfg.CreateMap<UserDb, UserDto>();
-                cfg.CreateMap<DeviceDb, DeviceDto>();
-                cfg.CreateMap<CertificateDb, CertificateDto>();
-                cfg.CreateMap<UserInvitationDb, UserInvitationDto>();
-                cfg.CreateMap<SessionTempRecord, SessionDto>();
-                cfg.CreateMap<Instant, DateTime>().ConvertUsing(s => s.ToDateTimeUtc());
-            });
+            services.AddSingleton<Services.IMapper, ObjectMapper>();
 
             var identityUrl = Environment.GetEnvironmentVariable("IdentityUrl") ?? Configuration.GetValue<string>("AppSetting:IdentityUrl");
             var returnUrl = Environment.GetEnvironmentVariable("returnUrl") ?? Configuration.GetValue<string>("AppSetting:returnUrl");
@@ -117,6 +109,7 @@ namespace passi_webapi
                 applicationBuilder.UseRouting();
 
                 //applicationBuilder.UseMiddleware<MyAuthenticationMiddleware>();
+                applicationBuilder.UseMiddleware<RequestLoggingMiddleware>();
                 applicationBuilder.UseCorrelationId(); // Add correlation ID tracking for all requests
                 applicationBuilder.UseMiddleware<ErrorHandlerMiddleware>();
                 applicationBuilder.UseForwardedHeaders();

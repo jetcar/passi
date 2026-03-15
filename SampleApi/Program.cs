@@ -11,21 +11,20 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
-using log4net;
+using NLog;
+using NLog.Web;
 using Services;
+using SampleApi.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configure Log4net
-var logRepository = LogManager.GetRepository(System.Reflection.Assembly.GetEntryAssembly());
-var configFile = new System.IO.FileInfo("../log4net.config");
-if (configFile.Exists)
-{
-    log4net.Config.XmlConfigurator.Configure(logRepository, configFile);
-}
+// Configure NLog
+builder.Logging.ClearProviders();
+builder.Host.UseNLog();
 
-var log = LogManager.GetLogger(typeof(Program));
+var log = LogManager.GetCurrentClassLogger();
 log.Info("Starting SampleApi application...");
 
 builder.WebHost.ConfigureKestrel(options =>
@@ -130,6 +129,7 @@ if (!string.IsNullOrEmpty(virtualPath))
 }
 
 // Use correlation ID middleware for request tracking
+app.UseMiddleware<RequestLoggingMiddleware>();
 app.UseCorrelationId();
 
 // Configure the HTTP request pipeline

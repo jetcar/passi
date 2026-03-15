@@ -2,7 +2,7 @@ using Microsoft.Extensions.Hosting;
 using System.Threading;
 using Microsoft.AspNetCore.Hosting;
 using Services;
-
+using NLog.Web;
 
 public static class Program
 {
@@ -15,7 +15,7 @@ public static class Program
 
     public static IHostBuilder CreateWebHostBuilder(string[] args) =>
         Host.CreateDefaultBuilder(args)
-            .UseLog4Net()
+            .UseNLog()
             .ConfigureWebHostDefaults(webBuilder =>
             {
                 webBuilder.UseStartup<Startup>();

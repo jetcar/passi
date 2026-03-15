@@ -10,12 +10,11 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="AutoMapper" Version="13.0.1" />
 		<PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="9.0.12" />
 		<PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="9.0.12" />
 		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.22.1" />
-		<PackageReference Include="log4net" Version="3.0.1" />
-		<PackageReference Include="log4net.Ext.Json" Version="3.0.1" />
+		<PackageReference Include="NLog" Version="5.3.4" />
+		<PackageReference Include="NLog.Web.AspNetCore" Version="5.3.14" />
 		<PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="9.0.6" />
 		<PackageReference Include="Swashbuckle.AspNetCore.Newtonsoft" Version="9.0.6" />
 		<PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="9.0.6" />
@@ -33,5 +32,10 @@
 		<ProjectReference Include="..\WebApiDto\WebApiDto.csproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+		<None Update="nlog.config">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
 
 </Project>

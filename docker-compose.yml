@@ -118,7 +118,7 @@ services:
       - ../passi_identity_cert:/myapp/cert
     restart: always
   mailler-backend:
-    image: mailler-backend:latest
+    image: jetcar/mailler-backend:latest
     container_name: mailler-backend
     networks:
       - haproxy_net

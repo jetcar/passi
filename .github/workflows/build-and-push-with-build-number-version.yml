@@ -7,6 +7,10 @@ on:
       - master
   workflow_dispatch:
 
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   DOCKER_USERNAME: jetcar
 
@@ -110,3 +114,23 @@ jobs:
 
       - name: Image digest
         run: echo "Image built and pushed successfully for ${{ matrix.name }}"
+
+  deploy-to-passi-cloud:
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    if: github.ref_name == 'main' || github.ref_name == 'master'
+    steps:
+      - name: Deploy on passi.cloud via SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.PASSI_CLOUD_SSH_HOST }}
+          username: ${{ secrets.PASSI_CLOUD_SSH_USERNAME }}
+          key: ${{ secrets.PASSI_CLOUD_SSH_PRIVATE_KEY }}
+          passphrase: ${{ secrets.PASSI_CLOUD_SSH_PASSPHRASE }}
+          port: ${{ secrets.PASSI_CLOUD_SSH_PORT || '22' }}
+          script_stop: true
+          script: |
+            set -e
+            cd /home/jetcarq/passi
+            chmod +x ./run.sh
+            ./run.sh

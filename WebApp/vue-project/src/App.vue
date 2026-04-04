@@ -5,6 +5,7 @@ import { ref, onMounted } from 'vue'
 const API_URL = `/api/UserLoggedIn`
 
 const isLoggedIn = ref(false)
+const webmailUrl = '/mailler'
 
 const fetchData = async () => {
     try {
@@ -81,7 +82,7 @@ onMounted(() => {
                                 </router-link>
                             </li>
                             <li class="nav-item">
-                                <a href="/webmail" class="nav-link" target="_blank">
+                                <a :href="webmailUrl" class="nav-link" target="_blank" rel="noopener noreferrer">
                                     <i class="bi bi-envelope-at me-1"></i>Webmail
                                 </a>
                             </li>

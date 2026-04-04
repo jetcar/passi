@@ -46,6 +46,7 @@ services:
     depends_on:
       - passiwebapi
       - webapp
+      - mailler-backend
     networks:
       - haproxy_net
   certbot:
@@ -116,145 +117,23 @@ services:
       - ../creds:/home/creds
       - ../passi_identity_cert:/myapp/cert
     restart: always
-  # Core services
-  front:
-    image: ${DOCKER_ORG:-ghcr.io/heviat}/${DOCKER_PREFIX:-}nginx:${MAILU_VERSION:-2024.06}
-    container_name: front
-    restart: always
-    env_file:
-      - ../passi_config/dev.env
-    ports:
-      - "25:25"
-      - "465:465"
-      - "587:587"
-      - "110:110"
-      - "995:995"
-      - "143:143"
-      - "993:993"
-      - "4190:4190"
-      - "8008:8008"
+  mailler-backend:
+    image: mailler-backend:latest
+    container_name: mailler-backend
     networks:
-      - default
       - haproxy_net
-    volumes:
-      - ../passi_cert:/certs
-      - "/mnt/newdisk/mailu/overrides/nginx:/overrides:ro"
-    depends_on:
-      - resolver
-    dns:
-      - 192.168.202.254
-  resolver:
-    image: ${DOCKER_ORG:-ghcr.io/heviat}/${DOCKER_PREFIX:-}unbound:${MAILU_VERSION:-2024.06}
-    env_file:
-      - ../passi_config/dev.env
-    restart: always
-    networks:
-      default:
-        ipv4_address: 192.168.202.254
-  admin:
-    image: ${DOCKER_ORG:-ghcr.io/heviat}/${DOCKER_PREFIX:-}admin:${MAILU_VERSION:-2024.06}
-    container_name: admin
-    restart: always
-    env_file:
-      - ../passi_config/dev.env
-    volumes:
-      - "/mnt/newdisk/mailu/data:/data"
-      - "/mnt/newdisk/mailu/dkim:/dkim"
-    networks:
-      - default
-      - haproxy_net
+      - database_net
       - redis_net
-    depends_on:
-      - redis
-      - resolver
-    dns:
-      - 192.168.202.254
-  imap:
-    image: ${DOCKER_ORG:-ghcr.io/heviat}/${DOCKER_PREFIX:-}dovecot:${MAILU_VERSION:-2024.06}
-    restart: always
     env_file:
-      - ../passi_config/dev.env
+      - ../passi_config/mailler.env
     volumes:
-      - "/mnt/newdisk/mailu/mail:/mail"
-      - "/mnt/newdisk/mailu/overrides/dovecot:/overrides:ro"
-    networks:
-      - haproxy_net
-      - default
+      - ../mailler/certs:/certs
     depends_on:
-      - front
-      - resolver
-    dns:
-      - 192.168.202.254
-    deploy:
-      mode: replicated
-      replicas: 1
-      endpoint_mode: vip
-  smtp:
-    image: ${DOCKER_ORG:-ghcr.io/heviat}/${DOCKER_PREFIX:-}postfix:${MAILU_VERSION:-2024.06}
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_started
     restart: always
-    env_file:
-      - ../passi_config/dev.env
-    networks:
-      - haproxy_net
-      - default
-    volumes:
-      - "/mnt/newdisk/mailu/mailqueue:/queue"
-      - "/mnt/newdisk/mailu/overrides/postfix:/overrides:ro"
-    depends_on:
-      - front
-      - resolver
-    dns:
-      - 192.168.202.254
-    deploy:
-      mode: replicated
-      replicas: 1
-      endpoint_mode: vip
-  oletools:
-    image: ${DOCKER_ORG:-ghcr.io/heviat}/${DOCKER_PREFIX:-}oletools:${MAILU_VERSION:-2024.06}
-    container_name: oletools
-    hostname: oletools
-    restart: always
-    networks:
-      - default
-    depends_on:
-      - resolver
-    dns:
-      - 192.168.202.254
-  antispam:
-    image: ${DOCKER_ORG:-ghcr.io/heviat}/${DOCKER_PREFIX:-}rspamd:${MAILU_VERSION:-2024.06}
-    container_name: antispam
-    hostname: antispam
-    restart: always
-    env_file:
-      - ../passi_config/dev.env
-    volumes:
-      - "/mnt/newdisk/mailu/filter:/var/lib/rspamd"
-      - "/mnt/newdisk/mailu/overrides/rspamd:/overrides:ro"
-    networks:
-      - redis_net
-      - default
-    depends_on:
-      - front
-      - redis
-      - oletools
-      - resolver
-    dns:
-      - 192.168.202.254
-  webmail:
-    image: ${DOCKER_ORG:-ghcr.io/heviat}/${DOCKER_PREFIX:-}webmail:${MAILU_VERSION:-2024.06}
-    container_name: webmail
-    restart: always
-    env_file:
-      - ../passi_config/dev.env
-    volumes:
-      - "/mailu/webmail:/data"
-      - "/mailu/overrides/roundcube:/overrides:ro"
-    networks:
-      - default
-    depends_on:
-      - front
-    dns:
-      - 192.168.202.254
   wireguard:
     image: lscr.io/linuxserver/wireguard
     container_name: wireguard
@@ -265,12 +144,12 @@ services:
       - PUID=1000
       - PGID=1000
       - TZ=Europe/London
-      - SERVERURL=passi.cloud #optional
-      - SERVERPORT=51820 #optional
-      - PEERS=4 #optional
-      - PEERDNS=auto #optional
-      - INTERNAL_SUBNET=192.168.0.0 #optional
-      - ALLOWEDIPS=0.0.0.0/0 #optional
+      - SERVERURL=passi.cloud
+      - SERVERPORT=51820
+      - PEERS=4
+      - PEERDNS=auto
+      - INTERNAL_SUBNET=192.168.0.0
+      - ALLOWEDIPS=0.0.0.0/0
     volumes:
       - ../wireguard/config:/config
       - /lib/modules:/lib/modules

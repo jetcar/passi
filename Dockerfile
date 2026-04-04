@@ -11,7 +11,9 @@ RUN npm run build
 
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
-COPY --from=vueWeb /src .
+COPY . .
+COPY --from=vueWeb /src/WebApp/wwwroot ./WebApp/wwwroot
+COPY --from=vueWeb /src/OpenIDC/wwwroot ./OpenIDC/wwwroot
 
 RUN dotnet restore passi.sln
 RUN dotnet publish passi.sln -c Release /p:UseAppHost=false

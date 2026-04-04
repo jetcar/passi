@@ -25,6 +25,8 @@ target/
 
 # JetBrains IDE
 .idea/
+.claude/
+.vs/
 
 # Unit test reports
 TEST*.xml

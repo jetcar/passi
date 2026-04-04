@@ -4,6 +4,7 @@
 **/.git
 **/.github
 **/.idea
+**/.claude
 **/.gitignore
 **/.project
 **/.settings
@@ -13,6 +14,10 @@
 **/*.*proj.user
 **/*.dbmdl
 **/*.jfm
+**/.venv
+**/bin/**
+**/obj/**
+**/publish/**
 **/azds.yaml
 **/bin
 **/charts
@@ -23,5 +28,12 @@
 **/secrets.dev.yaml
 **/values.dev.yaml
 **/publish
+configs/variables/mailler.env
+PassiChat/
+LoadTests/
+MauiTest/
+RegisterManyUsersTestApp/
+MauiApp2/
+MauiApp1/
 LICENSE
 README.md

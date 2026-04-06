@@ -84,6 +84,11 @@ services:
       endpoint_mode: vip
 
   mailler-backend:
+    build:
+      context: ./mailler
+      dockerfile: backend-dotnet/Dockerfile
+    ports:
+      - "3000:3000"
     env_file:
       - ./configs/variables/mailler.env
 

@@ -123,9 +123,9 @@ namespace passi_webapi
                 applicationBuilder.UseEndpoints(endpoints =>
                 {
                     endpoints.MapControllers();
+                    endpoints.MapHealthChecks("/health");
                 });
 
-                applicationBuilder.UseHealthChecks("/health");
                 applicationBuilder.UseSwagger();
                 applicationBuilder.UseSwaggerUI(c => { c.SwaggerEndpoint("v1/swagger.json", "My API V1"); });
             });

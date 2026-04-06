@@ -24,8 +24,7 @@ namespace Services
         {
             _appSetting = appSetting;
             var host = _appSetting["smtpHost"];
-            var boolean = Convert.ToBoolean(_appSetting["DoNotSendMail"]);
-            if (!boolean || (!string.IsNullOrEmpty(host) && host != "-"))
+            if (!string.IsNullOrEmpty(host) && host != "-")
             {
                 var port = Convert.ToInt32(_appSetting["smtpPort"]);
                 var userName = _appSetting["smtpUsername"];
@@ -40,6 +39,11 @@ namespace Services
                 email = _appSetting["testMail"];
             if (email == null)
                 return SuccessResult;
+            if (client == null)
+            {
+                _logger.Error("SMTP client is not configured. Set smtpHost to send emails.");
+                return FailureResult;
+            }
             var message = new MailMessage(_appSetting["emailFrom"], email)
             {
                 IsBodyHtml = true,
@@ -73,6 +77,11 @@ namespace Services
                 email = _appSetting["testMail"];
             if (email == null)
                 return SuccessResult;
+            if (client == null)
+            {
+                _logger.Error("SMTP client is not configured. Set smtpHost to send emails.");
+                return FailureResult;
+            }
             var message = new MailMessage(_appSetting["smtpUsername"], email)
             {
                 IsBodyHtml = true,

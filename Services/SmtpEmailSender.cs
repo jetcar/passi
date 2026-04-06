@@ -44,7 +44,8 @@ namespace Services
                 _logger.Error("SMTP client is not configured. Set smtpHost to send emails.");
                 return FailureResult;
             }
-            var message = new MailMessage(_appSetting["emailFrom"], email)
+            var emailFrom = _appSetting["emailFrom"];
+            var message = new MailMessage(emailFrom, email)
             {
                 IsBodyHtml = true,
                 Subject = $"Passi code {code}",
@@ -82,7 +83,8 @@ namespace Services
                 _logger.Error("SMTP client is not configured. Set smtpHost to send emails.");
                 return FailureResult;
             }
-            var message = new MailMessage(_appSetting["smtpUsername"], email)
+            var senderEmail = _appSetting["smtpUsername"];
+            var message = new MailMessage(senderEmail, email)
             {
                 IsBodyHtml = true,
                 Subject = $"Passi code {code}",

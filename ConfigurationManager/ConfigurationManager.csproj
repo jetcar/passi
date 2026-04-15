@@ -6,8 +6,8 @@
 
 	<ItemGroup>
 		<PackageReference Include="MessagePack" Version="3.1.4" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.2" />
-		<PackageReference Include="log4net" Version="3.0.1" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.6" />
+		<PackageReference Include="log4net" Version="3.3.0" />
 	</ItemGroup>
 
 </Project>

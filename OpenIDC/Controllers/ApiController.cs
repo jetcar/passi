@@ -19,6 +19,7 @@ using OpenIDC.Services;
 [ApiController]
 [Route("api")]
 [Profile]
+[IgnoreAntiforgeryToken]
 public class ApiController : ControllerBase
 {
     private readonly AppSetting _appSetting;

@@ -6,7 +6,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="ServiceStack.Redis" Version="10.0.4" />
+		<PackageReference Include="ServiceStack.Redis" Version="10.0.6" />
 	</ItemGroup>
 
 	<ItemGroup>

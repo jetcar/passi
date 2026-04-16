@@ -41,13 +41,13 @@ namespace passi_webapi.Controllers
                 {
                     if (_userRepository.IsUsernameTaken(signupDto.Email))
                     {
-                        var result = _userService.SendConfirmationEmail(signupDto);
-                        _logger.Debug(result);
+                        _userService.SendConfirmationEmail(signupDto);
+                        _logger.Debug("Confirmation email flow executed for existing user.");
                     }
                     else
                     {
-                        var result = _userService.AddUserAndSendConfirmationEmail(signupDto);
-                        _logger.Debug(result);
+                        _userService.AddUserAndSendConfirmationEmail(signupDto);
+                        _logger.Debug("User created and invitation email flow executed.");
                     }
 
                     transaction.Commit();

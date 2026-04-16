@@ -8,6 +8,7 @@ using OpenIDC.Helpers;
 
 namespace OpenIDC.Controllers
 {
+    [IgnoreAntiforgeryToken]
     public class TokenController : Controller
     {
         private readonly IClientStore _clientStore;

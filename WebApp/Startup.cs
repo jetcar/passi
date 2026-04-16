@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi;
 using Services;
@@ -85,7 +86,12 @@ namespace WebApp
             services.AddHttpClient();
             services.AddHealthChecks()
                 .AddDbContextCheck<WebAppDbContext>("database", tags: new[] { "db", "ready" });
-            services.AddMvc(x => { x.EnableEndpointRouting = false; });
+            services.AddAntiforgery();
+            services.AddMvc(options =>
+            {
+                options.EnableEndpointRouting = false;
+                options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
+            });
 
             services.AddSwaggerGen(c =>
             {

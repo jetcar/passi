@@ -70,7 +70,7 @@ public class AuthenticationController : Controller
         return base64.Replace("+", "-").Replace("/", "_").Replace("=", "");
     }
 
-    [HttpPost("~/logout"), ValidateAntiForgeryToken]
+    [HttpPost("~/logout")]
     public async Task<ActionResult> LogOut(string returnUrl)
     {
         _logger.LogInformation("Logout initiated");

@@ -67,11 +67,19 @@ namespace OpenIDC.Controllers
             _logger.LogInformation("Token request received - GrantType: {GrantType}, ClientId: {ClientId}, Code: {Code}",
                 request.GrantType, request.ClientId, request.Code?.Substring(0, Math.Min(8, request.Code?.Length ?? 0)) + "...");
 
-            if (request.GrantType == "authorization_code")
+            var normalizedGrantType = request.GrantType?.Trim();
+            if (string.IsNullOrEmpty(normalizedGrantType) ||
+                (normalizedGrantType != "authorization_code" && normalizedGrantType != "refresh_token"))
+            {
+                _logger.LogWarning("Unsupported grant type: {GrantType}", request.GrantType);
+                return BadRequest(new { error = "unsupported_grant_type" });
+            }
+
+            if (normalizedGrantType == "authorization_code")
             {
                 return await HandleAuthorizationCode(request);
             }
-            else if (request.GrantType == "refresh_token")
+            else if (normalizedGrantType == "refresh_token")
             {
                 return await HandleRefreshToken(request);
             }

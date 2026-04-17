@@ -116,8 +116,8 @@ namespace passi_webapi.Controllers
                 {
                     if (_userRepository.IsUsernameTaken(delete.Email))
                     {
-                        var result = _userService.SendDeleteConfirmationEmail(delete.Email);
-                        _logger.Debug(result);
+                        _userService.SendDeleteConfirmationEmail(delete.Email);
+                        _logger.Debug("Delete confirmation email dispatch attempted.");
                     }
 
                     transaction.Commit();

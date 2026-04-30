@@ -3,8 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Models;
 using NodaTime;
-
-using Repos.CompiledModels;
 using log4net;
 using System;
 using System.Collections.Generic;
@@ -51,6 +49,7 @@ namespace Repos
         public DbSet<CertificateDb> Certificates { get; set; }
         public DbSet<UserDb> Users { get; set; }
         public DbSet<DeviceDb> Devices { get; set; }
+        public DbSet<UserDeviceDb> UserDevices { get; set; }
         public DbSet<UserInvitationDb> Invitations { get; set; }
         public DbSet<AdminDb> Admins { get; set; }
         public DbSet<DataProtectionKey> DataProtectionKeys { get; set; }
@@ -78,7 +77,6 @@ namespace Repos
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseModel(PassiDbContextModel.Instance);
             if (string.IsNullOrEmpty(_connectionString))
             {
                 var trustMode = _appSetting["DbSslMode"] == "Require" ? "Trust Server Certificate=true;" : "";
@@ -165,6 +163,40 @@ namespace Repos
                     .WithMany(p => p.Devices)
                     .HasForeignKey(d => d.ModifiedById)
                     .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<UserDeviceDb>(entity =>
+            {
+                entity.HasKey(x => x.Id);
+                entity.Property(x => x.Id).ValueGeneratedOnAdd().UseIdentityColumn();
+
+                entity.HasIndex(e => e.DeviceId, "IX_UserDevices_DeviceId");
+
+                entity.HasIndex(e => e.ModifiedById, "IX_UserDevices_ModifiedById");
+
+                entity.HasIndex(e => e.UserId, "IX_UserDevices_UserId");
+
+                entity.HasIndex(e => new { e.UserId, e.DeviceId }, "IX_UserDevices_UserId_DeviceId")
+                    .IsUnique();
+
+                entity.Property(e => e.CreationTime);
+
+                entity.Property(e => e.ModifiedTime);
+
+                entity.HasOne(d => d.Device)
+                    .WithMany(p => p.UserDevices)
+                    .HasForeignKey(d => d.DeviceId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(d => d.ModifiedBy)
+                    .WithMany()
+                    .HasForeignKey(d => d.ModifiedById)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.UserDevices)
+                    .HasForeignKey(d => d.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
 
             modelBuilder.Entity<UserInvitationDb>(entity =>

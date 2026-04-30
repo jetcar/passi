@@ -13,7 +13,7 @@ namespace Services
         public void ValidateCertificate(string publicCertBase64, string email)
         {
             var fromBase64String = Convert.FromBase64String(publicCertBase64);
-            var publicCert = new X509Certificate2(fromBase64String);
+            var publicCert = X509CertificateLoader.LoadCertificate(fromBase64String);
 
             if (publicCert == null)
                 throw new BadRequestException("Certificate is missing");
@@ -27,10 +27,10 @@ namespace Services
         public void ValidateCertificate(CertificateUpdateDto newPublicCertDto, CertificateDb oldPublicCertDb)
         {
             var fromBase64String = Convert.FromBase64String(newPublicCertDto.PublicCert);
-            var newPublicCert = new X509Certificate2(fromBase64String);
+            var newPublicCert = X509CertificateLoader.LoadCertificate(fromBase64String);
 
             var oldBase64String = Convert.FromBase64String(oldPublicCertDb.PublicCert);
-            var oldpublicCert = new X509Certificate2(oldBase64String);
+            var oldpublicCert = X509CertificateLoader.LoadCertificate(oldBase64String);
 
             if (newPublicCert == null)
                 throw new BadRequestException("Certificate is missing");

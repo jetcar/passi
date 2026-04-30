@@ -15,6 +15,7 @@ namespace Models
             Invitations = new HashSet<UserInvitationDb>();
             SessionModifiedBies = new HashSet<SimpleSessionDb>();
             SessionUsers = new HashSet<SimpleSessionDb>();
+            UserDevices = new HashSet<UserDeviceDb>();
         }
 
         public long Id { get; set; }
@@ -31,5 +32,6 @@ namespace Models
         public virtual ICollection<UserInvitationDb> Invitations { get; set; }
         public virtual ICollection<SimpleSessionDb> SessionModifiedBies { get; set; }
         public virtual ICollection<SimpleSessionDb> SessionUsers { get; set; }
+        public virtual ICollection<UserDeviceDb> UserDevices { get; set; }
     }
 }

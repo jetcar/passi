@@ -20,7 +20,7 @@ namespace Services
 
         public CertificateDb UpdateCertificate(CertificateUpdateDto newCertificate)
         {
-            var certificate = new X509Certificate2(Convert.FromBase64String(newCertificate.PublicCert));
+            var certificate = X509CertificateLoader.LoadCertificate(Convert.FromBase64String(newCertificate.PublicCert));
             return _certificateRepository.AddCertificate(certificate.Thumbprint, newCertificate.PublicCert,
                 newCertificate.ParentCertThumbprint, newCertificate.DeviceId);
         }

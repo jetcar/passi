@@ -82,7 +82,13 @@ namespace Repos
 
         public SessionTempRecord GetActiveSession(string deviceId, Instant expirationTime)
         {
-            var sessionDbs = _dbContext.Sessions.Include(x => x.User).Where(x => x.User.Device.DeviceId == deviceId).OrderByDescending(x => x.CreationTime).FirstOrDefault(x => x.Status != SessionStatus.Canceled && x.Status != SessionStatus.Confirmed && x.ExpirationTime >= expirationTime);
+            var sessionDbs = _dbContext.Sessions
+                .Include(x => x.User)
+                .ThenInclude(x => x.UserDevices)
+                .ThenInclude(x => x.Device)
+                .Where(x => x.User.UserDevices.Any(link => link.Device.DeviceId == deviceId))
+                .OrderByDescending(x => x.CreationTime)
+                .FirstOrDefault(x => x.Status != SessionStatus.Canceled && x.Status != SessionStatus.Confirmed && x.ExpirationTime >= expirationTime);
             if (sessionDbs != null)
                 return _redisService.Get<SessionTempRecord>(sessionDbs.Guid.ToString());
             return null;
@@ -90,15 +96,9 @@ namespace Repos
 
         public List<UserDb> SyncAccounts(List<string> guilds, string deviceId)
         {
-            var activeAccounts = new List<UserDb>();
-            var existingAccounts = _dbContext.Users.Where(x => x.Device.DeviceId == deviceId).ToDictionary(x => x.Guid.ToString());
-            foreach (var guid in guilds)
-            {
-                if (existingAccounts.ContainsKey(guid))
-                    activeAccounts.Add(existingAccounts[guid]);
-            }
-
-            return activeAccounts;
+            return _dbContext.Users
+                .Where(x => guilds.Contains(x.Guid.ToString()) && x.UserDevices.Any(link => link.Device.DeviceId == deviceId))
+                .ToList();
         }
 
         public SimpleSessionDb GetAuthorizedSession(Guid sessionId, string thunbprint, string username)

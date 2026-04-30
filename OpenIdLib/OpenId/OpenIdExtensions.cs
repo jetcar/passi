@@ -114,7 +114,7 @@ namespace OpenIdLib.OpenId
                 if (result.IsSuccessful)
                 {
                     var cert = JsonConvert.DeserializeObject<SessionMinDto>(result.Content);
-                    var publicCertificate = new X509Certificate2(Convert.FromBase64String(cert.PublicCert));
+                    var publicCertificate = X509CertificateLoader.LoadCertificate(Convert.FromBase64String(cert.PublicCert));
                     var nonce = context.Nonce;
 
                     // ComputeHash - returns byte array

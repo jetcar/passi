@@ -12,6 +12,7 @@ using NotificationsService;
 using WebApiDto;
 using WebApiDto.Auth;
 using WebApiDto.Auth.Dto;
+using Services;
 
 namespace passi_webapi.Controllers
 {
@@ -51,33 +52,85 @@ namespace passi_webapi.Controllers
         {
             if (!_userRepository.IsUsernameTaken(startLoginDto.Username))
                 return BadRequest("username not found");
-            if (!_userRepository.IsUserFinished(startLoginDto.Username))
-                return BadRequest("user not verified");
+
+            var user = _userRepository.GetUser(startLoginDto.Username);
+            var registeredDevices = GetRegisteredDevices(user);
+            if (!user.Certificates.Any() || !registeredDevices.Any())
+                return BadRequest("No registered devices available for login approval");
+
             var sessionDb = _sessionsRepository.BeginSession(startLoginDto.Username, startLoginDto.ClientId,
                 startLoginDto.RandomString, startLoginDto.CheckColor.ToString(), startLoginDto.ReturnUrl);
-            var user = _userRepository.GetUser(startLoginDto.Username);
             var host = startLoginDto.ReturnUrl;
             try
             {
                 host = new Uri(startLoginDto.ReturnUrl).Host;
             }
-            catch (Exception e)
+            catch (Exception)
             {
             }
-            _firebaseService.SendNotification(user.Device.NotificationToken, "Passi login",
-                JsonConvert.SerializeObject(
-                    new FirebaseNotificationDto()
-                    {
-                        Sender = startLoginDto.ClientId,
-                        ReturnHost = host,
-                        SessionId = sessionDb.Guid,
-                        AccountGuid = user.Guid
-                    }),
-                host, sessionDb.Guid);
+            var notificationPayload = JsonConvert.SerializeObject(
+                new FirebaseNotificationDto()
+                {
+                    Sender = startLoginDto.ClientId,
+                    ReturnHost = host,
+                    SessionId = sessionDb.Guid,
+                    AccountGuid = user.Guid
+                });
+            var notificationTokens = registeredDevices
+                .Select(x => x.NotificationToken)
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .Distinct()
+                .ToList();
+
+            if (!notificationTokens.Any() && !string.IsNullOrWhiteSpace(user.Device?.NotificationToken))
+            {
+                notificationTokens.Add(user.Device.NotificationToken);
+            }
+
+            foreach (var notificationToken in notificationTokens)
+            {
+                _firebaseService.SendNotification(notificationToken, "Passi login", notificationPayload, host, sessionDb.Guid);
+            }
 
             Guid sessionid = sessionDb.Guid;
 
-            return Ok(new LoginResponceDto() { SessionId = sessionid });
+            return Ok(new LoginResponceDto()
+            {
+                SessionId = sessionid,
+                RegisteredDevices = registeredDevices.Select(GetDeviceDisplayName).ToList()
+            });
+        }
+
+        private static List<DeviceDb> GetRegisteredDevices(UserDb user)
+        {
+            var registeredDevices = user.UserDevices
+                .Select(x => x.Device)
+                .Where(x => x != null && !string.IsNullOrWhiteSpace(x.DeviceId))
+                .GroupBy(x => x.DeviceId)
+                .Select(x => x.First())
+                .ToList();
+
+            if (user.Device != null
+                && !string.IsNullOrWhiteSpace(user.Device.DeviceId)
+                && registeredDevices.All(x => x.DeviceId != user.Device.DeviceId))
+            {
+                registeredDevices.Add(user.Device);
+            }
+
+            return registeredDevices;
+        }
+
+        private static string GetDeviceDisplayName(DeviceDb device)
+        {
+            var shortIdentifier = device.DeviceId.Length <= 10
+                ? device.DeviceId
+                : device.DeviceId[..8];
+
+            var label = string.IsNullOrWhiteSpace(device.Platform)
+                ? "Registered device"
+                : device.Platform;
+
+            return $"{label} ({shortIdentifier})";
         }
 
         [HttpPost, Route("Authorize")]
@@ -136,7 +189,7 @@ namespace passi_webapi.Controllers
             {
                 host = new Uri(sessionDb.ReturnUrl).Host;
             }
-            catch (Exception e)
+            catch (Exception)
             {
             }
             return Ok(new NotificationDto()
@@ -165,6 +218,34 @@ namespace passi_webapi.Controllers
             }).ToList();
 
             return list;
+        }
+
+        [HttpPost, Route("Devices")]
+        public ActionResult<List<ManagedDeviceDto>> Devices([FromBody] ManageDevicesDto manageDevicesDto)
+        {
+            var devices = _userRepository.GetAccountDevices(manageDevicesDto.AccountGuid, manageDevicesDto.Thumbprint)
+                .Select(x => new ManagedDeviceDto
+                {
+                    DeviceId = x.DeviceId,
+                    Platform = x.Platform,
+                    CreationTime = x.CreationTime.ToDateTimeUtc(),
+                    IsCurrent = x.DeviceId == manageDevicesDto.CurrentDeviceId,
+                })
+                .ToList();
+
+            return Ok(devices);
+        }
+
+        [HttpPost, Route("DeleteDevice")]
+        public IActionResult DeleteDevice([FromBody] DeleteDeviceDto deleteDeviceDto)
+        {
+            _userRepository.DeleteDevice(
+                deleteDeviceDto.AccountGuid,
+                deleteDeviceDto.Thumbprint,
+                deleteDeviceDto.DeviceId,
+                deleteDeviceDto.CurrentDeviceId);
+
+            return Ok();
         }
     }
 }

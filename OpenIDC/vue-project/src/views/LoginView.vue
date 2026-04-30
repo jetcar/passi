@@ -16,7 +16,7 @@
                 LoginResponse: {
                     checkColor: "red",
                     sessionId:"",
-
+                    registeredDevices: [],
                 },
                 errorMessage: false,
                 loginForm: true,
@@ -152,6 +152,10 @@
                     </div>
                     <div class="row" v-if="!loginForm">
                         <div class="col-md-6">
+                            <p>Open Passi on one of these devices to approve the login request:</p>
+                            <ul v-if="LoginResponse.registeredDevices?.length">
+                                <li v-for="device in LoginResponse.registeredDevices" :key="device">{{ device }}</li>
+                            </ul>
                             <label for="CheckColor"></label>
                             <div class="coloredBox" :class="LoginResponse.checkColor">&nbsp;</div>
                             <button class="btn btn-secondary" name="button" value="cancel" asp-action="CancelLogin" @click="handleCheckCancelClick">Cancel</button>

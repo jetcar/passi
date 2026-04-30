@@ -25,7 +25,7 @@ namespace passi_webapi
                                     Thread.Sleep(100);
                                 break;
                             }
-                            catch (Exception e)
+                            catch (Exception)
                             {
                                 Thread.Sleep(100);
                             }

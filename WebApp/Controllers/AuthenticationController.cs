@@ -135,7 +135,7 @@ public class AuthenticationController : Controller
             if (requestResult.IsSuccessful)
             {
                 var cert = JsonConvert.DeserializeObject<SessionMinDto>(requestResult.Content);
-                var publicCertificate = new X509Certificate2(Convert.FromBase64String(cert.PublicCert));
+                var publicCertificate = X509CertificateLoader.LoadCertificate(Convert.FromBase64String(cert.PublicCert));
 
                 // Verify signature
                 var isValid = CertHelper.VerifyData(nonce, cert.SignedHash, cert.PublicCert);

@@ -1,6 +1,7 @@
 ﻿using Models;
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using GoogleTracer;
@@ -22,12 +23,10 @@ namespace Repos
 
         public UserDb AddUser(UserDb user)
         {
-            var device = _dbContext.Devices.FirstOrDefault(x => x.DeviceId == user.Device.DeviceId);
-            if (device != null)
-            {
-                user.DeviceId = device.Id;
-                user.Device = device;
-            }
+            var device = GetOrCreateDevice(user.Device.DeviceId, user.Device.Platform);
+            user.DeviceId = device.Id;
+            user.Device = device;
+            EnsureUserDeviceLink(user, device);
             _dbContext.Users.Add(user);
             _dbContext.SaveChanges();
             return user;
@@ -41,17 +40,12 @@ namespace Repos
 
         public void ConfirmInvitation(string email, string publicCert, string guid, string code, string deviceId)
         {
-            var userInvitationDb = _dbContext.Invitations.Include(x => x.User).FirstOrDefault(x => x.User.EmailHash == email && x.Code == code);
+            var userInvitationDb = _dbContext.Invitations
+                .Include(x => x.User)
+                .ThenInclude(x => x.UserDevices)
+                .FirstOrDefault(x => x.User.EmailHash == email && x.Code == code);
 
-            var device = _dbContext.Devices.FirstOrDefault(x => x.DeviceId == deviceId);
-            if (device == null)
-            {
-                device = new DeviceDb()
-                {
-                    DeviceId = deviceId
-                };
-                _dbContext.Devices.Add(device);
-            }
+            var device = GetOrCreateDevice(deviceId);
 
             if (userInvitationDb != null)
             {
@@ -60,11 +54,13 @@ namespace Repos
                 {
                     PublicCert = publicCert,
                     Thumbprint =
-                        new X509Certificate2(Convert.FromBase64String(publicCert)).Thumbprint,
+                        X509CertificateLoader.LoadCertificate(Convert.FromBase64String(publicCert)).Thumbprint,
                     User = userInvitationDb.User
                 });
 
                 userInvitationDb.User.Device = device;
+                userInvitationDb.User.DeviceId = device.Id;
+                EnsureUserDeviceLink(userInvitationDb.User, device);
                 userInvitationDb.User.Guid = Guid.Parse(guid);
             }
 
@@ -96,7 +92,52 @@ namespace Repos
 
         public UserDb GetUser(string username)
         {
-            return _dbContext.Users.Include(x => x.Device).First(x => x.EmailHash == username);
+            return _dbContext.Users
+                .Include(x => x.Device)
+                .Include(x => x.Certificates)
+                .Include(x => x.UserDevices)
+                .ThenInclude(x => x.Device)
+                .First(x => x.EmailHash == username);
+        }
+
+        public IReadOnlyList<DeviceDb> GetAccountDevices(Guid accountGuid, string thumbprint)
+        {
+            var user = GetUserByAccount(accountGuid, thumbprint);
+            return user.UserDevices
+                .Select(x => x.Device)
+                .OrderByDescending(x => x.CreationTime)
+                .ToList();
+        }
+
+        public void DeleteDevice(Guid accountGuid, string thumbprint, string deviceId, string currentDeviceId)
+        {
+            if (deviceId == currentDeviceId)
+            {
+                throw new ClientException("Current device cannot be removed");
+            }
+
+            var user = GetUserByAccount(accountGuid, thumbprint);
+            var link = user.UserDevices.FirstOrDefault(x => x.Device.DeviceId == deviceId);
+            if (link == null)
+            {
+                throw new ClientException("Device not found");
+            }
+
+            _dbContext.UserDevices.Remove(link);
+
+            if (user.DeviceId == link.DeviceId)
+            {
+                var replacementDeviceId = user.UserDevices
+                    .Where(x => x.Id != link.Id)
+                    .OrderByDescending(x => x.CreationTime)
+                    .Select(x => (long?)x.DeviceId)
+                    .FirstOrDefault();
+                user.DeviceId = replacementDeviceId;
+            }
+
+            _dbContext.SaveChanges();
+
+            CleanupDeviceIfUnused(link.DeviceId);
         }
 
         public void AddInvitation(UserInvitationDb userInvitationDb)
@@ -149,6 +190,69 @@ namespace Repos
                 _dbContext.Users.Where(x => x.Id == exinstingUser.Id).DeleteFromQuery();
             }
         }
+
+        private DeviceDb GetOrCreateDevice(string deviceId, string platform = null)
+        {
+            var device = _dbContext.Devices.FirstOrDefault(x => x.DeviceId == deviceId);
+            if (device != null)
+            {
+                if (!string.IsNullOrWhiteSpace(platform) && string.IsNullOrWhiteSpace(device.Platform))
+                {
+                    device.Platform = platform;
+                }
+
+                return device;
+            }
+
+            device = new DeviceDb
+            {
+                DeviceId = deviceId,
+                Platform = platform,
+            };
+            _dbContext.Devices.Add(device);
+            return device;
+        }
+
+        private void EnsureUserDeviceLink(UserDb user, DeviceDb device)
+        {
+            if (user.UserDevices.Any(x => x.Device == device || x.DeviceId == device.Id))
+            {
+                return;
+            }
+
+            user.UserDevices.Add(new UserDeviceDb
+            {
+                User = user,
+                Device = device,
+            });
+        }
+
+        private UserDb GetUserByAccount(Guid accountGuid, string thumbprint)
+        {
+            var user = _dbContext.Users
+                .Include(x => x.Certificates)
+                .Include(x => x.UserDevices)
+                .ThenInclude(x => x.Device)
+                .FirstOrDefault(x => x.Guid == accountGuid && x.Certificates.Any(a => a.Thumbprint == thumbprint));
+
+            if (user == null)
+            {
+                throw new ClientException("Account not found");
+            }
+
+            return user;
+        }
+
+        private void CleanupDeviceIfUnused(long deviceId)
+        {
+            var isReferenced = _dbContext.UserDevices.Any(x => x.DeviceId == deviceId)
+                || _dbContext.Users.Any(x => x.DeviceId == deviceId);
+
+            if (!isReferenced)
+            {
+                _dbContext.Devices.Where(x => x.Id == deviceId).DeleteFromQuery();
+            }
+        }
     }
 
     public interface IUserRepository : ITransaction
@@ -166,6 +270,10 @@ namespace Repos
         bool IsUserFinished(string username);
 
         UserDb GetUser(string username);
+
+        IReadOnlyList<DeviceDb> GetAccountDevices(Guid accountGuid, string thumbprint);
+
+        void DeleteDevice(Guid accountGuid, string thumbprint, string deviceId, string currentDeviceId);
 
         void AddInvitation(UserInvitationDb userInvitationDb);
 

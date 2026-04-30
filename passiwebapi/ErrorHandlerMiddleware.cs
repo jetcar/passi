@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Http;
+using Models;
 using Newtonsoft.Json;
 using Services;
 using System;
@@ -34,6 +35,11 @@ namespace passi_webapi
                 {
                     case BadRequestException e:
                         // custom application error
+                        responseModel.errors = e.Message;
+                        response.StatusCode = (int)HttpStatusCode.BadRequest;
+                        break;
+
+                    case ClientException e:
                         responseModel.errors = e.Message;
                         response.StatusCode = (int)HttpStatusCode.BadRequest;
                         break;

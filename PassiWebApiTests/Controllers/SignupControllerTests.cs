@@ -53,7 +53,7 @@ namespace PassiWebApiTests.Controllers
             Assert.That(cert.HasPrivateKey);
 
             var certificate64 = Convert.ToBase64String(cert.Export(X509ContentType.Pkcs12, "1234"));
-            var certLoaded = new X509Certificate2(Convert.FromBase64String(certificate64), "1234", X509KeyStorageFlags.Exportable);
+            var certLoaded = X509CertificateLoader.LoadPkcs12(Convert.FromBase64String(certificate64), "1234", X509KeyStorageFlags.Exportable);
             Assert.That(certLoaded.HasPrivateKey);
             var signupConfirmationDto = new SignupConfirmationDto()
             {
@@ -85,7 +85,7 @@ namespace PassiWebApiTests.Controllers
                 ParentCertHashSignature = parentCertHashSignature
             };
             var updateResponse = certController.UpdatePublicCert(certificateUpdateDto);
-            var x509Certificate2 = new X509Certificate2(Convert.FromBase64String(updateResponse.PublicCert));
+            var x509Certificate2 = X509CertificateLoader.LoadCertificate(Convert.FromBase64String(updateResponse.PublicCert));
             Assert.That(cert2.Thumbprint.Equals(x509Certificate2.Thumbprint));
         }
 
@@ -141,7 +141,7 @@ namespace PassiWebApiTests.Controllers
                     controller = ServiceProvider.GetService<SignUpController>();
                     controller.Confirm(signupConfirmationDto);
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                 }
             }

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using NotificationsService;
 using NUnit.Framework;
 using passi_webapi;
 using passi_webapi.Controllers;
@@ -29,6 +30,7 @@ public class TestBase
         IServiceCollection services = new ServiceCollection();
         services.AddScoped<SignUpController>();
         services.AddScoped<CertificateController>();
+        services.AddScoped<AuthController>();
         services.AddSingleton<ILog>(LogManager.GetLogger(typeof(TestBase)));
         //IConfiguration configuration = new ConfigurationBuilder().AddInMemoryCollection(myConfiguration).Build();
         IConfiguration configuration = new ConfigurationBuilder().AddJsonFile("test.appsettings.json").Build();
@@ -39,9 +41,13 @@ public class TestBase
         services.Remove(new ServiceDescriptor(typeof(IMyRestClient), typeof(MyRestClient)));//remove real requests services
         services.Remove(new ServiceDescriptor(typeof(IEmailSender), typeof(SendgridEmailSender)));//remove real requests services
         services.Remove(new ServiceDescriptor(typeof(IEmailSender), typeof(SmtpEmailSender)));//remove real requests services
+        services.Remove(new ServiceDescriptor(typeof(IFireBaseClient), typeof(FireBaseClient)));
+        services.Remove(new ServiceDescriptor(typeof(IFirebaseService), typeof(FirebaseService)));
 
         services.AddSingleton<IMyRestClient, TestRestClient>();
         services.AddScoped<IEmailSender, TestEmailSender>();
+        services.AddSingleton<IFireBaseClient, TestFireBaseClient>();
+        services.AddScoped<IFirebaseService, FirebaseService>();
 
         ServiceProvider = services.BuildServiceProvider();
         PrepareDockers();
@@ -77,7 +83,7 @@ public class TestBase
             var containerBuilder = new ContainerBuilder()
                 .WithImage("postgres:15.5")
                 .WithPortBinding(5432, true)
-                .WithWaitStrategy(Wait.ForUnixContainer().UntilExternalTcpPortIsAvailable(5432))
+                .WithWaitStrategy(Wait.ForUnixContainer().UntilMessageIsLogged("database system is ready to accept connections"))
                 .WithEnvironment("POSTGRES_PASSWORD", pgpassword);
             if (!string.IsNullOrEmpty(dockerEndpoint))
                 containerBuilder.WithDockerEndpoint(dockerEndpoint);
@@ -193,5 +199,13 @@ public class TestRestClient : IMyRestClient
     public Task<RestResponse> ExecuteAsync(RestRequest request)
     {
         throw new NotImplementedException();
+    }
+}
+
+public class TestFireBaseClient : IFireBaseClient
+{
+    public string Send(FirebaseAdmin.Messaging.Message message)
+    {
+        return "test-notification";
     }
 }

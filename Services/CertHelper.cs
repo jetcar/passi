@@ -32,7 +32,7 @@ public class CertHelper
 
         _logger.Debug($"VerifyData called with data length: {data.Length}, signedData length: {signedData.Length}, cert length: {base64PublicCert.Length}");
 
-        var parentCert = new X509Certificate2(Convert.FromBase64String(base64PublicCert));
+        var parentCert = X509CertificateLoader.LoadCertificate(Convert.FromBase64String(base64PublicCert));
 
         using (var sha512 = SHA512.Create())
         {

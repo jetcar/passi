@@ -14,6 +14,7 @@ using WebApiDto.Auth;
 using WebApiDto.Auth.Dto;
 using OpenIDC.Models;
 using OpenIDC.Services;
+using System.Net;
 
 
 [ApiController]
@@ -94,19 +95,52 @@ public class ApiController : ControllerBase
                 ReturnUrl = redirect_uri,
                 Username = username,
                 CheckColor = color,
-                RandomString = startLoginDto.RandomString
+                RandomString = startLoginDto.RandomString,
+                RegisteredDevices = loginResponceDto.RegisteredDevices ?? []
             });
         }
 
         _logger.LogDebug("response:" + result.Content);
         if (result.Content != null)
         {
-            var errorResult = JsonConvert.DeserializeObject<ApiResponseDto>(result.Content);
-
-            return BadRequest(new ApiResponseDto() { errors = errorResult?.errors });
+            return BadRequest(new ApiResponseDto() { errors = GetApiErrorMessage(result.Content) });
         }
 
         return BadRequest(new ApiResponseDto() { errors = "Internal error" });
+    }
+
+    private static string GetApiErrorMessage(string content)
+    {
+        if (string.IsNullOrWhiteSpace(content))
+        {
+            return "Internal error";
+        }
+
+        try
+        {
+            var errorResult = JsonConvert.DeserializeObject<ApiResponseDto>(content);
+            if (!string.IsNullOrWhiteSpace(errorResult?.errors))
+            {
+                return errorResult.errors;
+            }
+        }
+        catch (JsonException)
+        {
+        }
+
+        try
+        {
+            var errorMessage = JsonConvert.DeserializeObject<string>(content);
+            if (!string.IsNullOrWhiteSpace(errorMessage))
+            {
+                return errorMessage;
+            }
+        }
+        catch (JsonException)
+        {
+        }
+
+        return WebUtility.HtmlDecode(content).Trim().Trim('"');
     }
 
     [HttpPost]

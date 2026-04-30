@@ -8,8 +8,6 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using GoogleTracer;
-using IdentityModel.Client.Extensions;
-using IdentityModel.Client.Messages;
 
 using Repos;
 

@@ -7,6 +7,7 @@ namespace Models
         public DeviceDb()
         {
             Users = new HashSet<UserDb>();
+            UserDevices = new HashSet<UserDeviceDb>();
         }
 
         public long Id { get; set; }
@@ -15,5 +16,6 @@ namespace Models
         public string Platform { get; set; }
 
         public virtual ICollection<UserDb> Users { get; set; }
+        public virtual ICollection<UserDeviceDb> UserDevices { get; set; }
     }
 }

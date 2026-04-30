@@ -5,24 +5,24 @@
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 	</PropertyGroup>
 	<ItemGroup>
+		<PackageReference Include="IdentityModel" Version="7.0.0" />
 		<PackageReference Include="MessagePack" Version="3.1.4" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="10.0.6" />
-		<PackageReference Include="Microsoft.AspNetCore.DataProtection.EntityFrameworkCore" Version="10.0.6" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.6" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.6" />
+		<PackageReference Include="Microsoft.AspNetCore.DataProtection.EntityFrameworkCore" Version="10.0.7" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.7" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.7" />
 		<PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.5.0" />
 		<PackageReference Include="MrAdvice" Version="2.20.5" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.6" />
 		<PackageReference Include="RestSharp" Version="114.0.0" />
 		<PackageReference Include="ServiceStack.Redis" Version="10.0.6" />
 		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.5.0" />
-		<PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.6" />
+		<PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.7" />
 		<PackageReference Include="Z.EntityFramework.Extensions.EFCore" Version="10.105.4" />
 
 
 	</ItemGroup>
 	<ItemGroup>
-		<ProjectReference Include="..\identityserver4\IdentityModel\IdentityModel.csproj" />
 		<ProjectReference Include="..\Services\Services.csproj" />
 		<ProjectReference Include="..\WebApiDto\WebApiDto.csproj" />
 	</ItemGroup>

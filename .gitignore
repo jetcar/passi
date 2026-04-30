@@ -73,3 +73,6 @@ bin
 Debug
 
 /RegisterManyUsersTestApp/test.appsettings.json
+/android-native/app/build/*
+
+/android-native/.gradle/*

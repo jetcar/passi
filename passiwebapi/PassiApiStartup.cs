@@ -42,8 +42,12 @@ namespace passi_webapi
             var clientId = Environment.GetEnvironmentVariable("PassiClientId") ?? Configuration.GetValue<string>("AppSetting:PassiClientId");
             var secret = Environment.GetEnvironmentVariable("PassiSecret") ?? Configuration.GetValue<string>("AppSetting:PassiSecret");
             var projectId = Environment.GetEnvironmentVariable("projectId") ?? Configuration.GetValue<string>("AppSetting:projectId");
+            var isTest = Convert.ToBoolean(Environment.GetEnvironmentVariable("IsTest") ?? Configuration.GetValue<string>("AppSetting:IsTest"));
 
-            Tracer.SetupTracer(services, projectId, "PassiApi");
+            if (!isTest)
+            {
+                Tracer.SetupTracer(services, projectId, "PassiApi");
+            }
 
             services.AddControllers();
             services.AddSingleton<AppSetting>(new AppSetting(Configuration));
@@ -54,7 +58,14 @@ namespace passi_webapi
             services.AddSingleton<IRandomGenerator, RandomGenerator>();
             services.AddSingleton<ICertValidator, CertValidator>();
             services.AddSingleton<IFirebaseService, FirebaseService>();
-            services.AddSingleton<IFireBaseClient, FireBaseClient>();
+            if (isTest)
+            {
+                services.AddSingleton<IFireBaseClient, ExternalServiceCatcherClient>();
+            }
+            else
+            {
+                services.AddSingleton<IFireBaseClient, FireBaseClient>();
+            }
             services.AddScoped<PassiDbContext>();
             services.AddScoped<CurrentContext>();
             services.AddScoped<IUserRepository, UserRepository>();

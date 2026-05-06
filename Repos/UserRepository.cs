@@ -61,7 +61,12 @@ namespace Repos
                 userInvitationDb.User.Device = device;
                 userInvitationDb.User.DeviceId = device.Id;
                 EnsureUserDeviceLink(userInvitationDb.User, device);
-                userInvitationDb.User.Guid = Guid.Parse(guid);
+                // Keep existing account GUID stable across devices. Overwriting it on repeated
+                // confirmations makes previously enrolled devices look removed.
+                if (userInvitationDb.User.Guid == Guid.Empty)
+                {
+                    userInvitationDb.User.Guid = Guid.Parse(guid);
+                }
             }
 
             _dbContext.SaveChanges();

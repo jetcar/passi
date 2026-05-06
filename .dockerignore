@@ -35,5 +35,12 @@ MauiTest/
 RegisterManyUsersTestApp/
 MauiApp2/
 MauiApp1/
+android-native/**
+.android-sdk
+MauiViewModels/**
 LICENSE
 README.md
+*.dll
+*.pdb
+*.exe
+*.log

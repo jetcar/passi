@@ -76,3 +76,5 @@ Debug
 /android-native/app/build/*
 
 /android-native/.gradle/*
+/android-native/e2e/build/*
+/android-native/build/reports/problems/problems-report.html

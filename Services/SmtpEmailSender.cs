@@ -4,6 +4,7 @@ using System.Net;
 using GoogleTracer;
 using System.Net.Mail;
 using System.Threading;
+using System.Threading.Tasks;
 using log4net;
 
 namespace Services
@@ -11,8 +12,9 @@ namespace Services
     [Profile]
     public class SmtpEmailSender : IEmailSender
     {
-        private const int MaxRetryAttempts = 10;
-        private const int RetryDelayMilliseconds = 1000;
+        private const int MaxRetryAttempts = 3;
+        private const int RetryDelayMilliseconds = 2000;
+        private const int SmtpTimeoutMilliseconds = 15_000;
         private const string SuccessResult = "ok";
         private const string FailureResult = "failed";
 
@@ -30,7 +32,7 @@ namespace Services
                 var port = Convert.ToInt32(_appSetting["smtpPort"]);
                 var userName = _appSetting["smtpUsername"];
                 var password = _appSetting["smtpPassword"];
-                this.client = new SmtpClient() { Host = host, Port = port, EnableSsl = !Convert.ToBoolean(_appSetting["SmtpDisableSsl"]), Credentials = new NetworkCredential(userName, password) };
+                this.client = new SmtpClient() { Host = host, Port = port, EnableSsl = !Convert.ToBoolean(_appSetting["SmtpDisableSsl"]), Credentials = new NetworkCredential(userName, password), Timeout = SmtpTimeoutMilliseconds };
             }
         }
 
@@ -49,6 +51,11 @@ namespace Services
                 $"<tr><td><b>{code}</b></td></tr>" +
                 "</table></body></html>"
             };
+            return TrySendWithRetry(message);
+        }
+
+        private string TrySendWithRetry(MailMessage message)
+        {
             for (int i = 0; i < MaxRetryAttempts; i++)
             {
                 try
@@ -58,10 +65,10 @@ namespace Services
                 }
                 catch (Exception e)
                 {
-                    _logger.Error(e.Message, e);
-                    Thread.Sleep(RetryDelayMilliseconds);
+                    _logger.Error($"SMTP send attempt {i + 1}/{MaxRetryAttempts} failed: {e.Message}", e);
+                    if (i < MaxRetryAttempts - 1)
+                        Thread.Sleep(RetryDelayMilliseconds);
                 }
-
             }
 
             return FailureResult;
@@ -82,16 +89,7 @@ namespace Services
                 $"<tr><td><b>{code}</b></td></tr>" +
                 "</table></body></html>"
             };
-            try
-            {
-                client.Send(message);
-            }
-            catch (Exception e)
-            {
-                _logger.Error(e.Message, e);
-                return FailureResult;
-            }
-            return SuccessResult;
+            return TrySendWithRetry(message);
         }
     }
 }

@@ -34,6 +34,7 @@ namespace passi_webapi.Controllers
         public IActionResult SignUp([FromBody] SignupDto signupDto)
         {
             signupDto.Email = signupDto.Email.Trim();
+            string confirmationCode = null;
             var strategy = _userRepository.GetExecutionStrategy();
             strategy.Execute(() =>
             {
@@ -41,18 +42,23 @@ namespace passi_webapi.Controllers
                 {
                     if (_userRepository.IsUsernameTaken(signupDto.Email))
                     {
-                        _userService.SendConfirmationEmail(signupDto);
+                        confirmationCode = _userService.PrepareSignupCode(signupDto);
                         _logger.Debug("Confirmation email flow executed for existing user.");
                     }
                     else
                     {
-                        _userService.AddUserAndSendConfirmationEmail(signupDto);
+                        confirmationCode = _userService.PrepareNewUserSignupCode(signupDto);
                         _logger.Debug("User created and invitation email flow executed.");
                     }
 
                     transaction.Commit();
                 }
             });
+
+            var email = signupDto.Email;
+            var code = confirmationCode;
+            Task.Run(() => _userService.SendSignupEmail(email, code));
+
             return Ok();
         }
 

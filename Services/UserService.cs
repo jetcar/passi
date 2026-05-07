@@ -22,6 +22,12 @@ namespace Services
 
         public string AddUserAndSendConfirmationEmail(SignupDto signupDto)
         {
+            var code = PrepareNewUserSignupCode(signupDto);
+            return _emailSender.SendInvitationEmail(signupDto.Email, code);
+        }
+
+        public string PrepareNewUserSignupCode(SignupDto signupDto)
+        {
             var userInvitationDb = new UserInvitationDb()
             {
                 Code = _randomGenerator.GetNumbersString(6),
@@ -38,7 +44,7 @@ namespace Services
             };
             user.Invitations.Add(userInvitationDb);
             _userRepository.AddUser(user);
-            return _emailSender.SendInvitationEmail(signupDto.Email, userInvitationDb.Code);
+            return userInvitationDb.Code;
         }
 
         public void ConfirmUser(SignupConfirmationDto signupConfirmationDto)
@@ -49,6 +55,12 @@ namespace Services
 
         public string SendConfirmationEmail(SignupDto signupDto)
         {
+            var code = PrepareSignupCode(signupDto);
+            return _emailSender.SendInvitationEmail(signupDto.Email, code);
+        }
+
+        public string PrepareSignupCode(SignupDto signupDto)
+        {
             var user = _userRepository.GetUser(signupDto.Email);
             var userInvitationDb = new UserInvitationDb()
             {
@@ -57,7 +69,12 @@ namespace Services
             };
 
             _userRepository.AddInvitation(userInvitationDb);
-            return _emailSender.SendInvitationEmail(signupDto.Email, userInvitationDb.Code);
+            return userInvitationDb.Code;
+        }
+
+        public void SendSignupEmail(string email, string code)
+        {
+            _emailSender.SendInvitationEmail(email, code);
         }
 
         public string SendDeleteConfirmationEmail(string email)

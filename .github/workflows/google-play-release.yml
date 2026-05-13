@@ -55,6 +55,14 @@ jobs:
       - name: Setup Gradle cache
         uses: gradle/actions/setup-gradle@v4
 
+      - name: Remove local Android SDK override for CI
+        shell: pwsh
+        run: |
+          $localProps = Join-Path $env:GITHUB_WORKSPACE 'android-native\local.properties'
+          if (Test-Path $localProps) {
+            Remove-Item $localProps -Force
+          }
+
       - name: Materialize Android keystore
         shell: pwsh
         run: |
@@ -64,6 +72,20 @@ jobs:
             [System.Convert]::FromBase64String('${{ secrets.PASSI_ANDROID_KEYSTORE_BASE64 }}')
           )
           "PASSI_ANDROID_KEYSTORE_PATH=$keystorePath" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Materialize google-services.json
+        shell: pwsh
+        run: |
+          $encoded = '${{ secrets.PASSI_ANDROID_GOOGLE_SERVICES_JSON_BASE64 }}'
+          if ([string]::IsNullOrWhiteSpace($encoded)) {
+            throw 'Missing secret PASSI_ANDROID_GOOGLE_SERVICES_JSON_BASE64'
+          }
+
+          $googleServicesPath = Join-Path $env:GITHUB_WORKSPACE 'android-native\app\google-services.json'
+          [System.IO.File]::WriteAllBytes(
+            $googleServicesPath,
+            [System.Convert]::FromBase64String($encoded)
+          )
 
       - name: Set Android version metadata
         shell: pwsh

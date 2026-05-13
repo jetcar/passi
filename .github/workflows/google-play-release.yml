@@ -39,18 +39,12 @@ jobs:
   release-android:
     runs-on: windows-latest
     env:
-      PROJECT_PATH: MauiApp2/MauiApp2.csproj
-      TARGET_FRAMEWORK: net9.0-android35.0
+      ANDROID_NATIVE_DIR: android-native
       PACKAGE_NAME: com.passi.cloud.passi_android
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: 9.0.x
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -58,13 +52,8 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: Install MAUI Android workload
-        shell: pwsh
-        run: dotnet workload install maui-android
-
-      - name: Restore dependencies
-        shell: pwsh
-        run: dotnet restore $env:PROJECT_PATH
+      - name: Setup Gradle cache
+        uses: gradle/actions/setup-gradle@v4
 
       - name: Materialize Android keystore
         shell: pwsh
@@ -82,30 +71,29 @@ jobs:
           "PASSI_ANDROID_DISPLAY_VERSION=${{ inputs.display_version }}" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
           "PASSI_ANDROID_VERSION_CODE=${{ github.run_number }}" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
 
-      - name: Publish signed Android App Bundle
+      - name: Build signed Android App Bundle
         shell: pwsh
         env:
           PASSI_ANDROID_SIGNING_STORE_PASS: ${{ secrets.PASSI_ANDROID_SIGNING_STORE_PASS }}
           PASSI_ANDROID_SIGNING_KEY_PASS: ${{ secrets.PASSI_ANDROID_SIGNING_KEY_PASS }}
           PASSI_ANDROID_KEY_ALIAS: ${{ secrets.PASSI_ANDROID_KEY_ALIAS }}
         run: |
-          dotnet publish $env:PROJECT_PATH `
-            -c Release `
-            -f $env:TARGET_FRAMEWORK `
-            /p:AndroidPackageFormat=aab `
-            /p:AndroidKeyStore=True `
-            /p:AndroidSigningKeyStore="$env:PASSI_ANDROID_KEYSTORE_PATH" `
-            /p:AndroidSigningStorePass="$env:PASSI_ANDROID_SIGNING_STORE_PASS" `
-            /p:AndroidSigningKeyAlias="$env:PASSI_ANDROID_KEY_ALIAS" `
-            /p:AndroidSigningKeyPass="$env:PASSI_ANDROID_SIGNING_KEY_PASS" `
-            /p:ApplicationDisplayVersion="$env:PASSI_ANDROID_DISPLAY_VERSION" `
-            /p:ApplicationVersion="$env:PASSI_ANDROID_VERSION_CODE"
+          Push-Location $env:ANDROID_NATIVE_DIR
+          .\gradlew.bat :app:bundleRelease `
+            -PPASSI_ANDROID_KEYSTORE_PATH="$env:PASSI_ANDROID_KEYSTORE_PATH" `
+            -PPASSI_ANDROID_SIGNING_STORE_PASS="$env:PASSI_ANDROID_SIGNING_STORE_PASS" `
+            -PPASSI_ANDROID_KEY_ALIAS="$env:PASSI_ANDROID_KEY_ALIAS" `
+            -PPASSI_ANDROID_SIGNING_KEY_PASS="$env:PASSI_ANDROID_SIGNING_KEY_PASS" `
+            -PPASSI_ANDROID_DISPLAY_VERSION="$env:PASSI_ANDROID_DISPLAY_VERSION" `
+            -PPASSI_ANDROID_VERSION_CODE="$env:PASSI_ANDROID_VERSION_CODE" `
+            --no-daemon
+          Pop-Location
 
       - name: Locate generated AAB
         id: aab
         shell: pwsh
         run: |
-          $bundle = Get-ChildItem -Path MauiApp2\bin\Release -Filter *.aab -Recurse |
+          $bundle = Get-ChildItem -Path android-native\app\build\outputs\bundle -Filter *.aab -Recurse |
             Sort-Object LastWriteTime -Descending |
             Select-Object -First 1
 

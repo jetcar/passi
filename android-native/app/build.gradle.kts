@@ -5,6 +5,13 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
 }
 
+val ciVersionCode = (project.findProperty("PASSI_ANDROID_VERSION_CODE") as String?)?.toIntOrNull()
+val ciVersionName = project.findProperty("PASSI_ANDROID_DISPLAY_VERSION") as String?
+val ciSigningStorePath = project.findProperty("PASSI_ANDROID_KEYSTORE_PATH") as String?
+val ciSigningStorePass = project.findProperty("PASSI_ANDROID_SIGNING_STORE_PASS") as String?
+val ciSigningKeyAlias = project.findProperty("PASSI_ANDROID_KEY_ALIAS") as String?
+val ciSigningKeyPass = project.findProperty("PASSI_ANDROID_SIGNING_KEY_PASS") as String?
+
 android {
     namespace = "com.passi.cloud.passi_android"
     compileSdk = 35
@@ -13,8 +20,8 @@ android {
         applicationId = "com.passi.cloud.passi_android"
         minSdk = 28
         targetSdk = 35
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = ciVersionCode ?: 1
+        versionName = ciVersionName ?: "0.1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -22,9 +29,23 @@ android {
         }
     }
 
+    signingConfigs {
+        create("ciRelease") {
+            if (!ciSigningStorePath.isNullOrBlank()) {
+                storeFile = file(ciSigningStorePath)
+                storePassword = ciSigningStorePass
+                keyAlias = ciSigningKeyAlias
+                keyPassword = ciSigningKeyPass
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
+            if (!ciSigningStorePath.isNullOrBlank()) {
+                signingConfig = signingConfigs.getByName("ciRelease")
+            }
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"

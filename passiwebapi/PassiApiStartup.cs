@@ -54,7 +54,14 @@ namespace passi_webapi
             services.AddSingleton<IMyRestClient, MyRestClient>();
 
             services.AddSingleton<IRedisService, RedisService>();
-            services.AddSingleton<IEmailSender, SendgridEmailSender>();
+            if (isTest)
+            {
+                services.AddSingleton<IEmailSender, SmtpEmailSender>();
+            }
+            else
+            {
+                services.AddSingleton<IEmailSender, SendgridEmailSender>();
+            }
             services.AddSingleton<IRandomGenerator, RandomGenerator>();
             services.AddSingleton<ICertValidator, CertValidator>();
             services.AddSingleton<IFirebaseService, FirebaseService>();

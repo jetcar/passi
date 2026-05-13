@@ -1,0 +1,125 @@
+name: Release Android To Google Play
+
+on:
+  workflow_dispatch:
+    inputs:
+      track:
+        description: Google Play track to publish to
+        required: true
+        default: internal
+        type: choice
+        options:
+          - internal
+          - alpha
+          - beta
+          - production
+      release_status:
+        description: Google Play release status
+        required: true
+        default: draft
+        type: choice
+        options:
+          - draft
+          - completed
+          - inProgress
+          - halted
+      display_version:
+        description: Visible app version, for example 1.54
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: google-play-release
+  cancel-in-progress: false
+
+jobs:
+  release-android:
+    runs-on: windows-latest
+    env:
+      PROJECT_PATH: MauiApp2/MauiApp2.csproj
+      TARGET_FRAMEWORK: net9.0-android35.0
+      PACKAGE_NAME: com.passi.cloud.passi_android
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Install MAUI Android workload
+        shell: pwsh
+        run: dotnet workload install maui-android
+
+      - name: Restore dependencies
+        shell: pwsh
+        run: dotnet restore $env:PROJECT_PATH
+
+      - name: Materialize Android keystore
+        shell: pwsh
+        run: |
+          $keystorePath = Join-Path $env:RUNNER_TEMP 'passi.keystore'
+          [System.IO.File]::WriteAllBytes(
+            $keystorePath,
+            [System.Convert]::FromBase64String('${{ secrets.PASSI_ANDROID_KEYSTORE_BASE64 }}')
+          )
+          "PASSI_ANDROID_KEYSTORE_PATH=$keystorePath" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Set Android version metadata
+        shell: pwsh
+        run: |
+          "PASSI_ANDROID_DISPLAY_VERSION=${{ inputs.display_version }}" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          "PASSI_ANDROID_VERSION_CODE=${{ github.run_number }}" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Publish signed Android App Bundle
+        shell: pwsh
+        env:
+          PASSI_ANDROID_SIGNING_STORE_PASS: ${{ secrets.PASSI_ANDROID_SIGNING_STORE_PASS }}
+          PASSI_ANDROID_SIGNING_KEY_PASS: ${{ secrets.PASSI_ANDROID_SIGNING_KEY_PASS }}
+          PASSI_ANDROID_KEY_ALIAS: ${{ secrets.PASSI_ANDROID_KEY_ALIAS }}
+        run: |
+          dotnet publish $env:PROJECT_PATH `
+            -c Release `
+            -f $env:TARGET_FRAMEWORK `
+            /p:AndroidPackageFormat=aab `
+            /p:AndroidKeyStore=True `
+            /p:AndroidSigningKeyStore="$env:PASSI_ANDROID_KEYSTORE_PATH" `
+            /p:AndroidSigningStorePass="$env:PASSI_ANDROID_SIGNING_STORE_PASS" `
+            /p:AndroidSigningKeyAlias="$env:PASSI_ANDROID_KEY_ALIAS" `
+            /p:AndroidSigningKeyPass="$env:PASSI_ANDROID_SIGNING_KEY_PASS" `
+            /p:ApplicationDisplayVersion="$env:PASSI_ANDROID_DISPLAY_VERSION" `
+            /p:ApplicationVersion="$env:PASSI_ANDROID_VERSION_CODE"
+
+      - name: Locate generated AAB
+        id: aab
+        shell: pwsh
+        run: |
+          $bundle = Get-ChildItem -Path MauiApp2\bin\Release -Filter *.aab -Recurse |
+            Sort-Object LastWriteTime -Descending |
+            Select-Object -First 1
+
+          if (-not $bundle) {
+            throw 'No Android App Bundle (.aab) was generated.'
+          }
+
+          "path=$($bundle.FullName)" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+
+      - name: Upload to Google Play
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: ${{ env.PACKAGE_NAME }}
+          releaseFiles: ${{ steps.aab.outputs.path }}
+          track: ${{ inputs.track }}
+          status: ${{ inputs.release_status }}

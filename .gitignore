@@ -18,6 +18,7 @@ node_modules/
 
 # Package files
 *.jar
+!android-native/gradle/wrapper/gradle-wrapper.jar
 
 # Maven
 target/

@@ -118,8 +118,11 @@ namespace WebApp
 
                 applicationBuilder.UseSession();
                 applicationBuilder.UseDefaultFiles();
+                var contentTypeProvider = new Microsoft.AspNetCore.StaticFiles.FileExtensionContentTypeProvider();
+                contentTypeProvider.Mappings[".md"] = "text/markdown";
                 applicationBuilder.UseStaticFiles(new StaticFileOptions()
                 {
+                    ContentTypeProvider = contentTypeProvider,
                     OnPrepareResponse = (context) =>
                     {
                         // Disable caching for all static files.

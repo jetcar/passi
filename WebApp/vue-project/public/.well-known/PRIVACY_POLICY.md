@@ -12,7 +12,7 @@ When you visit the website, we may collect the following data:
 
 - Your IP address.
 - Your email address.
-- Your attempted to login domains, as it's part of the authentication process.
+- Your attempted login domains, as it's part of the authentication process.
 
 ## Why We Collect Your Data
 

@@ -7,6 +7,7 @@ import com.passi.cloud.passi_android.feature.enrollment.FinishEnrollmentViewMode
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
 import org.junit.Test
+import java.util.UUID
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class EnrollmentUseCaseTests : CoroutineViewModelTest() {
@@ -138,5 +139,37 @@ class EnrollmentUseCaseTests : CoroutineViewModelTest() {
         assertThat(updatedAccount.deviceId).isEqualTo("device-finished")
         assertThat(updatedAccount.pinLength).isEqualTo(4)
         assertThat(updatedAccount.thumbprint).isEqualTo("thumbprint-123")
+    }
+
+    @Test
+    fun finishEnrollmentReconcilesAccountToCanonicalGuidFromServer() = runViewModelTest {
+        val enrollmentStore = pendingEnrollmentStore().apply { save(samplePendingEnrollment()) }
+        val accountsRepository = inMemoryAccountsRepository()
+        val localId = UUID.fromString(samplePendingEnrollment().accountId)
+        val canonicalId = UUID.randomUUID()
+        val enrollmentService = FakeEnrollmentService().apply {
+            finalizeSignupResult = Result.success(canonicalId)
+        }
+        val viewModel = FinishEnrollmentViewModel(
+            pendingEnrollmentStore = enrollmentStore,
+            accountsRepository = accountsRepository,
+            providersRepository = inMemoryProvidersRepository(),
+            enrollmentService = enrollmentService,
+            certificateGenerator = FakeCertificateGenerator(),
+            deviceIdProvider = { "device-finished" },
+        )
+
+        viewModel.onPinChanged("1234")
+        viewModel.onPinConfirmationChanged("1234")
+        viewModel.submit {}
+        advanceUntilIdle()
+
+        // The old local GUID is gone; the finalized account now lives under the server's canonical GUID
+        // so a login push keyed on it resolves instead of failing with "Account not found".
+        assertThat(accountsRepository.getAccount(localId)).isNull()
+        val reconciled = accountsRepository.getAccount(canonicalId)
+        assertThat(reconciled).isNotNull()
+        assertThat(reconciled!!.deviceId).isEqualTo("device-finished")
+        assertThat(reconciled.thumbprint).isEqualTo("thumbprint-123")
     }
 }

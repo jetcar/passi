@@ -1,4 +1,5 @@
-﻿using WebApiDto.SignUp;
+﻿using System;
+using WebApiDto.SignUp;
 
 namespace Services
 {
@@ -6,7 +7,7 @@ namespace Services
     {
         string AddUserAndSendConfirmationEmail(SignupDto signupDto);
 
-        void ConfirmUser(SignupConfirmationDto signupConfirmationDto);
+        Guid ConfirmUser(SignupConfirmationDto signupConfirmationDto);
 
         string SendConfirmationEmail(SignupDto signupDto);
 

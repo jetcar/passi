@@ -89,6 +89,54 @@ namespace PassiWebApiTests.Controllers
             Assert.That(cert2.Thumbprint.Equals(x509Certificate2.Thumbprint));
         }
 
+        [Test]
+        public void ConfirmReturnsCanonicalAccountGuidWhenExistingUserReenrolls()
+        {
+            var email = Guid.NewGuid() + "@passi.cloud";
+            var deviceId = Guid.NewGuid().ToString();
+            var originalGuid = Guid.NewGuid();
+
+            // First enrollment (new user) adopts the client-provided GUID.
+            var controller = ServiceProvider.GetService<SignUpController>();
+            controller.SignUp(new SignupDto { DeviceId = deviceId, Email = email, UserGuid = originalGuid });
+            var firstGuid = ConfirmAndGetAccountGuid(controller, email, deviceId, originalGuid);
+            Assert.That(firstGuid, Is.EqualTo(originalGuid.ToString()));
+
+            // Re-enrolling the same email with a freshly generated GUID must NOT change the account
+            // GUID; the server returns the canonical (original) one so the client can reconcile.
+            var reenrollController = ServiceProvider.GetService<SignUpController>();
+            var differentGuid = Guid.NewGuid();
+            reenrollController.SignUp(new SignupDto { DeviceId = deviceId, Email = email, UserGuid = differentGuid });
+            var secondGuid = ConfirmAndGetAccountGuid(reenrollController, email, deviceId, differentGuid);
+
+            Assert.That(secondGuid, Is.EqualTo(originalGuid.ToString()));
+            Assert.That(secondGuid, Is.Not.EqualTo(differentGuid.ToString()));
+        }
+
+        private string ConfirmAndGetAccountGuid(SignUpController controller, string email, string deviceId, Guid clientGuid)
+        {
+            controller.Check(new SignupCheckDto { Code = TestEmailSender.Code, Username = email });
+
+            var rsa = RSA.Create();
+            var req = new CertificateRequest($"cn={email.Replace("@", "")}", rsa, HashAlgorithmName.SHA512, RSASignaturePadding.Pkcs1);
+            var cert = req.CreateSelfSigned(DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddYears(1));
+
+            var result = controller.Confirm(new SignupConfirmationDto
+            {
+                Code = TestEmailSender.Code,
+                DeviceId = deviceId,
+                Email = email,
+                Guid = clientGuid.ToString(),
+                PublicCert = Convert.ToBase64String(cert.RawData)
+            });
+
+            var ok = result as Microsoft.AspNetCore.Mvc.OkObjectResult;
+            Assert.That(ok, Is.Not.Null, "Confirm should return an OK body with the account GUID");
+            var response = ok.Value as SignupConfirmationResponseDto;
+            Assert.That(response, Is.Not.Null, "Confirm should return a SignupConfirmationResponseDto");
+            return response.AccountGuid;
+        }
+
         public string GetSignedData(string messageToSign, X509Certificate2 certificate)
         {
             using (var sha512 = SHA512.Create())

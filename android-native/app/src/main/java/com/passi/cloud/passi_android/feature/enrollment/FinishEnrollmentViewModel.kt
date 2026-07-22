@@ -131,19 +131,28 @@ class FinishEnrollmentViewModel(
                 generatedCertificate = generatedCertificate,
             )
 
-            finalizeResult.onSuccess {
-                accountsRepository.updateAccount(
-                    account.copy(
-                        deviceId = deviceId,
-                        pinLength = pinLength,
-                        salt = generatedCertificate.salt,
-                        privateCertBinary = generatedCertificate.privateCertBinary,
-                        publicCertBinary = generatedCertificate.publicCertBinary,
-                        thumbprint = generatedCertificate.thumbprint,
-                        validFrom = generatedCertificate.validFrom,
-                        validTo = generatedCertificate.validTo,
-                    )
+            finalizeResult.onSuccess { canonicalAccountId ->
+                val finalizedAccount = account.copy(
+                    id = canonicalAccountId,
+                    deviceId = deviceId,
+                    pinLength = pinLength,
+                    salt = generatedCertificate.salt,
+                    privateCertBinary = generatedCertificate.privateCertBinary,
+                    publicCertBinary = generatedCertificate.publicCertBinary,
+                    thumbprint = generatedCertificate.thumbprint,
+                    validFrom = generatedCertificate.validFrom,
+                    validTo = generatedCertificate.validTo,
                 )
+                if (canonicalAccountId == account.id) {
+                    accountsRepository.updateAccount(finalizedAccount)
+                } else {
+                    // The server keeps a canonical GUID for an already-existing account and ignores
+                    // the one this device generated. Move the local record onto the canonical GUID so
+                    // login push notifications (keyed on it) resolve to this account instead of
+                    // failing with "Account not found for this session".
+                    accountsRepository.deleteAccount(account.id)
+                    accountsRepository.savePendingAccount(finalizedAccount)
+                }
                 pendingEnrollmentStore.clear()
                 _uiState.value = _uiState.value.copy(isSubmitting = false)
                 onDone()

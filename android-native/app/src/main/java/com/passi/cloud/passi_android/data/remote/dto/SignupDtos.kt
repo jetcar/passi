@@ -34,3 +34,14 @@ data class SignupConfirmationRequestDto(
     @SerialName("DeviceId")
     val deviceId: String,
 )
+
+/**
+ * Response from the confirm endpoint. [accountGuid] is the canonical account GUID as stored on the
+ * server; for an existing account it can differ from the GUID the client generated at enrollment, so
+ * the client must adopt it (see [BackendEnrollmentService.finalizeSignup]).
+ */
+@Serializable
+data class SignupConfirmationResponseDto(
+    @SerialName("AccountGuid")
+    val accountGuid: String? = null,
+)

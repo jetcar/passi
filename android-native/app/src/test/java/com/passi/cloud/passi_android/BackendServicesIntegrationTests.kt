@@ -143,6 +143,46 @@ class BackendServicesIntegrationTests : CoroutineViewModelTest() {
     }
 
     @Test
+    fun enrollmentFinalizeAdoptsCanonicalAccountGuidFromServer() = runViewModelTest {
+        val canonicalGuid = UUID.randomUUID()
+        server.enqueue(MockResponse().setResponseCode(200).setBody("""{"AccountGuid":"$canonicalGuid"}"""))
+
+        val cert = BouncyCastleCertificateGenerator().generate("user@example.com", "1234")
+        val pending = PendingEnrollment(
+            accountId = UUID.randomUUID().toString(),
+            email = "user@example.com",
+            providerId = provider.id.toString(),
+            confirmationCode = "654321",
+        )
+
+        val result = BackendEnrollmentService(apiClient)
+            .finalizeSignup(pending, provider, "device-1", cert)
+
+        assertThat(result.isSuccess).isTrue()
+        assertThat(result.getOrNull()).isEqualTo(canonicalGuid)
+    }
+
+    @Test
+    fun enrollmentFinalizeFallsBackToLocalGuidWhenResponseHasNoBody() = runViewModelTest {
+        server.enqueue(MockResponse().setResponseCode(200))
+
+        val cert = BouncyCastleCertificateGenerator().generate("user@example.com", "1234")
+        val localId = UUID.randomUUID()
+        val pending = PendingEnrollment(
+            accountId = localId.toString(),
+            email = "user@example.com",
+            providerId = provider.id.toString(),
+            confirmationCode = "654321",
+        )
+
+        val result = BackendEnrollmentService(apiClient)
+            .finalizeSignup(pending, provider, "device-1", cert)
+
+        assertThat(result.isSuccess).isTrue()
+        assertThat(result.getOrNull()).isEqualTo(localId)
+    }
+
+    @Test
     fun enrollmentFinalizeFailsWhenConfirmationCodeMissing() = runViewModelTest {
         val cert = BouncyCastleCertificateGenerator().generate("user@example.com", "1234")
         val pending = PendingEnrollment(

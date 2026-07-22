@@ -80,6 +80,7 @@ namespace passi_webapi.Controllers
         public IActionResult Confirm([FromBody] SignupConfirmationDto signupConfirmationDto)
         {
             signupConfirmationDto.Email = signupConfirmationDto.Email.Trim();
+            var accountGuid = Guid.Empty;
             var strategy = _userRepository.GetExecutionStrategy();
             strategy.Execute(() =>
             {
@@ -93,12 +94,21 @@ namespace passi_webapi.Controllers
                     }
                     _certValidator.ValidateCertificate(signupConfirmationDto.PublicCert, signupConfirmationDto.Email);
 
-                    _userService.ConfirmUser(signupConfirmationDto);
+                    accountGuid = _userService.ConfirmUser(signupConfirmationDto);
                     transaction.Commit();
                 }
             });
 
-            return Ok();
+            // For an existing account the server keeps its canonical GUID and ignores the freshly
+            // generated one the client sent. Surface that divergence so a "account not found" on the
+            // client (a local lookup keyed on the canonical GUID) is diagnosable server-side.
+            if (!Guid.TryParse(signupConfirmationDto.Guid, out var clientGuid) || clientGuid != accountGuid)
+            {
+                _logger.Warn("Confirmation account GUID reconciled. Client sent {0}, canonical is {1}.",
+                    signupConfirmationDto.Guid, accountGuid);
+            }
+
+            return Ok(new SignupConfirmationResponseDto { AccountGuid = accountGuid.ToString() });
         }
 
         [HttpPost, Route("check")]

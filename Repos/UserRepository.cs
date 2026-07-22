@@ -38,7 +38,7 @@ namespace Repos
             return validateConfirmationCode != null && validateConfirmationCode.TryCount < 10;
         }
 
-        public void ConfirmInvitation(string email, string publicCert, string guid, string code, string deviceId)
+        public Guid ConfirmInvitation(string email, string publicCert, string guid, string code, string deviceId)
         {
             var userInvitationDb = _dbContext.Invitations
                 .Include(x => x.User)
@@ -47,29 +47,37 @@ namespace Repos
 
             var device = GetOrCreateDevice(deviceId);
 
-            if (userInvitationDb != null)
+            if (userInvitationDb == null)
             {
-                userInvitationDb.IsConfirmed = true;
-                _dbContext.Certificates.Add(new CertificateDb()
-                {
-                    PublicCert = publicCert,
-                    Thumbprint =
-                        X509CertificateLoader.LoadCertificate(Convert.FromBase64String(publicCert)).Thumbprint,
-                    User = userInvitationDb.User
-                });
+                _dbContext.SaveChanges();
+                return Guid.Empty;
+            }
 
-                userInvitationDb.User.Device = device;
-                userInvitationDb.User.DeviceId = device.Id;
-                EnsureUserDeviceLink(userInvitationDb.User, device);
-                // Keep existing account GUID stable across devices. Overwriting it on repeated
-                // confirmations makes previously enrolled devices look removed.
-                if (userInvitationDb.User.Guid == Guid.Empty)
-                {
-                    userInvitationDb.User.Guid = Guid.Parse(guid);
-                }
+            userInvitationDb.IsConfirmed = true;
+            _dbContext.Certificates.Add(new CertificateDb()
+            {
+                PublicCert = publicCert,
+                Thumbprint =
+                    X509CertificateLoader.LoadCertificate(Convert.FromBase64String(publicCert)).Thumbprint,
+                User = userInvitationDb.User
+            });
+
+            userInvitationDb.User.Device = device;
+            userInvitationDb.User.DeviceId = device.Id;
+            EnsureUserDeviceLink(userInvitationDb.User, device);
+            // Keep existing account GUID stable across devices. Overwriting it on repeated
+            // confirmations makes previously enrolled devices look removed. When the account already
+            // has a canonical GUID that differs from the one the client generated, the client is
+            // expected to adopt the returned canonical GUID; otherwise login push notifications
+            // (keyed on the canonical GUID) will not match any local account.
+            if (userInvitationDb.User.Guid == Guid.Empty)
+            {
+                userInvitationDb.User.Guid = Guid.Parse(guid);
             }
 
             _dbContext.SaveChanges();
+
+            return userInvitationDb.User.Guid;
         }
 
         public void UpdateNotificationToken(string deviceId, string token, string platform)
@@ -268,7 +276,7 @@ namespace Repos
 
         bool ValidateConfirmationCode(string email, string code);
 
-        void ConfirmInvitation(string email, string publicCert, string guid, string code, string deviceId);
+        Guid ConfirmInvitation(string email, string publicCert, string guid, string code, string deviceId);
 
         void UpdateNotificationToken(string deviceId, string token, string platform);
 

@@ -86,7 +86,8 @@ fun sampleGeneratedCertificate(): GeneratedCertificate = GeneratedCertificate(
 class FakeEnrollmentService : EnrollmentService {
     var beginSignupResult: Result<PendingEnrollment> = Result.success(samplePendingEnrollment())
     var confirmSignupCodeResult: Result<Unit> = Result.success(Unit)
-    var finalizeSignupResult: Result<Unit> = Result.success(Unit)
+    var finalizeSignupResult: Result<UUID> =
+        Result.success(UUID.fromString(samplePendingEnrollment().accountId))
 
     var lastBeginSignupEmail: String? = null
     var lastBeginSignupProvider: Provider? = null
@@ -115,7 +116,7 @@ class FakeEnrollmentService : EnrollmentService {
         provider: Provider,
         deviceId: String,
         generatedCertificate: GeneratedCertificate,
-    ): Result<Unit> = finalizeSignupResult
+    ): Result<UUID> = finalizeSignupResult
 }
 
 class FakeCertificateGenerator : CertificateGenerator {

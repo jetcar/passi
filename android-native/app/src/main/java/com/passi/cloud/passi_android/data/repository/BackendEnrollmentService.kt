@@ -2,6 +2,7 @@ package com.passi.cloud.passi_android.data.repository
 
 import com.passi.cloud.passi_android.data.remote.PassiApiClient
 import com.passi.cloud.passi_android.data.remote.dto.SignupConfirmationRequestDto
+import com.passi.cloud.passi_android.data.remote.dto.SignupConfirmationResponseDto
 import com.passi.cloud.passi_android.data.remote.dto.SignupCheckRequestDto
 import com.passi.cloud.passi_android.data.remote.dto.SignupRequestDto
 import com.passi.cloud.passi_android.domain.enrollment.GeneratedCertificate
@@ -64,7 +65,7 @@ class BackendEnrollmentService(
         provider: Provider,
         deviceId: String,
         generatedCertificate: GeneratedCertificate,
-    ): Result<Unit> {
+    ): Result<UUID> {
         val code = pendingEnrollment.confirmationCode
             ?: return Result.failure(IllegalStateException("Missing confirmation code"))
 
@@ -81,7 +82,17 @@ class BackendEnrollmentService(
         )
 
         if (result.isSuccessful) {
-            return Result.success(Unit)
+            // Adopt the canonical GUID the server returns. For an existing account this differs from
+            // the locally generated accountId; falling back to the local one keeps older backends
+            // (which return no body) working.
+            val canonicalGuid = apiClient
+                .parseBody(result.body, SignupConfirmationResponseDto::class.java)
+                ?.accountGuid
+                ?.takeIf { it.isNotBlank() }
+                ?.let { runCatching { UUID.fromString(it) }.getOrNull() }
+                ?: UUID.fromString(pendingEnrollment.accountId)
+
+            return Result.success(canonicalGuid)
         }
 
         val errorMessage = apiClient.extractErrorMessage(result.body)

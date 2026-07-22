@@ -118,6 +118,18 @@ class PassiApiClient(
         }
     }
 
+    fun <T> parseBody(body: String, type: Class<T>): T? {
+        if (body.isBlank()) {
+            return null
+        }
+
+        return try {
+            gson.fromJson(body, type)
+        } catch (_: JsonSyntaxException) {
+            null
+        }
+    }
+
     private fun readResponseBody(connection: HttpURLConnection, statusCode: Int): String {
         val stream = if (statusCode in 200..299) connection.inputStream else connection.errorStream
         if (stream == null) {

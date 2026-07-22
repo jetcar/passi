@@ -1,4 +1,5 @@
-﻿using GoogleTracer;
+﻿using System;
+using GoogleTracer;
 using Models;
 
 using Repos;
@@ -47,9 +48,9 @@ namespace Services
             return userInvitationDb.Code;
         }
 
-        public void ConfirmUser(SignupConfirmationDto signupConfirmationDto)
+        public Guid ConfirmUser(SignupConfirmationDto signupConfirmationDto)
         {
-            _userRepository.ConfirmInvitation(signupConfirmationDto.Email, signupConfirmationDto.PublicCert,
+            return _userRepository.ConfirmInvitation(signupConfirmationDto.Email, signupConfirmationDto.PublicCert,
                 signupConfirmationDto.Guid, signupConfirmationDto.Code, signupConfirmationDto.DeviceId);
         }
 

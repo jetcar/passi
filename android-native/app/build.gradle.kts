@@ -14,12 +14,12 @@ val ciSigningKeyPass = project.findProperty("PASSI_ANDROID_SIGNING_KEY_PASS") as
 
 android {
     namespace = "com.passi.cloud.passi_android"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.passi.cloud.passi_android"
         minSdk = 28
-        targetSdk = 35
+        targetSdk = 36
         versionCode = ciVersionCode ?: 1
         versionName = ciVersionName ?: "0.1.0"
 

@@ -1,8 +1,11 @@
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
 using passi_webapi.Controllers;
+using Repos;
 using Services;
 using System;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -25,7 +28,9 @@ namespace PassiWebApiTests.Controllers
                 UserGuid = Guid.NewGuid()
             };
             controller.SignUp(signupDto);
-            Assert.That(TestEmailSender.Code != null);
+            // The confirmation email is dispatched on a background Task, so TestEmailSender.Code is
+            // racy; assert on the synchronously-persisted invitation code instead.
+            Assert.That(GetLatestCode(signupDto.Email), Is.Not.Null);
         }
 
         [Test]
@@ -40,9 +45,10 @@ namespace PassiWebApiTests.Controllers
                 UserGuid = Guid.NewGuid()
             };
             controller.SignUp(signupDto);
+            var code = GetLatestCode(signupDto.Email);
             controller.Check(new SignupCheckDto()
             {
-                Code = TestEmailSender.Code,
+                Code = code,
                 Username = signupDto.Email
             });
 
@@ -57,14 +63,14 @@ namespace PassiWebApiTests.Controllers
             Assert.That(certLoaded.HasPrivateKey);
             var signupConfirmationDto = new SignupConfirmationDto()
             {
-                Code = TestEmailSender.Code,
+                Code = code,
                 DeviceId = signupDto.DeviceId,
                 Email = signupDto.Email,
                 Guid = signupDto.UserGuid.ToString(),
                 PublicCert = Convert.ToBase64String(certLoaded.RawData)
             };
             controller.Confirm(signupConfirmationDto);
-            Assert.That(TestEmailSender.Code != null);
+            Assert.That(code, Is.Not.Null);
             //renew
 
             var rsa2 = RSA.Create(); // generate asymmetric key pair
@@ -113,9 +119,91 @@ namespace PassiWebApiTests.Controllers
             Assert.That(secondGuid, Is.Not.EqualTo(differentGuid.ToString()));
         }
 
-        private string ConfirmAndGetAccountGuid(SignUpController controller, string email, string deviceId, Guid clientGuid)
+        [Test]
+        public void ConfirmAddsDeviceAndLinksItToAccount()
         {
-            controller.Check(new SignupCheckDto { Code = TestEmailSender.Code, Username = email });
+            var email = Guid.NewGuid() + "@passi.cloud";
+            var deviceId = Guid.NewGuid().ToString();
+            var userGuid = Guid.NewGuid();
+
+            // Each call runs in its own DI scope / DbContext, mirroring separate HTTP requests.
+            SignUpInScope(email, deviceId, userGuid);
+            ConfirmInScope(email, deviceId, userGuid);
+
+            using var scope = ServiceProvider.CreateScope();
+            var dbContext = scope.ServiceProvider.GetRequiredService<PassiDbContext>();
+
+            var device = dbContext.Devices.FirstOrDefault(x => x.DeviceId == deviceId);
+            Assert.That(device, Is.Not.Null, "A Device row should exist for the confirmed device");
+
+            var user = dbContext.Users
+                .Include(x => x.UserDevices).ThenInclude(x => x.Device)
+                .First(x => x.EmailHash == email);
+
+            Assert.That(
+                user.UserDevices.Any(ud => ud.Device != null && ud.Device.DeviceId == deviceId),
+                Is.True,
+                "The confirmed device should be linked to the account via UserDevices");
+            Assert.That(user.DeviceId, Is.EqualTo(device.Id),
+                "The account's current device should point to the confirmed device");
+        }
+
+        [Test]
+        public void ConfirmLinksNewDeviceWhenExistingUserReenrollsFromAnotherDevice()
+        {
+            var email = Guid.NewGuid() + "@passi.cloud";
+            var firstDeviceId = Guid.NewGuid().ToString();
+            var secondDeviceId = Guid.NewGuid().ToString();
+            var userGuid = Guid.NewGuid();
+
+            // First enrollment from device A.
+            SignUpInScope(email, firstDeviceId, userGuid);
+            ConfirmInScope(email, firstDeviceId, userGuid);
+
+            // Existing user re-enrolls from a different device B.
+            SignUpInScope(email, secondDeviceId, Guid.NewGuid());
+            ConfirmInScope(email, secondDeviceId, userGuid);
+
+            using var scope = ServiceProvider.CreateScope();
+            var dbContext = scope.ServiceProvider.GetRequiredService<PassiDbContext>();
+
+            var user = dbContext.Users
+                .Include(x => x.UserDevices).ThenInclude(x => x.Device)
+                .First(x => x.EmailHash == email);
+
+            var linkedDeviceIds = user.UserDevices
+                .Where(ud => ud.Device != null)
+                .Select(ud => ud.Device.DeviceId)
+                .ToList();
+
+            Assert.That(linkedDeviceIds, Does.Contain(firstDeviceId), "The original device should remain linked");
+            Assert.That(linkedDeviceIds, Does.Contain(secondDeviceId), "The re-enrolled device should be linked to the account");
+        }
+
+        // SignUp dispatches the confirmation email on a background Task, so TestEmailSender.Code is
+        // racy. The code is persisted synchronously during SignUp, so read it from the DB instead.
+        private string GetLatestCode(string email)
+        {
+            using var scope = ServiceProvider.CreateScope();
+            var repository = scope.ServiceProvider.GetRequiredService<IUserRepository>();
+            return repository.GetCode(email);
+        }
+
+        // Runs SignUp in its own DI scope / DbContext, mirroring a standalone HTTP request.
+        private void SignUpInScope(string email, string deviceId, Guid userGuid)
+        {
+            using var scope = ServiceProvider.CreateScope();
+            var controller = scope.ServiceProvider.GetRequiredService<SignUpController>();
+            controller.SignUp(new SignupDto { DeviceId = deviceId, Email = email, UserGuid = userGuid });
+        }
+
+        // Runs Check + Confirm in their own DI scope / DbContext, mirroring a standalone HTTP request.
+        private string ConfirmInScope(string email, string deviceId, Guid clientGuid)
+        {
+            var code = GetLatestCode(email);
+            using var scope = ServiceProvider.CreateScope();
+            var controller = scope.ServiceProvider.GetRequiredService<SignUpController>();
+            controller.Check(new SignupCheckDto { Code = code, Username = email });
 
             var rsa = RSA.Create();
             var req = new CertificateRequest($"cn={email.Replace("@", "")}", rsa, HashAlgorithmName.SHA512, RSASignaturePadding.Pkcs1);
@@ -123,7 +211,32 @@ namespace PassiWebApiTests.Controllers
 
             var result = controller.Confirm(new SignupConfirmationDto
             {
-                Code = TestEmailSender.Code,
+                Code = code,
+                DeviceId = deviceId,
+                Email = email,
+                Guid = clientGuid.ToString(),
+                PublicCert = Convert.ToBase64String(cert.RawData)
+            });
+
+            var ok = result as Microsoft.AspNetCore.Mvc.OkObjectResult;
+            Assert.That(ok, Is.Not.Null, "Confirm should return an OK body with the account GUID");
+            var response = ok.Value as SignupConfirmationResponseDto;
+            Assert.That(response, Is.Not.Null, "Confirm should return a SignupConfirmationResponseDto");
+            return response.AccountGuid;
+        }
+
+        private string ConfirmAndGetAccountGuid(SignUpController controller, string email, string deviceId, Guid clientGuid)
+        {
+            var code = GetLatestCode(email);
+            controller.Check(new SignupCheckDto { Code = code, Username = email });
+
+            var rsa = RSA.Create();
+            var req = new CertificateRequest($"cn={email.Replace("@", "")}", rsa, HashAlgorithmName.SHA512, RSASignaturePadding.Pkcs1);
+            var cert = req.CreateSelfSigned(DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddYears(1));
+
+            var result = controller.Confirm(new SignupConfirmationDto
+            {
+                Code = code,
                 DeviceId = deviceId,
                 Email = email,
                 Guid = clientGuid.ToString(),

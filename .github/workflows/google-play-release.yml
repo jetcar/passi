@@ -130,6 +130,8 @@ jobs:
         with:
           serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
           packageName: ${{ env.PACKAGE_NAME }}
-          releaseFiles: ${{ steps.aab.outputs.path }}
+          # Workspace-relative forward-slash glob: the upload action's glob matcher
+          # cannot handle the absolute Windows path (backslashes) from the runner.
+          releaseFiles: android-native/app/build/outputs/bundle/release/*.aab
           track: ${{ inputs.track }}
           status: ${{ inputs.release_status }}

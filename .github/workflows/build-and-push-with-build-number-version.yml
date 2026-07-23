@@ -5,6 +5,11 @@ on:
     branches:
       - main
       - master
+    paths-ignore:
+      # These never affect the backend images; skip the rebuild + redeploy for them.
+      - 'android-native/**'
+      - '.github/**'
+      - '**/*.md'
   workflow_dispatch:
 
 concurrency:

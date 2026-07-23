@@ -91,7 +91,10 @@ jobs:
         shell: pwsh
         run: |
           "PASSI_ANDROID_DISPLAY_VERSION=${{ inputs.display_version }}" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
-          "PASSI_ANDROID_VERSION_CODE=${{ github.run_number }}" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          # Offset the run number above the highest versionCode already on Play (154 as of v1.54)
+          # so uploads never collide with an existing bundle. Keeps monotonically increasing.
+          $versionCode = ${{ github.run_number }} + 1000
+          "PASSI_ANDROID_VERSION_CODE=$versionCode" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
 
       - name: Build signed Android App Bundle
         shell: pwsh

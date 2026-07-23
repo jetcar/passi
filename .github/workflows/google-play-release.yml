@@ -138,3 +138,9 @@ jobs:
           releaseFiles: android-native/app/build/outputs/bundle/release/*.aab
           track: ${{ inputs.track }}
           status: ${{ inputs.release_status }}
+          # Commit the edit without sending the whole edit for review. With the default (false),
+          # commit tries to send changes for review, which needs broader permission than the
+          # "Release to testing tracks" role and fails at commit with "caller does not have
+          # permission" even though the bundle uploads fine. Not sending for review is correct for
+          # internal testing (those releases don't go through review).
+          changesNotSentForReview: true

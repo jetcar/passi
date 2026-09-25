@@ -18,11 +18,11 @@ namespace OpenIDC.Helpers
                 using var sha256 = SHA256.Create();
                 var hash = sha256.ComputeHash(Encoding.ASCII.GetBytes(codeVerifier));
                 var computedChallenge = Base64UrlEncode(hash);
-                return computedChallenge == codeChallenge;
+                return FixedTimeEquals(computedChallenge, codeChallenge);
             }
             else if (codeChallengeMethod == "plain")
             {
-                return codeVerifier == codeChallenge;
+                return FixedTimeEquals(codeVerifier, codeChallenge);
             }
 
             return false;
@@ -32,6 +32,16 @@ namespace OpenIDC.Helpers
         {
             var base64 = Convert.ToBase64String(input);
             return base64.Replace("+", "-").Replace("/", "_").Replace("=", "");
+        }
+
+        private static bool FixedTimeEquals(string a, string b)
+        {
+            if (a == null || b == null)
+                return false;
+
+            return CryptographicOperations.FixedTimeEquals(
+                Encoding.UTF8.GetBytes(a),
+                Encoding.UTF8.GetBytes(b));
         }
     }
 }

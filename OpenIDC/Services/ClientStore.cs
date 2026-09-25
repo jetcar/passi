@@ -1,4 +1,6 @@
 using System;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 using OpenIDC.Models;
 using RedisClient;
@@ -50,7 +52,17 @@ namespace OpenIDC.Services
         public async Task<bool> ValidateClientAsync(string clientId, string clientSecret)
         {
             var client = await FindByClientIdAsync(clientId);
-            return client != null && client.ClientSecret == clientSecret;
+            return client != null && FixedTimeSecretEquals(client.ClientSecret, clientSecret);
+        }
+
+        private static bool FixedTimeSecretEquals(string expected, string actual)
+        {
+            if (expected == null || actual == null)
+                return false;
+
+            return CryptographicOperations.FixedTimeEquals(
+                Encoding.UTF8.GetBytes(expected),
+                Encoding.UTF8.GetBytes(actual));
         }
     }
 }

@@ -122,6 +122,50 @@
             </div>
           </div>
 
+          <!-- Tallinn Crash Statistics -->
+          <div class="col-lg-6">
+            <div class="product-card h-100">
+              <div class="product-header">
+                <div class="product-icon bg-danger">
+                  <i class="bi bi-car-front-fill"></i>
+                </div>
+                <h3 class="product-title">Tallinn Crash Statistics</h3>
+                <span class="badge bg-danger">Open Data</span>
+              </div>
+              <div class="product-body">
+                <p class="product-description">
+                  Automated data collection showing where car crashes happen in Tallinn. A scheduled
+                  GitHub Action gathers police-registered injury crashes from Transpordiamet open data
+                  and driver-reported Waze accident alerts, and publishes per-street and per-year reports.
+                </p>
+
+                <div class="product-features mb-4">
+                  <h5>Key Features:</h5>
+                  <ul>
+                    <li><i class="bi bi-check-circle-fill text-danger"></i> Official Transpordiamet Data (2011–now)</li>
+                    <li><i class="bi bi-check-circle-fill text-danger"></i> Waze Accident Alerts</li>
+                    <li><i class="bi bi-check-circle-fill text-danger"></i> Hourly Automated Collection</li>
+                    <li><i class="bi bi-check-circle-fill text-danger"></i> Per-street &amp; Per-year Reports</li>
+                    <li><i class="bi bi-check-circle-fill text-danger"></i> CSV Datasets</li>
+                  </ul>
+                </div>
+
+                <div class="product-actions">
+                  <a href="https://github.com/jetcar/tallinn-crashes" target="_blank" class="btn btn-danger">
+                    <i class="bi bi-github me-2"></i>View on GitHub
+                  </a>
+                  <a href="https://github.com/jetcar/tallinn-crashes/blob/main/REPORT.md" target="_blank" class="btn btn-outline-secondary">
+                    <i class="bi bi-bar-chart me-2"></i>Report
+                  </a>
+                </div>
+
+                <div class="product-tech-stack mt-4">
+                  <small class="text-muted">Built with: Python, GitHub Actions, Estonian Open Data</small>
+                </div>
+              </div>
+            </div>
+          </div>
+
         </div>
 
         <!-- Additional Info Section -->
@@ -133,7 +177,7 @@
                 Open Source & Transparent
               </h4>
               <p class="mb-0">
-                Both products are completely open source and available on GitHub. 
+                All products are completely open source and available on GitHub. 
                 We believe in transparency and invite you to review our code, contribute to development, 
                 and build secure authentication solutions for your own projects.
               </p>

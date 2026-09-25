@@ -104,10 +104,9 @@ namespace Repos
         public SimpleSessionDb GetAuthorizedSession(Guid sessionId, string thunbprint, string username)
         {
             var certificate = _dbContext.Certificates.Include(x => x.User).FirstOrDefault(x => x.Thumbprint == thunbprint && x.User.EmailHash == username);
-            var sessionDb = _dbContext.Sessions.FirstOrDefault(x => x.Guid == sessionId);
-            if (certificate != null)
-                return sessionDb;
-            return null;
+            if (certificate == null)
+                return null;
+            return _dbContext.Sessions.FirstOrDefault(x => x.Guid == sessionId && x.UserId == certificate.User.Id);
         }
     }
 

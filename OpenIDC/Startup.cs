@@ -46,6 +46,10 @@ public class Startup
         services.AddSingleton<IRedisService, RedisService>();
 
         // Register custom OIDC services
+        services.AddScoped<OpenIDC.Data.OpenIdcDbContext>();
+        services.AddSingleton<IStartupFilter, OpenIDC.Data.MigrationStartupFilter<OpenIDC.Data.OpenIdcDbContext>>();
+        services.AddSingleton<IRegisteredClientRepository, RegisteredClientRepository>();
+        services.AddScoped<IRegisteredClientService, RegisteredClientService>();
         services.AddSingleton<IClientStore, ClientStore>();
         services.AddSingleton<IAuthorizationCodeStore, AuthorizationCodeStore>();
         services.AddSingleton<IRefreshTokenStore, RefreshTokenStore>();

@@ -33,6 +33,11 @@ const router = createRouter({
             name: 'UserInfo',
             component: () => import('../views/UserInfo.vue')
         },
+        {
+            path: '/OAuthApps',
+            name: 'OAuthApps',
+            component: () => import('../views/OAuthApps.vue')
+        },
     ]
 })
 

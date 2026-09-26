@@ -70,7 +70,7 @@ namespace OpenIDCTests
 
         // Minimal in-memory stand-in for IRedisService so ClientStore can be unit tested
         // without a real Redis instance.
-        private class FakeRedisService : IRedisService
+        internal class FakeRedisService : IRedisService
         {
             private readonly Dictionary<string, object> _store = new Dictionary<string, object>();
 

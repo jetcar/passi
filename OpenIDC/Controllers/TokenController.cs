@@ -117,6 +117,13 @@ namespace OpenIDC.Controllers
             bool hasClientSecret = !string.IsNullOrEmpty(request.ClientSecret);
             bool clientHasSecretConfigured = !string.IsNullOrEmpty(client.ClientSecret);
 
+            // Confidential clients (user-registered websites) must always authenticate with their secret
+            if (client.RequireClientSecret && !hasClientSecret)
+            {
+                _logger.LogWarning("Client secret required but not provided for client: {ClientId}", request.ClientId);
+                return Unauthorized(new { error = "invalid_client" });
+            }
+
             // Require at least one authentication method
             if (!hasPkce && !hasClientSecret)
             {
@@ -201,8 +208,10 @@ namespace OpenIDC.Controllers
 
         private async Task<IActionResult> HandleRefreshToken(TokenRequest request)
         {
-            // Validate client
-            if (!await _clientStore.ValidateClientAsync(request.ClientId, request.ClientSecret))
+            // Validate client (public clients have no secret; the refresh token itself is the credential)
+            var refreshClient = await _clientStore.GetClientAsync(request.ClientId);
+            var isPublicWithoutSecret = refreshClient != null && refreshClient.IsPublicClient && string.IsNullOrEmpty(request.ClientSecret);
+            if (!isPublicWithoutSecret && !await _clientStore.ValidateClientAsync(request.ClientId, request.ClientSecret))
             {
                 return Unauthorized(new { error = "invalid_client" });
             }

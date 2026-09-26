@@ -78,6 +78,11 @@ onMounted(() => {
                                     <i class="bi bi-person me-1"></i>User Info
                                 </router-link>
                             </li>
+                            <li class="nav-item" v-if="isLoggedIn">
+                                <router-link to="/OAuthApps" class="nav-link">
+                                    <i class="bi bi-key me-1"></i>My OAuth apps
+                                </router-link>
+                            </li>
                         </ul>
                         
                         <ul class="navbar-nav ms-auto">

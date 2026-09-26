@@ -369,7 +369,7 @@ class BackendServicesIntegrationTests : CoroutineViewModelTest() {
     }
 
     @Test
-    fun authSessionCancelSendsDeleteForSession() = runViewModelTest {
+    fun authSessionCancelSendsGetForSession() = runViewModelTest {
         val accountId = UUID.fromString("4eeb9825-3028-4389-ac41-b6690b0edb9e")
         val providersRepository = providersRepositoryWithTestServer()
         server.enqueue(MockResponse().setResponseCode(200))
@@ -387,7 +387,7 @@ class BackendServicesIntegrationTests : CoroutineViewModelTest() {
         val request = server.takeRequest()
 
         assertThat(result.isSuccess).isTrue()
-        assertThat(request.method).isEqualTo("DELETE")
+        assertThat(request.method).isEqualTo("GET") // backend: [HttpGet] api/Auth/Cancel
         assertThat(request.path).contains("/api/Auth/Cancel")
         assertThat(request.path).contains(session.sessionId.toString())
     }

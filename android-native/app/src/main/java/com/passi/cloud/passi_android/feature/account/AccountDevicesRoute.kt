@@ -109,14 +109,6 @@ internal fun AccountDevicesScreen(
             )
         }
 
-        Text(
-            text = "Remove old devices one by one. This device stays protected from deletion.",
-            color = Color.Black,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-        )
-
         if (uiState.isLoading) {
             CircularProgressIndicator(
                 modifier = Modifier
@@ -135,11 +127,27 @@ internal fun AccountDevicesScreen(
             )
         }
 
+        val currentDevice = uiState.devices.firstOrNull { it.isCurrent }
+        val otherDevices = uiState.devices.filterNot { it.isCurrent }
+
         LazyColumn(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            items(uiState.devices, key = { it.deviceId }) { device ->
+            item(key = "current-header") { SectionHeader("This device") }
+            item(key = "current") {
+                if (currentDevice != null) {
+                    DeviceRow(device = currentDevice, isRemoving = false, onRemove = {})
+                } else if (!uiState.isLoading) {
+                    EmptyText("This device is not registered for this account.")
+                }
+            }
+
+            item(key = "others-header") { SectionHeader("Other devices") }
+            if (otherDevices.isEmpty() && !uiState.isLoading) {
+                item(key = "others-empty") { EmptyText("No other devices are connected to this account.") }
+            }
+            items(otherDevices, key = { it.deviceId }) { device ->
                 DeviceRow(
                     device = device,
                     isRemoving = uiState.isRemoving && pendingDevice?.deviceId == device.deviceId,
@@ -158,6 +166,30 @@ internal fun AccountDevicesScreen(
             onDismiss = onDismissRemove,
         )
     }
+}
+
+@Composable
+private fun SectionHeader(text: String) {
+    Text(
+        text = text,
+        color = Color.Black,
+        fontWeight = FontWeight.Bold,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 16.dp, end = 16.dp, top = 12.dp),
+    )
+}
+
+@Composable
+private fun EmptyText(text: String) {
+    Text(
+        text = text,
+        color = Color.Gray,
+        fontSize = 14.sp,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+    )
 }
 
 @Composable

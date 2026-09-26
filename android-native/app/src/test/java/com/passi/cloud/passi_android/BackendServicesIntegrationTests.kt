@@ -248,6 +248,44 @@ class BackendServicesIntegrationTests : CoroutineViewModelTest() {
     }
 
     @Test
+    fun authSessionSyncParsesConfirmationNumber() = runViewModelTest {
+        val accountId = UUID.fromString("4eeb9825-3028-4389-ac41-b6690b0edb9e")
+        val sessionJson = buildSessionJson(accountId, confirmationNumber = 42)
+        server.enqueue(MockResponse().setResponseCode(200).setBody("[]"))
+        server.enqueue(MockResponse().setResponseCode(200).setBody(sessionJson))
+
+        val result = BackendAuthSessionService(
+            apiClient = apiClient,
+            accountsRepository = confirmedAccountsRepository(),
+            providersRepository = providersRepositoryWithTestServer(),
+            signer = Pkcs12AccountSigner(),
+            biometricCertificateService = FakeBiometricCertificateService(),
+            deviceIdProvider = { "device-1" },
+        ).syncAndPollPendingSession()
+
+        assertThat(result.getOrNull()?.confirmationNumber).isEqualTo(42)
+    }
+
+    @Test
+    fun authSessionSyncLeavesNumberNullForOlderServers() = runViewModelTest {
+        val accountId = UUID.fromString("4eeb9825-3028-4389-ac41-b6690b0edb9e")
+        server.enqueue(MockResponse().setResponseCode(200).setBody("[]"))
+        server.enqueue(MockResponse().setResponseCode(200).setBody(buildSessionJson(accountId)))
+
+        val result = BackendAuthSessionService(
+            apiClient = apiClient,
+            accountsRepository = confirmedAccountsRepository(),
+            providersRepository = providersRepositoryWithTestServer(),
+            signer = Pkcs12AccountSigner(),
+            biometricCertificateService = FakeBiometricCertificateService(),
+            deviceIdProvider = { "device-1" },
+        ).syncAndPollPendingSession()
+
+        assertThat(result.getOrNull()).isNotNull()
+        assertThat(result.getOrNull()?.confirmationNumber).isNull()
+    }
+
+    @Test
     fun authSessionSyncParsesNumericConfirmationColor() = runViewModelTest {
         val accountId = UUID.fromString("4eeb9825-3028-4389-ac41-b6690b0edb9e")
         val accountsRepository = confirmedAccountsRepository()
@@ -675,8 +713,11 @@ class BackendServicesIntegrationTests : CoroutineViewModelTest() {
         accountId = accountId,
     )
 
-    private fun buildSessionJson(accountId: UUID): String = """
+    private fun buildSessionJson(accountId: UUID, confirmationNumber: Int? = null): String {
+        val numberField = confirmationNumber?.let { "\"ConfirmationNumber\": $it," } ?: ""
+        return """
         {
+            $numberField
             "Sender": "mailler",
             "ConfirmationColor": "blue",
             "SessionId": "2d9e6360-28ba-4aa8-a9c5-ec7cb5632489",
@@ -686,6 +727,7 @@ class BackendServicesIntegrationTests : CoroutineViewModelTest() {
             "AccountGuid": "$accountId"
         }
     """.trimIndent()
+    }
 
     private fun buildSessionJsonWithNumericColor(accountId: UUID, color: Int): String = """
         {

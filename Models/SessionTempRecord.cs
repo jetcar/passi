@@ -1,4 +1,4 @@
-﻿using NodaTime;
+using NodaTime;
 using System;
 
 namespace Models
@@ -22,6 +22,7 @@ namespace Models
         public SessionStatus? Status { get; set; }
         public string PublicCertThumbprint { get; set; }
         public string CheckColor { get; set; }
+        public int? CheckNumber { get; set; }
         public string ReturnUrl { get; set; }
         public DateTime ExpirationTime { get; set; }
         public string ErrorMessage { get; set; }

@@ -10,6 +10,8 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using WebApiDto.Auth;
 using WebApiDto.SignUp;
+using Repos;
+using WebApiDto;
 
 namespace PassiWebApiTests.Controllers
 {
@@ -194,7 +196,35 @@ namespace PassiWebApiTests.Controllers
             Assert.That(payload.RegisteredDevices, Does.Contain(GetExpectedDeviceDisplayName(secondDeviceId)));
         }
 
-        private static X509Certificate2 ConfirmAccountOnDevice(SignUpController signupController, string email, Guid accountGuid, string deviceId)
+        [Test]
+        public void ActiveSessionReturnsTwoDigitNumberAndKeepsColorForOlderApps()
+        {
+            var signupController = ServiceProvider.GetService<SignUpController>();
+            var authController = ServiceProvider.GetService<AuthController>();
+            var email = Guid.NewGuid() + "@passi.cloud";
+            var deviceId = Guid.NewGuid().ToString();
+            ConfirmAccountOnDevice(signupController, email, Guid.NewGuid(), deviceId);
+
+            var start = authController.Start(new StartLoginDto
+            {
+                Username = email,
+                ClientId = "SampleApp",
+                ReturnUrl = "https://localhost/callback",
+                RandomString = "123456",
+                CheckColor = Color.green,
+                CheckNumber = 42,
+            }) as OkObjectResult;
+            Assert.That(start, Is.Not.Null);
+
+            var active = authController.GetActiveSession(new GetAllSessionDto { DeviceId = deviceId }) as OkObjectResult;
+
+            var notification = active!.Value as NotificationDto;
+            Assert.That(notification, Is.Not.Null);
+            Assert.That(notification!.ConfirmationNumber, Is.EqualTo(42));
+            Assert.That(notification.ConfirmationColor, Is.EqualTo(Color.green));
+        }
+
+        private X509Certificate2 ConfirmAccountOnDevice(SignUpController signupController, string email, Guid accountGuid, string deviceId)
         {
             signupController.SignUp(new SignupDto
             {
@@ -204,9 +234,12 @@ namespace PassiWebApiTests.Controllers
             });
 
             var cert = CreateCertificate(email);
+            string code;
+            using (var scope = ServiceProvider.CreateScope())
+                code = scope.ServiceProvider.GetRequiredService<IUserRepository>().GetCode(email);
             signupController.Confirm(new SignupConfirmationDto
             {
-                Code = TestEmailSender.Code,
+                Code = code,
                 DeviceId = deviceId,
                 Email = email,
                 Guid = accountGuid.ToString(),

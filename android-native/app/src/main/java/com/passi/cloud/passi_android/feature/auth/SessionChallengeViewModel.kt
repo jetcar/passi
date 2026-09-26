@@ -20,6 +20,8 @@ data class SessionChallengeUiState(
     val session: NotificationSession? = null,
     val account: Account? = null,
     val colorOptions: List<ConfirmationColor> = emptyList(),
+    /** 2-digit choices (correct + decoys); empty when the server sent no number and colors are used. */
+    val numberOptions: List<Int> = emptyList(),
     val responseError: String? = null,
     val colorError: String? = null,
     val isButtonEnabled: Boolean = false,
@@ -51,6 +53,7 @@ class SessionChallengeViewModel(
                         session = session,
                         account = account,
                         colorOptions = buildColorOptions(session.confirmationColor),
+                        numberOptions = session.confirmationNumber?.let(::buildNumberOptions).orEmpty(),
                         isButtonEnabled = true,
                     )
                 }
@@ -60,6 +63,33 @@ class SessionChallengeViewModel(
 
     fun onColorSelected(
         color: ConfirmationColor,
+        onRequirePin: () -> Unit,
+        onRequireBiometric: () -> Unit,
+        onAuthorized: () -> Unit,
+    ) = onChallengeAnswered(
+        isCorrect = { it.confirmationColor == color },
+        errorMessage = "Invalid confirmation color. Go back and try again.",
+        onRequirePin = onRequirePin,
+        onRequireBiometric = onRequireBiometric,
+        onAuthorized = onAuthorized,
+    )
+
+    fun onNumberSelected(
+        number: Int,
+        onRequirePin: () -> Unit,
+        onRequireBiometric: () -> Unit,
+        onAuthorized: () -> Unit,
+    ) = onChallengeAnswered(
+        isCorrect = { it.confirmationNumber == number },
+        errorMessage = "Invalid confirmation number. Go back and try again.",
+        onRequirePin = onRequirePin,
+        onRequireBiometric = onRequireBiometric,
+        onAuthorized = onAuthorized,
+    )
+
+    private fun onChallengeAnswered(
+        isCorrect: (NotificationSession) -> Boolean,
+        errorMessage: String,
         onRequirePin: () -> Unit,
         onRequireBiometric: () -> Unit,
         onAuthorized: () -> Unit,
@@ -76,10 +106,10 @@ class SessionChallengeViewModel(
             return
         }
 
-        if (color != session.confirmationColor) {
+        if (!isCorrect(session)) {
             _uiState.value = _uiState.value.copy(
                 isButtonEnabled = false,
-                colorError = "Invalid confirmation color. Go back and try again.",
+                colorError = errorMessage,
             )
             return
         }
@@ -153,6 +183,12 @@ class SessionChallengeViewModel(
             _uiState.value = _uiState.value.copy(isLoading = false)
             onCancelled(cancelResult.exceptionOrNull()?.message)
         }
+    }
+
+    private fun buildNumberOptions(correctNumber: Int): List<Int> {
+        val decoys = (10..99).filterNot { it == correctNumber }.shuffled().take(2).toMutableList()
+        decoys.add((0..2).random(), correctNumber)
+        return decoys
     }
 
     private fun buildColorOptions(correctColor: ConfirmationColor): List<ConfirmationColor> {

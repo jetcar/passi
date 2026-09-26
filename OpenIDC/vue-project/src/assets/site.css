@@ -55,6 +55,21 @@ html {
     margin: 10px;
 }
 
+.coloredBox.smallBox {
+    height: 18px;
+    width: 18px;
+    margin: 0 0 0 8px;
+    border: 1px solid #555;
+}
+
+.checkNumber {
+    font-size: 4rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    line-height: 1.1;
+    margin: 8px 0 12px;
+}
+
 .red {
     background-color: red;
 }

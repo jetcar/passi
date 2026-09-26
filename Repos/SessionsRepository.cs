@@ -1,4 +1,4 @@
-﻿using ConfigurationManager;
+using ConfigurationManager;
 using Models;
 using NodaTime;
 using System;
@@ -23,7 +23,7 @@ namespace Repos
             _sessionTimeout = Convert.ToInt32(_appSetting["Timeout"]);
         }
 
-        public SessionTempRecord BeginSession(string username, string clientId, string randomString, string color, string returnUrl)
+        public SessionTempRecord BeginSession(string username, string clientId, string randomString, string color, string returnUrl, int? checkNumber = null)
         {
             var user = _dbContext.Users.First(x => x.EmailHash == username);
             var sessionDb = new SessionTempRecord()
@@ -33,6 +33,7 @@ namespace Repos
                 ClientId = clientId,
                 RandomString = randomString,
                 CheckColor = color,
+                CheckNumber = checkNumber,
                 ReturnUrl = returnUrl,
                 Email = user.EmailHash,
                 ExpirationTime = DateTime.UtcNow.AddMinutes(_sessionTimeout),
@@ -112,7 +113,7 @@ namespace Repos
 
     public interface ISessionsRepository : ITransaction
     {
-        SessionTempRecord BeginSession(string username, string clientId, string randomString, string color, string returnUrl);
+        SessionTempRecord BeginSession(string username, string clientId, string randomString, string color, string returnUrl, int? checkNumber = null);
 
         SessionTempRecord CheckSessionAndReturnUser(Guid sessionId);
 

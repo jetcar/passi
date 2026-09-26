@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Models;
 using Newtonsoft.Json;
 using NodaTime;
@@ -59,7 +59,7 @@ namespace passi_webapi.Controllers
                 return BadRequest("No registered devices available for login approval");
 
             var sessionDb = _sessionsRepository.BeginSession(startLoginDto.Username, startLoginDto.ClientId,
-                startLoginDto.RandomString, startLoginDto.CheckColor.ToString(), startLoginDto.ReturnUrl);
+                startLoginDto.RandomString, startLoginDto.CheckColor.ToString(), startLoginDto.ReturnUrl, startLoginDto.CheckNumber);
             var host = startLoginDto.ReturnUrl;
             try
             {
@@ -197,6 +197,7 @@ namespace passi_webapi.Controllers
                 Sender = sessionDb.ClientId,
                 ReturnHost = host,
                 ConfirmationColor = Enum.Parse<Color>(sessionDb.CheckColor),
+                ConfirmationNumber = sessionDb.CheckNumber,
                 SessionId = sessionDb.Guid,
                 ExpirationTime = sessionDb.ExpirationTime,
                 RandomString = sessionDb.RandomString,

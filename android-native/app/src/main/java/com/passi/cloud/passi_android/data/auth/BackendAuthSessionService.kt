@@ -169,6 +169,7 @@ private fun NotificationDto.toDomain(): NotificationSession = NotificationSessio
     randomString = randomString,
     returnHost = returnHost,
     accountId = UUID.fromString(accountGuid),
+    confirmationNumber = confirmationNumber,
 )
 
 private fun Any?.toDomainConfirmationColor(): ConfirmationColor {

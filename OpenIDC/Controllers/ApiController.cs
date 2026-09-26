@@ -1,4 +1,4 @@
-﻿using ConfigurationManager;
+using ConfigurationManager;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -80,6 +80,7 @@ public class ApiController : ControllerBase
             ClientId = client_id ?? "SampleApp",
             ReturnUrl = redirect_uri,
             CheckColor = possibleCodes[index],
+            CheckNumber = System.Security.Cryptography.RandomNumberGenerator.GetInt32(10, 100),
             RandomString = nonce ?? _randomGenerator.GetNumbersString(10)
         };
         request.AddJsonBody(startLoginDto);
@@ -95,6 +96,7 @@ public class ApiController : ControllerBase
                 ReturnUrl = redirect_uri,
                 Username = username,
                 CheckColor = color,
+                CheckNumber = startLoginDto.CheckNumber,
                 RandomString = startLoginDto.RandomString,
                 RegisteredDevices = loginResponceDto.RegisteredDevices ?? []
             });

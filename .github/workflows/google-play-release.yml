@@ -29,7 +29,7 @@ on:
         type: string
 
 permissions:
-  contents: read
+  contents: write # push the android-v<version> release tag
 
 concurrency:
   group: google-play-release
@@ -138,3 +138,14 @@ jobs:
           releaseFiles: android-native/app/build/outputs/bundle/release/*.aab
           track: ${{ inputs.track }}
           status: ${{ inputs.release_status }}
+
+      - name: Tag release
+        shell: pwsh
+        env:
+          DISPLAY_VERSION: ${{ inputs.display_version }}
+        run: |
+          # The monthly dependency workflow computes the next version from these tags.
+          $tag = "android-v$env:DISPLAY_VERSION"
+          git tag $tag
+          git push origin $tag
+          if ($LASTEXITCODE -ne 0) { Write-Warning "Could not push tag $tag (it may already exist)"; exit 0 }

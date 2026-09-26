@@ -1,0 +1,194 @@
+name: Monthly dependency update and release
+
+# Once a month: update NuGet, npm and Gradle dependencies (including major versions), run every test suite
+# and build, and — only if all of that passes — push the update to main, deploy the backend and create an
+# Android production *draft* release (you start the rollout in Play Console).
+# If anything fails, nothing is released and a PR with the attempted update is opened instead.
+
+on:
+  schedule:
+    - cron: '0 3 1 * *' # 03:00 UTC on the 1st of every month
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Update and test only; do not push, deploy or release
+        type: boolean
+        default: false
+
+permissions:
+  contents: write # push to main / branch, tags
+  actions: write # dispatch the deploy and Play release workflows
+  pull-requests: write # open a PR when the update fails
+
+concurrency:
+  group: monthly-dependency-release
+  cancel-in-progress: false
+
+env:
+  # Continue app versions from here when no android-v* tag exists yet (1.57 = last manual release).
+  ANDROID_VERSION_BASE: '1.57'
+  UPDATES_FILE: ${{ github.workspace }}/../dependency-updates.txt
+
+jobs:
+  update-test-release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0 # tags are needed to compute the next app version
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 23 # matches the node:23 build stage in Dockerfile
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Test update scripts
+        run: python -m unittest discover -s scripts/deps -v
+
+      - name: Create update branch
+        id: branch
+        run: |
+          name="deps/monthly-$(date -u +%Y-%m)"
+          git checkout -b "$name"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          echo "name=$name" >> "$GITHUB_OUTPUT"
+          : > "$UPDATES_FILE"
+
+      - name: Update NuGet packages
+        run: |
+          dotnet tool install --global dotnet-outdated-tool
+          dotnet outdated passi.sln --upgrade | tee -a "$UPDATES_FILE"
+
+      - name: Update npm packages
+        run: |
+          for dir in WebApp/vue-project OpenIDC/vue-project; do
+            echo "== $dir" | tee -a "$UPDATES_FILE"
+            (cd "$dir" && npx --yes npm-check-updates --upgrade | tee -a "$UPDATES_FILE" && npm install --no-audit --no-fund)
+          done
+
+      - name: Prepare Android build (CI-only files, never committed)
+        env:
+          GOOGLE_SERVICES_BASE64: ${{ secrets.PASSI_ANDROID_GOOGLE_SERVICES_JSON_BASE64 }}
+        run: |
+          # local.properties holds a Windows sdk.dir; hide it so Gradle uses the runner's Android SDK.
+          mv android-native/local.properties "$RUNNER_TEMP/local.properties" || true
+          echo "$GOOGLE_SERVICES_BASE64" | base64 -d > android-native/app/google-services.json
+
+      - name: Update Gradle dependencies
+        working-directory: android-native
+        run: |
+          chmod +x gradlew
+          ./gradlew dependencyUpdates --no-daemon
+          echo "== Android" | tee -a "$UPDATES_FILE"
+          python ../scripts/deps/gradle_updates.py build/dependencyUpdates/report.json build.gradle.kts app/build.gradle.kts | tee -a "$UPDATES_FILE"
+          gradle_latest=$(python -c "import json; g = json.load(open('build/dependencyUpdates/report.json'))['gradle']['current']; print(g['version'] if g['isUpdateAvailable'] else '')")
+          if [ -n "$gradle_latest" ]; then
+            ./gradlew wrapper --gradle-version "$gradle_latest" --no-daemon
+            echo "Gradle wrapper -> $gradle_latest" | tee -a "$UPDATES_FILE"
+          fi
+
+      - name: Commit updates to branch
+        id: changes
+        run: |
+          # Stage only dependency manifests — never build outputs (wwwroot), local.properties or google-services.json.
+          git add -- '*.csproj' \
+            WebApp/vue-project/package.json WebApp/vue-project/package-lock.json \
+            OpenIDC/vue-project/package.json OpenIDC/vue-project/package-lock.json \
+            android-native/build.gradle.kts android-native/app/build.gradle.kts \
+            android-native/gradle/wrapper android-native/gradlew android-native/gradlew.bat
+          if git diff --cached --quiet; then
+            echo "any=false" >> "$GITHUB_OUTPUT"
+            echo "No dependency updates this month." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "any=true" >> "$GITHUB_OUTPUT"
+            git commit -q -m "chore(deps): monthly dependency update $(date -u +%Y-%m)" -m "$(head -c 60000 "$UPDATES_FILE")"
+            git show --stat --format="%h %s" HEAD
+          fi
+
+      - name: Build and test backend (.NET)
+        if: steps.changes.outputs.any == 'true'
+        run: dotnet test passi.sln -c Release
+
+      - name: Build Vue apps
+        if: steps.changes.outputs.any == 'true'
+        run: |
+          for dir in WebApp/vue-project OpenIDC/vue-project; do
+            (cd "$dir" && npm run build)
+          done
+
+      - name: Test and build Android app
+        if: steps.changes.outputs.any == 'true'
+        working-directory: android-native
+        run: ./gradlew :app:testDebugUnitTest :app:assembleDebug --no-daemon
+
+      - name: Push to main, deploy backend, create Android production draft
+        if: steps.changes.outputs.any == 'true' && !inputs.dry_run
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          changed=$(git diff --name-only HEAD~1 HEAD)
+          # Fast-forward only: if main moved during the run this fails and the PR fallback below kicks in.
+          git push origin HEAD:main
+          echo "### Released" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Dependency update pushed to main: $(git rev-parse --short HEAD)" >> "$GITHUB_STEP_SUMMARY"
+          # Pushes made with GITHUB_TOKEN don't trigger workflows, so dispatch explicitly — and only what changed.
+          if echo "$changed" | grep -qv '^android-native/'; then
+            gh workflow run build-and-push-with-build-number-version.yml --ref main
+            echo "- Backend deploy dispatched" >> "$GITHUB_STEP_SUMMARY"
+          fi
+          if echo "$changed" | grep -q '^android-native/'; then
+            version=$(git tag -l 'android-v*' | python scripts/deps/next_version.py --base "$ANDROID_VERSION_BASE")
+            gh workflow run google-play-release.yml --ref main -f track=production -f release_status=draft -f display_version="$version"
+            echo "- Android **$version** production draft dispatched — start the rollout in Play Console" >> "$GITHUB_STEP_SUMMARY"
+          fi
+          {
+            echo
+            echo '```'
+            cat "$UPDATES_FILE"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Dry-run summary
+        if: steps.changes.outputs.any == 'true' && inputs.dry_run
+        run: |
+          {
+            echo "### Dry run: updates pass all tests (nothing pushed or released)"
+            echo '```'
+            cat "$UPDATES_FILE"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Open PR with the failed update
+        if: failure() && steps.changes.outputs.any == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: ${{ steps.branch.outputs.name }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          git push --force origin "HEAD:refs/heads/$BRANCH"
+          body=$(printf 'The monthly dependency update did not pass tests/build, so nothing was released.\n\nFailed run: %s\n\n```\n%s\n```\n' "$RUN_URL" "$(head -c 50000 "$UPDATES_FILE")")
+          gh pr create --base main --head "$BRANCH" --title "chore(deps): monthly update $(date -u +%Y-%m) needs attention" --body "$body" \
+            || gh pr comment "$BRANCH" --body "Update attempt failed again: $RUN_URL"

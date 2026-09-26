@@ -78,4 +78,4 @@ Debug
 
 /android-native/.gradle/*
 /android-native/e2e/build/*
-/android-native/build/reports/problems/problems-report.html
+/android-native/build/*

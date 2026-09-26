@@ -64,6 +64,7 @@ fun samplePendingEnrollment(
 fun sampleSession(
     accountId: UUID = UUID.fromString("4eeb9825-3028-4389-ac41-b6690b0edb9e"),
     confirmationColor: ConfirmationColor = ConfirmationColor.BLUE,
+    confirmationNumber: Int? = null,
 ): NotificationSession = NotificationSession(
     sender = "mailler",
     confirmationColor = confirmationColor,
@@ -72,6 +73,7 @@ fun sampleSession(
     randomString = "nonce-123",
     returnHost = "mail.example.com",
     accountId = accountId,
+    confirmationNumber = confirmationNumber,
 )
 
 fun sampleGeneratedCertificate(): GeneratedCertificate = GeneratedCertificate(

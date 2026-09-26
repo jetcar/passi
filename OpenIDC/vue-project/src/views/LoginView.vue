@@ -15,6 +15,7 @@
                 },
                 LoginResponse: {
                     checkColor: "red",
+                    checkNumber: null,
                     sessionId:"",
                     registeredDevices: [],
                 },
@@ -156,8 +157,12 @@
                             <ul v-if="LoginResponse.registeredDevices?.length">
                                 <li v-for="device in LoginResponse.registeredDevices" :key="device">{{ device }}</li>
                             </ul>
-                            <label for="CheckColor"></label>
-                            <div class="coloredBox" :class="LoginResponse.checkColor">&nbsp;</div>
+                            <p class="mb-1">Tap this number in the Passi app:</p>
+                            <div class="checkNumber" v-if="LoginResponse.checkNumber" aria-live="polite">{{ LoginResponse.checkNumber }}</div>
+                            <div class="d-flex align-items-center small text-muted">
+                                <span>Older app version? Pick this color ({{ LoginResponse.checkColor }}):</span>
+                                <div class="coloredBox smallBox" :class="LoginResponse.checkColor" :title="LoginResponse.checkColor">&nbsp;</div>
+                            </div>
                             <button class="btn btn-secondary" name="button" value="cancel" asp-action="CancelLogin" @click="handleCheckCancelClick">Cancel</button>
                         </div>
                     </div>

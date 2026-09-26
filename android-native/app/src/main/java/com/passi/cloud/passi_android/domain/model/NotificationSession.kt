@@ -11,4 +11,6 @@ data class NotificationSession(
     val randomString: String,
     val returnHost: String,
     val accountId: UUID,
+    /** 2-digit number shown in the browser; null when the server predates number matching. */
+    val confirmationNumber: Int? = null,
 )

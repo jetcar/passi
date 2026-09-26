@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace WebApiDto.Auth
 {
@@ -12,6 +12,9 @@ namespace WebApiDto.Auth
 
         [Required]
         public Color CheckColor { get; set; }
+
+        /// <summary>2-digit number the user matches on the phone (color kept for older app versions).</summary>
+        public int? CheckNumber { get; set; }
 
         [Required]
         public string RandomString { get; set; }

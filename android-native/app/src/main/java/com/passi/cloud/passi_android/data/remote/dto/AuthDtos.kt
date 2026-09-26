@@ -35,6 +35,8 @@ data class NotificationDto(
     val sender: String,
     @SerialName("ConfirmationColor")
     val confirmationColor: Any?,
+    @SerialName("ConfirmationNumber")
+    val confirmationNumber: Int? = null,
     @SerialName("SessionId")
     val sessionId: String,
     @SerialName("ExpirationTime")

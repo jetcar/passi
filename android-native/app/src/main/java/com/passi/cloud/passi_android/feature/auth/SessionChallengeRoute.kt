@@ -1,5 +1,6 @@
 package com.passi.cloud.passi_android.feature.auth
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -95,6 +96,14 @@ fun SessionChallengeRoute(
                 onAuthorized = onAuthorized,
             )
         },
+        onNumberSelected = { number ->
+            viewModel.onNumberSelected(
+                number = number,
+                onRequirePin = onRequirePin,
+                onRequireBiometric = launchBiometricPrompt,
+                onAuthorized = onAuthorized,
+            )
+        },
         onCancel = { viewModel.cancel(onCancel) },
     )
 }
@@ -105,7 +114,11 @@ internal fun SessionChallengeScreen(
     timeLeftSeconds: Long,
     onColorSelected: (ConfirmationColor) -> Unit,
     onCancel: () -> Unit,
+    onNumberSelected: (Int) -> Unit = {},
 ) {
+    // Numbers are accessible for colorblind users; colors remain only for servers that don't send a number.
+    val useNumbers = uiState.numberOptions.isNotEmpty()
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -171,7 +184,21 @@ internal fun SessionChallengeScreen(
                 horizontalArrangement = Arrangement.spacedBy(20.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                uiState.colorOptions.forEach { color ->
+                if (useNumbers) uiState.numberOptions.forEach { number ->
+                    Button(
+                        onClick = { onNumberSelected(number) },
+                        enabled = uiState.isButtonEnabled && !uiState.isLoading,
+                        modifier = Modifier
+                            .testTag("session-number-$number")
+                            .size(76.dp),
+                        shape = CircleShape,
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = Color.Black),
+                        border = BorderStroke(2.dp, Color.Black),
+                        contentPadding = PaddingValues(0.dp),
+                    ) {
+                        Text(text = number.toString(), fontSize = 26.sp, fontWeight = FontWeight.Bold)
+                    }
+                } else uiState.colorOptions.forEach { color ->
                     Button(
                         onClick = { onColorSelected(color) },
                         enabled = uiState.isButtonEnabled && !uiState.isLoading,
@@ -192,7 +219,7 @@ internal fun SessionChallengeScreen(
             Spacer(modifier = Modifier.height(12.dp))
 
             Text(
-                text = "Tap the matching color",
+                text = if (useNumbers) "Tap the number shown in your browser" else "Tap the matching color",
                 color = Color.Black.copy(alpha = 0.75f),
                 fontSize = 13.sp,
                 textAlign = TextAlign.Center,

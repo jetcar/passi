@@ -208,6 +208,34 @@ class ButtonCoverageTest {
     }
 
     @Test
+    fun sessionChallengeShowsNumberButtonsInsteadOfColorsWhenNumberProvided() {
+        val clickedNumbers = mutableListOf<Int>()
+
+        composeRule.setPassiContent {
+            SessionChallengeScreen(
+                uiState = SessionChallengeUiState(
+                    session = sampleSession(),
+                    account = sampleAccount(),
+                    colorOptions = ConfirmationColor.entries,
+                    numberOptions = listOf(17, 42, 83),
+                    isButtonEnabled = true,
+                ),
+                timeLeftSeconds = 25,
+                onColorSelected = {},
+                onNumberSelected = { clickedNumbers += it },
+                onCancel = {},
+            )
+        }
+
+        composeRule.onNodeWithText("42").performClick()
+        composeRule.onNodeWithText("83").performClick()
+        composeRule.onNodeWithTag("session-color-blue").assertDoesNotExist()
+        composeRule.onNodeWithText("Tap the number shown in your browser").assertExists()
+
+        assert(clickedNumbers == listOf(42, 83))
+    }
+
+    @Test
     fun updateCertificateButtonsTriggerBiometricRotateClearAndCancel() {
         var biometric = 0
         var rotated = 0

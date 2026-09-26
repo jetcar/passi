@@ -108,6 +108,77 @@ class ApprovalAndSyncUseCaseTests : CoroutineViewModelTest() {
     }
 
     @Test
+    fun sessionChallengeOffersThreeDistinctTwoDigitNumbersIncludingCorrectOne() = runViewModelTest {
+        val viewModel = SessionChallengeViewModel(
+            pendingSessionStore = PendingSessionStore().apply { save(sampleSession(confirmationNumber = 42)) },
+            accountsRepository = inMemoryAccountsRepository(),
+            authSessionService = FakeAuthSessionService(),
+        )
+
+        advanceUntilIdle()
+
+        val options = viewModel.uiState.value.numberOptions
+        assertThat(options).hasSize(3)
+        assertThat(options.toSet()).hasSize(3)
+        assertThat(options).contains(42)
+        assertThat(options.all { it in 10..99 }).isTrue()
+    }
+
+    @Test
+    fun sessionChallengeRejectsWrongNumber() = runViewModelTest {
+        val viewModel = SessionChallengeViewModel(
+            pendingSessionStore = PendingSessionStore().apply { save(sampleSession(confirmationNumber = 42)) },
+            accountsRepository = inMemoryAccountsRepository(),
+            authSessionService = FakeAuthSessionService(),
+        )
+        var anyFlowStarted = false
+
+        advanceUntilIdle()
+        viewModel.onNumberSelected(
+            number = 17,
+            onRequirePin = { anyFlowStarted = true },
+            onRequireBiometric = { anyFlowStarted = true },
+            onAuthorized = { anyFlowStarted = true },
+        )
+
+        assertThat(viewModel.uiState.value.colorError).isEqualTo("Invalid confirmation number. Go back and try again.")
+        assertThat(viewModel.uiState.value.isButtonEnabled).isFalse()
+        assertThat(anyFlowStarted).isFalse()
+    }
+
+    @Test
+    fun sessionChallengeCorrectNumberRoutesPinAccountToPinFlow() = runViewModelTest {
+        val accountsRepository = inMemoryAccountsRepository().also {
+            it.updateAccount(it.getAccounts().first().copy(isConfirmed = true, pinLength = 4))
+        }
+        val viewModel = SessionChallengeViewModel(
+            pendingSessionStore = PendingSessionStore().apply { save(sampleSession(confirmationNumber = 42)) },
+            accountsRepository = accountsRepository,
+            authSessionService = FakeAuthSessionService(),
+        )
+        var pinRequested = false
+
+        advanceUntilIdle()
+        viewModel.onNumberSelected(number = 42, onRequirePin = { pinRequested = true }, onRequireBiometric = {}, onAuthorized = {})
+
+        assertThat(pinRequested).isTrue()
+    }
+
+    @Test
+    fun sessionChallengeFallsBackToColorsWhenServerSendsNoNumber() = runViewModelTest {
+        val viewModel = SessionChallengeViewModel(
+            pendingSessionStore = PendingSessionStore().apply { save(sampleSession(confirmationNumber = null)) },
+            accountsRepository = inMemoryAccountsRepository(),
+            authSessionService = FakeAuthSessionService(),
+        )
+
+        advanceUntilIdle()
+
+        assertThat(viewModel.uiState.value.numberOptions).isEmpty()
+        assertThat(viewModel.uiState.value.colorOptions).hasSize(3)
+    }
+
+    @Test
     fun sessionChallengeRoutesPinProtectedAccountToPinFlow() = runViewModelTest {
         val accountsRepository = inMemoryAccountsRepository().also {
             it.updateAccount(it.getAccounts().first().copy(isConfirmed = true, pinLength = 4))

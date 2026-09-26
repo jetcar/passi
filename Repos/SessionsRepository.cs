@@ -109,6 +109,11 @@ namespace Repos
                 return null;
             return _dbContext.Sessions.FirstOrDefault(x => x.Guid == sessionId && x.UserId == certificate.User.Id);
         }
+
+        public CertificateDb GetCertificate(string username, string thumbprint)
+        {
+            return _dbContext.Certificates.FirstOrDefault(x => x.Thumbprint == thumbprint && x.User.EmailHash == username);
+        }
     }
 
     public interface ISessionsRepository : ITransaction
@@ -126,5 +131,7 @@ namespace Repos
         List<UserDb> SyncAccounts(List<string> guilds, string deviceId);
 
         SimpleSessionDb GetAuthorizedSession(Guid sessionId, string thunbprint, string username);
+
+        CertificateDb GetCertificate(string username, string thumbprint);
     }
 }

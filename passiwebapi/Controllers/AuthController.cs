@@ -7,6 +7,7 @@ using Repos;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using GoogleTracer;
 using NotificationsService;
 using WebApiDto;
@@ -139,10 +140,36 @@ namespace passi_webapi.Controllers
             var sessionDb = _sessionsRepository.CheckSessionAndReturnUser(authorizeDto.SessionId);
             if (sessionDb == null)
                 return BadRequest("Session not found");
+
+            if (string.IsNullOrEmpty(authorizeDto.SignedHash) || string.IsNullOrEmpty(authorizeDto.PublicCertThumbprint))
+                return BadRequest("Invalid signature");
+
+            var certificate = _sessionsRepository.GetCertificate(sessionDb.Email, authorizeDto.PublicCertThumbprint);
+            if (certificate == null || !TryVerifySignature(sessionDb.RandomString, authorizeDto.SignedHash, certificate.PublicCert))
+                return BadRequest("Invalid signature");
+
             _sessionsRepository.VerifySession(authorizeDto.SessionId, authorizeDto.SignedHash,
                 authorizeDto.PublicCertThumbprint);
 
             return Ok(new LoginResponceDto() { SessionId = authorizeDto.SessionId });
+        }
+
+        // The device signs the session's random challenge with its registered certificate;
+        // malformed base64/certificate data means the signature cannot be valid, not a server error.
+        private static bool TryVerifySignature(string data, string signedData, string base64PublicCert)
+        {
+            try
+            {
+                return CertHelper.VerifyData(data, signedData, base64PublicCert);
+            }
+            catch (FormatException)
+            {
+                return false;
+            }
+            catch (CryptographicException)
+            {
+                return false;
+            }
         }
 
         [HttpGet, Route("check")]

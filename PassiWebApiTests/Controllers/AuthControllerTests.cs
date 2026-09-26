@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using System.Text;
 using WebApiDto.Auth;
 using WebApiDto.SignUp;
 using Repos;
@@ -222,6 +223,82 @@ namespace PassiWebApiTests.Controllers
             Assert.That(notification, Is.Not.Null);
             Assert.That(notification!.ConfirmationNumber, Is.EqualTo(42));
             Assert.That(notification.ConfirmationColor, Is.EqualTo(Color.green));
+        }
+
+        [Test]
+        public void AuthorizeConfirmsSessionWhenSignatureIsValid()
+        {
+            var signupController = ServiceProvider.GetService<SignUpController>();
+            var authController = ServiceProvider.GetService<AuthController>();
+            var email = Guid.NewGuid() + "@passi.cloud";
+            var deviceId = Guid.NewGuid().ToString();
+            var cert = ConfirmAccountOnDevice(signupController, email, Guid.NewGuid(), deviceId);
+
+            var start = authController.Start(new StartLoginDto
+            {
+                Username = email,
+                ClientId = "SampleApp",
+                ReturnUrl = "https://localhost/callback",
+                RandomString = "123456",
+                CheckColor = Color.blue,
+            }) as OkObjectResult;
+            var sessionId = ((LoginResponceDto)start!.Value).SessionId;
+
+            var authorizeResult = authController.Authorize(new AuthorizeDto
+            {
+                SessionId = sessionId,
+                SignedHash = SignData("123456", cert),
+                PublicCertThumbprint = cert.Thumbprint,
+            });
+
+            Assert.That(authorizeResult, Is.InstanceOf<OkObjectResult>());
+
+            var checkResult = authController.Check(sessionId);
+            Assert.That(checkResult, Is.InstanceOf<OkObjectResult>());
+        }
+
+        [Test]
+        public void AuthorizeRejectsSignatureFromAnUnregisteredCertificate()
+        {
+            var signupController = ServiceProvider.GetService<SignUpController>();
+            var authController = ServiceProvider.GetService<AuthController>();
+            var email = Guid.NewGuid() + "@passi.cloud";
+            var deviceId = Guid.NewGuid().ToString();
+            var cert = ConfirmAccountOnDevice(signupController, email, Guid.NewGuid(), deviceId);
+
+            var start = authController.Start(new StartLoginDto
+            {
+                Username = email,
+                ClientId = "SampleApp",
+                ReturnUrl = "https://localhost/callback",
+                RandomString = "123456",
+                CheckColor = Color.blue,
+            }) as OkObjectResult;
+            var sessionId = ((LoginResponceDto)start!.Value).SessionId;
+
+            // Valid RSA signature, but from a key never registered for this account.
+            var attackerCert = CreateCertificate(email);
+
+            var authorizeResult = authController.Authorize(new AuthorizeDto
+            {
+                SessionId = sessionId,
+                SignedHash = SignData("123456", attackerCert),
+                PublicCertThumbprint = cert.Thumbprint,
+            });
+
+            Assert.That(authorizeResult, Is.InstanceOf<BadRequestObjectResult>());
+
+            var checkResult = authController.Check(sessionId) as BadRequestObjectResult;
+            Assert.That(checkResult, Is.Not.Null);
+            Assert.That(checkResult!.Value, Is.EqualTo("Waiting for response"));
+        }
+
+        private static string SignData(string data, X509Certificate2 certificate)
+        {
+            using var sha512 = SHA512.Create();
+            var hash = sha512.ComputeHash(Encoding.UTF8.GetBytes(data));
+            var signedBytes = certificate.GetRSAPrivateKey().SignHash(hash, HashAlgorithmName.SHA512, RSASignaturePadding.Pkcs1);
+            return Convert.ToBase64String(signedBytes);
         }
 
         private X509Certificate2 ConfirmAccountOnDevice(SignUpController signupController, string email, Guid accountGuid, string deviceId)

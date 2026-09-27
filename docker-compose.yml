@@ -129,6 +129,7 @@ services:
       - redis_net
     env_file:
       - ../passi_config/mailler.env
+      - ../passi_config/sendgrid.env
     volumes:
       - ../mailler/certs:/certs
     depends_on:

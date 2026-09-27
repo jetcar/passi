@@ -26,7 +26,7 @@
     "PassiSecret": "secret1",
     "redis": "localhost",
     "redisPort": "6379",
-    "IsTest": "false",
+    "IsTest": "true",
     "projectId": "projectId"
   }
 }

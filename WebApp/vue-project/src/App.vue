@@ -57,7 +57,7 @@ onMounted(() => {
                                     </li>
                                     <li><hr class="dropdown-divider"></li>
                                     <li>
-                                        <a href="/Home/DevTools" class="dropdown-item">
+                                        <a href="/Home/RegisterApp" class="dropdown-item">
                                             <i class="bi bi-fingerprint me-2"></i>Passi Auth
                                         </a>
                                     </li>
@@ -147,7 +147,7 @@ onMounted(() => {
                         <h6 class="mb-3 text-white">Products</h6>
                         <ul class="list-unstyled">
                             <li class="mb-2"><router-link to="/products" class="text-light text-decoration-none hover-link">All Products</router-link></li>
-                            <li class="mb-2"><a href="/Home/DevTools" class="text-light text-decoration-none hover-link">Passi Auth</a></li>
+                            <li class="mb-2"><a href="/Home/RegisterApp" class="text-light text-decoration-none hover-link">Passi Auth</a></li>
                             <li class="mb-2"><a href="https://github.com/jetcar/eid-openidc" target="_blank" class="text-light text-decoration-none hover-link">eID OpenIDC</a></li>
                             <li class="mb-2"><a href="https://github.com/jetcar/tallinn-crashes" target="_blank" class="text-light text-decoration-none hover-link">Tallinn Crash Statistics</a></li>
                         </ul>
@@ -157,7 +157,7 @@ onMounted(() => {
                         <ul class="list-unstyled">
                             <li class="mb-2"><a href="https://github.com/jetcar/passi" target="_blank" class="text-light text-decoration-none hover-link">GitHub - Passi</a></li>
                             <li class="mb-2"><a href="https://www.youtube.com/watch?v=tRrWp6LWQNU" target="_blank" class="text-light text-decoration-none hover-link">Demo Video</a></li>
-                            <li class="mb-2"><a href="/Home/DevTools" class="text-light text-decoration-none hover-link">Register Site</a></li>
+                            <li class="mb-2"><a href="/Home/RegisterApp" class="text-light text-decoration-none hover-link">Register Site</a></li>
                             <li class="mb-2"><router-link to="/Contacts" class="text-light text-decoration-none hover-link">Contact</router-link></li>
                             <li class="mb-2"><router-link to="/PrivacyPolicy" class="text-light text-decoration-none hover-link">Privacy Policy</router-link></li>
                         </ul>

@@ -46,7 +46,7 @@
                   <a href="https://github.com/jetcar/passi" target="_blank" class="btn btn-primary">
                     <i class="bi bi-github me-2"></i>View on GitHub
                   </a>
-                  <a href="/Home/DevTools" class="btn btn-outline-secondary">
+                  <a href="/Home/RegisterApp" class="btn btn-outline-secondary">
                     <i class="bi bi-tools me-2"></i>Register Website
                   </a>
                 </div>

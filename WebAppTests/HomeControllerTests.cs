@@ -50,11 +50,17 @@ namespace WebAppTests
         {
             // It used to 301 to IdentityUrl + "/client", which no longer exists. Old links/bookmarks land on RegisterApp now,
             // with a temporary redirect so browsers don't cache it again.
+            //
+            // This uses a literal Redirect rather than RedirectToAction: in production, RedirectToAction(nameof(RegisterApp))
+            // threw "System.InvalidOperationException: No route matches the supplied values" at request time (the legacy
+            // UseMvc conventional route registered in WebApp/Startup.cs isn't picked up by the endpoint-routing-based link
+            // generator that RedirectToActionResult uses), which a unit test against the bare controller can't catch since
+            // it never runs real URL generation.
             var result = Controller(authenticated: false).DevTools();
 
-            Assert.That(result, Is.InstanceOf<RedirectToActionResult>());
-            var redirect = (RedirectToActionResult)result;
-            Assert.That(redirect.ActionName, Is.EqualTo(nameof(HomeController.RegisterApp)));
+            Assert.That(result, Is.InstanceOf<RedirectResult>());
+            var redirect = (RedirectResult)result;
+            Assert.That(redirect.Url, Is.EqualTo("/Home/RegisterApp"));
             Assert.That(redirect.Permanent, Is.False);
         }
     }

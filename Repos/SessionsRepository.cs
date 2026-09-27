@@ -59,13 +59,25 @@ namespace Repos
 
         public void CancelSession(Guid guid)
         {
-            _redisService.Get<SessionTempRecord>(guid.ToString());
+            var session = _redisService.Get<SessionTempRecord>(guid.ToString());
+            if (session == null)
+                return;
+
+            session.Status = SessionStatus.Canceled;
+            _redisService.Add(session.Guid.ToString(), session);
+
+            var sessionDb = _dbContext.Sessions.FirstOrDefault(x => x.Guid == guid);
+            if (sessionDb != null)
+            {
+                sessionDb.Status = SessionStatus.Canceled;
+                _dbContext.SaveChanges();
+            }
         }
 
         public void VerifySession(Guid guid, string signedHash, string publicCertThumbprint)
         {
             var session = _redisService.Get<SessionTempRecord>(guid.ToString());
-            if (session != null)
+            if (session != null && session.Status != SessionStatus.Canceled)
             {
                 var sessionDb = _dbContext.Sessions.FirstOrDefault(x => x.Guid == guid);
                 if (sessionDb != null)

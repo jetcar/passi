@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using Models;
 using NUnit.Framework;
 using passi_webapi.Controllers;
 using Repos;
@@ -11,6 +12,47 @@ namespace PassiWebApiTests.Repos
 {
     public class SessionsRepositoryTests : TestBase
     {
+        [Test]
+        public void CancelSessionMarksSessionAsCanceled()
+        {
+            var signupController = ServiceProvider.GetService<SignUpController>();
+            var sessionsRepository = ServiceProvider.GetService<ISessionsRepository>();
+
+            var email = Guid.NewGuid() + "@passi.cloud";
+            var deviceId = Guid.NewGuid().ToString();
+            ConfirmAccountOnDevice(signupController, email, Guid.NewGuid(), deviceId);
+
+            var session = sessionsRepository.BeginSession(email, "SampleApp", "123456", "blue", "https://localhost/callback");
+
+            sessionsRepository.CancelSession(session.Guid);
+
+            var cancelled = sessionsRepository.CheckSessionAndReturnUser(session.Guid);
+            Assert.That(cancelled, Is.Not.Null);
+            Assert.That(cancelled.Status, Is.EqualTo(SessionStatus.Canceled));
+        }
+
+        [Test]
+        public void VerifySessionDoesNotOverwriteACanceledSession()
+        {
+            var signupController = ServiceProvider.GetService<SignUpController>();
+            var sessionsRepository = ServiceProvider.GetService<ISessionsRepository>();
+
+            var email = Guid.NewGuid() + "@passi.cloud";
+            var deviceId = Guid.NewGuid().ToString();
+            var cert = ConfirmAccountOnDevice(signupController, email, Guid.NewGuid(), deviceId);
+
+            var session = sessionsRepository.BeginSession(email, "SampleApp", "123456", "blue", "https://localhost/callback");
+
+            sessionsRepository.CancelSession(session.Guid);
+
+            // A late/racing confirmation must not resurrect a session the user already canceled.
+            sessionsRepository.VerifySession(session.Guid, "signed-hash", cert.Thumbprint);
+
+            var afterVerify = sessionsRepository.CheckSessionAndReturnUser(session.Guid);
+            Assert.That(afterVerify, Is.Not.Null);
+            Assert.That(afterVerify.Status, Is.EqualTo(SessionStatus.Canceled));
+        }
+
         [Test]
         public void GetAuthorizedSessionReturnsNullWhenCertificateBelongsToAnotherUser()
         {

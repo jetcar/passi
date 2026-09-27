@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using FirebaseAdmin.Messaging;
@@ -33,12 +33,9 @@ namespace NotificationsService
                     {"title", title},
                     {"body", body},
                 },
-                Notification = new Notification()
-                {
-                    Title = title,
-                    Body = notification,
-                },
-                //Android = new AndroidConfig() { TimeToLive = new TimeSpan(0, 1, 0) }
+                // Data-only on purpose: with a notification block, Android shows the push itself while the app is
+                // in the background and the app's handler never runs (no full-screen intent, generic channel).
+                Android = new AndroidConfig() { Priority = Priority.High },
             };
             new Thread(() =>
             {

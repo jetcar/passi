@@ -179,6 +179,71 @@ class ApprovalAndSyncUseCaseTests : CoroutineViewModelTest() {
     }
 
     @Test
+    fun lockedPhoneMustBeUnlockedBeforeCorrectNumberProceeds() = runViewModelTest {
+        val accountsRepository = inMemoryAccountsRepository().also {
+            it.updateAccount(it.getAccounts().first().copy(isConfirmed = true, pinLength = 4))
+        }
+        val viewModel = SessionChallengeViewModel(
+            pendingSessionStore = PendingSessionStore().apply { save(sampleSession(confirmationNumber = 42)) },
+            accountsRepository = accountsRepository,
+            authSessionService = FakeAuthSessionService(),
+            isDeviceLocked = { true },
+        )
+        var pinRequested = false
+
+        advanceUntilIdle()
+        viewModel.onNumberSelected(number = 42, onRequirePin = { pinRequested = true }, onRequireBiometric = {}, onAuthorized = {})
+
+        assertThat(pinRequested).isFalse()
+        assertThat(viewModel.uiState.value.unlockRequired).isTrue()
+
+        viewModel.onUnlockResult(unlocked = true)
+
+        assertThat(pinRequested).isTrue()
+        assertThat(viewModel.uiState.value.unlockRequired).isFalse()
+    }
+
+    @Test
+    fun cancelledUnlockDoesNotApprove() = runViewModelTest {
+        val authService = FakeAuthSessionService()
+        val viewModel = SessionChallengeViewModel(
+            pendingSessionStore = PendingSessionStore().apply { save(sampleSession(confirmationNumber = 42)) },
+            accountsRepository = inMemoryAccountsRepository().also {
+                it.updateAccount(it.getAccounts().first().copy(isConfirmed = true, pinLength = 0, hasFingerprint = false))
+            },
+            authSessionService = authService,
+            isDeviceLocked = { true },
+        )
+        var authorized = false
+
+        advanceUntilIdle()
+        viewModel.onNumberSelected(number = 42, onRequirePin = {}, onRequireBiometric = {}, onAuthorized = { authorized = true })
+        viewModel.onUnlockResult(unlocked = false)
+        advanceUntilIdle()
+
+        assertThat(authorized).isFalse()
+        assertThat(authService.lastAuthorizedPin).isNull()
+        assertThat(viewModel.uiState.value.unlockRequired).isFalse()
+        assertThat(viewModel.uiState.value.responseError).isEqualTo("Unlock your phone to approve this login")
+    }
+
+    @Test
+    fun wrongNumberOnLockedPhoneIsRejectedWithoutAskingToUnlock() = runViewModelTest {
+        val viewModel = SessionChallengeViewModel(
+            pendingSessionStore = PendingSessionStore().apply { save(sampleSession(confirmationNumber = 42)) },
+            accountsRepository = inMemoryAccountsRepository(),
+            authSessionService = FakeAuthSessionService(),
+            isDeviceLocked = { true },
+        )
+
+        advanceUntilIdle()
+        viewModel.onNumberSelected(number = 17, onRequirePin = {}, onRequireBiometric = {}, onAuthorized = {})
+
+        assertThat(viewModel.uiState.value.unlockRequired).isFalse()
+        assertThat(viewModel.uiState.value.isButtonEnabled).isFalse()
+    }
+
+    @Test
     fun sessionChallengeRoutesPinProtectedAccountToPinFlow() = runViewModelTest {
         val accountsRepository = inMemoryAccountsRepository().also {
             it.updateAccount(it.getAccounts().first().copy(isConfirmed = true, pinLength = 4))

@@ -13,16 +13,25 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import com.passi.cloud.passi_android.ui.PassiApp
+import com.passi.cloud.passi_android.notifications.FullScreenIntentPrompt
+import com.passi.cloud.passi_android.notifications.PassiNotifications
 
 class MainActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         ensureNotificationChannel(this)
         requestNotificationPermissionIfNeeded()
+        FullScreenIntentPrompt.maybePrompt(this)
         handleIntent(intent)
         setContent {
             PassiApp()
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // The app is open now, so pending login notifications are stale; clear the whole list.
+        PassiNotifications.clearAll(this)
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -32,7 +41,12 @@ class MainActivity : FragmentActivity() {
     }
 
     private fun handleIntent(intent: Intent?) {
-        if (intent?.getBooleanExtra(EXTRA_OPEN_PENDING_SESSION, false) == true) {
+        val fromLoginNotification = intent?.getBooleanExtra(EXTRA_OPEN_PENDING_SESSION, false) == true
+        // Show the login challenge over the lock screen (and wake it) only when opened for a login request;
+        // approving still requires unlocking (see UnlockGate in SessionChallengeRoute).
+        setShowWhenLocked(fromLoginNotification)
+        setTurnScreenOn(fromLoginNotification)
+        if (fromLoginNotification) {
             (application as PassiApplication).container.notificationOpenStore.requestOpen()
         }
     }

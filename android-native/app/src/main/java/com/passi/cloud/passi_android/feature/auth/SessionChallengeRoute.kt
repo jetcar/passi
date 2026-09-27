@@ -1,5 +1,7 @@
 package com.passi.cloud.passi_android.feature.auth
 
+import android.app.Activity
+import android.app.KeyguardManager
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -52,15 +54,33 @@ fun SessionChallengeRoute(
     onRequirePin: () -> Unit,
     onAuthorized: () -> Unit,
 ) {
-    val application = LocalContext.current.applicationContext as PassiApplication
+    val context = LocalContext.current
+    val application = context.applicationContext as PassiApplication
+    val keyguardManager = context.getSystemService(KeyguardManager::class.java)
     val viewModel: SessionChallengeViewModel = viewModel(
         factory = SessionChallengeViewModel.factory(
             pendingSessionStore = application.container.pendingSessionStore,
             accountsRepository = application.container.accountsRepository,
             authSessionService = application.container.authSessionService,
+            isDeviceLocked = { keyguardManager.isKeyguardLocked },
         )
     )
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    // Shown over the lock screen: ask Android to unlock (PIN/fingerprint) before the approval continues.
+    LaunchedEffect(uiState.unlockRequired) {
+        val activity = context as? Activity
+        if (!uiState.unlockRequired) return@LaunchedEffect
+        if (activity == null) {
+            viewModel.onUnlockResult(unlocked = false)
+            return@LaunchedEffect
+        }
+        keyguardManager.requestDismissKeyguard(activity, object : KeyguardManager.KeyguardDismissCallback() {
+            override fun onDismissSucceeded() = viewModel.onUnlockResult(unlocked = true)
+            override fun onDismissCancelled() = viewModel.onUnlockResult(unlocked = false)
+            override fun onDismissError() = viewModel.onUnlockResult(unlocked = false)
+        })
+    }
     val launchBiometricPrompt = rememberBiometricPromptLauncher(
         title = "Approve session",
         subtitle = "Confirm your biometric credential to approve this session",

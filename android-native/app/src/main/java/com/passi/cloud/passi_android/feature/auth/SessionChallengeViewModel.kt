@@ -26,13 +26,18 @@ data class SessionChallengeUiState(
     val colorError: String? = null,
     val isButtonEnabled: Boolean = false,
     val isLoading: Boolean = false,
+    /** Correct answer given on a locked phone: the UI must ask Android to unlock before approval continues. */
+    val unlockRequired: Boolean = false,
 )
 
 class SessionChallengeViewModel(
     private val pendingSessionStore: PendingSessionStore,
     private val accountsRepository: AccountsRepository,
     private val authSessionService: AuthSessionService,
+    private val isDeviceLocked: () -> Boolean = { false },
 ) : ViewModel() {
+    private var continueAfterUnlock: (() -> Unit)? = null
+
     private val _uiState = MutableStateFlow(SessionChallengeUiState())
     val uiState: StateFlow<SessionChallengeUiState> = _uiState.asStateFlow()
 
@@ -114,17 +119,32 @@ class SessionChallengeViewModel(
             return
         }
 
-        if (account.pinLength > 0) {
-            onRequirePin()
+        val proceed = {
+            when {
+                account.pinLength > 0 -> onRequirePin()
+                account.hasFingerprint -> onRequireBiometric()
+                else -> authorizeWithoutPin(onAuthorized)
+            }
+        }
+
+        // The challenge may be shown over the lock screen; approving must still require unlocking the phone.
+        if (isDeviceLocked()) {
+            continueAfterUnlock = proceed
+            _uiState.value = _uiState.value.copy(unlockRequired = true)
             return
         }
 
-        if (account.hasFingerprint) {
-            onRequireBiometric()
-            return
-        }
+        proceed()
+    }
 
-        authorizeWithoutPin(onAuthorized)
+    fun onUnlockResult(unlocked: Boolean) {
+        val proceed = continueAfterUnlock
+        continueAfterUnlock = null
+        _uiState.value = _uiState.value.copy(
+            unlockRequired = false,
+            responseError = if (unlocked) _uiState.value.responseError else "Unlock your phone to approve this login",
+        )
+        if (unlocked) proceed?.invoke()
     }
 
     fun onBiometricPromptError(message: String) {
@@ -202,12 +222,14 @@ class SessionChallengeViewModel(
             pendingSessionStore: PendingSessionStore,
             accountsRepository: AccountsRepository,
             authSessionService: AuthSessionService,
+            isDeviceLocked: () -> Boolean,
         ): ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 SessionChallengeViewModel(
                     pendingSessionStore = pendingSessionStore,
                     accountsRepository = accountsRepository,
                     authSessionService = authSessionService,
+                    isDeviceLocked = isDeviceLocked,
                 )
             }
         }

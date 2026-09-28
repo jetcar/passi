@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Threading;
+using System.Threading.Tasks;
 using FirebaseAdmin.Messaging;
 using GoogleTracer;
 using Models;
@@ -37,12 +37,12 @@ namespace NotificationsService
                 // in the background and the app's handler never runs (no full-screen intent, generic channel).
                 Android = new AndroidConfig() { Priority = Priority.High },
             };
-            new Thread(() =>
+            _ = Task.Run(async () =>
             {
-                Thread.Sleep(3000);
+                await Task.Delay(3000);
                 try
                 {
-                    var response = _fireBaseClient.Send(message);
+                    var response = await _fireBaseClient.SendAsync(message);
                 }
                 catch (Exception e)
                 {
@@ -55,7 +55,7 @@ namespace NotificationsService
                     _redisService.Add(sessionId.ToString(), session);
 
                 }
-            }).Start();
+            });
             return "";
         }
 

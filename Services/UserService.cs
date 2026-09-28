@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using GoogleTracer;
 using Models;
 
@@ -21,10 +22,10 @@ namespace Services
             _emailSender = emailSender;
         }
 
-        public string AddUserAndSendConfirmationEmail(SignupDto signupDto)
+        public Task<string> AddUserAndSendConfirmationEmailAsync(SignupDto signupDto)
         {
             var code = PrepareNewUserSignupCode(signupDto);
-            return _emailSender.SendInvitationEmail(signupDto.Email, code);
+            return _emailSender.SendInvitationEmailAsync(signupDto.Email, code);
         }
 
         public string PrepareNewUserSignupCode(SignupDto signupDto)
@@ -54,10 +55,10 @@ namespace Services
                 signupConfirmationDto.Guid, signupConfirmationDto.Code, signupConfirmationDto.DeviceId);
         }
 
-        public string SendConfirmationEmail(SignupDto signupDto)
+        public Task<string> SendConfirmationEmailAsync(SignupDto signupDto)
         {
             var code = PrepareSignupCode(signupDto);
-            return _emailSender.SendInvitationEmail(signupDto.Email, code);
+            return _emailSender.SendInvitationEmailAsync(signupDto.Email, code);
         }
 
         public string PrepareSignupCode(SignupDto signupDto)
@@ -73,12 +74,12 @@ namespace Services
             return userInvitationDb.Code;
         }
 
-        public void SendSignupEmail(string email, string code)
+        public Task SendSignupEmailAsync(string email, string code)
         {
-            _emailSender.SendInvitationEmail(email, code);
+            return _emailSender.SendInvitationEmailAsync(email, code);
         }
 
-        public string SendDeleteConfirmationEmail(string email)
+        public string PrepareDeleteCode(string email)
         {
             var user = _userRepository.GetUser(email);
             var userInvitationDb = new UserInvitationDb()
@@ -89,7 +90,12 @@ namespace Services
             };
 
             _userRepository.AddInvitation(userInvitationDb);
-            return _emailSender.SendDeletingEmail(email, userInvitationDb.Code);
+            return userInvitationDb.Code;
+        }
+
+        public Task<string> SendDeleteEmailAsync(string email, string code)
+        {
+            return _emailSender.SendDeletingEmailAsync(email, code);
         }
 
         public void DeleteUser(string deleteEmail)

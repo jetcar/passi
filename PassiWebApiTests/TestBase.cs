@@ -183,14 +183,14 @@ public class TestEmailSender : IEmailSender
 {
     public static string Code;
 
-    public string SendInvitationEmail(String email, String code)
+    public Task<string> SendInvitationEmailAsync(String email, String code)
     {
-        return Code = code;
+        return Task.FromResult(Code = code);
     }
 
-    public string SendDeletingEmail(String email, String code)
+    public Task<string> SendDeletingEmailAsync(String email, String code)
     {
-        return Code = code;
+        return Task.FromResult(Code = code);
     }
 }
 
@@ -204,8 +204,8 @@ public class TestRestClient : IMyRestClient
 
 public class TestFireBaseClient : IFireBaseClient
 {
-    public string Send(FirebaseAdmin.Messaging.Message message)
+    public Task<string> SendAsync(FirebaseAdmin.Messaging.Message message)
     {
-        return "test-notification";
+        return Task.FromResult("test-notification");
     }
 }

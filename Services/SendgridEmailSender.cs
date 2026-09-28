@@ -1,6 +1,7 @@
 ﻿using ConfigurationManager;
 using System;
 using System.Net.Http;
+using System.Threading.Tasks;
 using GoogleTracer;
 using SendGrid;
 using SendGrid.Helpers.Mail;
@@ -22,7 +23,7 @@ namespace Services
                     apiKey);
         }
 
-        public string SendInvitationEmail(string email, string code)
+        public async Task<string> SendInvitationEmailAsync(string email, string code)
         {
             if (Convert.ToBoolean(_appSetting["DoNotSendMail"]))
                 email = _appSetting["testMail"];
@@ -30,13 +31,13 @@ namespace Services
                 return "ok";
             var message = MailHelper.CreateSingleTemplateEmail(new EmailAddress(_appSetting["EmailFrom"]), new EmailAddress(email),
                 "d-b6873d40e5c74e6bab695b5bf12a636e", new { code = code });
-            var responce = client.SendEmailAsync(message).Result;
+            var responce = await client.SendEmailAsync(message);
             if (!responce.IsSuccessStatusCode)
-                throw new BadRequestException(responce.Body.ReadAsStringAsync().Result);
-            return responce.Body.ReadAsStringAsync().Result;
+                throw new BadRequestException(await responce.Body.ReadAsStringAsync());
+            return await responce.Body.ReadAsStringAsync();
         }
 
-        public string SendDeletingEmail(string email, string code)
+        public async Task<string> SendDeletingEmailAsync(string email, string code)
         {
             if (Convert.ToBoolean(_appSetting["DoNotSendMail"]))
                 email = _appSetting["testMail"];
@@ -44,10 +45,10 @@ namespace Services
                 return "ok";
             var message = MailHelper.CreateSingleTemplateEmail(new EmailAddress(_appSetting["EmailFrom"]), new EmailAddress(email),
                 "d-b6873d40e5c74e6bab695b5bf12a636e", new { code = code });
-            var responce = client.SendEmailAsync(message).Result;
+            var responce = await client.SendEmailAsync(message);
             if (!responce.IsSuccessStatusCode)
-                throw new BadRequestException(responce.Body.ReadAsStringAsync().Result);
-            return responce.Body.ReadAsStringAsync().Result;
+                throw new BadRequestException(await responce.Body.ReadAsStringAsync());
+            return await responce.Body.ReadAsStringAsync();
         }
     }
 }

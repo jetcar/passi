@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Net.Mail;
-using System.Net;
-using System.Net.Mail;
+using System.Threading.Tasks;
 using ConfigurationManager;
 using FirebaseAdmin;
 using FirebaseAdmin.Messaging;
@@ -31,14 +30,14 @@ namespace NotificationsService
             });
         }
 
-        public string Send(Message message)
+        public async Task<string> SendAsync(Message message)
         {
             if (string.IsNullOrEmpty(message.Token))
             {
                 _logger.LogDebug("token is missing");
                 return null;
             }
-            return FirebaseMessaging.DefaultInstance.SendAsync(message).Result;
+            return await FirebaseMessaging.DefaultInstance.SendAsync(message);
         }
     }
 
@@ -61,7 +60,7 @@ namespace NotificationsService
             _appSetting = appSetting;
         }
 
-        public string Send(Message message)
+        public async Task<string> SendAsync(Message message)
         {
             var payload = BuildPayload(message);
             _logger.LogInformation("ExternalServiceCatcherClient: forwarding notification to test mail service. payload={Payload}", payload);
@@ -88,7 +87,7 @@ namespace NotificationsService
                     IsBodyHtml = false,
                 };
 
-                client.Send(mail);
+                await client.SendMailAsync(mail);
             }
             catch (Exception ex)
             {
@@ -112,6 +111,6 @@ namespace NotificationsService
 
     public interface IFireBaseClient
     {
-        string Send(Message message);
+        Task<string> SendAsync(Message message);
     }
 }

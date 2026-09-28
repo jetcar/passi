@@ -50,7 +50,7 @@ namespace passi_webapi.Controllers
                 .Include(x => x.Invitations.OrderByDescending(a => a.CreationTime).Take(1))
                 .Include(x => x.SessionUsers.OrderByDescending(a => a.CreationTime).Take(1))
                 .OrderByDescending(x => x.CreationTime)
-                .Skip(page * page).Take(pagesize).Select(_mapper.Map<UserDto>).ToList();
+                .Skip(page * pagesize).Take(pagesize).Select(_mapper.Map<UserDto>).ToList();
         }
     }
 }

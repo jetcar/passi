@@ -60,7 +60,7 @@ namespace PassiWebApiTests
 
         private class ThrowingFireBaseClient : IFireBaseClient
         {
-            public string Send(Message message) => throw new InvalidOperationException("FCM rejected the token");
+            public Task<string> SendAsync(Message message) => throw new InvalidOperationException("FCM rejected the token");
         }
 
         private class NullReturningRedisService : IRedisService

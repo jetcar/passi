@@ -103,9 +103,12 @@ jobs:
           chmod +x gradlew
           ./gradlew dependencyUpdates --no-daemon
           echo "== Android" | tee -a "$UPDATES_FILE"
-          python ../scripts/deps/gradle_updates.py build/dependencyUpdates/report.json build.gradle.kts app/build.gradle.kts | tee -a "$UPDATES_FILE"
+          python ../scripts/deps/gradle_updates.py build/dependencyUpdates/report.json build.gradle.kts app/build.gradle.kts e2e/build.gradle.kts | tee -a "$UPDATES_FILE"
           gradle_latest=$(python -c "import json; g = json.load(open('build/dependencyUpdates/report.json'))['gradle']['current']; print(g['version'] if g['isUpdateAvailable'] else '')")
           if [ -n "$gradle_latest" ]; then
+            # Point the wrapper at the new Gradle first: an updated AGP may refuse to configure on the old one,
+            # which would make the `wrapper` task itself fail.
+            sed -i -E "s#gradle-[0-9.]+-(bin|all)\.zip#gradle-${gradle_latest}-\1.zip#" gradle/wrapper/gradle-wrapper.properties
             ./gradlew wrapper --gradle-version "$gradle_latest" --no-daemon
             echo "Gradle wrapper -> $gradle_latest" | tee -a "$UPDATES_FILE"
           fi
@@ -117,7 +120,7 @@ jobs:
           git add -- '*.csproj' \
             WebApp/vue-project/package.json WebApp/vue-project/package-lock.json \
             OpenIDC/vue-project/package.json OpenIDC/vue-project/package-lock.json \
-            android-native/build.gradle.kts android-native/app/build.gradle.kts \
+            android-native/build.gradle.kts android-native/app/build.gradle.kts android-native/e2e/build.gradle.kts \
             android-native/gradle/wrapper android-native/gradlew android-native/gradlew.bat
           if git diff --cached --quiet; then
             echo "any=false" >> "$GITHUB_OUTPUT"

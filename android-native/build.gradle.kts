@@ -1,11 +1,11 @@
 plugins {
-    id("com.android.application") version "9.0.0" apply false
-    id("com.google.gms.google-services") version "4.4.2" apply false
-    id("org.jetbrains.kotlin.android") version "2.2.10" apply false
-    id("org.jetbrains.kotlin.jvm") version "2.2.10" apply false
-    id("org.jetbrains.kotlin.plugin.compose") version "2.2.10" apply false
+    id("com.android.application") version "9.4.1" apply false
+    id("com.google.gms.google-services") version "4.5.0" apply false
+    id("org.jetbrains.kotlin.android") version "2.4.20" apply false
+    id("org.jetbrains.kotlin.jvm") version "2.4.20" apply false
+    id("org.jetbrains.kotlin.plugin.compose") version "2.4.20" apply false
     // Reports newer dependency versions; used by the monthly dependency-update workflow.
-    id("com.github.ben-manes.versions") version "0.53.0"
+    id("com.github.ben-manes.versions") version "0.64.0"
 }
 
 tasks.named<com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask>("dependencyUpdates") {

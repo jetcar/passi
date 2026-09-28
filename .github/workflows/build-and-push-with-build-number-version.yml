@@ -22,6 +22,9 @@ env:
 jobs:
   build-common:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
 
     steps:
       - name: Checkout code
@@ -65,6 +68,24 @@ jobs:
             jetcar/common_image:${{ steps.version.outputs.branch }}
           cache-from: type=registry,ref=jetcar/common_image:latest
           cache-to: type=inline
+
+      # Report-only: findings go to the Security tab and never block the deploy.
+      - name: Trivy scan common image
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: jetcar/common_image:${{ github.run_number }}
+          format: sarif
+          output: trivy-common-image.sarif
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: '0'
+
+      - name: Upload Trivy results to GitHub Security
+        if: always() && hashFiles('trivy-common-image.sarif') != ''
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: trivy-common-image.sarif
+          category: trivy-common-image
 
   build-and-push:
     runs-on: ubuntu-latest

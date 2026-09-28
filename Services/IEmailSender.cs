@@ -1,9 +1,11 @@
-﻿namespace Services
+﻿using System.Threading.Tasks;
+
+namespace Services
 {
     public interface IEmailSender
     {
-        string SendInvitationEmail(string email, string code);
+        Task<string> SendInvitationEmailAsync(string email, string code);
 
-        string SendDeletingEmail(string email, string code);
+        Task<string> SendDeletingEmailAsync(string email, string code);
     }
 }

@@ -3,7 +3,6 @@ using System;
 using System.Net;
 using GoogleTracer;
 using System.Net.Mail;
-using System.Threading;
 using System.Threading.Tasks;
 using log4net;
 
@@ -36,12 +35,12 @@ namespace Services
             }
         }
 
-        public string SendInvitationEmail(string email, string code)
+        public Task<string> SendInvitationEmailAsync(string email, string code)
         {
             if (Convert.ToBoolean(_appSetting["DoNotSendMail"]))
                 email = _appSetting["testMail"];
             if (email == null)
-                return SuccessResult;
+                return Task.FromResult(SuccessResult);
             var message = new MailMessage(_appSetting["emailFrom"], email)
             {
                 IsBodyHtml = true,
@@ -51,35 +50,35 @@ namespace Services
                 $"<tr><td><b>{code}</b></td></tr>" +
                 "</table></body></html>"
             };
-            return TrySendWithRetry(message);
+            return TrySendWithRetryAsync(message);
         }
 
-        private string TrySendWithRetry(MailMessage message)
+        private async Task<string> TrySendWithRetryAsync(MailMessage message)
         {
             for (int i = 0; i < MaxRetryAttempts; i++)
             {
                 try
                 {
-                    client.Send(message);
+                    await client.SendMailAsync(message);
                     return SuccessResult;
                 }
                 catch (Exception e)
                 {
                     _logger.Error($"SMTP send attempt {i + 1}/{MaxRetryAttempts} failed: {e.Message}", e);
                     if (i < MaxRetryAttempts - 1)
-                        Thread.Sleep(RetryDelayMilliseconds);
+                        await Task.Delay(RetryDelayMilliseconds);
                 }
             }
 
             return FailureResult;
         }
 
-        public string SendDeletingEmail(string email, string code)
+        public Task<string> SendDeletingEmailAsync(string email, string code)
         {
             if (Convert.ToBoolean(_appSetting["DoNotSendMail"]))
                 email = _appSetting["testMail"];
             if (email == null)
-                return SuccessResult;
+                return Task.FromResult(SuccessResult);
             var message = new MailMessage(_appSetting["smtpUsername"], email)
             {
                 IsBodyHtml = true,
@@ -89,7 +88,7 @@ namespace Services
                 $"<tr><td><b>{code}</b></td></tr>" +
                 "</table></body></html>"
             };
-            return TrySendWithRetry(message);
+            return TrySendWithRetryAsync(message);
         }
     }
 }

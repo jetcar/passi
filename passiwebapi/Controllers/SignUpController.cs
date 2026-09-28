@@ -57,7 +57,7 @@ namespace passi_webapi.Controllers
 
             var email = signupDto.Email;
             var code = confirmationCode;
-            Task.Run(() => _userService.SendSignupEmail(email, code));
+            Task.Run(() => _userService.SendSignupEmailAsync(email, code));
 
             return Ok();
         }
@@ -122,9 +122,10 @@ namespace passi_webapi.Controllers
         }
 
         [HttpPost, Route("Delete")]
-        public IActionResult Delete([FromBody] DeleteUserDto delete)
+        public async Task<IActionResult> Delete([FromBody] DeleteUserDto delete)
         {
             delete.Email = delete.Email.Trim();
+            string deleteCode = null;
             var strategy = _userRepository.GetExecutionStrategy();
             strategy.Execute(() =>
             {
@@ -132,13 +133,18 @@ namespace passi_webapi.Controllers
                 {
                     if (_userRepository.IsUsernameTaken(delete.Email))
                     {
-                        _userService.SendDeleteConfirmationEmail(delete.Email);
-                        _logger.Debug("Delete confirmation email dispatch attempted.");
+                        deleteCode = _userService.PrepareDeleteCode(delete.Email);
                     }
 
                     transaction.Commit();
                 }
             });
+
+            if (deleteCode != null)
+            {
+                await _userService.SendDeleteEmailAsync(delete.Email, deleteCode);
+                _logger.Debug("Delete confirmation email dispatch attempted.");
+            }
             return Ok();
         }
 

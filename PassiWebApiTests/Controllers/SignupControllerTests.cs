@@ -9,6 +9,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Threading.Tasks;
 using WebApiDto.Certificate;
 using WebApiDto.SignUp;
 
@@ -31,6 +32,30 @@ namespace PassiWebApiTests.Controllers
             // The confirmation email is dispatched on a background Task, so TestEmailSender.Code is
             // racy; assert on the synchronously-persisted invitation code instead.
             Assert.That(GetLatestCode(signupDto.Email), Is.Not.Null);
+        }
+
+        [Test]
+        public async Task DeleteSendsDeleteConfirmationEmailWithPersistedCode()
+        {
+            var controller = ServiceProvider.GetService<SignUpController>();
+            var email = Guid.NewGuid().ToString() + "@passi.cloud";
+            controller.SignUp(new SignupDto()
+            {
+                DeviceId = Guid.NewGuid().ToString(),
+                Email = email,
+                UserGuid = Guid.NewGuid()
+            });
+
+            // Let SignUp's background email land first so it can't overwrite the delete code below.
+            var signupCode = GetLatestCode(email);
+            for (var i = 0; i < 50 && TestEmailSender.Code != signupCode; i++)
+                await Task.Delay(100);
+
+            await controller.Delete(new DeleteUserDto() { Email = email });
+
+            var code = GetLatestCode(email);
+            Assert.That(code, Is.Not.Null);
+            Assert.That(TestEmailSender.Code, Is.EqualTo(code));
         }
 
         [Test]

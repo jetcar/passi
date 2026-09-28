@@ -1,17 +1,21 @@
 ﻿using System;
+using System.Threading.Tasks;
 using WebApiDto.SignUp;
 
 namespace Services
 {
     public interface IUserService
     {
-        string AddUserAndSendConfirmationEmail(SignupDto signupDto);
+        Task<string> AddUserAndSendConfirmationEmailAsync(SignupDto signupDto);
 
         Guid ConfirmUser(SignupConfirmationDto signupConfirmationDto);
 
-        string SendConfirmationEmail(SignupDto signupDto);
+        Task<string> SendConfirmationEmailAsync(SignupDto signupDto);
 
-        string SendDeleteConfirmationEmail(string email);
+        /// <summary>Persists a new delete-confirmation code for an existing user in the DB. Does NOT send email.</summary>
+        string PrepareDeleteCode(string email);
+
+        Task<string> SendDeleteEmailAsync(string email, string code);
 
         void DeleteUser(string deleteEmail);
 
@@ -22,6 +26,6 @@ namespace Services
         string PrepareSignupCode(SignupDto signupDto);
 
         /// <summary>Sends the invitation email. Safe to call from a background thread.</summary>
-        void SendSignupEmail(string email, string code);
+        Task SendSignupEmailAsync(string email, string code);
     }
 }

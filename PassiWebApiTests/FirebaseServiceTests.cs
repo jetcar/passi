@@ -1,5 +1,6 @@
 using System;
 using System.Threading;
+using System.Threading.Tasks;
 using FirebaseAdmin.Messaging;
 using Models;
 using NotificationsService;
@@ -34,11 +35,11 @@ namespace PassiWebApiTests
             public readonly ManualResetEventSlim Sent = new(false);
             public Message Message;
 
-            public string Send(Message message)
+            public Task<string> SendAsync(Message message)
             {
                 Message = message;
                 Sent.Set();
-                return "id";
+                return Task.FromResult("id");
             }
         }
     }

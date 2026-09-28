@@ -8,7 +8,7 @@ namespace WebApp.Controllers
     public class HomeController : Controller
     {
         /// <summary>Legacy link target; the old identity-server clients page it pointed to no longer exists.</summary>
-        public IActionResult DevTools() => RedirectToAction(nameof(RegisterApp));
+        public IActionResult DevTools() => Redirect("/Home/RegisterApp");
 
         /// <summary>"Register website": the user's OAuth apps page, logging in first if needed.</summary>
         public IActionResult RegisterApp()

@@ -47,6 +47,8 @@ namespace NotificationsService
                 catch (Exception e)
                 {
                     var session = _redisService.Get<SessionTempRecord>(sessionId.ToString());
+                    if (session == null)
+                        return;
 
                     session.Status = Models.SessionStatus.Error;
                     session.ErrorMessage = Truncate(e.Message, 256);

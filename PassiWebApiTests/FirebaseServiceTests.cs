@@ -29,6 +29,21 @@ namespace PassiWebApiTests
             Assert.That(message.Android?.Priority, Is.EqualTo(Priority.High));
         }
 
+        [Test]
+        public void SendNotificationSurvivesAPushFailureForASessionThatAlreadyExpired()
+        {
+            // The error handler runs ~3s later on its own background Thread. If the session already
+            // expired out of Redis by then, dereferencing the (null) lookup result would throw a
+            // NullReferenceException on that raw Thread, which is unhandled and terminates the whole
+            // process. Simulate that race: the push fails, and Redis no longer has the session.
+            var redis = new NullReturningRedisService();
+            var service = new FirebaseService(new ThrowingFireBaseClient(), redis);
+
+            service.SendNotification("device-token", "Passi login", "{\"SessionId\":\"abc\"}", "passi.cloud", Guid.NewGuid());
+
+            Assert.That(redis.GetCalled.Wait(TimeSpan.FromSeconds(10)), Is.True, "error handler never ran");
+        }
+
         private class CapturingFireBaseClient : IFireBaseClient
         {
             public readonly ManualResetEventSlim Sent = new(false);
@@ -40,6 +55,28 @@ namespace PassiWebApiTests
                 Sent.Set();
                 return "id";
             }
+        }
+
+        private class ThrowingFireBaseClient : IFireBaseClient
+        {
+            public string Send(Message message) => throw new InvalidOperationException("FCM rejected the token");
+        }
+
+        private class NullReturningRedisService : IRedisService
+        {
+            public readonly ManualResetEventSlim GetCalled = new(false);
+
+            public void Add<T>(string key, T item, TimeSpan expire) { }
+
+            public void Add<T>(string key, T item) { }
+
+            public T Get<T>(string key)
+            {
+                GetCalled.Set();
+                return default;
+            }
+
+            public void Delete<T>(string key) { }
         }
     }
 }

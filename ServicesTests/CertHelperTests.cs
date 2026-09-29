@@ -60,6 +60,18 @@ namespace ServicesTests
             Assert.Throws<ArgumentNullException>(() => CertHelper.VerifyData("some-challenge", signedData, null));
         }
 
+        [Test]
+        public void VerifyDataThrowsCryptographicExceptionForANonRsaCertificate()
+        {
+            // A certificate with a non-RSA (EC) public key has no RSA key for VerifyHash to use.
+            // Callers (e.g. AuthController.TryVerifySignature) already treat CryptographicException
+            // as "invalid signature", so this must not surface as an unhandled NullReferenceException.
+            var ecCert = CreateEcCertificate();
+
+            Assert.Throws<CryptographicException>(() =>
+                CertHelper.VerifyData("some-challenge", Convert.ToBase64String(new byte[64]), PublicCertBase64(ecCert)));
+        }
+
         private static string Sign(string data, X509Certificate2 certificate)
         {
             using var sha512 = SHA512.Create();
@@ -77,6 +89,13 @@ namespace ServicesTests
         {
             using var rsa = RSA.Create();
             var request = new CertificateRequest($"cn={Guid.NewGuid()}", rsa, HashAlgorithmName.SHA512, RSASignaturePadding.Pkcs1);
+            return request.CreateSelfSigned(DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddYears(1));
+        }
+
+        private static X509Certificate2 CreateEcCertificate()
+        {
+            using var ecdsa = ECDsa.Create();
+            var request = new CertificateRequest($"cn={Guid.NewGuid()}", ecdsa, HashAlgorithmName.SHA512);
             return request.CreateSelfSigned(DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddYears(1));
         }
     }

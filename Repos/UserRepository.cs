@@ -82,20 +82,38 @@ namespace Repos
 
         public void UpdateNotificationToken(string deviceId, string token, string platform)
         {
-            var device = _dbContext.Devices.FirstOrDefault(x => x.DeviceId == deviceId || x.NotificationToken == token);
-            if (device == null)
+            // Concurrent calls for the same device (e.g. the app pushing a token update from
+            // multiple requests in quick succession) can both see no existing row and both try
+            // to insert, tripping the unique constraints on DeviceId+Platform/NotificationToken.
+            // Retry once: whichever call loses the race re-reads and updates the row the winner
+            // just committed instead of failing.
+            for (var attempt = 0; attempt < 2; attempt++)
             {
-                device = new DeviceDb()
+                var device = _dbContext.Devices.FirstOrDefault(x => x.DeviceId == deviceId || x.NotificationToken == token);
+                var isNewDevice = device == null;
+                if (isNewDevice)
                 {
-                    DeviceId = deviceId,
-                    Platform = platform
-                };
-                _dbContext.Devices.Add(device);
-            }
+                    device = new DeviceDb()
+                    {
+                        DeviceId = deviceId,
+                        Platform = platform
+                    };
+                    _dbContext.Devices.Add(device);
+                }
 
-            device.NotificationToken = token;
-            device.DeviceId = deviceId;
-            _dbContext.SaveChanges();
+                device.NotificationToken = token;
+                device.DeviceId = deviceId;
+
+                try
+                {
+                    _dbContext.SaveChanges();
+                    return;
+                }
+                catch (DbUpdateException) when (isNewDevice && attempt == 0)
+                {
+                    _dbContext.Entry(device).State = EntityState.Detached;
+                }
+            }
         }
 
         public bool IsUserFinished(string username)

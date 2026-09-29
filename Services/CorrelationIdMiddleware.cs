@@ -20,12 +20,17 @@ namespace Services
             _next = next;
         }
 
+        private const int MaxCorrelationIdLength = 64;
+
         public async Task InvokeAsync(HttpContext context)
         {
-            // Try to get correlation ID from request header, or generate a new one
+            // Try to get correlation ID from request header, or generate a new one.
+            // The header is client-supplied, so only accept it if it looks like an
+            // identifier - otherwise an attacker could use it to inject arbitrary
+            // content into every log line for the request or bloat log output.
             var correlationId = context.Request.Headers[CorrelationIdHeaderName].ToString();
 
-            if (string.IsNullOrEmpty(correlationId))
+            if (!IsValidCorrelationId(correlationId))
             {
                 correlationId = Guid.NewGuid().ToString();
             }
@@ -50,6 +55,24 @@ namespace Services
 
             // Clean up log4net after request
             log4net.LogicalThreadContext.Properties.Remove(CorrelationIdPropertyName);
+        }
+
+        private static bool IsValidCorrelationId(string correlationId)
+        {
+            if (string.IsNullOrEmpty(correlationId) || correlationId.Length > MaxCorrelationIdLength)
+            {
+                return false;
+            }
+
+            foreach (var c in correlationId)
+            {
+                if (!char.IsLetterOrDigit(c) && c != '-' && c != '_')
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 }

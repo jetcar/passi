@@ -224,6 +224,19 @@ namespace Repos
 
         private DeviceDb GetOrCreateDevice(string deviceId, string platform = null)
         {
+            // Check-then-act race: two concurrent callers (e.g. two signups racing on the very first
+            // request for a brand-new device id) can both see "no row yet" below and each add their
+            // own Device. Neither AddUser nor ConfirmInvitation ever supplies a Platform, and Postgres
+            // treats every NULL as distinct for uniqueness purposes, so "IX_Devices_DeviceId_Platform"
+            // does not catch two NULL-platform rows sharing a DeviceId: the race can silently leave
+            // two Device rows for one physical device instead of failing loudly. A transaction-scoped
+            // Postgres advisory lock keyed on the device id serializes this check-then-act per device
+            // id: a losing concurrent caller just waits for the winner's transaction to commit, then
+            // finds the row it already created instead of inserting a duplicate. The lock is released
+            // automatically when the ambient transaction (begun by the caller, e.g. SignUpController)
+            // commits or rolls back.
+            _dbContext.Database.ExecuteSqlRaw("SELECT pg_advisory_xact_lock(hashtext({0})::bigint)", deviceId);
+
             var device = _dbContext.Devices.FirstOrDefault(x => x.DeviceId == deviceId);
             if (device != null)
             {

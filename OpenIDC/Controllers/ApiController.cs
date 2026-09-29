@@ -199,10 +199,11 @@ public class ApiController : ControllerBase
                 {
                     var cert = JsonConvert.DeserializeObject<CertificateDto>(result2.Content);
                     var publicCertificate = X509Certificate2.CreateFromPem($"-----BEGIN CERTIFICATE-----\r\n{cert.PublicCert}\r\n-----END CERTIFICATE-----");
-                    if (publicCertificate.NotAfter < DateTime.UtcNow &&
+                    if (publicCertificate.NotAfter < DateTime.UtcNow ||
                         publicCertificate.NotBefore > DateTime.UtcNow)
                     {
-                        ModelState.AddModelError("Error", "Invalid Certificate");
+                        _logger.LogWarning("Certificate is not currently valid for user: {Username}", checkResponceDto.Username);
+                        return BadRequest(new ApiResponseDto() { errors = "Invalid Certificate" });
                     }
 
                     var requestCurrentSessionReq =

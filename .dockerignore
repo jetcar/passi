@@ -31,8 +31,15 @@
 configs/variables/mailler.env
 configs/cert/
 configs/identity/
+PassiChat/
+LoadTests/
+MauiTest/
+RegisterManyUsersTestApp/
+MauiApp2/
+MauiApp1/
 android-native/**
 .android-sdk
+MauiViewModels/**
 LICENSE
 README.md
 *.dll

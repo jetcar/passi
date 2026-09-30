@@ -9,6 +9,22 @@ const router = createRouter({
             component: () => import('../views/HomeView.vue')
         },
         {
+            path: '/news',
+            name: 'News',
+            component: () => import('../views/NewsList.vue')
+        },
+        {
+            // Must precede /news/:slug
+            path: '/news/admin',
+            name: 'NewsAdmin',
+            component: () => import('../views/NewsAdmin.vue')
+        },
+        {
+            path: '/news/:slug',
+            name: 'NewsPost',
+            component: () => import('../views/NewsPost.vue')
+        },
+        {
             path: '/products',
             name: 'Products',
             component: () => import('../views/ProductsView.vue')

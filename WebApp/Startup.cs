@@ -15,6 +15,7 @@ using System.Net.Http;
 using Google.Cloud.Diagnostics.Common;
 using WebApp.Services;
 using WebApp.Middleware;
+using WebApp.News;
 
 namespace WebApp
 {
@@ -43,6 +44,9 @@ namespace WebApp
             services.AddSingleton<IMyRestClient, MyRestClient>();
             services.AddSingleton<IOidcClient, OidcClient>();
             services.AddSingleton<IStartupFilter, MigrationStartupFilter<WebAppDbContext>>();
+            services.AddScoped<NewsService>();
+            services.AddSingleton<NewsAdmins>();
+            services.AddSingleton<NewsReactionRateLimiter>();
 
             // Use PostgreSQL only for long-term static data (DataProtectionKeys)
             services.AddDataProtection()
@@ -80,6 +84,9 @@ namespace WebApp
                     options.ExpireTimeSpan = TimeSpan.FromMinutes(50);
                     options.SlidingExpiration = false;
                 });
+
+            // Internal hop to OpenIDC, same trust model as MyRestClient.
+            services.AddNewsMcp(new AppSetting(Configuration), handler);
 
 
             services.AddHttpContextAccessor();
@@ -136,6 +143,19 @@ namespace WebApp
                 applicationBuilder.UseAuthorization();
                 applicationBuilder.UseCorrelationId(); // Add correlation ID tracking for all requests
 
+                // OAuth discovery probes (e.g. MCP clients looking for authorization server metadata) must get a
+                // real 404, not the SPA's index.html. The MCP protected-resource document is served by
+                // UseAuthentication above and ACME challenges by UseStaticFiles.
+                applicationBuilder.Use(async (context, next) =>
+                {
+                    if (context.Request.Path.StartsWithSegments("/.well-known"))
+                    {
+                        context.Response.StatusCode = StatusCodes.Status404NotFound;
+                        return;
+                    }
+                    await next();
+                });
+
                 applicationBuilder.UseHealthChecks("/health");
                 applicationBuilder.UseSwagger();
                 applicationBuilder.UseSwaggerUI(c => { c.SwaggerEndpoint("v1/swagger.json", "My API V1"); });
@@ -148,6 +168,7 @@ namespace WebApp
                             });
                 applicationBuilder.UseEndpoints(endpoints =>
                 {
+                    endpoints.MapNewsMcp();
 
                     endpoints.MapFallbackToFile("/index.html");
                 });

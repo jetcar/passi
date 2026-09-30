@@ -155,7 +155,7 @@ namespace OpenIDC.Controllers
                 grant_types_supported = new[] { "authorization_code", "refresh_token" },
                 subject_types_supported = new[] { "public" },
                 id_token_signing_alg_values_supported = new[] { "RS256" },
-                token_endpoint_auth_methods_supported = new[] { "client_secret_post", "client_secret_basic" },
+                token_endpoint_auth_methods_supported = new[] { "client_secret_post", "client_secret_basic", "none" },
                 code_challenge_methods_supported = new[] { "S256", "plain" }
             };
 

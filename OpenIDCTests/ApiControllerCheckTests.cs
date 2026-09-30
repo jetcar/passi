@@ -181,7 +181,6 @@ namespace OpenIDCTests
             public Task<string> CreateAuthorizationCodeAsync(AuthorizationCode authCode) => Task.FromResult("code123");
             public Task<AuthorizationCode> GetAuthorizationCodeAsync(string code) => Task.FromResult<AuthorizationCode>(null);
             public Task RevokeAuthorizationCodeAsync(string code) => Task.CompletedTask;
-            public Task StoreAuthorizationCodeAsync(AuthorizationCode authCode) => Task.CompletedTask;
         }
 
         private class SequencedRestClient : IMyRestClient

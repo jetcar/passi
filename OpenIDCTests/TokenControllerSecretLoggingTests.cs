@@ -76,8 +76,6 @@ namespace OpenIDCTests
                 Task.FromResult(code == _authCode.Code ? _authCode : null);
 
             public Task RevokeAuthorizationCodeAsync(string code) => Task.CompletedTask;
-
-            public Task StoreAuthorizationCodeAsync(AuthorizationCode authCode) => Task.CompletedTask;
         }
 
         private class FakeTokenService : ITokenService

@@ -39,7 +39,7 @@ namespace Repos
                 ExpirationTime = DateTime.UtcNow.AddMinutes(_sessionTimeout),
                 UserGuid = user.Guid
             };
-            _redisService.Add(sessionDb.Guid.ToString(), sessionDb);
+            _redisService.Add(sessionDb.Guid.ToString(), sessionDb, TimeSpan.FromMinutes(_sessionTimeout));
             _dbContext.Sessions.Add(new SimpleSessionDb()
             {
                 Guid = sessionDb.Guid,
@@ -64,7 +64,7 @@ namespace Repos
                 return;
 
             session.Status = SessionStatus.Canceled;
-            _redisService.Add(session.Guid.ToString(), session);
+            _redisService.Add(session.Guid.ToString(), session, TimeSpan.FromMinutes(_sessionTimeout));
 
             var sessionDb = _dbContext.Sessions.FirstOrDefault(x => x.Guid == guid);
             if (sessionDb != null)
@@ -88,7 +88,7 @@ namespace Repos
                 }
                 session.PublicCertThumbprint = publicCertThumbprint;
                 session.Status = SessionStatus.Confirmed;
-                _redisService.Add(session.Guid.ToString(), session);
+                _redisService.Add(session.Guid.ToString(), session, TimeSpan.FromMinutes(_sessionTimeout));
 
             }
         }

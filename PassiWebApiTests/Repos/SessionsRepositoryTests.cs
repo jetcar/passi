@@ -1,8 +1,10 @@
+using ConfigurationManager;
 using Microsoft.Extensions.DependencyInjection;
 using Models;
 using NUnit.Framework;
 using passi_webapi.Controllers;
 using Repos;
+using ServiceStack.Redis;
 using System;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
@@ -12,6 +14,33 @@ namespace PassiWebApiTests.Repos
 {
     public class SessionsRepositoryTests : TestBase
     {
+        [Test]
+        public void BeginSessionSetsRedisTtlToConfiguredTimeoutNotHardcodedFiveMinutes()
+        {
+            var signupController = ServiceProvider.GetService<SignUpController>();
+            var sessionsRepository = ServiceProvider.GetService<ISessionsRepository>();
+            var appSetting = ServiceProvider.GetService<AppSetting>();
+
+            var email = Guid.NewGuid() + "@passi.cloud";
+            var deviceId = Guid.NewGuid().ToString();
+            ConfirmAccountOnDevice(signupController, email, Guid.NewGuid(), deviceId);
+
+            var session = sessionsRepository.BeginSession(email, "SampleApp", "123456", "blue", "https://localhost/callback");
+
+            var configuredTimeoutMinutes = Convert.ToInt32(appSetting["Timeout"]);
+            var connectionString = $"{appSetting["redis"]}:{appSetting["redisPort"]}";
+            using var redisManager = new RedisManagerPool(connectionString);
+            using var redis = redisManager.GetClient();
+            var key = typeof(SessionTempRecord).FullName + "." + session.Guid;
+            var ttl = redis.GetTimeToLive(key);
+
+            Assert.That(ttl, Is.Not.Null, "The session key should exist in Redis with a TTL set");
+            // The cached session's TTL must track the configured session Timeout, not the
+            // RedisService default of 5 minutes used when no explicit expiry is passed.
+            Assert.That(ttl.Value.TotalSeconds, Is.EqualTo(configuredTimeoutMinutes * 60).Within(30),
+                "The Redis TTL for a session should match the configured session Timeout");
+        }
+
         [Test]
         public void CancelSessionMarksSessionAsCanceled()
         {

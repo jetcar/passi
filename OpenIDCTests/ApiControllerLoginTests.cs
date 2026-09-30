@@ -42,6 +42,23 @@ namespace OpenIDCTests
         }
 
         [Test]
+        public async Task LoginCanReturnEveryDocumentedCheckColor()
+        {
+            var seenColors = new HashSet<string>();
+            for (var i = 0; i < 200; i++)
+            {
+                var result = await Controller().Login("https://site/cb", "nonce", "alice@passi.cloud", "SampleApp");
+                var page = (CheckInputModel)((OkObjectResult)result).Value;
+                seenColors.Add(page.CheckColor);
+            }
+
+            // All four Color enum members (blue, red, green, yellow) must be reachable.
+            // With a uniform pick over 4 colors, missing one after 200 tries is
+            // astronomically unlikely; if it's missing every time, the picker is broken.
+            Assert.That(seenColors, Is.EquivalentTo(new[] { "blue", "red", "green", "yellow" }));
+        }
+
+        [Test]
         public async Task LoginNumbersVaryAcrossLogins()
         {
             var numbers = new HashSet<int>();

@@ -73,8 +73,8 @@ obj
 bin
 Debug
 
-/RegisterManyUsersTestApp/test.appsettings.json
 /android-native/app/build/*
+/android-native/local.properties
 
 /android-native/.gradle/*
 /android-native/e2e/build/*

@@ -24,5 +24,3 @@ https://github.com/jetcar/passi/blob/main/configs/variables/dev.env<br>
 
 own certificates put here<br>
 ../passi_cert<br>
-
-AppConfig/ConfigSettings.cs -> WebApiUrlLocal is for internalIp so mobile app can access it

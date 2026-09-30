@@ -66,6 +66,7 @@ public class TestBase
     public void SetUp()
     {
         TestEmailSender.Code = null;
+        TestEmailSender.InvitationFailure = null;
     }
 
     private static IContainer _pgContainer;
@@ -182,9 +183,12 @@ public class TestBase
 public class TestEmailSender : IEmailSender
 {
     public static string Code;
+    public static Exception InvitationFailure;
 
     public Task<string> SendInvitationEmailAsync(String email, String code)
     {
+        if (InvitationFailure != null)
+            return Task.FromException<string>(InvitationFailure);
         return Task.FromResult(Code = code);
     }
 

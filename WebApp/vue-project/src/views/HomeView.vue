@@ -29,6 +29,31 @@
       </div>
     </section>
 
+    <!-- Latest News Section -->
+    <section v-if="news.length" class="news-section py-5">
+      <div class="container">
+        <div class="d-flex justify-content-between align-items-end mb-4">
+          <div>
+            <h2 class="display-6 fw-bold mb-1">Latest News</h2>
+            <p class="text-muted mb-0">What's new in Passi</p>
+          </div>
+          <router-link to="/news" class="btn btn-outline-primary">All news <i class="bi bi-arrow-right ms-1"></i></router-link>
+        </div>
+        <div class="row g-4">
+          <div v-for="post in news" :key="post.slug" class="col-md-4">
+            <div class="news-card h-100 p-4 d-flex flex-column">
+              <small class="text-muted">{{ formatDate(post.publishedAt) }}</small>
+              <h3 class="h5 mt-1">
+                <router-link :to="`/news/${post.slug}`" class="news-title">{{ post.title }}</router-link>
+              </h3>
+              <p class="text-muted flex-grow-1">{{ post.summary }}</p>
+              <ReactionBar :slug="post.slug" :reactions="post.reactions" compact />
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- How It Works Section -->
     <section class="how-it-works-section py-5 bg-light">
       <div class="container">
@@ -158,9 +183,16 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
+import ReactionBar from '../components/ReactionBar.vue'
+// @ts-ignore - plain JS module
+import { listPosts, formatDate } from '../news/newsApi'
+
+const news = ref<any[]>([])
 
 onMounted(() => {
+  listPosts(0, 3).then((posts: any[]) => { news.value = posts }).catch(() => { news.value = [] })
+
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
@@ -210,6 +242,30 @@ onMounted(() => {
   50% {
     transform: translateY(-20px);
   }
+}
+
+.news-section {
+  background: white;
+}
+
+.news-card {
+  background: #f8f9fa;
+  border-radius: 15px;
+  transition: all 0.3s ease;
+}
+
+.news-card:hover {
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  transform: translateY(-4px);
+}
+
+.news-title {
+  color: #212529;
+  text-decoration: none;
+}
+
+.news-title:hover {
+  color: #667eea;
 }
 
 .how-it-works-section {

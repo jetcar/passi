@@ -44,6 +44,11 @@ onMounted(() => {
                                     <i class="bi bi-house-door me-1"></i>Home
                                 </router-link>
                             </li>
+                            <li class="nav-item">
+                                <router-link to="/news" class="nav-link" active-class="active">
+                                    <i class="bi bi-megaphone me-1"></i>News
+                                </router-link>
+                            </li>
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle" href="#" role="button" 
                                    data-bs-toggle="dropdown" aria-expanded="false">
@@ -157,6 +162,7 @@ onMounted(() => {
                         <ul class="list-unstyled">
                             <li class="mb-2"><a href="https://github.com/jetcar/passi" target="_blank" class="text-light text-decoration-none hover-link">GitHub - Passi</a></li>
                             <li class="mb-2"><a href="https://www.youtube.com/watch?v=tRrWp6LWQNU" target="_blank" class="text-light text-decoration-none hover-link">Demo Video</a></li>
+                            <li class="mb-2"><router-link to="/news" class="text-light text-decoration-none hover-link">News</router-link></li>
                             <li class="mb-2"><a href="/Home/RegisterApp" class="text-light text-decoration-none hover-link">Register Site</a></li>
                             <li class="mb-2"><router-link to="/Contacts" class="text-light text-decoration-none hover-link">Contact</router-link></li>
                             <li class="mb-2"><router-link to="/PrivacyPolicy" class="text-light text-decoration-none hover-link">Privacy Policy</router-link></li>

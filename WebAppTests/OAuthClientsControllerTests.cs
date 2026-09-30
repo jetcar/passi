@@ -145,14 +145,5 @@ namespace WebAppTests
             public Task SignInAsync(HttpContext context, string scheme, ClaimsPrincipal principal, AuthenticationProperties properties) => Task.CompletedTask;
             public Task SignOutAsync(HttpContext context, string scheme, AuthenticationProperties properties) => Task.CompletedTask;
         }
-
-        private class FakeAntiforgery : IAntiforgery
-        {
-            public AntiforgeryTokenSet GetAndStoreTokens(HttpContext httpContext) => new("req", "cookie", "__RequestVerificationToken", "RequestVerificationToken");
-            public AntiforgeryTokenSet GetTokens(HttpContext httpContext) => GetAndStoreTokens(httpContext);
-            public Task<bool> IsRequestValidAsync(HttpContext httpContext) => Task.FromResult(true);
-            public Task ValidateRequestAsync(HttpContext httpContext) => Task.CompletedTask;
-            public void SetCookieTokenAndHeader(HttpContext httpContext) { }
-        }
     }
 }

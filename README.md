@@ -70,6 +70,19 @@ Android e2e tests (need Docker, because they start PostgreSQL, Redis and the API
 run_e2e_tests.bat
 ```
 
+## News and MCP
+
+The sample web app has a news page (`/news`, latest posts on the home page, RSS at `/news/rss.xml`). Anyone can
+react to posts anonymously. Posts are managed at `/news/admin` by the users listed in `NewsAdminEmails`.
+
+AI agents can manage posts through the MCP server at `/mcp`, signing in with Passi (OAuth authorization code +
+PKCE). Register an *app* client under **My OAuth apps** with redirect URI `http://localhost:8765/callback`, add its
+client id to `NewsMcpClientIds`, then:
+
+```bash
+claude mcp add --transport http passi-news https://passi.cloud/mcp --client-id <client id> --callback-port 8765
+```
+
 ## CI/CD
 
 | Workflow | Trigger | What it does |

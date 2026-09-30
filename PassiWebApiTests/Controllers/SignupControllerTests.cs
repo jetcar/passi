@@ -35,6 +35,46 @@ namespace PassiWebApiTests.Controllers
         }
 
         [Test]
+        public async Task SignUpLogsSignupEmailFailure()
+        {
+            var target = new NLog.Targets.MemoryTarget("signupEmailFailure")
+            {
+                Layout = "${level}|${message}|${exception:format=Message}"
+            };
+            var previousConfiguration = NLog.LogManager.Configuration;
+            var configuration = previousConfiguration ?? new NLog.Config.LoggingConfiguration();
+            configuration.AddRule(NLog.LogLevel.Error, NLog.LogLevel.Fatal, target, typeof(SignUpController).FullName);
+            NLog.LogManager.Configuration = configuration;
+            TestEmailSender.InvitationFailure = new InvalidOperationException("email provider down");
+            try
+            {
+                var controller = ServiceProvider.GetService<SignUpController>();
+                var email = Guid.NewGuid().ToString() + "@passi.cloud";
+                controller.SignUp(new SignupDto()
+                {
+                    DeviceId = Guid.NewGuid().ToString(),
+                    Email = email,
+                    UserGuid = Guid.NewGuid()
+                });
+
+                // The email is dispatched on a background Task, so wait for its failure to be logged.
+                for (var i = 0; i < 50 && target.Logs.Count == 0; i++)
+                    await Task.Delay(100);
+
+                Assert.That(target.Logs, Has.Count.EqualTo(1));
+                Assert.That(target.Logs[0], Does.StartWith("Error|"));
+                Assert.That(target.Logs[0], Does.Contain("email provider down"));
+                Assert.That(target.Logs[0], Does.Not.Contain(email));
+            }
+            finally
+            {
+                TestEmailSender.InvitationFailure = null;
+                configuration.RemoveTarget(target.Name);
+                NLog.LogManager.Configuration = previousConfiguration;
+            }
+        }
+
+        [Test]
         public async Task DeleteSendsDeleteConfirmationEmailWithPersistedCode()
         {
             var controller = ServiceProvider.GetService<SignUpController>();

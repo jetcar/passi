@@ -57,7 +57,17 @@ namespace passi_webapi.Controllers
 
             var email = signupDto.Email;
             var code = confirmationCode;
-            Task.Run(() => _userService.SendSignupEmailAsync(email, code));
+            Task.Run(async () =>
+            {
+                try
+                {
+                    await _userService.SendSignupEmailAsync(email, code);
+                }
+                catch (Exception ex)
+                {
+                    _logger.Error(ex, "Signup confirmation email failed.");
+                }
+            });
 
             return Ok();
         }

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -57,7 +57,56 @@ namespace OpenIDCTests
             Assert.That(((ApiResponseDto)badRequest.Value).errors, Is.EqualTo("Invalid Signature"));
         }
 
-        private static async Task<IActionResult> RunCheck(X509Certificate2 cert)
+        [Test]
+        public async Task CheckWithoutNonceVerifiesTheSessionRandomString()
+        {
+            // Plain OAuth clients (e.g. MCP agents such as Claude Code) send no nonce. The phone signed the
+            // session's server-generated random string, so the check must verify against that.
+            var cert = MakeSelfSignedCert(DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddDays(1), out var rsa);
+            var signed = Sign("5551234567", rsa);
+
+            var result = await RunCheck(cert, new SessionMinDto { SignedHash = signed, RandomString = "5551234567" }, nonce: null,
+                state: "abc", codeChallenge: "challenge");
+
+            var ok = (OkObjectResult)result;
+            var redirect = (string)ok.Value.GetType().GetProperty("redirect_url").GetValue(ok.Value);
+            Assert.That(redirect, Does.StartWith(RedirectUri + "?code="));
+            Assert.That(redirect, Does.EndWith("&state=abc"));
+        }
+
+        [Test]
+        public async Task CheckIgnoresABrowserSuppliedNonceThatDiffersFromTheSignedRandomString()
+        {
+            var cert = MakeSelfSignedCert(DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddDays(1), out var rsa);
+            var signed = Sign("5551234567", rsa);
+
+            var result = await RunCheck(cert, new SessionMinDto { SignedHash = signed, RandomString = "5551234567" }, nonce: "attacker-chosen");
+
+            Assert.That(result, Is.InstanceOf<OkObjectResult>());
+        }
+
+        [Test]
+        public async Task CheckWithNoRandomStringAnywhereIsARejectionNotACrash()
+        {
+            var cert = MakeSelfSignedCert(DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddDays(1), out var rsa);
+
+            var result = await RunCheck(cert, new SessionMinDto { SignedHash = Sign("x", rsa) }, nonce: null);
+
+            var badRequest = (BadRequestObjectResult)result;
+            Assert.That(((ApiResponseDto)badRequest.Value).errors, Is.EqualTo("Invalid Signature"));
+        }
+
+        private static string Sign(string data, RSA rsa)
+        {
+            var hash = SHA512.HashData(System.Text.Encoding.ASCII.GetBytes(data));
+            return Convert.ToBase64String(rsa.SignHash(hash, HashAlgorithmName.SHA512, RSASignaturePadding.Pkcs1));
+        }
+
+        private static Task<IActionResult> RunCheck(X509Certificate2 cert) =>
+            RunCheck(cert, new SessionMinDto { SignedHash = Convert.ToBase64String(new byte[64]) }, nonce: "nonce");
+
+        private static async Task<IActionResult> RunCheck(X509Certificate2 cert, SessionMinDto session, string nonce,
+            string state = null, string codeChallenge = null)
         {
             var publicCertBase64 = Convert.ToBase64String(cert.RawData);
 
@@ -68,7 +117,7 @@ namespace OpenIDCTests
                 // 2. api/Certificate/Public
                 MakeJsonResponse(new CertificateDto { Thumbprint = "thumb", PublicCert = publicCertBase64 }),
                 // 3. api/Auth/session - only reached if the certificate passes the validity check
-                MakeJsonResponse(new SessionMinDto { SignedHash = Convert.ToBase64String(new byte[64]) }),
+                MakeJsonResponse(session),
             });
 
             var appSetting = new AppSetting(new ConfigurationBuilder()
@@ -82,10 +131,10 @@ namespace OpenIDCTests
                 RedirectUris = new List<string> { RedirectUri },
             });
 
-            var controller = new ApiController(new FixedRandom(), rest, appSetting, NullLogger<ApiController>.Instance, clientStore, null);
+            var controller = new ApiController(new FixedRandom(), rest, appSetting, NullLogger<ApiController>.Instance, clientStore, new FakeAuthCodeStore());
 
-            return await controller.Check(sessionId: "session", nonce: "nonce", client_id: ClientId, redirect_uri: RedirectUri,
-                scope: null, state: null, code_challenge: null, code_challenge_method: null);
+            return await controller.Check(sessionId: "session", nonce: nonce, client_id: ClientId, redirect_uri: RedirectUri,
+                scope: null, state: state, code_challenge: codeChallenge, code_challenge_method: codeChallenge == null ? null : "S256");
         }
 
         private static RestResponse MakeJsonResponse<T>(T value)
@@ -99,9 +148,12 @@ namespace OpenIDCTests
             };
         }
 
-        private static X509Certificate2 MakeSelfSignedCert(DateTimeOffset notBefore, DateTimeOffset notAfter)
+        private static X509Certificate2 MakeSelfSignedCert(DateTimeOffset notBefore, DateTimeOffset notAfter) =>
+            MakeSelfSignedCert(notBefore, notAfter, out _);
+
+        private static X509Certificate2 MakeSelfSignedCert(DateTimeOffset notBefore, DateTimeOffset notAfter, out RSA rsa)
         {
-            using var rsa = RSA.Create(2048);
+            rsa = RSA.Create(2048);
             var request = new CertificateRequest("CN=night-agent-test", rsa, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
             return request.CreateSelfSigned(notBefore, notAfter);
         }
@@ -122,6 +174,14 @@ namespace OpenIDCTests
             public Task CreateClientAsync(OidcClient client) => Task.CompletedTask;
             public Task DeleteClientAsync(string clientId) => Task.CompletedTask;
             public Task<bool> ValidateClientAsync(string clientId, string clientSecret) => Task.FromResult(true);
+        }
+
+        private class FakeAuthCodeStore : IAuthorizationCodeStore
+        {
+            public Task<string> CreateAuthorizationCodeAsync(AuthorizationCode authCode) => Task.FromResult("code123");
+            public Task<AuthorizationCode> GetAuthorizationCodeAsync(string code) => Task.FromResult<AuthorizationCode>(null);
+            public Task RevokeAuthorizationCodeAsync(string code) => Task.CompletedTask;
+            public Task StoreAuthorizationCodeAsync(AuthorizationCode authCode) => Task.CompletedTask;
         }
 
         private class SequencedRestClient : IMyRestClient

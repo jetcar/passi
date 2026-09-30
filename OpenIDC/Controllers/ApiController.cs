@@ -221,9 +221,11 @@ public class ApiController : ControllerBase
                         var session =
                             JsonConvert.DeserializeObject<SessionMinDto>(requestCurrentSessionResult.Content);
 
-                        // ComputeHash - returns byte array
-                        var isValid = CertHelper.VerifyData(nonce, session.SignedHash,
-                            cert.PublicCert);
+                        // Verify against the session's server-stored random string: that is what the phone signed (the
+                        // client's nonce, or a generated value when the client sent none, e.g. MCP agents). Never trust
+                        // a browser-supplied value here.
+                        var isValid = !string.IsNullOrEmpty(session.RandomString) && !string.IsNullOrEmpty(session.SignedHash) &&
+                                      CertHelper.VerifyData(session.RandomString, session.SignedHash, cert.PublicCert);
 
                         _logger.LogDebug("Signature validation result: {IsValid}, Username: {Username}",
                             isValid, checkResponceDto.Username);

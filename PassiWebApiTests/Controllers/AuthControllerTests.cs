@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Models;
 using NUnit.Framework;
@@ -10,6 +10,7 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using WebApiDto.Auth;
+using WebApiDto.Auth.Dto;
 using WebApiDto.SignUp;
 using Repos;
 using WebApiDto;
@@ -291,6 +292,38 @@ namespace PassiWebApiTests.Controllers
             var checkResult = authController.Check(sessionId) as BadRequestObjectResult;
             Assert.That(checkResult, Is.Not.Null);
             Assert.That(checkResult!.Value, Is.EqualTo("Waiting for response"));
+        }
+
+        [Test]
+        public void SessionReturnsTheRandomStringThePhoneSigned()
+        {
+            // OpenIDC verifies the signature against this value; plain OAuth clients (e.g. MCP agents) send no nonce.
+            var signupController = ServiceProvider.GetService<SignUpController>();
+            var authController = ServiceProvider.GetService<AuthController>();
+            var email = Guid.NewGuid() + "@passi.cloud";
+            var deviceId = Guid.NewGuid().ToString();
+            var cert = ConfirmAccountOnDevice(signupController, email, Guid.NewGuid(), deviceId);
+
+            var start = authController.Start(new StartLoginDto
+            {
+                Username = email,
+                ClientId = "SampleApp",
+                ReturnUrl = "https://localhost/callback",
+                RandomString = "7418529630",
+                CheckColor = Color.blue,
+            }) as OkObjectResult;
+            var sessionId = ((LoginResponceDto)start!.Value).SessionId;
+            authController.Authorize(new AuthorizeDto
+            {
+                SessionId = sessionId,
+                SignedHash = SignData("7418529630", cert),
+                PublicCertThumbprint = cert.Thumbprint,
+            });
+
+            var session = (authController.Session(sessionId, cert.Thumbprint, email) as OkObjectResult)?.Value as SessionMinDto;
+
+            Assert.That(session, Is.Not.Null);
+            Assert.That(session!.RandomString, Is.EqualTo("7418529630"));
         }
 
         private static string SignData(string data, X509Certificate2 certificate)

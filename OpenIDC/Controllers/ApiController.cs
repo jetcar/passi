@@ -73,7 +73,7 @@ public class ApiController : ControllerBase
             Color.red,
             Color.yellow
         };
-        var index = new Random().Next(0, possibleCodes.Count - 1);
+        var index = new Random().Next(0, possibleCodes.Count);
         var startLoginDto = new StartLoginDto()
         {
             Username = username,

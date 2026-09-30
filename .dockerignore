@@ -29,6 +29,8 @@
 **/values.dev.yaml
 **/publish
 configs/variables/mailler.env
+configs/cert/
+configs/identity/
 PassiChat/
 LoadTests/
 MauiTest/

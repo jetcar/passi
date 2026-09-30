@@ -13,6 +13,7 @@
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.12" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="10.0.12" />
 		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.12" />
+		<PackageReference Include="Microsoft.Extensions.ApiDescription.Server" Version="10.0.12" />
 		<PackageReference Include="NLog" Version="6.2.1" />
 		<PackageReference Include="NLog.Web.AspNetCore" Version="6.2.1" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="10.2.3" />

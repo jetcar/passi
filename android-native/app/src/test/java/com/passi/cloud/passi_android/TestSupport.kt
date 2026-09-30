@@ -201,7 +201,17 @@ class FakeCertificateRotationService : CertificateRotationService {
     }
 }
 
-fun inMemoryAccountsRepository(): InMemoryAccountsRepository = InMemoryAccountsRepository()
+class FakeAppUpdateChecker : com.passi.cloud.passi_android.domain.update.AppUpdateChecker {
+    var result: Result<Boolean> = Result.success(false)
+    var checkCount = 0
+
+    override suspend fun isUpdateAvailable(): Result<Boolean> {
+        checkCount++
+        return result
+    }
+}
+
+fun inMemoryAccountsRepository():InMemoryAccountsRepository = InMemoryAccountsRepository()
 
 fun inMemoryProvidersRepository(): InMemoryProvidersRepository = InMemoryProvidersRepository()
 

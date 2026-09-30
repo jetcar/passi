@@ -237,6 +237,17 @@ Required integration points:
 - An Android QR-scanning flow in the native app.
 - A Passi API endpoint or registration bridge that accepts QR-confirmed enrollment.
 
+### 24. Learn That A New App Version Is Available
+
+The user is told when a newer version of the app has been published on Google Play.
+
+Expected behavior:
+- Ask Google Play for update availability whenever the accounts screen becomes active.
+- Show a banner at the bottom of the accounts screen when a newer version exists.
+- Open the app's Google Play page when the user taps "Update".
+- Hide the banner until the next app start when the user taps "Later".
+- Show nothing when the check fails or the app was not installed from Google Play.
+
 ## Use Cases Not Covered By The Current Native Rewrite
 
 These are application-level concerns that exist in the broader product space or old codebase discussions but are not fully implemented in the current Android-native rewrite yet.

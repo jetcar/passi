@@ -48,6 +48,9 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.passi.cloud.passi_android.PassiApplication
+import com.passi.cloud.passi_android.feature.update.AppUpdateBanner
+import com.passi.cloud.passi_android.feature.update.AppUpdateViewModel
+import com.passi.cloud.passi_android.feature.update.openPlayStoreListing
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 
@@ -76,7 +79,12 @@ fun AccountsRoute(
             accountManagementService = application.container.accountManagementService,
         )
     )
+    val appUpdateViewModel: AppUpdateViewModel = viewModel(
+        factory = AppUpdateViewModel.factory(appUpdateChecker = application.container.appUpdateChecker)
+    )
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val appUpdateUiState by appUpdateViewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val notificationOpenRequest by application.container.notificationOpenStore.openRequests.collectAsStateWithLifecycle()
     val versionLabel = remember(application) {
@@ -98,6 +106,8 @@ fun AccountsRoute(
 
     LaunchedEffect(lifecycleOwner, viewModel) {
         lifecycleOwner.repeatOnLifecycle(androidx.lifecycle.Lifecycle.State.STARTED) {
+            // Re-checked on every return to the app, so the banner clears after updating in Google Play.
+            appUpdateViewModel.check()
             viewModel.foregroundPoll(onOpenPendingSession)
             while (isActive) {
                 delay(FOREGROUND_POLL_INTERVAL_MS)
@@ -116,6 +126,9 @@ fun AccountsRoute(
         onOpenAccount = { account -> viewModel.openAccount(account, onOpenAccount, onResumeEnrollment) },
         onRevealDelete = viewModel::toggleDeleteForAccount,
         onDelete = viewModel::deleteAccount,
+        showUpdateBanner = appUpdateUiState.showBanner,
+        onUpdateApp = { openPlayStoreListing(context) },
+        onDismissUpdate = appUpdateViewModel::dismiss,
     )
 }
 
@@ -131,6 +144,9 @@ internal fun AccountsScreen(
     onOpenAccount: (com.passi.cloud.passi_android.domain.model.Account) -> Unit,
     onRevealDelete: (java.util.UUID) -> Unit,
     onDelete: (com.passi.cloud.passi_android.domain.model.Account) -> Unit,
+    showUpdateBanner: Boolean = false,
+    onUpdateApp: () -> Unit = {},
+    onDismissUpdate: () -> Unit = {},
 ) {
     Column(
         modifier = Modifier
@@ -199,6 +215,12 @@ internal fun AccountsScreen(
                 }
             }
         }
+
+        AppUpdateBanner(
+            visible = showUpdateBanner,
+            onUpdate = onUpdateApp,
+            onDismiss = onDismissUpdate,
+        )
 
         Row(
             modifier = Modifier

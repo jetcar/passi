@@ -102,8 +102,9 @@ namespace OpenIDC.Controllers
 
             _logger.LogDebug("Client validated successfully: {ClientId}", request.ClientId);
 
-            // Get authorization code first to check if PKCE was used
-            var authCode = await _authCodeStore.GetAuthorizationCodeAsync(request.Code);
+            // Consume the authorization code first (atomically, so a replayed/concurrent request for the
+            // same code can never also get a non-null result) to check if PKCE was used
+            var authCode = await _authCodeStore.ConsumeAuthorizationCodeAsync(request.Code);
             if (authCode == null || authCode.ExpiresAt < DateTime.UtcNow)
             {
                 _logger.LogWarning("Invalid or expired authorization code. Code: {Code}, Expired: {Expired}",
@@ -175,10 +176,6 @@ namespace OpenIDC.Controllers
 
                 _logger.LogDebug("PKCE validation successful");
             }
-
-            // Revoke the authorization code (one-time use)
-            await _authCodeStore.RevokeAuthorizationCodeAsync(request.Code);
-            _logger.LogDebug("Authorization code revoked");
 
             // Generate tokens
             _logger.LogInformation("Generating tokens for subject: {Subject}, client: {ClientId}", authCode.Subject, authCode.ClientId);

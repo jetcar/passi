@@ -62,6 +62,30 @@ namespace RedisClient
             var newKey = typeof(T).FullName + "." + key;
             redis.Remove(newKey);
         }
+
+        public T GetAndDelete<T>(string key)
+        {
+            using var redis = _redisManager.GetClient();
+            var newKey = typeof(T).FullName + "." + key;
+
+            // Redis executes a client's queued MULTI/EXEC commands as one indivisible batch, so no other
+            // client's command can run between the GET and the DEL: two concurrent callers can never both
+            // read the value before either one removes it, unlike issuing Get<T> then Delete<T> separately.
+            string redisValue = null;
+            using (var transaction = redis.CreateTransaction())
+            {
+                transaction.QueueCommand(r => r.Get<string>(newKey), x => redisValue = x);
+                transaction.QueueCommand(r => r.Remove(newKey));
+                transaction.Commit();
+            }
+
+            if (redisValue != null)
+            {
+                return JsonConvert.DeserializeObject<T>(redisValue);
+            }
+
+            return default(T);
+        }
     }
 
     public interface IRedisService
@@ -73,5 +97,7 @@ namespace RedisClient
         T Get<T>(string key);
 
         void Delete<T>(string key);
+
+        T GetAndDelete<T>(string key);
     }
 }

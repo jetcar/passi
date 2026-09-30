@@ -1,1 +1,0 @@
-dotnet publish MauiApp2/MauiApp2.csproj -c Release -f net9.0-android35.0 -p:AndroidPackageFormat=aab

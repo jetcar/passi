@@ -35,6 +35,50 @@ namespace PassiWebApiTests.Controllers
         }
 
         [Test]
+        public async Task SignUpLogsErrorWhenConfirmationEmailFails()
+        {
+            var memoryTarget = new NLog.Targets.MemoryTarget("signupEmailFailureCapture")
+            {
+                Layout = "${level}|${message}|${exception}"
+            };
+            var config = new NLog.Config.LoggingConfiguration();
+            config.AddRule(NLog.LogLevel.Error, NLog.LogLevel.Fatal, memoryTarget,
+                "passi_webapi.Controllers.SignUpController");
+            var previousConfig = NLog.LogManager.Configuration;
+            NLog.LogManager.Configuration = config;
+
+            TestEmailSender.ThrowOnSendInvitation = true;
+            try
+            {
+                var controller = ServiceProvider.GetService<SignUpController>();
+                var signupDto = new SignupDto()
+                {
+                    DeviceId = Guid.NewGuid().ToString(),
+                    Email = Guid.NewGuid().ToString() + "@passi.cloud",
+                    UserGuid = Guid.NewGuid()
+                };
+
+                controller.SignUp(signupDto);
+
+                // The confirmation email is dispatched on a background Task; poll for the
+                // failure to be logged instead of asserting immediately.
+                var deadline = DateTime.UtcNow.AddSeconds(5);
+                while (memoryTarget.Logs.Count == 0 && DateTime.UtcNow < deadline)
+                {
+                    await Task.Delay(50);
+                }
+
+                Assert.That(memoryTarget.Logs, Is.Not.Empty,
+                    "A failed signup confirmation email should be logged, not silently swallowed");
+            }
+            finally
+            {
+                TestEmailSender.ThrowOnSendInvitation = false;
+                NLog.LogManager.Configuration = previousConfig;
+            }
+        }
+
+        [Test]
         public async Task DeleteSendsDeleteConfirmationEmailWithPersistedCode()
         {
             var controller = ServiceProvider.GetService<SignUpController>();

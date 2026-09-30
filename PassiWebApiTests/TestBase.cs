@@ -182,9 +182,14 @@ public class TestBase
 public class TestEmailSender : IEmailSender
 {
     public static string Code;
+    public static bool ThrowOnSendInvitation;
 
     public Task<string> SendInvitationEmailAsync(String email, String code)
     {
+        if (ThrowOnSendInvitation)
+        {
+            throw new InvalidOperationException("Simulated email provider failure");
+        }
         return Task.FromResult(Code = code);
     }
 

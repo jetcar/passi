@@ -39,7 +39,14 @@ public class CertHelper
             // ComputeHash - returns byte array
             byte[] bytes = sha512.ComputeHash(Encoding.ASCII.GetBytes(data));
 
-            var verify = parentCert.GetRSAPublicKey().VerifyHash(bytes,
+            var rsaPublicKey = parentCert.GetRSAPublicKey();
+            if (rsaPublicKey == null)
+            {
+                _logger.Error("VerifyData called with a certificate that has no RSA public key");
+                throw new CryptographicException("Unsupported certificate key algorithm; RSA required");
+            }
+
+            var verify = rsaPublicKey.VerifyHash(bytes,
                 Convert.FromBase64String(signedData), HashAlgorithmName.SHA512,
                 RSASignaturePadding.Pkcs1);
 

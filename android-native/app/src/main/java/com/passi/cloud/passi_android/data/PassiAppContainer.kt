@@ -29,6 +29,8 @@ import com.passi.cloud.passi_android.domain.notifications.NotificationTokenRegis
 import com.passi.cloud.passi_android.domain.repository.AccountsRepository
 import com.passi.cloud.passi_android.domain.repository.ProvidersRepository
 import com.passi.cloud.passi_android.domain.service.EnrollmentService
+import com.passi.cloud.passi_android.data.update.PlayAppUpdateChecker
+import com.passi.cloud.passi_android.domain.update.AppUpdateChecker
 
 interface PassiAppContainer {
     val accountsRepository: AccountsRepository
@@ -48,6 +50,7 @@ interface PassiAppContainer {
     val biometricCertificateService: BiometricCertificateService
     val notificationOpenStore: NotificationOpenStore
     val notificationTokenRegistrationService: NotificationTokenRegistrationService
+    val appUpdateChecker: AppUpdateChecker
 }
 
 class DefaultPassiAppContainer(
@@ -141,5 +144,9 @@ class DefaultPassiAppContainer(
             providersRepository = providersRepository,
             deviceIdProvider = { preferences.getOrCreateDeviceId() },
         )
+    }
+
+    override val appUpdateChecker: AppUpdateChecker by lazy {
+        PlayAppUpdateChecker(context)
     }
 }

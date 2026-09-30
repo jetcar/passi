@@ -201,7 +201,9 @@ namespace passi_webapi.Controllers
             if (sessionDb == null)
                 return BadRequest("Session not found");
 
-            return Ok(new SessionMinDto() { SignedHash = sessionDb.SignedHashNew, PublicCert = sessionDb.User.Certificates.FirstOrDefault(x => x.Thumbprint == thumbprint)?.PublicCert, ExpirationTime = sessionDb.ExpirationTime.ToDateTimeUtc() });
+            // The random string the phone signed lives only on the temp (Redis) record.
+            var sessionTemp = _sessionsRepository.CheckSessionAndReturnUser(sessionId);
+            return Ok(new SessionMinDto() { SignedHash = sessionDb.SignedHashNew, PublicCert = sessionDb.User.Certificates.FirstOrDefault(x => x.Thumbprint == thumbprint)?.PublicCert, ExpirationTime = sessionDb.ExpirationTime.ToDateTimeUtc(), RandomString = sessionTemp?.RandomString });
         }
 
         [HttpPost, Route("GetActiveSession")]

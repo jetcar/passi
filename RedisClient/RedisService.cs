@@ -74,18 +74,26 @@ namespace RedisClient
             string redisValue = null;
             using (var transaction = redis.CreateTransaction())
             {
-                transaction.QueueCommand(r => r.Get<string>(newKey), x => redisValue = x);
+                transaction.QueueCommand(r => r.GetValue(newKey), x => redisValue = x);
                 transaction.QueueCommand(r => r.Remove(newKey));
                 transaction.Commit();
             }
 
             if (redisValue != null)
             {
-                return JsonConvert.DeserializeObject<T>(redisValue);
+                return JsonConvert.DeserializeObject<T>(DecodeStoredString(redisValue));
             }
 
             return default(T);
         }
+
+        /// <summary>
+        /// Add stores through IRedisClient.Set&lt;string&gt;, which ServiceStack JSON-encodes into a quoted
+        /// string literal. Get&lt;string&gt; undoes that, but a GET queued in a transaction hands back the raw
+        /// bytes, so they must be decoded the same way before Newtonsoft can read the payload.
+        /// </summary>
+        public static string DecodeStoredString(string rawValue) =>
+            ServiceStack.Text.JsonSerializer.DeserializeFromString<string>(rawValue);
     }
 
     public interface IRedisService

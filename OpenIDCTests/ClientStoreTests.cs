@@ -81,6 +81,13 @@ namespace OpenIDCTests
             public T Get<T>(string key) => _store.TryGetValue(key, out var value) ? (T)value : default;
 
             public void Delete<T>(string key) => _store.Remove(key);
+
+            public T GetAndDelete<T>(string key)
+            {
+                var value = Get<T>(key);
+                Delete<T>(key);
+                return value;
+            }
         }
     }
 }

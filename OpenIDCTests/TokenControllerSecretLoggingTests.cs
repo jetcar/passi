@@ -88,8 +88,7 @@ namespace OpenIDCTests
         private class FakeRefreshTokenStore : IRefreshTokenStore
         {
             public Task<string> CreateRefreshTokenAsync(RefreshToken refreshToken) => Task.FromResult("refresh-token");
-            public Task<RefreshToken> GetRefreshTokenAsync(string token) => Task.FromResult<RefreshToken>(null);
-            public Task RevokeRefreshTokenAsync(string token) => Task.CompletedTask;
+            public Task<RefreshToken> ConsumeRefreshTokenAsync(string token) => Task.FromResult<RefreshToken>(null);
         }
 
         // Captures every rendered log message (template + args) so tests can assert

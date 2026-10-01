@@ -1,7 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using ConfigurationManager;
 using FirebaseAdmin.Messaging;
+using Microsoft.Extensions.Configuration;
 using Models;
 using NotificationsService;
 using NUnit.Framework;
@@ -11,11 +14,17 @@ namespace PassiWebApiTests
 {
     public class FirebaseServiceTests
     {
+        private static AppSetting SessionTimeoutSetting(int minutes) =>
+            new AppSetting(new ConfigurationBuilder()
+                .AddInMemoryCollection(new Dictionary<string, string> { ["Timeout"] = minutes.ToString() })
+                .Build())
+            { PrefferAppsettingFile = true };
+
         [Test]
         public void LoginPushIsDataOnlyAndHighPrioritySoTheAppAlwaysHandlesIt()
         {
             var client = new CapturingFireBaseClient();
-            var service = new FirebaseService(client, null);
+            var service = new FirebaseService(client, null, SessionTimeoutSetting(2));
 
             service.SendNotification("device-token", "Passi login", "{\"SessionId\":\"abc\"}", "passi.cloud", Guid.NewGuid());
 
@@ -38,11 +47,28 @@ namespace PassiWebApiTests
             // NullReferenceException on that raw Thread, which is unhandled and terminates the whole
             // process. Simulate that race: the push fails, and Redis no longer has the session.
             var redis = new NullReturningRedisService();
-            var service = new FirebaseService(new ThrowingFireBaseClient(), redis);
+            var service = new FirebaseService(new ThrowingFireBaseClient(), redis, SessionTimeoutSetting(2));
 
             service.SendNotification("device-token", "Passi login", "{\"SessionId\":\"abc\"}", "passi.cloud", Guid.NewGuid());
 
             Assert.That(redis.GetCalled.Wait(TimeSpan.FromSeconds(10)), Is.True, "error handler never ran");
+        }
+
+        [Test]
+        public void SendNotificationOnPushFailureKeepsTheSessionsConfiguredTimeoutInsteadOfAHardcodedFiveMinutes()
+        {
+            // The error handler re-saves the session record so the error surfaces to the polling client.
+            // That save must keep using the app's configured session Timeout - the same TTL the session
+            // was created with - and not silently fall back to whatever default the underlying Redis
+            // client happens to use for a save with no explicit expiry.
+            const int configuredTimeoutMinutes = 45; // deliberately far from any hardcoded default
+            var redis = new RecordingRedisService(new SessionTempRecord { Guid = Guid.NewGuid() });
+            var service = new FirebaseService(new ThrowingFireBaseClient(), redis, SessionTimeoutSetting(configuredTimeoutMinutes));
+
+            service.SendNotification("device-token", "Passi login", "{\"SessionId\":\"abc\"}", "passi.cloud", Guid.NewGuid());
+
+            Assert.That(redis.SaveCalled.Wait(TimeSpan.FromSeconds(10)), Is.True, "error handler never re-saved the session");
+            Assert.That(redis.LastExpiry, Is.EqualTo(TimeSpan.FromMinutes(configuredTimeoutMinutes)));
         }
 
         private class CapturingFireBaseClient : IFireBaseClient
@@ -78,6 +104,35 @@ namespace PassiWebApiTests
             }
 
             public void Delete<T>(string key) { }
+
+            public T GetAndDelete<T>(string key) => default;
+        }
+
+        private class RecordingRedisService : IRedisService
+        {
+            private readonly SessionTempRecord _session;
+            public readonly ManualResetEventSlim SaveCalled = new(false);
+            public TimeSpan? LastExpiry;
+
+            public RecordingRedisService(SessionTempRecord session) => _session = session;
+
+            public void Add<T>(string key, T item, TimeSpan expire)
+            {
+                LastExpiry = expire;
+                SaveCalled.Set();
+            }
+
+            public void Add<T>(string key, T item)
+            {
+                LastExpiry = null; // no explicit expiry given - marks the bug this test guards against
+                SaveCalled.Set();
+            }
+
+            public T Get<T>(string key) => (T)(object)_session;
+
+            public void Delete<T>(string key) { }
+
+            public T GetAndDelete<T>(string key) => default;
         }
     }
 }

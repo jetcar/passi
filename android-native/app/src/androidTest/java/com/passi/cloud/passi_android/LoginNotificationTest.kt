@@ -20,6 +20,7 @@ import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until
 import com.passi.cloud.passi_android.notifications.FullScreenIntentPrompt
+import com.passi.cloud.passi_android.notifications.OverlayPermissionPrompt
 import com.passi.cloud.passi_android.notifications.PassiNotifications
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -80,6 +81,12 @@ class LoginNotificationTest {
     }
 
     @Test
+    fun appDeclaresOverlayPermissionSoPushCanOpenItWhileUnlocked() {
+        val info = context.packageManager.getPackageInfo(context.packageName, PackageManager.GET_PERMISSIONS)
+        assertTrue(info.requestedPermissions.orEmpty().contains(Manifest.permission.SYSTEM_ALERT_WINDOW))
+    }
+
+    @Test
     fun loginNotificationShowsOnLockScreenWithFullScreenIntent() {
         PassiNotifications.showLoginNotification(context, "Passi login", "passi.cloud")
         waitFor { activeCount() == 1 }
@@ -125,6 +132,8 @@ class LoginNotificationTest {
         val device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
         FullScreenIntentPrompt.resetAsked(context)
         shell("appops set ${context.packageName} USE_FULL_SCREEN_INTENT deny")
+        // Otherwise the overlay prompt takes this launch's single permission dialog.
+        shell("appops set ${context.packageName} SYSTEM_ALERT_WINDOW allow")
         try {
             ActivityScenario.launch(MainActivity::class.java).use {
                 assertNotNull("prompt should appear", device.wait(Until.findObject(By.textContains("full-screen")), 5_000))
@@ -135,6 +144,20 @@ class LoginNotificationTest {
             }
         } finally {
             shell("appops set ${context.packageName} USE_FULL_SCREEN_INTENT allow")
+        }
+    }
+
+    @Test
+    fun appAsksOnceToAllowDisplayOverOtherAppsWhenDenied() {
+        val device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
+        OverlayPermissionPrompt.resetAsked(context)
+        shell("appops set ${context.packageName} SYSTEM_ALERT_WINDOW default")
+        ActivityScenario.launch(MainActivity::class.java).use {
+            assertNotNull("prompt should appear", device.wait(Until.findObject(By.textContains("Display over other apps")), 5_000))
+            device.findObject(By.text("Not now"))?.click()
+        }
+        ActivityScenario.launch(MainActivity::class.java).use {
+            assertTrue("asked only once", device.wait(Until.gone(By.textContains("Display over other apps")), 3_000))
         }
     }
 

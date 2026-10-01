@@ -5,6 +5,9 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <!-- Wake the screen and show the login challenge over the lock screen (approval still requires unlocking). -->
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+    <!-- "Display over other apps": the only way a login push may open the app while the phone is unlocked
+         (Android blocks background activity starts otherwise). Granted by the user in system settings. -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
     <application
         android:name=".PassiApplication"

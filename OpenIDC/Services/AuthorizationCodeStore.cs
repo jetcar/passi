@@ -8,7 +8,6 @@ namespace OpenIDC.Services
     public interface IAuthorizationCodeStore
     {
         Task<string> CreateAuthorizationCodeAsync(AuthorizationCode authCode);
-        Task StoreAuthorizationCodeAsync(AuthorizationCode authCode);
         Task<AuthorizationCode> ConsumeAuthorizationCodeAsync(string code);
     }
 
@@ -39,22 +38,6 @@ namespace OpenIDC.Services
             // AuthorizationCodeStoreConcurrencyTests.ConcurrentTokenExchangesCannotBothConsumeTheSameAuthorizationCode).
             var authCode = _redisService.GetAndDelete<AuthorizationCode>($"{CodePrefix}{code}");
             return Task.FromResult(authCode);
-        }
-
-        public Task StoreAuthorizationCodeAsync(AuthorizationCode authCode)
-        {
-            if (string.IsNullOrEmpty(authCode.Code))
-            {
-                throw new ArgumentException("Authorization code must have a Code value", nameof(authCode));
-            }
-
-            if (authCode.ExpiresAt == default)
-            {
-                authCode.ExpiresAt = DateTime.UtcNow.AddMinutes(5);
-            }
-
-            _redisService.Add($"{CodePrefix}{authCode.Code}", authCode, TimeSpan.FromMinutes(5));
-            return Task.CompletedTask;
         }
     }
 }

@@ -179,7 +179,6 @@ namespace OpenIDCTests
         private class FakeAuthCodeStore : IAuthorizationCodeStore
         {
             public Task<string> CreateAuthorizationCodeAsync(AuthorizationCode authCode) => Task.FromResult("code123");
-            public Task StoreAuthorizationCodeAsync(AuthorizationCode authCode) => Task.CompletedTask;
             public Task<AuthorizationCode> ConsumeAuthorizationCodeAsync(string code) => Task.FromResult<AuthorizationCode>(null);
         }
 

@@ -72,8 +72,6 @@ namespace OpenIDCTests
 
             public Task<string> CreateAuthorizationCodeAsync(AuthorizationCode authCode) => Task.FromResult(authCode.Code);
 
-            public Task StoreAuthorizationCodeAsync(AuthorizationCode authCode) => Task.CompletedTask;
-
             public Task<AuthorizationCode> ConsumeAuthorizationCodeAsync(string code) =>
                 Task.FromResult(code == _authCode.Code ? _authCode : null);
         }

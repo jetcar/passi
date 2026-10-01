@@ -76,7 +76,7 @@ jobs:
           image-ref: jetcar/common_image:${{ github.run_number }}
           format: sarif
           output: trivy-common-image.sarif
-          severity: CRITICAL,HIGH
+          severity: CRITICAL,HIGH,MEDIUM
           ignore-unfixed: true
           exit-code: '0'
 

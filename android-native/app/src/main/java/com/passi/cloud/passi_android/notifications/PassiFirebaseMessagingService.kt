@@ -46,6 +46,8 @@ class PassiFirebaseMessagingService : FirebaseMessagingService() {
         }
     }
 
+    // Android lets this through only if the user allowed "Display over other apps" (see OverlayPermissionPrompt);
+    // otherwise it is silently blocked and the notification's full-screen intent / tap opens the app instead.
     private fun openApplication() {
         val intent = Intent(this, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP

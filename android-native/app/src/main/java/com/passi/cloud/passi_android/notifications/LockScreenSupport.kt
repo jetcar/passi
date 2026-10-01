@@ -41,3 +41,39 @@ object FullScreenIntentPrompt {
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().remove(KEY_ASKED).commit()
     }
 }
+
+/**
+ * Android blocks a background app from starting its own activity, so a login push can only open Passi while
+ * the phone is unlocked if the user allowed "Display over other apps". The full-screen intent only covers the
+ * locked/screen-off case. Ask once.
+ */
+object OverlayPermissionPrompt {
+    private const val PREFS = "passi_ui"
+    private const val KEY_ASKED = "overlay_permission_asked"
+
+    fun shouldPrompt(canDrawOverlays: Boolean, alreadyAsked: Boolean): Boolean =
+        !canDrawOverlays && !alreadyAsked
+
+    /** Returns true when the dialog was shown. */
+    fun maybePrompt(activity: Activity): Boolean {
+        val prefs = activity.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        if (!shouldPrompt(Settings.canDrawOverlays(activity), prefs.getBoolean(KEY_ASKED, false))) return false
+
+        prefs.edit().putBoolean(KEY_ASKED, true).apply()
+        AlertDialog.Builder(activity)
+            .setTitle("Open Passi for login requests")
+            .setMessage("To open login requests automatically while you use your phone, allow Passi to \"Display over other apps\". Otherwise you'll need to tap the notification.")
+            .setPositiveButton("Open settings") { _, _ ->
+                activity.startActivity(
+                    Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:${activity.packageName}")),
+                )
+            }
+            .setNegativeButton("Not now", null)
+            .show()
+        return true
+    }
+
+    fun resetAsked(context: Context) {
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().remove(KEY_ASKED).commit()
+    }
+}

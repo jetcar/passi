@@ -14,6 +14,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import com.passi.cloud.passi_android.ui.PassiApp
 import com.passi.cloud.passi_android.notifications.FullScreenIntentPrompt
+import com.passi.cloud.passi_android.notifications.OverlayPermissionPrompt
 import com.passi.cloud.passi_android.notifications.PassiNotifications
 
 class MainActivity : FragmentActivity() {
@@ -21,7 +22,10 @@ class MainActivity : FragmentActivity() {
         super.onCreate(savedInstanceState)
         ensureNotificationChannel(this)
         requestNotificationPermissionIfNeeded()
-        FullScreenIntentPrompt.maybePrompt(this)
+        // One permission dialog per launch; the full-screen-intent one follows on a later start if still needed.
+        if (!OverlayPermissionPrompt.maybePrompt(this)) {
+            FullScreenIntentPrompt.maybePrompt(this)
+        }
         handleIntent(intent)
         setContent {
             PassiApp()

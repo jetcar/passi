@@ -8,8 +8,7 @@ namespace OpenIDC.Services
     public interface IAuthorizationCodeStore
     {
         Task<string> CreateAuthorizationCodeAsync(AuthorizationCode authCode);
-        Task<AuthorizationCode> GetAuthorizationCodeAsync(string code);
-        Task RevokeAuthorizationCodeAsync(string code);
+        Task<AuthorizationCode> ConsumeAuthorizationCodeAsync(string code);
     }
 
     public class AuthorizationCodeStore : IAuthorizationCodeStore
@@ -32,16 +31,13 @@ namespace OpenIDC.Services
             return Task.FromResult(code);
         }
 
-        public Task<AuthorizationCode> GetAuthorizationCodeAsync(string code)
+        public Task<AuthorizationCode> ConsumeAuthorizationCodeAsync(string code)
         {
-            var authCode = _redisService.Get<AuthorizationCode>($"{CodePrefix}{code}");
+            // Atomically read-and-delete: two concurrent token-exchange requests presenting the same
+            // authorization code must never both succeed in redeeming it (see
+            // AuthorizationCodeStoreConcurrencyTests.ConcurrentTokenExchangesCannotBothConsumeTheSameAuthorizationCode).
+            var authCode = _redisService.GetAndDelete<AuthorizationCode>($"{CodePrefix}{code}");
             return Task.FromResult(authCode);
-        }
-
-        public Task RevokeAuthorizationCodeAsync(string code)
-        {
-            _redisService.Delete<AuthorizationCode>($"{CodePrefix}{code}");
-            return Task.CompletedTask;
         }
     }
 }

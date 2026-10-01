@@ -142,9 +142,8 @@ namespace OpenIDCTests
             private readonly AuthorizationCode _code;
             public SingleCodeStore(AuthorizationCode code) => _code = code;
             public Task<string> CreateAuthorizationCodeAsync(AuthorizationCode authCode) => Task.FromResult(authCode.Code);
-            public Task<AuthorizationCode> GetAuthorizationCodeAsync(string code) =>
+            public Task<AuthorizationCode> ConsumeAuthorizationCodeAsync(string code) =>
                 Task.FromResult(_code != null && code == _code.Code ? _code : null);
-            public Task RevokeAuthorizationCodeAsync(string code) => Task.CompletedTask;
         }
 
         private class SingleRefreshStore : IRefreshTokenStore

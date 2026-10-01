@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using ConfigurationManager;
 using FirebaseAdmin.Messaging;
 using GoogleTracer;
 using Models;
@@ -15,11 +16,13 @@ namespace NotificationsService
 
         private IFireBaseClient _fireBaseClient;
         private IRedisService _redisService;
+        private readonly int _sessionTimeout;
 
-        public FirebaseService(IFireBaseClient fireBaseClient, IRedisService redisService)
+        public FirebaseService(IFireBaseClient fireBaseClient, IRedisService redisService, AppSetting appSetting)
         {
             _fireBaseClient = fireBaseClient;
             _redisService = redisService;
+            _sessionTimeout = Convert.ToInt32(appSetting["Timeout"]);
         }
 
         public virtual string SendNotification(string clientToken, string title, string body, string notification, Guid sessionId)
@@ -52,7 +55,7 @@ namespace NotificationsService
 
                     session.Status = Models.SessionStatus.Error;
                     session.ErrorMessage = Truncate(e.Message, 256);
-                    _redisService.Add(sessionId.ToString(), session);
+                    _redisService.Add(sessionId.ToString(), session, TimeSpan.FromMinutes(_sessionTimeout));
 
                 }
             });

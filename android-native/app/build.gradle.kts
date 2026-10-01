@@ -104,6 +104,9 @@ dependencies {
     implementation("org.bouncycastle:bcprov-jdk18on:1.86")
     implementation("org.bouncycastle:bcpkix-jdk18on:1.86")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
+    // Not used directly. AGP pins androidTest to the app's runtime versions, and androidx.test.ext:junit needs
+    // 1.2.0 while the app would otherwise resolve 1.1.0 (via profileinstaller), which breaks the androidTest build.
+    implementation("androidx.concurrent:concurrent-futures:1.2.0")
 
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.11.0")

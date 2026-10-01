@@ -160,3 +160,10 @@ jobs:
             cd /home/jetcarq/passi
             chmod +x ./run.sh
             ./run.sh
+            # Reclaim disk: drop images/build cache no running container uses and cap the journal.
+            # Best-effort — a cleanup failure must not fail the deploy.
+            DOCKER="docker"; docker info >/dev/null 2>&1 || DOCKER="sudo -n docker"
+            $DOCKER image prune -a -f || true
+            $DOCKER builder prune -a -f || true
+            sudo -n journalctl --vacuum-size=200M || true
+            df -h /

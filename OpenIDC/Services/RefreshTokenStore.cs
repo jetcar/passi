@@ -8,8 +8,7 @@ namespace OpenIDC.Services
     public interface IRefreshTokenStore
     {
         Task<string> CreateRefreshTokenAsync(RefreshToken refreshToken);
-        Task<RefreshToken> GetRefreshTokenAsync(string token);
-        Task RevokeRefreshTokenAsync(string token);
+        Task<RefreshToken> ConsumeRefreshTokenAsync(string token);
     }
 
     public class RefreshTokenStore : IRefreshTokenStore
@@ -32,16 +31,13 @@ namespace OpenIDC.Services
             return Task.FromResult(token);
         }
 
-        public Task<RefreshToken> GetRefreshTokenAsync(string token)
+        public Task<RefreshToken> ConsumeRefreshTokenAsync(string token)
         {
-            var refreshToken = _redisService.Get<RefreshToken>($"{TokenPrefix}{token}");
+            // Atomically read-and-delete: two concurrent token-refresh requests presenting the same
+            // refresh token must never both succeed in redeeming it (see
+            // RefreshTokenStoreConcurrencyTests.ConcurrentTokenRefreshesCannotBothConsumeTheSameRefreshToken).
+            var refreshToken = _redisService.GetAndDelete<RefreshToken>($"{TokenPrefix}{token}");
             return Task.FromResult(refreshToken);
-        }
-
-        public Task RevokeRefreshTokenAsync(string token)
-        {
-            _redisService.Delete<RefreshToken>($"{TokenPrefix}{token}");
-            return Task.CompletedTask;
         }
     }
 }

@@ -21,7 +21,7 @@ namespace passi_webapi.Filters
             var db = filterContext.HttpContext.RequestServices.GetService(typeof(PassiDbContext)) as PassiDbContext;
             var user = filterContext.HttpContext.User.Identity as ClaimsIdentity;
             var userId = user?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (user != null && !db.Admins.Any(x => x.Email == userId))
+            if (user == null || !db.Admins.Any(x => x.Email == userId))
             {
                 filterContext.Result = new UnauthorizedResult();
             }

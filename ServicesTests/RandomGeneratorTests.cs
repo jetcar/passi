@@ -54,5 +54,29 @@ namespace ServicesTests
 
             Assert.That(exceptions, Is.Empty, () => string.Join(Environment.NewLine, exceptions));
         }
+
+        [Test]
+        public void GetNumbersStringCanProduceTheLargestValueOfTheRequestedDigitCount()
+        {
+            // GetNumbersString(1) should be able to return every single digit "0".."9" - in
+            // particular "9", the largest. With only 9 possible digits, 2000 draws make it
+            // astronomically unlikely (less than 1e-99) to miss "9" by chance alone; a generator
+            // that systematically excludes the upper bound (an off-by-one against
+            // RandomNumberGenerator.GetInt32's exclusive-upper-bound contract) will never produce
+            // it, no matter how many draws are taken.
+            var randomGenerator = new RandomGenerator();
+
+            var sawMaxDigit = false;
+            for (int j = 0; j < 2000; j++)
+            {
+                if (randomGenerator.GetNumbersString(1) == "9")
+                {
+                    sawMaxDigit = true;
+                    break;
+                }
+            }
+
+            Assert.That(sawMaxDigit, Is.True, "expected \"9\" to be producible, but it never appeared in 2000 draws");
+        }
     }
 }

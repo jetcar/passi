@@ -34,9 +34,9 @@ namespace Services
 
             if (newPublicCert == null)
                 throw new BadRequestException("Certificate is missing");
-            if (newPublicCert.NotAfter < DateTime.UtcNow.Date)
+            if (newPublicCert.NotAfter < DateTime.UtcNow)
                 throw new BadRequestException("Certificate is expired");
-            if (newPublicCert.NotBefore > DateTime.UtcNow.Date)
+            if (newPublicCert.NotBefore > DateTime.UtcNow)
                 throw new BadRequestException("Certificate is not started");
             if (newPublicCert.GetNameInfo(X509NameType.SimpleName, true) !=
                 oldpublicCert.GetNameInfo(X509NameType.SimpleName, true).Replace("@", ""))

@@ -38,6 +38,28 @@ namespace PassiWebApiTests.Repos
             Assert.That(devices, Has.Count.EqualTo(1));
         }
 
+        [Test]
+        public void ConfirmInvitationWithNoMatchingInvitationDoesNotPersistADeviceRow()
+        {
+            using var scope = ServiceProvider.CreateScope();
+            var userRepository = scope.ServiceProvider.GetRequiredService<IUserRepository>();
+            var deviceId = Guid.NewGuid().ToString();
+
+            // No invitation anywhere matches this email/code combination, so confirmation must fail
+            // without any side effect - in particular, it must not create a Device row for a device
+            // id that was only ever seen on this failed attempt.
+            var result = userRepository.ConfirmInvitation(
+                Guid.NewGuid() + "@passi.cloud", "irrelevant-cert", Guid.NewGuid().ToString(), "wrong-code", deviceId);
+
+            Assert.That(result, Is.EqualTo(Guid.Empty));
+
+            using var verifyScope = ServiceProvider.CreateScope();
+            var dbContext = verifyScope.ServiceProvider.GetRequiredService<PassiDbContext>();
+            var deviceCount = dbContext.Devices.Count(x => x.DeviceId == deviceId);
+            Assert.That(deviceCount, Is.EqualTo(0),
+                $"Expected no Device row for device id {deviceId} after a failed confirmation but found {deviceCount}");
+        }
+
         // GetOrCreateDevice (private, used by AddUser/SignUp and ConfirmInvitation/Confirm) does a
         // classic check-then-act: look up the Device row by DeviceId, and if none is found, add a new
         // one. When several requests race for the very first signup on a brand-new device id, more

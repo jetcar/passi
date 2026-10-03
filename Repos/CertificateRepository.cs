@@ -21,6 +21,14 @@ namespace Repos
         public CertificateDb AddCertificate(string certificateThumbprint, string PublicCert,
             string parentCertThumbprint, string deviceId)
         {
+            // Check-then-act race: two concurrent certificate-chain updates for the same brand-new
+            // device id can both see "no row yet" below and each add their own Device (see
+            // UserRepository.GetOrCreateDevice for the same race on the signup path). A
+            // transaction-scoped Postgres advisory lock keyed on the device id serializes this
+            // check-then-act per device id; the lock is released when the ambient transaction
+            // (begun by the caller, e.g. CertificateController.UpdatePublicCert) commits or rolls back.
+            _dbContext.Database.ExecuteSqlRaw("SELECT pg_advisory_xact_lock(hashtext({0})::bigint)", deviceId);
+
             var device = _dbContext.Devices.FirstOrDefault(x => x.DeviceId == deviceId);
             if (device == null)
             {

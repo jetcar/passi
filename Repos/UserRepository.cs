@@ -288,6 +288,21 @@ namespace Repos
 
         private void CleanupDeviceIfUnused(long deviceId)
         {
+            var device = _dbContext.Devices.FirstOrDefault(x => x.Id == deviceId);
+            if (device == null)
+            {
+                return;
+            }
+
+            // Mirror-image race of the one GetOrCreateDevice guards against: without this lock, a
+            // concurrent caller can attach a brand-new link to this device (GetOrCreateDevice +
+            // EnsureUserDeviceLink, under the same advisory lock key) between the "is it referenced"
+            // check below and the delete, and have that new link silently cascade-deleted along with
+            // the Device row. Locking on the same key here serializes the two paths: whichever side
+            // commits first is the one the other observes. The caller must keep this inside a
+            // transaction so the lock is held until commit.
+            _dbContext.Database.ExecuteSqlRaw("SELECT pg_advisory_xact_lock(hashtext({0})::bigint)", device.DeviceId);
+
             var isReferenced = _dbContext.UserDevices.Any(x => x.DeviceId == deviceId)
                 || _dbContext.Users.Any(x => x.DeviceId == deviceId);
 

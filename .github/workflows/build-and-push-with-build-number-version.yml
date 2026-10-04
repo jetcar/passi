@@ -158,6 +158,10 @@ jobs:
           script: |
             set -e
             cd /home/jetcarq/passi
+            # run.sh pulls the repo itself, but bash keeps executing the copy it started with, so update first
+            # to run this commit's run.sh.
+            git checkout .
+            git pull
             chmod +x ./run.sh
             ./run.sh
             # Reclaim disk: drop images/build cache no running container uses and cap the journal.

@@ -32,6 +32,10 @@ services:
     networks:
       - redis_net
     restart: always
+    environment:
+      # Append-only file, fsynced every second: refresh tokens rotate on every use, so losing the writes since the
+      # last hourly RDB snapshot (e.g. a restart while the disk is full) signs every OAuth client out.
+      REDIS_ARGS: "--appendonly yes --appendfsync everysec"
     volumes:
       - ../redis_data/:/data
   haproxy:

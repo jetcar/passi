@@ -28,6 +28,7 @@ public class TestBase
     public void OneTimeSetUp()
     {
         IServiceCollection services = new ServiceCollection();
+        services.AddLogging();
         services.AddScoped<SignUpController>();
         services.AddScoped<CertificateController>();
         services.AddScoped<AuthController>();

@@ -213,8 +213,10 @@ namespace OpenIDC.Controllers
                 return Unauthorized(new { error = "invalid_client" });
             }
 
-            // Get refresh token
-            var refreshToken = await _refreshTokenStore.GetRefreshTokenAsync(request.RefreshToken);
+            // Atomically consume the refresh token so two concurrent refresh requests presenting the
+            // same token can never both succeed (see
+            // RefreshTokenStoreConcurrencyTests.ConcurrentTokenRefreshesCannotBothConsumeTheSameRefreshToken).
+            var refreshToken = await _refreshTokenStore.ConsumeRefreshTokenAsync(request.RefreshToken);
             if (refreshToken == null || refreshToken.ExpiresAt < DateTime.UtcNow)
             {
                 return BadRequest(new { error = "invalid_grant", error_description = "Invalid or expired refresh token" });
@@ -230,8 +232,6 @@ namespace OpenIDC.Controllers
             var accessToken = _tokenService.GenerateAccessToken(refreshToken.Subject, refreshToken.ClientId, refreshToken.Scopes, refreshToken.Claims);
             var idToken = _tokenService.GenerateIdToken(refreshToken.Subject, refreshToken.ClientId, refreshToken.Scopes, refreshToken.Claims, null);
 
-            // Optionally rotate refresh token
-            await _refreshTokenStore.RevokeRefreshTokenAsync(request.RefreshToken);
             var newRefreshToken = await _refreshTokenStore.CreateRefreshTokenAsync(new RefreshToken
             {
                 ClientId = refreshToken.ClientId,

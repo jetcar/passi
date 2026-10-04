@@ -151,9 +151,8 @@ namespace OpenIDCTests
             private readonly RefreshToken _token;
             public SingleRefreshStore(RefreshToken token) => _token = token;
             public Task<string> CreateRefreshTokenAsync(RefreshToken refreshToken) => Task.FromResult("new-refresh");
-            public Task<RefreshToken> GetRefreshTokenAsync(string token) =>
+            public Task<RefreshToken> ConsumeRefreshTokenAsync(string token) =>
                 Task.FromResult(_token != null && token == _token.Token ? _token : null);
-            public Task RevokeRefreshTokenAsync(string token) => Task.CompletedTask;
         }
 
         private class StubTokenService : ITokenService

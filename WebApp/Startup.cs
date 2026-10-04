@@ -143,9 +143,11 @@ namespace WebApp
                 applicationBuilder.UseAuthorization();
                 applicationBuilder.UseCorrelationId(); // Add correlation ID tracking for all requests
 
-                // OAuth discovery probes (e.g. MCP clients looking for authorization server metadata) must get a
-                // real 404, not the SPA's index.html. The MCP protected-resource document is served by
-                // UseAuthentication above and ACME challenges by UseStaticFiles.
+                // Authorization server metadata for MCP clients that look for it on this host instead of /openidc.
+                applicationBuilder.UseNewsMcpDiscovery();
+
+                // Other OAuth discovery probes must get a real 404, not the SPA's index.html. The MCP
+                // protected-resource document is served by UseAuthentication above and ACME challenges by UseStaticFiles.
                 applicationBuilder.Use(async (context, next) =>
                 {
                     if (context.Request.Path.StartsWithSegments("/.well-known"))

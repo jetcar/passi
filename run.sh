@@ -20,6 +20,19 @@ git checkout .
 git fetch
 git pull
 #sudo ./run_deploy.sh
+
+# One-time switch of Redis to the append-only file (docker-compose.yml sets --appendonly yes). Starting Redis with
+# AOF on and no AOF yet would ignore dump.rdb and come up empty, so let the running Redis write its AOF first.
+redis_aof=$(run_privileged docker exec redis redis-cli config get appendonly 2>/dev/null | tail -n 1 | tr -d '\r')
+if [ "$redis_aof" = "no" ]; then
+	run_privileged docker exec redis redis-cli config set appendonly yes
+	for _ in $(seq 1 60); do
+		rewriting=$(run_privileged docker exec redis redis-cli info persistence | tr -d '\r' | grep -E '^aof_rewrite_(in_progress|scheduled):' | cut -d: -f2 | tr -d '\n')
+		[ "$rewriting" = "00" ] && break
+		sleep 1
+	done
+fi
+
 containers_running=$(docker ps -q)
 if [ -n "$containers_running" ]; then
 	run_privileged docker stop $containers_running

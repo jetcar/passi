@@ -217,14 +217,23 @@ namespace OpenIDC.Controllers
             // same token can never both succeed (see
             // RefreshTokenStoreConcurrencyTests.ConcurrentTokenRefreshesCannotBothConsumeTheSameRefreshToken).
             var refreshToken = await _refreshTokenStore.ConsumeRefreshTokenAsync(request.RefreshToken);
-            if (refreshToken == null || refreshToken.ExpiresAt < DateTime.UtcNow)
+            if (refreshToken == null)
             {
+                // Usually a token that was already rotated, or one lost from Redis (e.g. a restart before it was persisted).
+                _logger.LogWarning("Refresh token not found for client: {ClientId}", request.ClientId);
+                return BadRequest(new { error = "invalid_grant", error_description = "Invalid or expired refresh token" });
+            }
+            if (refreshToken.ExpiresAt < DateTime.UtcNow)
+            {
+                _logger.LogWarning("Refresh token expired at {ExpiresAt:o} for client: {ClientId}, subject: {Subject}",
+                    refreshToken.ExpiresAt, request.ClientId, refreshToken.Subject);
                 return BadRequest(new { error = "invalid_grant", error_description = "Invalid or expired refresh token" });
             }
 
             // Validate client ID matches
             if (refreshToken.ClientId != request.ClientId)
             {
+                _logger.LogWarning("Refresh token client ID mismatch. Expected: {Expected}, Got: {Got}", refreshToken.ClientId, request.ClientId);
                 return BadRequest(new { error = "invalid_grant", error_description = "Client ID mismatch" });
             }
 

@@ -69,58 +69,59 @@ public class TestBase
         TestEmailSender.InvitationFailure = null;
     }
 
-    private static IContainer _pgContainer;
-    private static IContainer _redisContainer;
+    private static readonly SharedTestResource<IContainer> PgContainerResource = new(BuildAndStartPgContainer);
+    private static readonly SharedTestResource<IContainer> RedisContainerResource = new(BuildAndStartRedisContainer);
+
+    private const string PgPassword = "1";
 
     private void PrepareDockers()
     {
         var appSetting = ServiceProvider.GetService<AppSetting>();
 
-        var dockerEndpoint = Environment.GetEnvironmentVariable("DOCKER_HOST");
-
-        var pgpassword = "1";
-        if (_pgContainer == null)
-        {
-            var containerBuilder = new ContainerBuilder()
-                .WithImage("postgres:15.5")
-                .WithPortBinding(5432, true)
-                .WithWaitStrategy(Wait.ForUnixContainer().UntilMessageIsLogged("database system is ready to accept connections"))
-                .WithEnvironment("POSTGRES_PASSWORD", pgpassword);
-            if (!string.IsNullOrEmpty(dockerEndpoint))
-                containerBuilder.WithDockerEndpoint(dockerEndpoint);
-            _pgContainer = containerBuilder
-                .Build();
-            Console.WriteLine("starting postgres container");
-            _pgContainer.StartAsync().ConfigureAwait(false).GetAwaiter().GetResult();
-        }
-
-        var pgPort = _pgContainer
-            .GetMappedPublicPort(5432).ToString();
-        appSetting["DbHost"] = _pgContainer.Hostname;
+        var pgContainer = PgContainerResource.GetOrCreate();
+        var pgPort = pgContainer.GetMappedPublicPort(5432).ToString();
+        appSetting["DbHost"] = pgContainer.Hostname;
         appSetting["DbUser"] = "postgres";
-        appSetting["DbPassword"] = pgpassword;
+        appSetting["DbPassword"] = PgPassword;
         appSetting["DbPort"] = pgPort;
-        if (_redisContainer == null)
-        {
-            var containerBuilder = new ContainerBuilder()
-                .WithImage("redis:latest")
-                .WithPortBinding(6379, true)
-                .WithWaitStrategy(Wait.ForUnixContainer().UntilExternalTcpPortIsAvailable(6379));
-            if (!string.IsNullOrEmpty(dockerEndpoint))
-                containerBuilder.WithDockerEndpoint(dockerEndpoint);
 
-            _redisContainer = containerBuilder
-                .Build();
-            Console.WriteLine("starting redis container");
-
-            _redisContainer.StartAsync().ConfigureAwait(false).GetAwaiter().GetResult();
-        }
-        var redisport = _redisContainer
-            .GetMappedPublicPort(6379).ToString();
-        appSetting["redis"] = _redisContainer.Hostname;
+        var redisContainer = RedisContainerResource.GetOrCreate();
+        var redisport = redisContainer.GetMappedPublicPort(6379).ToString();
+        appSetting["redis"] = redisContainer.Hostname;
         appSetting["redisPort"] = redisport;
 
         Console.WriteLine("all containers are started");
+    }
+
+    private static IContainer BuildAndStartPgContainer()
+    {
+        var dockerEndpoint = Environment.GetEnvironmentVariable("DOCKER_HOST");
+        var containerBuilder = new ContainerBuilder()
+            .WithImage("postgres:15.5")
+            .WithPortBinding(5432, true)
+            .WithWaitStrategy(Wait.ForUnixContainer().UntilMessageIsLogged("database system is ready to accept connections"))
+            .WithEnvironment("POSTGRES_PASSWORD", PgPassword);
+        if (!string.IsNullOrEmpty(dockerEndpoint))
+            containerBuilder.WithDockerEndpoint(dockerEndpoint);
+        var container = containerBuilder.Build();
+        Console.WriteLine("starting postgres container");
+        container.StartAsync().ConfigureAwait(false).GetAwaiter().GetResult();
+        return container;
+    }
+
+    private static IContainer BuildAndStartRedisContainer()
+    {
+        var dockerEndpoint = Environment.GetEnvironmentVariable("DOCKER_HOST");
+        var containerBuilder = new ContainerBuilder()
+            .WithImage("redis:latest")
+            .WithPortBinding(6379, true)
+            .WithWaitStrategy(Wait.ForUnixContainer().UntilExternalTcpPortIsAvailable(6379));
+        if (!string.IsNullOrEmpty(dockerEndpoint))
+            containerBuilder.WithDockerEndpoint(dockerEndpoint);
+        var container = containerBuilder.Build();
+        Console.WriteLine("starting redis container");
+        container.StartAsync().ConfigureAwait(false).GetAwaiter().GetResult();
+        return container;
     }
 
     [TearDown]
@@ -146,15 +147,15 @@ public class TestBase
     [OneTimeTearDown]
     public static void OnetimeTearDown()
     {
-        if (_pgContainer != null)
+        if (PgContainerResource.Current is { } pgContainer)
         {
-            _pgContainer.DisposeAsync().AsTask().GetAwaiter().GetResult();
-            _pgContainer = null;
+            pgContainer.DisposeAsync().AsTask().GetAwaiter().GetResult();
+            PgContainerResource.Reset();
         }
-        if (_redisContainer != null)
+        if (RedisContainerResource.Current is { } redisContainer)
         {
-            _redisContainer.DisposeAsync().AsTask().GetAwaiter().GetResult();
-            _redisContainer = null;
+            redisContainer.DisposeAsync().AsTask().GetAwaiter().GetResult();
+            RedisContainerResource.Reset();
         }
     }
 

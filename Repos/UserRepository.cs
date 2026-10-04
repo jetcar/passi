@@ -45,13 +45,12 @@ namespace Repos
                 .ThenInclude(x => x.UserDevices)
                 .FirstOrDefault(x => x.User.EmailHash == email && x.Code == code);
 
-            var device = GetOrCreateDevice(deviceId);
-
             if (userInvitationDb == null)
             {
-                _dbContext.SaveChanges();
                 return Guid.Empty;
             }
+
+            var device = GetOrCreateDevice(deviceId);
 
             userInvitationDb.IsConfirmed = true;
             _dbContext.Certificates.Add(new CertificateDb()

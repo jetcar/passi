@@ -25,6 +25,10 @@ namespace OpenIDC.Services
         private readonly string _issuer;
         private readonly int _accessTokenLifetimeMinutes = 60;
 
+        // Test seam: lets tests observe that the RSA key extracted here is disposed, without
+        // changing GetJsonWebKeySet's public contract.
+        internal static Func<X509Certificate2, RSA> ExtractRsaPublicKey = certificate => certificate.GetRSAPublicKey();
+
         public TokenService(AppSetting appSetting, SigningCredentials signingCredentials)
         {
             _signingCredentials = signingCredentials;
@@ -204,7 +208,7 @@ namespace OpenIDC.Services
             // Handle both X509SecurityKey and RsaSecurityKey
             if (_signingCredentials.Key is X509SecurityKey x509Key)
             {
-                var rsa = x509Key.Certificate.GetRSAPublicKey()
+                using var rsa = ExtractRsaPublicKey(x509Key.Certificate)
                     ?? throw new InvalidOperationException("Certificate does not contain an RSA key");
                 parameters = rsa.ExportParameters(false);
             }

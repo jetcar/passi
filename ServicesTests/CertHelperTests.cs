@@ -61,6 +61,30 @@ namespace ServicesTests
         }
 
         [Test]
+        public void VerifyDataDisposesTheLoadedCertificate()
+        {
+            var cert = CreateCertificate();
+            var signedData = Sign("some-challenge", cert);
+            var publicCertBase64 = PublicCertBase64(cert);
+
+            var trackingCert = new DisposeTrackingCertificate(cert.RawData);
+            var previousLoader = CertHelper.LoadCertificate;
+            CertHelper.LoadCertificate = _ => trackingCert;
+            try
+            {
+                CertHelper.VerifyData("some-challenge", signedData, publicCertBase64);
+            }
+            finally
+            {
+                CertHelper.LoadCertificate = previousLoader;
+            }
+
+            // VerifyData loads a certificate (and its RSA public key) that nothing else owns;
+            // it must dispose them itself instead of leaking the native handles.
+            Assert.That(trackingCert.WasDisposed, Is.True);
+        }
+
+        [Test]
         public void VerifyDataThrowsCryptographicExceptionForANonRsaCertificate()
         {
             // A certificate with a non-RSA (EC) public key has no RSA key for VerifyHash to use.
@@ -97,6 +121,22 @@ namespace ServicesTests
             using var ecdsa = ECDsa.Create();
             var request = new CertificateRequest($"cn={Guid.NewGuid()}", ecdsa, HashAlgorithmName.SHA512);
             return request.CreateSelfSigned(DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddYears(1));
+        }
+
+        // Lets the test observe whether CertHelper disposes the certificate it loaded.
+        private class DisposeTrackingCertificate : X509Certificate2
+        {
+            public bool WasDisposed { get; private set; }
+
+            public DisposeTrackingCertificate(byte[] rawData) : base(rawData)
+            {
+            }
+
+            protected override void Dispose(bool disposing)
+            {
+                WasDisposed = true;
+                base.Dispose(disposing);
+            }
         }
     }
 }

@@ -26,4 +26,8 @@
 		<ProjectReference Include="..\WebApiDto\WebApiDto.csproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+		<InternalsVisibleTo Include="ServicesTests" />
+	</ItemGroup>
+
 </Project>

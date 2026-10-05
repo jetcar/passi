@@ -1,5 +1,6 @@
 package com.passi.cloud.passi_android.navigation
 
+import android.app.Activity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -29,6 +30,16 @@ private const val AccountsErrorKey = "accounts_error"
 fun PassiNavGraph() {
     val application = LocalContext.current.applicationContext as PassiApplication
     val navController = rememberNavController()
+    val activity = LocalContext.current as? Activity
+    // A login is approved from a push, so once it succeeds hand the user straight back to the
+    // browser/app they were signing in to instead of leaving Passi open on top of it.
+    val closeAfterAuthorized: () -> Unit = {
+        navController.popBackStack(
+            PassiDestination.Accounts.javaClass.simpleName,
+            inclusive = false,
+        )
+        activity?.finish()
+    }
     val notificationOpenRequest by application.container.notificationOpenStore.openRequests.collectAsState()
 
     LaunchedEffect(notificationOpenRequest) {
@@ -186,12 +197,7 @@ fun PassiNavGraph() {
                 onRequirePin = {
                     navController.navigate(PassiDestination.SessionPin.javaClass.simpleName)
                 },
-                onAuthorized = {
-                    navController.popBackStack(
-                        PassiDestination.Accounts.javaClass.simpleName,
-                        inclusive = false,
-                    )
-                }
+                onAuthorized = closeAfterAuthorized
             )
         }
         composable(PassiDestination.SessionPin.javaClass.simpleName) {
@@ -199,12 +205,7 @@ fun PassiNavGraph() {
                 onCancel = {
                     navController.popBackStack()
                 },
-                onAuthorized = {
-                    navController.popBackStack(
-                        PassiDestination.Accounts.javaClass.simpleName,
-                        inclusive = false,
-                    )
-                }
+                onAuthorized = closeAfterAuthorized
             )
         }
     }

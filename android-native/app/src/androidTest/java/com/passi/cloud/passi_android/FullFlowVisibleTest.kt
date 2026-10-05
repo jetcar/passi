@@ -1,5 +1,6 @@
 package com.passi.cloud.passi_android
 
+import android.app.Activity
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -70,10 +71,20 @@ class FullFlowVisibleTest {
 
         waitForText("Pin", "session pin screen")
         tapDigits("1234")
+        val activity = composeRule.activity
         composeRule.onNodeWithText("→").performClick()
 
         waitForSessionCheckPass(baseUrl, sessionId)
-        waitForContentDescription("Add", "accounts screen after authorization")
+        waitForActivityFinishing(activity, "app closed after authorization")
+    }
+
+    private fun waitForActivityFinishing(activity: Activity, label: String, timeoutMs: Long = 10_000L) {
+        val deadline = System.currentTimeMillis() + timeoutMs
+        while (System.currentTimeMillis() < deadline) {
+            if (activity.isFinishing || activity.isDestroyed) return
+            Thread.sleep(100)
+        }
+        throw AssertionError("Timed out waiting for $label")
     }
 
     private fun updateDefaultProvider(baseUrl: String) {

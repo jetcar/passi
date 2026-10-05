@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Models;
 using Newtonsoft.Json;
 using NodaTime;
@@ -269,11 +270,20 @@ namespace passi_webapi.Controllers
         [HttpPost, Route("DeleteDevice")]
         public IActionResult DeleteDevice([FromBody] DeleteDeviceDto deleteDeviceDto)
         {
-            _userRepository.DeleteDevice(
-                deleteDeviceDto.AccountGuid,
-                deleteDeviceDto.Thumbprint,
-                deleteDeviceDto.DeviceId,
-                deleteDeviceDto.CurrentDeviceId);
+            var strategy = _userRepository.GetExecutionStrategy();
+            strategy.Execute(() =>
+            {
+                using (var transaction = _userRepository.BeginTransaction())
+                {
+                    _userRepository.DeleteDevice(
+                        deleteDeviceDto.AccountGuid,
+                        deleteDeviceDto.Thumbprint,
+                        deleteDeviceDto.DeviceId,
+                        deleteDeviceDto.CurrentDeviceId);
+
+                    transaction.Commit();
+                }
+            });
 
             return Ok();
         }

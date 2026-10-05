@@ -9,6 +9,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Threading;
 using WebApiDto.Auth;
 using WebApiDto.Auth.Dto;
 using WebApiDto.SignUp;
@@ -64,6 +65,99 @@ namespace PassiWebApiTests.Controllers
 
             Assert.That(afterDelete, Has.Count.EqualTo(1));
             Assert.That(afterDelete.Single().DeviceId, Is.EqualTo(secondaryDeviceId));
+        }
+
+        // CleanupDeviceIfUnused (private, called from DeleteDevice) does a check-then-act with no
+        // lock: it reads whether any UserDevices/Users row still references the device, and only
+        // deletes the Device row when none does. GetOrCreateDevice guards the mirror-image race
+        // with a pg_advisory_xact_lock, but CleanupDeviceIfUnused has none. A SignUp racing in
+        // between the "is it referenced" check and the delete can attach a brand-new link to the
+        // device just before it is deleted out from under it; since UserDeviceDb.Device and
+        // UserDb.Device both cascade-delete, that new link - and the user row it belongs to,
+        // because this scenario signs the user up for the very first time on that device - is
+        // silently removed along with the Device row.
+        [Test]
+        public void DeleteDeviceCleanupDoesNotLoseAConcurrentNewSignUpOnTheSameDevice()
+        {
+            const int attempts = 20;
+            for (var attempt = 0; attempt < attempts; attempt++)
+            {
+                var sharedDeviceId = Guid.NewGuid().ToString();
+                var keepDeviceId = Guid.NewGuid().ToString();
+                var email = Guid.NewGuid() + "@passi.cloud";
+                var accountGuid = Guid.NewGuid();
+                var newEmail = Guid.NewGuid() + "@passi.cloud";
+
+                using var setupScope = ServiceProvider.CreateScope();
+                var setupSignup = setupScope.ServiceProvider.GetRequiredService<SignUpController>();
+
+                // sharedDeviceId starts out referenced by exactly one link (the one DeleteDevice is
+                // about to remove), so the cleanup's "is it referenced" check sees nothing left and
+                // proceeds to delete the Device row - precisely the window the race needs.
+                var cert = ConfirmAccountOnDevice(setupSignup, email, accountGuid, sharedDeviceId);
+                ConfirmAccountOnDevice(setupSignup, email, accountGuid, keepDeviceId);
+
+                using var barrier = new Barrier(2);
+                Exception deleteException = null;
+                Exception signUpException = null;
+
+                var deleteThread = new Thread(() =>
+                {
+                    try
+                    {
+                        using var scope = ServiceProvider.CreateScope();
+                        var authController = scope.ServiceProvider.GetRequiredService<AuthController>();
+                        barrier.SignalAndWait();
+                        authController.DeleteDevice(new DeleteDeviceDto
+                        {
+                            AccountGuid = accountGuid,
+                            Thumbprint = cert.Thumbprint,
+                            CurrentDeviceId = keepDeviceId,
+                            DeviceId = sharedDeviceId,
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        deleteException = ex;
+                    }
+                });
+
+                var signUpThread = new Thread(() =>
+                {
+                    try
+                    {
+                        using var scope = ServiceProvider.CreateScope();
+                        var signupController = scope.ServiceProvider.GetRequiredService<SignUpController>();
+                        barrier.SignalAndWait();
+                        signupController.SignUp(new SignupDto
+                        {
+                            Email = newEmail,
+                            UserGuid = Guid.NewGuid(),
+                            DeviceId = sharedDeviceId,
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        signUpException = ex;
+                    }
+                });
+
+                deleteThread.Start();
+                signUpThread.Start();
+                deleteThread.Join();
+                signUpThread.Join();
+
+                Assert.That(deleteException, Is.Null,
+                    $"Attempt {attempt}: DeleteDevice should not throw: {deleteException}");
+                Assert.That(signUpException, Is.Null,
+                    $"Attempt {attempt}: a SignUp racing a DeleteDevice cleanup of the same device should not throw: {signUpException}");
+
+                using var verifyScope = ServiceProvider.CreateScope();
+                var userRepository = verifyScope.ServiceProvider.GetRequiredService<IUserRepository>();
+                Assert.That(userRepository.IsUsernameTaken(newEmail), Is.True,
+                    $"Attempt {attempt}: the user signed up on device {sharedDeviceId} must survive a concurrent " +
+                    "DeleteDevice cleanup of that same device.");
+            }
         }
 
         [Test]

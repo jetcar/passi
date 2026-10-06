@@ -24,6 +24,10 @@ using System.Net;
 [IgnoreAntiforgeryToken]
 public class ApiController : ControllerBase
 {
+    // Test seam: lets tests observe that the certificate loaded here is disposed, without
+    // changing Check's public contract (it still just reads the PEM-encoded cert string).
+    internal static Func<string, X509Certificate2> LoadCertificateFromPem = pem => X509Certificate2.CreateFromPem(pem);
+
     private readonly AppSetting _appSetting;
     private readonly IMyRestClient _myRestClient;
     private readonly IRandomGenerator _randomGenerator;
@@ -199,7 +203,7 @@ public class ApiController : ControllerBase
                 if (result2.IsSuccessful)
                 {
                     var cert = JsonConvert.DeserializeObject<CertificateDto>(result2.Content);
-                    var publicCertificate = X509Certificate2.CreateFromPem($"-----BEGIN CERTIFICATE-----\r\n{cert.PublicCert}\r\n-----END CERTIFICATE-----");
+                    using var publicCertificate = LoadCertificateFromPem($"-----BEGIN CERTIFICATE-----\r\n{cert.PublicCert}\r\n-----END CERTIFICATE-----");
                     if (publicCertificate.NotAfter < DateTime.UtcNow ||
                         publicCertificate.NotBefore > DateTime.UtcNow)
                     {

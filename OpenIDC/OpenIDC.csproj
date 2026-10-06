@@ -52,6 +52,10 @@
 		<ProjectReference Include="..\Services\Services.csproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+		<InternalsVisibleTo Include="OpenIDCTests" />
+	</ItemGroup>
+
 	<ItemGroup>		<None Update="nlog.config">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>

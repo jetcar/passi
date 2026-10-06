@@ -12,6 +12,10 @@ public class CertHelper
 {
     private static readonly ILog _logger = LogManager.GetLogger(typeof(CertHelper));
 
+    // Test seam: lets tests observe that the certificate loaded here is disposed, without
+    // changing VerifyData's public contract (callers still just pass the base64 cert string).
+    internal static Func<byte[], X509Certificate2> LoadCertificate = X509CertificateLoader.LoadCertificate;
+
     public static bool VerifyData(string data, string signedData, string base64PublicCert)
     {
         if (data == null)
@@ -32,14 +36,14 @@ public class CertHelper
 
         _logger.Debug($"VerifyData called with data length: {data.Length}, signedData length: {signedData.Length}, cert length: {base64PublicCert.Length}");
 
-        var parentCert = X509CertificateLoader.LoadCertificate(Convert.FromBase64String(base64PublicCert));
+        using var parentCert = LoadCertificate(Convert.FromBase64String(base64PublicCert));
 
         using (var sha512 = SHA512.Create())
         {
             // ComputeHash - returns byte array
             byte[] bytes = sha512.ComputeHash(Encoding.ASCII.GetBytes(data));
 
-            var rsaPublicKey = parentCert.GetRSAPublicKey();
+            using var rsaPublicKey = parentCert.GetRSAPublicKey();
             if (rsaPublicKey == null)
             {
                 _logger.Error("VerifyData called with a certificate that has no RSA public key");

@@ -36,4 +36,8 @@
 		<ProjectReference Include="..\RedisClient\RedisClient.csproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+		<InternalsVisibleTo Include="PassiWebApiTests" />
+	</ItemGroup>
+
 </Project>

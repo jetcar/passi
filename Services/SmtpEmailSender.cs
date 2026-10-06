@@ -39,7 +39,7 @@ namespace Services
         {
             if (Convert.ToBoolean(_appSetting["DoNotSendMail"]))
                 email = _appSetting["testMail"];
-            if (email == null)
+            if (email == null || client == null)
                 return Task.FromResult(SuccessResult);
             var message = new MailMessage(_appSetting["emailFrom"], email)
             {
@@ -77,7 +77,7 @@ namespace Services
         {
             if (Convert.ToBoolean(_appSetting["DoNotSendMail"]))
                 email = _appSetting["testMail"];
-            if (email == null)
+            if (email == null || client == null)
                 return Task.FromResult(SuccessResult);
             var message = new MailMessage(_appSetting["emailFrom"], email)
             {

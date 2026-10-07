@@ -10,10 +10,14 @@ namespace Services
     [Profile]
     public class CertValidator : ICertValidator
     {
+        // Test seam: lets tests observe that certificates loaded here are disposed, without
+        // changing the public contract (callers still just pass base64 cert strings/DTOs).
+        internal static Func<byte[], X509Certificate2> LoadCertificate = X509CertificateLoader.LoadCertificate;
+
         public void ValidateCertificate(string publicCertBase64, string email)
         {
             var fromBase64String = Convert.FromBase64String(publicCertBase64);
-            var publicCert = X509CertificateLoader.LoadCertificate(fromBase64String);
+            using var publicCert = LoadCertificate(fromBase64String);
 
             if (publicCert == null)
                 throw new BadRequestException("Certificate is missing");
@@ -27,10 +31,10 @@ namespace Services
         public void ValidateCertificate(CertificateUpdateDto newPublicCertDto, CertificateDb oldPublicCertDb)
         {
             var fromBase64String = Convert.FromBase64String(newPublicCertDto.PublicCert);
-            var newPublicCert = X509CertificateLoader.LoadCertificate(fromBase64String);
+            using var newPublicCert = LoadCertificate(fromBase64String);
 
             var oldBase64String = Convert.FromBase64String(oldPublicCertDb.PublicCert);
-            var oldpublicCert = X509CertificateLoader.LoadCertificate(oldBase64String);
+            using var oldpublicCert = LoadCertificate(oldBase64String);
 
             if (newPublicCert == null)
                 throw new BadRequestException("Certificate is missing");

@@ -2,10 +2,13 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Models;
 using NUnit.Framework;
 using passi_webapi.Controllers;
 using Repos;
@@ -122,6 +125,65 @@ namespace PassiWebApiTests.Repos
 
             Assert.That(deviceCount, Is.EqualTo(1),
                 $"Expected exactly one Device row for device id {deviceId} but found {deviceCount}");
+        }
+
+        [Test]
+        public void ConfirmInvitationDisposesTheCertificateLoadedToReadItsThumbprint()
+        {
+            using var scope = ServiceProvider.CreateScope();
+            var userRepository = (UserRepository)scope.ServiceProvider.GetRequiredService<IUserRepository>();
+
+            var email = Guid.NewGuid() + "@passi.cloud";
+            const string code = "123456";
+            var deviceId = Guid.NewGuid().ToString();
+            var user = new UserDb
+            {
+                EmailHash = email,
+                Guid = Guid.NewGuid(),
+                Device = new DeviceDb { DeviceId = deviceId },
+            };
+            user.Invitations.Add(new UserInvitationDb { Code = code });
+            userRepository.AddUser(user);
+
+            var cert = CreateCertificate();
+            var trackingCert = new DisposeTrackingCertificate(cert.RawData);
+            var previousLoader = UserRepository.LoadCertificate;
+            UserRepository.LoadCertificate = _ => trackingCert;
+            try
+            {
+                userRepository.ConfirmInvitation(email, Convert.ToBase64String(cert.RawData), Guid.NewGuid().ToString(), code, deviceId);
+            }
+            finally
+            {
+                UserRepository.LoadCertificate = previousLoader;
+            }
+
+            // ConfirmInvitation loads a certificate purely to read its Thumbprint; nothing else
+            // owns it, so it must dispose it instead of leaking the native handle.
+            Assert.That(trackingCert.WasDisposed, Is.True);
+        }
+
+        private static X509Certificate2 CreateCertificate()
+        {
+            using var rsa = RSA.Create();
+            var request = new CertificateRequest($"cn={Guid.NewGuid()}", rsa, HashAlgorithmName.SHA512, RSASignaturePadding.Pkcs1);
+            return request.CreateSelfSigned(DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddYears(1));
+        }
+
+        // Lets the test observe whether ConfirmInvitation disposes the certificate it loaded.
+        private class DisposeTrackingCertificate : X509Certificate2
+        {
+            public bool WasDisposed { get; private set; }
+
+            public DisposeTrackingCertificate(byte[] rawData) : base(rawData)
+            {
+            }
+
+            protected override void Dispose(bool disposing)
+            {
+                WasDisposed = true;
+                base.Dispose(disposing);
+            }
         }
     }
 }

@@ -12,6 +12,10 @@ namespace Repos
     [Profile]
     public class UserRepository : BaseRepo<PassiDbContext>, IUserRepository
     {
+        // Test seam: lets tests observe that the certificate loaded here is disposed, without
+        // changing ConfirmInvitation's public contract (callers still just pass a base64 cert string).
+        internal static Func<byte[], X509Certificate2> LoadCertificate = X509CertificateLoader.LoadCertificate;
+
         public UserRepository(PassiDbContext dbContext) : base(dbContext)
         {
         }
@@ -53,11 +57,15 @@ namespace Repos
             var device = GetOrCreateDevice(deviceId);
 
             userInvitationDb.IsConfirmed = true;
+            string thumbprint;
+            using (var loadedCert = LoadCertificate(Convert.FromBase64String(publicCert)))
+            {
+                thumbprint = loadedCert.Thumbprint;
+            }
             _dbContext.Certificates.Add(new CertificateDb()
             {
                 PublicCert = publicCert,
-                Thumbprint =
-                    X509CertificateLoader.LoadCertificate(Convert.FromBase64String(publicCert)).Thumbprint,
+                Thumbprint = thumbprint,
                 User = userInvitationDb.User
             });
 

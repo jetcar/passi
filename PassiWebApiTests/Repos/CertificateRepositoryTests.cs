@@ -17,6 +17,32 @@ namespace PassiWebApiTests.Repos
     public class CertificateRepositoryTests : TestBase
     {
         [Test]
+        public void AddCertificateForANewDeviceLinksItToTheUsersDevices()
+        {
+            var signupController = ServiceProvider.GetRequiredService<SignUpController>();
+            var email = Guid.NewGuid() + "@passi.cloud";
+            var accountGuid = Guid.NewGuid();
+            var signupDeviceId = Guid.NewGuid().ToString();
+            var parentCert = ConfirmAccountOnDevice(signupController, email, accountGuid, signupDeviceId);
+
+            // A brand-new device, enrolled by having the signup device sign its certificate (the
+            // normal "add a device via certificate chaining" flow), not the device the user signed
+            // up on.
+            var newDeviceId = Guid.NewGuid().ToString();
+            var childThumbprint = Guid.NewGuid().ToString();
+            var certificateRepository = ServiceProvider.GetRequiredService<ICertificateRepository>();
+            certificateRepository.AddCertificate(childThumbprint, "child-cert-data", parentCert.Thumbprint, newDeviceId);
+
+            var userRepository = ServiceProvider.GetRequiredService<IUserRepository>();
+            var devices = userRepository.GetAccountDevices(accountGuid, parentCert.Thumbprint);
+
+            // AddCertificate enrolls the new device as the user's "current" device, but unless it is
+            // also linked into UserDevices, the user can never see or remove it via normal device
+            // management (AuthController.Devices / DeleteDevice only look at UserDevices).
+            Assert.That(devices.Select(x => x.DeviceId), Does.Contain(newDeviceId));
+        }
+
+        [Test]
         public void ConcurrentAddCertificateCallsForSameNewDeviceIdProduceExactlyOneDeviceRow()
         {
             const int concurrency = 15;

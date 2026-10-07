@@ -86,6 +86,27 @@ namespace OpenIDCTests
         }
 
         [Test]
+        public async Task CheckDisposesTheLoadedPublicCertificate()
+        {
+            var cert = MakeSelfSignedCert(notBefore: DateTimeOffset.UtcNow.AddDays(-2), notAfter: DateTimeOffset.UtcNow.AddDays(-1));
+            var trackingCert = new DisposeTrackingCertificate(cert.RawData);
+            var previousLoader = ApiController.LoadCertificateFromPem;
+            ApiController.LoadCertificateFromPem = _ => trackingCert;
+            try
+            {
+                await RunCheck(cert);
+            }
+            finally
+            {
+                ApiController.LoadCertificateFromPem = previousLoader;
+            }
+
+            // Check loads a certificate purely to read its validity window; nothing else owns
+            // it, so it must dispose it instead of leaking the native handle.
+            Assert.That(trackingCert.WasDisposed, Is.True);
+        }
+
+        [Test]
         public async Task CheckWithNoRandomStringAnywhereIsARejectionNotACrash()
         {
             var cert = MakeSelfSignedCert(DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddDays(1), out var rsa);
@@ -189,6 +210,22 @@ namespace OpenIDCTests
             public SequencedRestClient(IEnumerable<RestResponse> responses) => _responses = new Queue<RestResponse>(responses);
 
             public Task<RestResponse> ExecuteAsync(RestRequest request) => Task.FromResult(_responses.Dequeue());
+        }
+
+        // Lets the test observe whether Check disposes the certificate it loaded.
+        private class DisposeTrackingCertificate : X509Certificate2
+        {
+            public bool WasDisposed { get; private set; }
+
+            public DisposeTrackingCertificate(byte[] rawData) : base(rawData)
+            {
+            }
+
+            protected override void Dispose(bool disposing)
+            {
+                WasDisposed = true;
+                base.Dispose(disposing);
+            }
         }
     }
 }

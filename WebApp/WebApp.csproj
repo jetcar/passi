@@ -41,6 +41,9 @@
 		<ProjectReference Include="..\Services\Services.csproj" />
 	</ItemGroup>
 	<ItemGroup>
+		<InternalsVisibleTo Include="WebAppTests" />
+	</ItemGroup>
+	<ItemGroup>
 		<None Include="vue-project\**" />
 		<None Remove="vue-project\node_modules\**" />
 		<None Remove="vue-project\.vscode\**" />

@@ -18,6 +18,10 @@ namespace WebApp.Controllers;
 
 public class AuthenticationController : Controller
 {
+    // Test seam: lets tests observe that the certificate loaded in LogInCallback is disposed,
+    // without changing the controller's public contract.
+    internal static Func<byte[], X509Certificate2> LoadCertificate = X509CertificateLoader.LoadCertificate;
+
     private readonly IMyRestClient _myRest;
     private readonly ILogger<AuthenticationController> _logger;
     private readonly IOidcClient _oidcClient;
@@ -135,7 +139,7 @@ public class AuthenticationController : Controller
             if (requestResult.IsSuccessful)
             {
                 var cert = JsonConvert.DeserializeObject<SessionMinDto>(requestResult.Content);
-                var publicCertificate = X509CertificateLoader.LoadCertificate(Convert.FromBase64String(cert.PublicCert));
+                using var publicCertificate = LoadCertificate(Convert.FromBase64String(cert.PublicCert));
 
                 // Verify signature
                 var isValid = CertHelper.VerifyData(nonce, cert.SignedHash, cert.PublicCert);

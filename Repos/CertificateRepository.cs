@@ -39,7 +39,10 @@ namespace Repos
                 _dbContext.Devices.Add(device);
             }
 
-            var parentCert = _dbContext.Certificates.Include(x => x.User).FirstOrDefault(x => x.Thumbprint == parentCertThumbprint);
+            var parentCert = _dbContext.Certificates
+                .Include(x => x.User)
+                .ThenInclude(x => x.UserDevices)
+                .FirstOrDefault(x => x.Thumbprint == parentCertThumbprint);
             if (parentCert != null)
             {
                 var certificateDb = new CertificateDb()
@@ -50,6 +53,21 @@ namespace Repos
                     UserId = parentCert.UserId,
                 };
                 parentCert.User.Device = device;
+
+                // Certificate chaining can enroll a brand-new device (an existing trusted device
+                // signs the new device's certificate). That device must also be linked into
+                // UserDevices - mirroring UserRepository.EnsureUserDeviceLink - or the user can
+                // never see or remove it via normal device management (AuthController.Devices /
+                // DeleteDevice only look at UserDevices).
+                if (!parentCert.User.UserDevices.Any(x => x.Device == device || x.DeviceId == device.Id))
+                {
+                    parentCert.User.UserDevices.Add(new UserDeviceDb
+                    {
+                        User = parentCert.User,
+                        Device = device,
+                    });
+                }
+
                 _dbContext.Certificates.Add(certificateDb);
                 _dbContext.SaveChanges();
                 return certificateDb;

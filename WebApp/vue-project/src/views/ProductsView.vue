@@ -166,6 +166,51 @@
             </div>
           </div>
 
+          <!-- Decentralized Social Economy (deksirip) -->
+          <div class="col-lg-6">
+            <div class="product-card h-100">
+              <div class="product-header">
+                <div class="product-icon bg-success">
+                  <i class="bi bi-diagram-3-fill"></i>
+                </div>
+                <h3 class="product-title">Decentralized Social Economy</h3>
+                <span class="badge bg-success">Open Research</span>
+              </div>
+              <div class="product-body">
+                <p class="product-description">
+                  A research project modelling a society with social ownership, a social dividend,
+                  decentralized resource allocation and high automation. Experts and AI analyse,
+                  citizens decide. Includes an adversarial critique, a quantitative Sweden baseline,
+                  and a book on where economic surplus has gone through history.
+                </p>
+
+                <div class="product-features mb-4">
+                  <h5>Key Features:</h5>
+                  <ul>
+                    <li><i class="bi bi-check-circle-fill text-success"></i> Refined Concept &amp; Open Questions</li>
+                    <li><i class="bi bi-check-circle-fill text-success"></i> Adversarial Critique</li>
+                    <li><i class="bi bi-check-circle-fill text-success"></i> Sweden Baseline Calculation</li>
+                    <li><i class="bi bi-check-circle-fill text-success"></i> Economic History Book</li>
+                    <li><i class="bi bi-check-circle-fill text-success"></i> Russian &amp; English</li>
+                  </ul>
+                </div>
+
+                <div class="product-actions">
+                  <a href="https://github.com/jetcar/deksirip" target="_blank" class="btn btn-success">
+                    <i class="bi bi-github me-2"></i>View on GitHub
+                  </a>
+                  <a href="https://github.com/jetcar/deksirip/blob/main/README.en.md" target="_blank" class="btn btn-outline-secondary">
+                    <i class="bi bi-book me-2"></i>Read Concept
+                  </a>
+                </div>
+
+                <div class="product-tech-stack mt-4">
+                  <small class="text-muted">Format: Markdown texts, CSV models · CC BY 4.0</small>
+                </div>
+              </div>
+            </div>
+          </div>
+
         </div>
 
         <!-- Additional Info Section -->

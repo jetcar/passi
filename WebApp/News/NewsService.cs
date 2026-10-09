@@ -129,7 +129,18 @@ namespace WebApp.News
                 AuthorEmail = authorEmail,
             };
             _db.NewsPosts.Add(post);
-            await _db.SaveChangesAsync();
+            try
+            {
+                await _db.SaveChangesAsync();
+            }
+            catch (DbUpdateException)
+            {
+                // A concurrent request inserted the same explicit slug between our check above and this
+                // insert; the unique index on Slug is what actually prevents the duplicate.
+                _db.ChangeTracker.Clear();
+                throw new NewsValidationException($"Slug '{slug}' is already used");
+            }
+
             return post;
         }
 
@@ -151,7 +162,17 @@ namespace WebApp.News
             post.Summary = input.Summary?.Trim() ?? "";
             post.BodyMarkdown = input.BodyMarkdown ?? "";
             post.UpdatedAt = _utcNow();
-            await _db.SaveChangesAsync();
+            try
+            {
+                await _db.SaveChangesAsync();
+            }
+            catch (DbUpdateException)
+            {
+                // A concurrent request claimed the same new slug between our check above and this save.
+                _db.ChangeTracker.Clear();
+                throw new NewsValidationException($"Slug '{post.Slug}' is already used");
+            }
+
             return post;
         }
 

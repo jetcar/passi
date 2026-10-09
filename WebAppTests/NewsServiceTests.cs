@@ -1,8 +1,10 @@
 using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using NUnit.Framework;
 using WebApp;
 using WebApp.News;
@@ -205,6 +207,81 @@ namespace WebAppTests
             var post = await _service.CreateAsync(Input(), "a@b.c");
 
             Assert.ThrowsAsync<NewsNotFoundException>(() => _service.SetReactionAsync(post.Slug, "like", "v1", true));
+        }
+
+        /// <summary>
+        /// CreateAsync checks the slug is free, then inserts; between those two steps another request can
+        /// insert the same explicit slug first. Reproduces that interleaving deterministically (no thread
+        /// timing) by hooking into EF's save pipeline: when A is about to execute its INSERT, B's full
+        /// create-with-the-same-slug runs first and commits, so A's INSERT then hits the real unique
+        /// constraint on Slug.
+        /// </summary>
+        [Test]
+        public async Task CreateWithExplicitSlugRaceRejectsTheLoserInsteadOfThrowingDbUpdateException()
+        {
+            var interceptor = new RunOnceBeforeSaveInterceptor(async () =>
+            {
+                using var dbB = new WebAppDbContext(new DbContextOptionsBuilder<WebAppDbContext>().UseSqlite(_connection).Options);
+                var serviceB = new NewsService(dbB, () => _now);
+                await serviceB.CreateAsync(Input("Winner", slug: "race"), "b@two.com");
+            });
+
+            using var dbA = new WebAppDbContext(new DbContextOptionsBuilder<WebAppDbContext>()
+                .UseSqlite(_connection)
+                .AddInterceptors(interceptor)
+                .Options);
+            var serviceA = new NewsService(dbA, () => _now);
+
+            Assert.ThrowsAsync<NewsValidationException>(() => serviceA.CreateAsync(Input("Loser", slug: "race"), "a@one.com"));
+
+            var withThatSlug = (await _service.ListAllAsync()).Count(p => p.Slug == "race");
+            Assert.That(withThatSlug, Is.EqualTo(1));
+        }
+
+        /// <summary>Same race as above, but for renaming an existing post's slug via UpdateAsync.</summary>
+        [Test]
+        public async Task UpdateSlugRaceRejectsTheLoserInsteadOfThrowingDbUpdateException()
+        {
+            var existing = await _service.CreateAsync(Input("Existing", slug: "existing"), "a@one.com");
+
+            var interceptor = new RunOnceBeforeSaveInterceptor(async () =>
+            {
+                using var dbB = new WebAppDbContext(new DbContextOptionsBuilder<WebAppDbContext>().UseSqlite(_connection).Options);
+                var serviceB = new NewsService(dbB, () => _now);
+                await serviceB.CreateAsync(Input("Winner", slug: "race"), "b@two.com");
+            });
+
+            using var dbA = new WebAppDbContext(new DbContextOptionsBuilder<WebAppDbContext>()
+                .UseSqlite(_connection)
+                .AddInterceptors(interceptor)
+                .Options);
+            var serviceA = new NewsService(dbA, () => _now);
+
+            Assert.ThrowsAsync<NewsValidationException>(() =>
+                serviceA.UpdateAsync(existing.Slug, Input("Renamed", slug: "race")));
+
+            var withThatSlug = (await _service.ListAllAsync()).Count(p => p.Slug == "race");
+            Assert.That(withThatSlug, Is.EqualTo(1));
+        }
+
+        private class RunOnceBeforeSaveInterceptor : SaveChangesInterceptor
+        {
+            private readonly Func<Task> _onFirstSave;
+            private bool _fired;
+
+            public RunOnceBeforeSaveInterceptor(Func<Task> onFirstSave) => _onFirstSave = onFirstSave;
+
+            public override async ValueTask<InterceptionResult<int>> SavingChangesAsync(
+                DbContextEventData eventData, InterceptionResult<int> result, CancellationToken cancellationToken = default)
+            {
+                if (!_fired)
+                {
+                    _fired = true;
+                    await _onFirstSave();
+                }
+
+                return await base.SavingChangesAsync(eventData, result, cancellationToken);
+            }
         }
     }
 }

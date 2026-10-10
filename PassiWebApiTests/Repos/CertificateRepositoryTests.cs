@@ -115,6 +115,22 @@ namespace PassiWebApiTests.Repos
                 $"Expected exactly one Device row for device id {sharedDeviceId} but found {deviceCount}");
         }
 
+        [Test]
+        public void GetUserCertificateMatchesEmailRegardlessOfCase()
+        {
+            var signupController = ServiceProvider.GetRequiredService<SignUpController>();
+            var certificateRepository = ServiceProvider.GetRequiredService<ICertificateRepository>();
+
+            var email = $"User.{Guid.NewGuid()}@Passi.Cloud";
+            var deviceId = Guid.NewGuid().ToString();
+            var cert = ConfirmAccountOnDevice(signupController, email, Guid.NewGuid(), deviceId);
+
+            var found = certificateRepository.GetUserCertificate(email.ToLowerInvariant(), cert.Thumbprint);
+
+            Assert.That(found, Is.Not.Null,
+                "A certificate lookup must still find the user when the username is sent in a different case than the email was stored in.");
+        }
+
         private static X509Certificate2 ConfirmAccountOnDevice(SignUpController signupController, string email, Guid accountGuid, string deviceId)
         {
             signupController.SignUp(new SignupDto

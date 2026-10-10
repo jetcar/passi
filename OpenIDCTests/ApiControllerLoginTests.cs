@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using NUnit.Framework;
 using RestSharp;
 using Services;
+using WebApiDto;
 using WebApiDto.Auth;
 
 namespace OpenIDCTests
@@ -72,9 +73,38 @@ namespace OpenIDCTests
             Assert.That(numbers.Count, Is.GreaterThan(5));
         }
 
+        [Test]
+        public async Task LoginReturnsBadRequestInsteadOfThrowingWhenPassiResponseBodyIsEmpty()
+        {
+            // The internal api/auth/start call can come back HTTP-successful with an empty/null body
+            // (e.g. a proxy truncating the response). Login must reject that cleanly instead of
+            // dereferencing a null LoginResponceDto.
+            var rest = new NullContentRestClient();
+            var appSetting = new AppSetting(new ConfigurationBuilder()
+                .AddInMemoryCollection(new Dictionary<string, string> { ["AppSetting:startRequest"] = "/api/auth/start" })
+                .Build()) { PrefferAppsettingFile = true };
+            var controller = new ApiController(new FixedRandom(), rest, appSetting, NullLogger<ApiController>.Instance, null, null);
+
+            var result = await controller.Login("https://site/cb", "nonce", "alice@passi.cloud", "SampleApp");
+
+            var badRequest = (BadRequestObjectResult)result;
+            Assert.That(((ApiResponseDto)badRequest.Value).errors, Is.EqualTo("Internal error"));
+        }
+
         private class FixedRandom : IRandomGenerator
         {
             public string GetNumbersString(int i) => new string('1', i);
+        }
+
+        private class NullContentRestClient : IMyRestClient
+        {
+            public Task<RestResponse> ExecuteAsync(RestRequest request) => Task.FromResult(new RestResponse(request)
+            {
+                StatusCode = HttpStatusCode.OK,
+                IsSuccessStatusCode = true,
+                ResponseStatus = ResponseStatus.Completed,
+                Content = "null",
+            });
         }
 
         private class CapturingRestClient : IMyRestClient

@@ -86,6 +86,54 @@ namespace OpenIDCTests
         }
 
         [Test]
+        public async Task CheckReturnsBadRequestInsteadOfThrowingWhenCertificateLookupReturnsNull()
+        {
+            // The internal api/Certificate/Public call can come back HTTP-successful with an empty/null
+            // body (e.g. the lookup finding no matching record). Check must reject that cleanly instead
+            // of dereferencing a null CertificateDto.
+            var rest = new SequencedRestClient(new[]
+            {
+                // 1. checkRequest
+                MakeJsonResponse(new CheckResponceDto { Username = "alice@passi.cloud", PublicCertThumbprint = "thumb" }),
+                // 2. api/Certificate/Public - successful response, but with no certificate data
+                MakeJsonResponse<CertificateDto>(null),
+            });
+
+            var appSetting = new AppSetting(new ConfigurationBuilder()
+                .AddInMemoryCollection(new Dictionary<string, string> { ["AppSetting:checkRequest"] = "/api/auth/check" })
+                .Build())
+            { PrefferAppsettingFile = true };
+
+            var clientStore = new FixedClientStore(new OidcClient
+            {
+                ClientId = ClientId,
+                RedirectUris = new List<string> { RedirectUri },
+            });
+
+            var controller = new ApiController(new FixedRandom(), rest, appSetting, NullLogger<ApiController>.Instance, clientStore, new FakeAuthCodeStore());
+
+            var result = await controller.Check(sessionId: "session", nonce: "nonce", client_id: ClientId, redirect_uri: RedirectUri,
+                scope: null, state: null, code_challenge: null, code_challenge_method: null);
+
+            var badRequest = (BadRequestObjectResult)result;
+            Assert.That(((ApiResponseDto)badRequest.Value).errors, Is.EqualTo("Invalid Certificate"));
+        }
+
+        [Test]
+        public async Task CheckReturnsBadRequestInsteadOfThrowingWhenSessionLookupReturnsNull()
+        {
+            // The internal api/Auth/session call can come back HTTP-successful with an empty/null body
+            // too (e.g. the session having already expired out of the store). Check must reject that
+            // cleanly instead of dereferencing a null SessionMinDto.
+            var cert = MakeSelfSignedCert(DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddDays(1));
+
+            var result = await RunCheck(cert, session: null, nonce: "nonce");
+
+            var badRequest = (BadRequestObjectResult)result;
+            Assert.That(((ApiResponseDto)badRequest.Value).errors, Is.EqualTo("Invalid Signature"));
+        }
+
+        [Test]
         public async Task CheckDisposesTheLoadedPublicCertificate()
         {
             var cert = MakeSelfSignedCert(notBefore: DateTimeOffset.UtcNow.AddDays(-2), notAfter: DateTimeOffset.UtcNow.AddDays(-1));

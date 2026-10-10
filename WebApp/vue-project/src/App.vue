@@ -81,6 +81,11 @@ onMounted(() => {
                                             <i class="bi bi-diagram-3 me-2"></i>Decentralized Social Economy
                                         </a>
                                     </li>
+                                    <li>
+                                        <a href="https://github.com/jetcar/charp2p" target="_blank" class="dropdown-item">
+                                            <i class="bi bi-chat-dots me-2"></i>CharP2P
+                                        </a>
+                                    </li>
                                 </ul>
                             </li>
                             <li class="nav-item" v-if="isLoggedIn">
@@ -161,6 +166,7 @@ onMounted(() => {
                             <li class="mb-2"><a href="https://github.com/jetcar/eid-openidc" target="_blank" class="text-light text-decoration-none hover-link">eID OpenIDC</a></li>
                             <li class="mb-2"><a href="https://github.com/jetcar/tallinn-crashes" target="_blank" class="text-light text-decoration-none hover-link">Tallinn Crash Statistics</a></li>
                             <li class="mb-2"><a href="https://github.com/jetcar/deksirip" target="_blank" class="text-light text-decoration-none hover-link">Decentralized Social Economy</a></li>
+                            <li class="mb-2"><a href="https://github.com/jetcar/charp2p" target="_blank" class="text-light text-decoration-none hover-link">CharP2P</a></li>
                         </ul>
                     </div>
                     <div class="col-md-3 mb-4">

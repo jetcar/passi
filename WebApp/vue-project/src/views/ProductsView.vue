@@ -211,6 +211,50 @@
             </div>
           </div>
 
+          <!-- CharP2P -->
+          <div class="col-lg-6">
+            <div class="product-card h-100">
+              <div class="product-header">
+                <div class="product-icon bg-warning">
+                  <i class="bi bi-chat-dots-fill"></i>
+                </div>
+                <h3 class="product-title">CharP2P</h3>
+                <span class="badge bg-warning text-dark">In Development</span>
+              </div>
+              <div class="product-body">
+                <p class="product-description">
+                  A private, peer-to-peer group chat for Windows and Android. A shared invite opens the app,
+                  finds online group members through an open peer-discovery network, and synchronizes
+                  messages directly or through a relay &mdash; with no central chat service storing your messages.
+                </p>
+
+                <div class="product-features mb-4">
+                  <h5>Key Features:</h5>
+                  <ul>
+                    <li><i class="bi bi-check-circle-fill text-warning"></i> Private, Invite-only Groups</li>
+                    <li><i class="bi bi-check-circle-fill text-warning"></i> End-to-end Protected Messages</li>
+                    <li><i class="bi bi-check-circle-fill text-warning"></i> Open DHT Discovery &amp; Relay Fallback</li>
+                    <li><i class="bi bi-check-circle-fill text-warning"></i> No Central Message Storage</li>
+                    <li><i class="bi bi-check-circle-fill text-warning"></i> Windows &amp; Android Apps</li>
+                  </ul>
+                </div>
+
+                <div class="product-actions">
+                  <a href="https://github.com/jetcar/charp2p" target="_blank" class="btn btn-warning">
+                    <i class="bi bi-github me-2"></i>View on GitHub
+                  </a>
+                  <a href="https://github.com/jetcar/charp2p#readme" target="_blank" class="btn btn-outline-secondary">
+                    <i class="bi bi-book me-2"></i>Documentation
+                  </a>
+                </div>
+
+                <div class="product-tech-stack mt-4">
+                  <small class="text-muted">Built with: Rust, libp2p, Tauri</small>
+                </div>
+              </div>
+            </div>
+          </div>
+
         </div>
 
         <!-- Additional Info Section -->

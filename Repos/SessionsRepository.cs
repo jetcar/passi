@@ -25,7 +25,7 @@ namespace Repos
 
         public SessionTempRecord BeginSession(string username, string clientId, string randomString, string color, string returnUrl, int? checkNumber = null)
         {
-            var user = _dbContext.Users.First(x => x.EmailHash == username);
+            var user = _dbContext.Users.First(x => x.EmailHash.ToLower() == username.ToLower());
             var sessionDb = new SessionTempRecord()
             {
                 Guid = Guid.NewGuid(),
@@ -116,7 +116,7 @@ namespace Repos
 
         public SimpleSessionDb GetAuthorizedSession(Guid sessionId, string thunbprint, string username)
         {
-            var certificate = _dbContext.Certificates.Include(x => x.User).FirstOrDefault(x => x.Thumbprint == thunbprint && x.User.EmailHash == username);
+            var certificate = _dbContext.Certificates.Include(x => x.User).FirstOrDefault(x => x.Thumbprint == thunbprint && x.User.EmailHash.ToLower() == username.ToLower());
             if (certificate == null)
                 return null;
             return _dbContext.Sessions.FirstOrDefault(x => x.Guid == sessionId && x.UserId == certificate.User.Id);
@@ -124,7 +124,7 @@ namespace Repos
 
         public CertificateDb GetCertificate(string username, string thumbprint)
         {
-            return _dbContext.Certificates.FirstOrDefault(x => x.Thumbprint == thumbprint && x.User.EmailHash == username);
+            return _dbContext.Certificates.FirstOrDefault(x => x.Thumbprint == thumbprint && x.User.EmailHash.ToLower() == username.ToLower());
         }
     }
 

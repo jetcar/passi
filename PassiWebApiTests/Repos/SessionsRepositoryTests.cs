@@ -122,6 +122,42 @@ namespace PassiWebApiTests.Repos
             Assert.That(authorized.Guid, Is.EqualTo(session.Guid));
         }
 
+        [Test]
+        public void BeginSessionMatchesEmailRegardlessOfCase()
+        {
+            var signupController = ServiceProvider.GetService<SignUpController>();
+            var sessionsRepository = ServiceProvider.GetService<ISessionsRepository>();
+
+            var email = $"User.{Guid.NewGuid()}@Passi.Cloud";
+            var deviceId = Guid.NewGuid().ToString();
+            ConfirmAccountOnDevice(signupController, email, Guid.NewGuid(), deviceId);
+
+            // AuthController.Start only gets this far because IsUsernameTaken/GetUser already match
+            // case-insensitively; BeginSession must not then crash with "Sequence contains no
+            // matching element" when the login is started with a different case than the email was
+            // originally stored in.
+            Assert.DoesNotThrow(() =>
+                sessionsRepository.BeginSession(email.ToLowerInvariant(), "SampleApp", "123456", "blue", "https://localhost/callback"));
+        }
+
+        [Test]
+        public void GetAuthorizedSessionMatchesEmailRegardlessOfCase()
+        {
+            var signupController = ServiceProvider.GetService<SignUpController>();
+            var sessionsRepository = ServiceProvider.GetService<ISessionsRepository>();
+
+            var email = $"User.{Guid.NewGuid()}@Passi.Cloud";
+            var deviceId = Guid.NewGuid().ToString();
+            var cert = ConfirmAccountOnDevice(signupController, email, Guid.NewGuid(), deviceId);
+
+            var session = sessionsRepository.BeginSession(email, "SampleApp", "123456", "blue", "https://localhost/callback");
+
+            var authorized = sessionsRepository.GetAuthorizedSession(session.Guid, cert.Thumbprint, email.ToLowerInvariant());
+
+            Assert.That(authorized, Is.Not.Null,
+                "A certificate-authorized request must still be recognized when the username is sent in a different case than it was stored in.");
+        }
+
         private static X509Certificate2 ConfirmAccountOnDevice(SignUpController signupController, string email, Guid accountGuid, string deviceId)
         {
             signupController.SignUp(new SignupDto

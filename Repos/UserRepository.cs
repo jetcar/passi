@@ -22,7 +22,7 @@ namespace Repos
 
         public bool IsUsernameTaken(string username)
         {
-            return _dbContext.Users.Any(x => x.EmailHash == username);
+            return _dbContext.Users.Any(x => x.EmailHash.ToLower() == username.ToLower());
         }
 
         public UserDb AddUser(UserDb user)
@@ -38,7 +38,7 @@ namespace Repos
 
         public bool ValidateConfirmationCode(string email, string code)
         {
-            var validateConfirmationCode = _dbContext.Invitations.FirstOrDefault(x => x.User.EmailHash == email && x.Code == code && x.IsConfirmed == false);
+            var validateConfirmationCode = _dbContext.Invitations.FirstOrDefault(x => x.User.EmailHash.ToLower() == email.ToLower() && x.Code == code && x.IsConfirmed == false);
             return validateConfirmationCode != null && validateConfirmationCode.TryCount < 10;
         }
 
@@ -47,7 +47,7 @@ namespace Repos
             var userInvitationDb = _dbContext.Invitations
                 .Include(x => x.User)
                 .ThenInclude(x => x.UserDevices)
-                .FirstOrDefault(x => x.User.EmailHash == email && x.Code == code);
+                .FirstOrDefault(x => x.User.EmailHash.ToLower() == email.ToLower() && x.Code == code);
 
             if (userInvitationDb == null)
             {
@@ -125,7 +125,7 @@ namespace Repos
 
         public bool IsUserFinished(string username)
         {
-            return _dbContext.Users.Any(x => x.EmailHash == username && x.Invitations.Any(a => a.IsConfirmed));
+            return _dbContext.Users.Any(x => x.EmailHash.ToLower() == username.ToLower() && x.Invitations.Any(a => a.IsConfirmed));
         }
 
         public UserDb GetUser(string username)
@@ -135,7 +135,7 @@ namespace Repos
                 .Include(x => x.Certificates)
                 .Include(x => x.UserDevices)
                 .ThenInclude(x => x.Device)
-                .First(x => x.EmailHash == username);
+                .First(x => x.EmailHash.ToLower() == username.ToLower());
         }
 
         public IReadOnlyList<DeviceDb> GetAccountDevices(Guid accountGuid, string thumbprint)
@@ -202,7 +202,7 @@ namespace Repos
 
         public void IncreaseFailedRetryCount(string email)
         {
-            var invitations = _dbContext.Invitations.Where(x => x.User.EmailHash == email).ToList();
+            var invitations = _dbContext.Invitations.Where(x => x.User.EmailHash.ToLower() == email.ToLower()).ToList();
             foreach (var userInvitationDb in invitations)
             {
                 userInvitationDb.TryCount++;
@@ -213,7 +213,7 @@ namespace Repos
 
         public string GetCode(string email)
         {
-            return _dbContext.Invitations.Where(x => x.User.EmailHash == email && x.IsConfirmed == false && x.TryCount < 10)
+            return _dbContext.Invitations.Where(x => x.User.EmailHash.ToLower() == email.ToLower() && x.IsConfirmed == false && x.TryCount < 10)
                 .OrderByDescending(x => x.Id).Select(x => x.Code).FirstOrDefault();
         }
 

@@ -185,5 +185,27 @@ namespace PassiWebApiTests.Repos
                 base.Dispose(disposing);
             }
         }
+
+        // EmailHash is the plain (trimmed) email, not an actual hash, and mobile keyboards commonly
+        // auto-capitalize the first letter of an email field on signup. A later login attempt with the
+        // email typed in a different case must still find the account instead of reporting it as
+        // unregistered.
+        [Test]
+        public void IsUsernameTakenMatchesEmailRegardlessOfCase()
+        {
+            using var scope = ServiceProvider.CreateScope();
+            var userRepository = scope.ServiceProvider.GetRequiredService<IUserRepository>();
+            var email = $"User.{Guid.NewGuid()}@Passi.Cloud";
+
+            userRepository.AddUser(new UserDb
+            {
+                EmailHash = email,
+                Guid = Guid.NewGuid(),
+                Device = new DeviceDb { DeviceId = Guid.NewGuid().ToString() }
+            });
+
+            Assert.That(userRepository.IsUsernameTaken(email.ToLowerInvariant()), Is.True,
+                "A signup stored as mixed-case must still be found when logging in with the lower-case form of the same email.");
+        }
     }
 }

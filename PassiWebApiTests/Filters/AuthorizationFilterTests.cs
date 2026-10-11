@@ -65,5 +65,25 @@ namespace PassiWebApiTests.Filters
 
             Assert.That(filterContext.Result, Is.Null);
         }
+
+        // Admin rows are provisioned by hand (DB seed/migration), independently of however the
+        // identity provider happens to case the login claim. The filter must not deny a real admin
+        // just because the two differ only in case.
+        [Test]
+        public void RequestFromAdminIdentityIsAllowedRegardlessOfCase()
+        {
+            using var scope = ServiceProvider.CreateScope();
+            var dbContext = scope.ServiceProvider.GetRequiredService<PassiDbContext>();
+            var email = $"Admin.{Guid.NewGuid()}@Passi.Cloud";
+            dbContext.Admins.Add(new Models.AdminDb { Email = email });
+            dbContext.SaveChanges();
+
+            var identity = new ClaimsIdentity(new[] { new Claim(ClaimTypes.NameIdentifier, email.ToLowerInvariant()) }, "TestAuth");
+            var filterContext = CreateFilterContext(scope.ServiceProvider, new ClaimsPrincipal(identity));
+
+            new Authorization().OnAuthorization(filterContext);
+
+            Assert.That(filterContext.Result, Is.Null);
+        }
     }
 }

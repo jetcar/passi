@@ -5,6 +5,7 @@ namespace WebApiDto.SignUp
 {
     public class SignupDto
     {
+        [Required]
         [EmailAddress]
         public string Email { get; set; }
 

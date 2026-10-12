@@ -156,6 +156,12 @@ public class AuthenticationController : Controller
                 identity.AddClaim(new Claim("ValidFrom", publicCertificate.NotBefore.ToShortDateString()));
                 identity.AddClaim(new Claim("ValidTo", publicCertificate.NotAfter.ToShortDateString()));
             }
+            else
+            {
+                _logger.LogError("Session/certificate validation call failed for user: {Username}, StatusCode: {StatusCode}",
+                    username, requestResult.StatusCode);
+                throw new UnauthorizedAccessException("Session validation failed");
+            }
         }
         else
         {

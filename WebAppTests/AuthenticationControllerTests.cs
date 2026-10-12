@@ -86,6 +86,48 @@ namespace WebAppTests
             Assert.That(trackingCert.WasDisposed, Is.True);
         }
 
+        [Test]
+        public async Task LogInCallbackThrowsWhenSessionValidationCallFails()
+        {
+            const string state = "state-2";
+            const string nonce = "nonce-2";
+            var cache = new FakeDistributedCache();
+            await cache.SetStringAsync($"oauth:state:{state}", state);
+            await cache.SetStringAsync($"oauth:nonce:{state}", nonce);
+            await cache.SetStringAsync($"oauth:verifier:{state}", "verifier-2");
+            await cache.SetStringAsync($"oauth:returnurl:{state}", "/");
+
+            // Simulates passiwebapi being unreachable or returning an error for the session/certificate check.
+            var rest = new FakeRestClient(new RestResponse
+            {
+                StatusCode = HttpStatusCode.ServiceUnavailable,
+                IsSuccessStatusCode = false,
+                ResponseStatus = ResponseStatus.Completed,
+            });
+            var oidcClient = new FakeOidcClient();
+
+            var services = new ServiceCollection()
+                .AddSingleton<IAuthenticationService>(new FakeAuthenticationService())
+                .BuildServiceProvider();
+
+            var controller = new AuthenticationController(rest, NullLogger<AuthenticationController>.Instance, oidcClient, cache)
+            {
+                ControllerContext = new ControllerContext
+                {
+                    HttpContext = new DefaultHttpContext
+                    {
+                        Request = { Scheme = "https", Host = new HostString("passi.example") },
+                        RequestServices = services,
+                    },
+                },
+            };
+
+            // The thumbprint claim is present, so the certificate check is required. If the call to
+            // check it fails (instead of coming back with a definite valid/invalid answer), login must
+            // be rejected rather than falling through to a successful sign-in.
+            Assert.ThrowsAsync<UnauthorizedAccessException>(() => controller.LogInCallback("code-1", state));
+        }
+
         private static string Sign(string data, X509Certificate2 certificate)
         {
             using var sha512 = SHA512.Create();

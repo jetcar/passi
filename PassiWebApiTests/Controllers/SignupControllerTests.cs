@@ -377,5 +377,70 @@ namespace PassiWebApiTests.Controllers
             var exception = Assert.Throws<BadRequestException>(() => controller.Confirm(signupConfirmationDto));
             Assert.That(exception.Message == "Code not found");
         }
+
+        // Check is an unauthenticated oracle for the same invitation code Confirm protects with a
+        // 10-attempt lockout (ValidateConfirmationCode / IncreaseFailedRetryCount). If Check never
+        // reports failed attempts back to the repository, an attacker can brute-force the 6-digit
+        // code through Check with no lockout, then use the discovered code against Confirm.
+        [Test]
+        public void CheckLocksOutAfterTenFailedAttempts()
+        {
+            var controller = ServiceProvider.GetService<SignUpController>();
+            var signupDto = new SignupDto()
+            {
+                DeviceId = Guid.NewGuid().ToString(),
+                Email = Guid.NewGuid().ToString() + "@passi.cloud",
+                UserGuid = Guid.NewGuid()
+            };
+            controller.SignUp(signupDto);
+            var code = GetLatestCode(signupDto.Email);
+
+            for (var i = 0; i < 10; i++)
+            {
+                Assert.Throws<BadRequestException>(() => controller.Check(new SignupCheckDto
+                {
+                    Code = "wrong-code",
+                    Username = signupDto.Email
+                }));
+            }
+
+            var exception = Assert.Throws<BadRequestException>(() => controller.Check(new SignupCheckDto
+            {
+                Code = code,
+                Username = signupDto.Email
+            }));
+            Assert.That(exception.Message, Is.EqualTo("Code not found"));
+        }
+
+        // Same lockout bypass as CheckLocksOutAfterTenFailedAttempts, but through DeleteConfirmation.
+        [Test]
+        public void DeleteConfirmationLocksOutAfterTenFailedAttempts()
+        {
+            var controller = ServiceProvider.GetService<SignUpController>();
+            var signupDto = new SignupDto()
+            {
+                DeviceId = Guid.NewGuid().ToString(),
+                Email = Guid.NewGuid().ToString() + "@passi.cloud",
+                UserGuid = Guid.NewGuid()
+            };
+            controller.SignUp(signupDto);
+            var code = GetLatestCode(signupDto.Email);
+
+            for (var i = 0; i < 10; i++)
+            {
+                Assert.Throws<BadRequestException>(() => controller.DeleteConfirmation(new SignupCheckDto
+                {
+                    Code = "wrong-code",
+                    Username = signupDto.Email
+                }));
+            }
+
+            var exception = Assert.Throws<BadRequestException>(() => controller.DeleteConfirmation(new SignupCheckDto
+            {
+                Code = code,
+                Username = signupDto.Email
+            }));
+            Assert.That(exception.Message, Is.EqualTo("Code not found"));
+        }
     }
 }

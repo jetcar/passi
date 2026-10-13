@@ -111,7 +111,7 @@ namespace WebApp
         {
             app.Map(new PathString(""), (applicationBuilder) =>
             {
-                Tracer.CurrentTracer = app.ApplicationServices.GetService<IManagedTracer>();
+                applicationBuilder.UseCurrentTracerPerRequest();
 
                 applicationBuilder.UseRouting();
                 applicationBuilder.UseMiddleware<RequestLoggingMiddleware>();

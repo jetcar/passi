@@ -86,6 +86,37 @@ namespace OpenIDCTests
         }
 
         [Test]
+        public async Task CheckReturnsBadRequestInsteadOfThrowingWhenCheckRequestReturnsNull()
+        {
+            // The internal checkRequest call (api/auth/check) itself can come back HTTP-successful
+            // with an empty/null body too. Check must reject that cleanly instead of dereferencing
+            // a null CheckResponceDto.
+            var rest = new SequencedRestClient(new[]
+            {
+                // 1. checkRequest - successful response, but with no body
+                MakeJsonResponse<CheckResponceDto>(null),
+            });
+
+            var appSetting = new AppSetting(new ConfigurationBuilder()
+                .AddInMemoryCollection(new Dictionary<string, string> { ["AppSetting:checkRequest"] = "/api/auth/check" })
+                .Build())
+            { PrefferAppsettingFile = true };
+
+            var clientStore = new FixedClientStore(new OidcClient
+            {
+                ClientId = ClientId,
+                RedirectUris = new List<string> { RedirectUri },
+            });
+
+            var controller = new ApiController(new FixedRandom(), rest, appSetting, NullLogger<ApiController>.Instance, clientStore, new FakeAuthCodeStore());
+
+            var result = await controller.Check(sessionId: "session", nonce: "nonce", client_id: ClientId, redirect_uri: RedirectUri,
+                scope: null, state: null, code_challenge: null, code_challenge_method: null);
+
+            Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
+        }
+
+        [Test]
         public async Task CheckReturnsBadRequestInsteadOfThrowingWhenCertificateLookupReturnsNull()
         {
             // The internal api/Certificate/Public call can come back HTTP-successful with an empty/null

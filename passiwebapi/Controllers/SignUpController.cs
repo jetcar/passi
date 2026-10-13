@@ -126,7 +126,10 @@ namespace passi_webapi.Controllers
         {
             confirmationDto.Username = confirmationDto.Username.Trim();
             if (!_userRepository.ValidateConfirmationCode(confirmationDto.Username, confirmationDto.Code))
+            {
+                _userRepository.IncreaseFailedRetryCount(confirmationDto.Username);
                 throw new BadRequestException("Code not found");
+            }
 
             return Ok();
         }
@@ -162,7 +165,10 @@ namespace passi_webapi.Controllers
         public IActionResult DeleteConfirmation([FromBody] SignupCheckDto delete)
         {
             if (!_userRepository.ValidateConfirmationCode(delete.Username, delete.Code))
+            {
+                _userRepository.IncreaseFailedRetryCount(delete.Username);
                 throw new BadRequestException("Code not found");
+            }
             var strategy = _userRepository.GetExecutionStrategy();
             strategy.Execute(() =>
             {

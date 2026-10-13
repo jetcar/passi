@@ -138,7 +138,15 @@ public class AuthenticationController : Controller
 
             if (requestResult.IsSuccessful)
             {
-                var cert = JsonConvert.DeserializeObject<SessionMinDto>(requestResult.Content);
+                var cert = string.IsNullOrEmpty(requestResult.Content)
+                    ? null
+                    : JsonConvert.DeserializeObject<SessionMinDto>(requestResult.Content);
+                if (cert == null)
+                {
+                    _logger.LogError("Session/certificate validation returned no data for user: {Username}", username);
+                    throw new UnauthorizedAccessException("Session validation failed");
+                }
+
                 using var publicCertificate = LoadCertificate(Convert.FromBase64String(cert.PublicCert));
 
                 // Verify signature

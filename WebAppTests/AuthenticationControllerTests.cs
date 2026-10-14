@@ -87,6 +87,48 @@ namespace WebAppTests
         }
 
         [Test]
+        public async Task LogInCallbackThrowsWhenSessionValidationReturnsNull()
+        {
+            const string state = "state-3";
+            const string nonce = "nonce-3";
+            var cache = new FakeDistributedCache();
+            await cache.SetStringAsync($"oauth:state:{state}", state);
+            await cache.SetStringAsync($"oauth:nonce:{state}", nonce);
+            await cache.SetStringAsync($"oauth:verifier:{state}", "verifier-3");
+            await cache.SetStringAsync($"oauth:returnurl:{state}", "/");
+
+            // The internal api/Auth/session call can come back HTTP-successful with a null/empty
+            // body too (e.g. the session having already expired out of the store). LogInCallback
+            // must reject that cleanly instead of dereferencing a null SessionMinDto.
+            var rest = new FakeRestClient(new RestResponse
+            {
+                StatusCode = HttpStatusCode.OK,
+                IsSuccessStatusCode = true,
+                ResponseStatus = ResponseStatus.Completed,
+                Content = null,
+            });
+            var oidcClient = new FakeOidcClient();
+
+            var services = new ServiceCollection()
+                .AddSingleton<IAuthenticationService>(new FakeAuthenticationService())
+                .BuildServiceProvider();
+
+            var controller = new AuthenticationController(rest, NullLogger<AuthenticationController>.Instance, oidcClient, cache)
+            {
+                ControllerContext = new ControllerContext
+                {
+                    HttpContext = new DefaultHttpContext
+                    {
+                        Request = { Scheme = "https", Host = new HostString("passi.example") },
+                        RequestServices = services,
+                    },
+                },
+            };
+
+            Assert.ThrowsAsync<UnauthorizedAccessException>(() => controller.LogInCallback("code-1", state));
+        }
+
+        [Test]
         public async Task LogInCallbackThrowsWhenSessionValidationCallFails()
         {
             const string state = "state-2";

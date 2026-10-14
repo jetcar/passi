@@ -68,6 +68,7 @@ public class TestBase
     {
         TestEmailSender.Code = null;
         TestEmailSender.InvitationFailure = null;
+        TestEmailSender.DeletionFailure = null;
     }
 
     private static readonly SharedTestResource<IContainer> PgContainerResource = new(BuildAndStartPgContainer);
@@ -186,6 +187,7 @@ public class TestEmailSender : IEmailSender
 {
     public static string Code;
     public static Exception InvitationFailure;
+    public static Exception DeletionFailure;
 
     public Task<string> SendInvitationEmailAsync(String email, String code)
     {
@@ -196,6 +198,8 @@ public class TestEmailSender : IEmailSender
 
     public Task<string> SendDeletingEmailAsync(String email, String code)
     {
+        if (DeletionFailure != null)
+            return Task.FromException<string>(DeletionFailure);
         return Task.FromResult(Code = code);
     }
 }

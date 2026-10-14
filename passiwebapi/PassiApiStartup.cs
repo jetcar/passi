@@ -118,7 +118,7 @@ namespace passi_webapi
             InitializeDatabase(app.ApplicationServices);
             app.Map(new PathString("/passiapi"), (applicationBuilder) =>
             {
-                Tracer.CurrentTracer = app.ApplicationServices.GetService<IManagedTracer>();
+                applicationBuilder.UseCurrentTracerPerRequest();
                 if (env.IsDevelopment())
                 {
                     applicationBuilder.UseDeveloperExceptionPage();

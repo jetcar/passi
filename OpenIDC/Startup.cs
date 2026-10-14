@@ -142,7 +142,7 @@ public class Startup
 
         app.Map(new PathString("/openidc"), (appBuilder) =>
         {
-            Tracer.CurrentTracer = app.ApplicationServices.GetService<IManagedTracer>();
+            appBuilder.UseCurrentTracerPerRequest();
 
             appBuilder.UseMiddleware<RequestLoggingMiddleware>();
             appBuilder.UseCorrelationId(); // Add correlation ID tracking for all requests

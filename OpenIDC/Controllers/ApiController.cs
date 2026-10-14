@@ -199,7 +199,7 @@ public class ApiController : ControllerBase
         {
             var checkResponceDto = JsonConvert.DeserializeObject<CheckResponceDto>(result.Content);
 
-            if (checkResponceDto.PublicCertThumbprint != null)
+            if (checkResponceDto != null && checkResponceDto.PublicCertThumbprint != null)
             {
                 var request2 =
                     new RestRequest(

@@ -78,5 +78,31 @@ namespace ServicesTests
 
             Assert.That(sawMaxDigit, Is.True, "expected \"9\" to be producible, but it never appeared in 2000 draws");
         }
+
+        [Test]
+        public void GetNumbersStringOfTenDigitsCanProduceAFirstDigitAboveTwo()
+        {
+            // GetNumbersString(10) builds its range as (int)Math.Pow(10, 9) to (int)Math.Pow(10, 10).
+            // 10^10 overflows Int32 and the cast saturates to int.MaxValue (2147483647), so the
+            // generator can only ever draw from [1000000000, 2147483647) - every result starts with
+            // "1" or "2". A correct generator covering the full 10-digit range makes a first digit of
+            // "3".."9" overwhelmingly likely within 2000 draws (~87% per draw), so missing it entirely
+            // means the range is still truncated.
+            var randomGenerator = new RandomGenerator();
+
+            var sawHighFirstDigit = false;
+            for (int j = 0; j < 2000; j++)
+            {
+                var str = randomGenerator.GetNumbersString(10);
+                if (str[0] >= '3')
+                {
+                    sawHighFirstDigit = true;
+                    break;
+                }
+            }
+
+            Assert.That(sawHighFirstDigit, Is.True,
+                "expected a first digit of 3-9 to be producible for a 10-digit string, but it never appeared in 2000 draws");
+        }
     }
 }

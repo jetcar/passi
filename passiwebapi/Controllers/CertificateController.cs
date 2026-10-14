@@ -44,6 +44,8 @@ namespace passi_webapi.Controllers
                 using (var transaction = _certificateRepository.BeginTransaction())
                 {
                     var oldCertificate = _certificateRepository.GetCertificate(newCertificate.ParentCertThumbprint);
+                    if (oldCertificate == null)
+                        throw new BadRequestException("Parent certificate not found");
 
                     _certValidator.ValidateCertificateChain(newCertificate, oldCertificate);
                     _certValidator.ValidateCertificate(newCertificate, oldCertificate);

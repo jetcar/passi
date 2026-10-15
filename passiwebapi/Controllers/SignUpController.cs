@@ -155,8 +155,15 @@ namespace passi_webapi.Controllers
 
             if (deleteCode != null)
             {
-                await _userService.SendDeleteEmailAsync(delete.Email, deleteCode);
-                _logger.Debug("Delete confirmation email dispatch attempted.");
+                try
+                {
+                    await _userService.SendDeleteEmailAsync(delete.Email, deleteCode);
+                    _logger.Debug("Delete confirmation email dispatch attempted.");
+                }
+                catch (Exception ex)
+                {
+                    _logger.Error(ex, "Delete confirmation email failed.");
+                }
             }
             return Ok();
         }

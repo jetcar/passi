@@ -99,6 +99,51 @@ namespace PassiWebApiTests.Controllers
         }
 
         [Test]
+        public async Task DeleteLogsDeleteEmailFailureInsteadOfThrowing()
+        {
+            var target = new NLog.Targets.MemoryTarget("deleteEmailFailure")
+            {
+                Layout = "${level}|${message}|${exception:format=Message}"
+            };
+            var previousConfiguration = NLog.LogManager.Configuration;
+            var configuration = previousConfiguration ?? new NLog.Config.LoggingConfiguration();
+            configuration.AddRule(NLog.LogLevel.Error, NLog.LogLevel.Fatal, target, typeof(SignUpController).FullName);
+            NLog.LogManager.Configuration = configuration;
+            // The production IEmailSender is SendgridEmailSender, whose SendDeletingEmailAsync throws
+            // BadRequestException with SendGrid's raw response body on any non-success response. Delete
+            // awaited that call with no try/catch, so a transient provider failure turned an
+            // already-persisted delete code into a failed request and leaked the provider's response.
+            TestEmailSender.DeletionFailure = new InvalidOperationException("email provider down");
+            try
+            {
+                var controller = ServiceProvider.GetService<SignUpController>();
+                var email = Guid.NewGuid().ToString() + "@passi.cloud";
+                controller.SignUp(new SignupDto()
+                {
+                    DeviceId = Guid.NewGuid().ToString(),
+                    Email = email,
+                    UserGuid = Guid.NewGuid()
+                });
+
+                var result = await controller.Delete(new DeleteUserDto() { Email = email });
+
+                Assert.That(result, Is.Not.Null, "Delete must still return a response instead of letting the email failure propagate.");
+
+                for (var i = 0; i < 50 && target.Logs.Count == 0; i++)
+                    await Task.Delay(100);
+
+                Assert.That(target.Logs, Has.Count.EqualTo(1));
+                Assert.That(target.Logs[0], Does.StartWith("Error|"));
+                Assert.That(target.Logs[0], Does.Contain("email provider down"));
+            }
+            finally
+            {
+                TestEmailSender.DeletionFailure = null;
+                NLog.LogManager.Configuration = previousConfiguration;
+            }
+        }
+
+        [Test]
         public void SignUpConfirmRenewTest()
         {
             var controller = ServiceProvider.GetService<SignUpController>();

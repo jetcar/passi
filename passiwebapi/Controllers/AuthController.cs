@@ -52,6 +52,9 @@ namespace passi_webapi.Controllers
         [HttpPost, Route("Start")]
         public IActionResult Start([FromBody] StartLoginDto startLoginDto)
         {
+            if (startLoginDto == null)
+                return BadRequest("Invalid request");
+
             if (!_userRepository.IsUsernameTaken(startLoginDto.Username))
                 return BadRequest("username not found");
 

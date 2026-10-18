@@ -37,6 +37,9 @@ namespace passi_webapi.Controllers
         [HttpPost, Route("UpdatePublicCert")]
         public CertificateUpdateDto UpdatePublicCert([FromBody] CertificateUpdateDto newCertificate)
         {
+            if (newCertificate == null)
+                throw new BadRequestException("Invalid request");
+
             string cert = "";
             var strategy = _certificateRepository.GetExecutionStrategy();
             strategy.Execute(() =>

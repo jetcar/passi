@@ -163,6 +163,34 @@ namespace PassiWebApiTests.Repos
             Assert.That(trackingCert.WasDisposed, Is.True);
         }
 
+        // The client supplies Guid as a free-form string (SignupConfirmationDto.Guid has no format
+        // validation). When this is the first confirmation for a brand-new account (User.Guid is
+        // still Guid.Empty), ConfirmInvitation parses it to adopt as the account's canonical guid. A
+        // malformed value is bad client input and must surface as a 400, not crash the request.
+        [Test]
+        public void ConfirmInvitationRejectsAMalformedGuidAsAClientErrorInsteadOfCrashing()
+        {
+            using var scope = ServiceProvider.CreateScope();
+            var userRepository = scope.ServiceProvider.GetRequiredService<IUserRepository>();
+
+            var email = Guid.NewGuid() + "@passi.cloud";
+            const string code = "123456";
+            var deviceId = Guid.NewGuid().ToString();
+            var user = new UserDb
+            {
+                EmailHash = email,
+                Guid = Guid.Empty,
+                Device = new DeviceDb { DeviceId = deviceId },
+            };
+            user.Invitations.Add(new UserInvitationDb { Code = code });
+            userRepository.AddUser(user);
+
+            var cert = CreateCertificate();
+
+            Assert.Throws<ClientException>(() =>
+                userRepository.ConfirmInvitation(email, Convert.ToBase64String(cert.RawData), "not-a-guid", code, deviceId));
+        }
+
         private static X509Certificate2 CreateCertificate()
         {
             using var rsa = RSA.Create();

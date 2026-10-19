@@ -14,6 +14,17 @@ namespace PassiWebApiTests.Controllers
     public class CertificateControllerTests : TestBase
     {
         [Test]
+        public void UpdatePublicCertRejectsANullBodyAsBadRequestInsteadOfCrashing()
+        {
+            var certificateController = ServiceProvider.GetRequiredService<CertificateController>();
+
+            // A literal JSON "null" body is valid JSON and binds newCertificate to null; there is
+            // no [Required] on the parameter itself, so this must be rejected as a client error
+            // rather than dereferencing a null certificate record.
+            Assert.Throws<BadRequestException>(() => certificateController.UpdatePublicCert(null));
+        }
+
+        [Test]
         public void UpdatePublicCertRejectsAnUnknownParentCertThumbprintAsBadRequest()
         {
             var signupController = ServiceProvider.GetRequiredService<SignUpController>();

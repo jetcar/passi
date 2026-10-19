@@ -33,6 +33,9 @@ namespace passi_webapi.Controllers
         [HttpPost, Route("signup")]
         public IActionResult SignUp([FromBody] SignupDto signupDto)
         {
+            if (signupDto == null)
+                return BadRequest("Invalid request");
+
             signupDto.Email = signupDto.Email.Trim();
             string confirmationCode = null;
             var strategy = _userRepository.GetExecutionStrategy();

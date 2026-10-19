@@ -79,7 +79,11 @@ namespace Repos
             // (keyed on the canonical GUID) will not match any local account.
             if (userInvitationDb.User.Guid == Guid.Empty)
             {
-                userInvitationDb.User.Guid = Guid.Parse(guid);
+                if (!Guid.TryParse(guid, out var parsedGuid))
+                {
+                    throw new ClientException("Invalid account identifier");
+                }
+                userInvitationDb.User.Guid = parsedGuid;
             }
 
             _dbContext.SaveChanges();

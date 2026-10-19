@@ -89,6 +89,9 @@ namespace passi_webapi.Controllers
         [HttpPost, Route("confirm")]
         public IActionResult Confirm([FromBody] SignupConfirmationDto signupConfirmationDto)
         {
+            if (signupConfirmationDto == null)
+                return BadRequest("Invalid request");
+
             signupConfirmationDto.Email = signupConfirmationDto.Email.Trim();
             var accountGuid = Guid.Empty;
             var strategy = _userRepository.GetExecutionStrategy();

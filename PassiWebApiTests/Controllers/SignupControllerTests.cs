@@ -18,6 +18,19 @@ namespace PassiWebApiTests.Controllers
     public class SignupControllerTests : TestBase
     {
         [Test]
+        public void ConfirmRejectsANullBodyAsBadRequestInsteadOfCrashing()
+        {
+            var controller = ServiceProvider.GetService<SignUpController>();
+
+            // A literal JSON "null" body is valid JSON and binds signupConfirmationDto to null;
+            // there is no [Required] on the parameter itself, so this must be rejected as a 400,
+            // not dereferenced.
+            var result = controller.Confirm(null);
+
+            Assert.That(result, Is.InstanceOf<Microsoft.AspNetCore.Mvc.BadRequestObjectResult>());
+        }
+
+        [Test]
         public void SignUpTest()
         {
             var controller = ServiceProvider.GetService<SignUpController>();

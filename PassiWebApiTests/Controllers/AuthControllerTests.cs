@@ -34,6 +34,19 @@ namespace PassiWebApiTests.Controllers
         }
 
         [Test]
+        public void AuthorizeRejectsANullBodyAsBadRequestInsteadOfCrashing()
+        {
+            var authController = ServiceProvider.GetRequiredService<AuthController>();
+
+            // A literal JSON "null" body is valid JSON and binds authorizeDto to null; there is
+            // no [Required] on the parameter itself, so this must be rejected as a 400, not
+            // dereferenced.
+            var result = authController.Authorize(null);
+
+            Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
+        }
+
+        [Test]
         public void DevicesListsAllConfirmedDevicesAndDeletesNonCurrentDevice()
         {
             var signupController = ServiceProvider.GetService<SignUpController>();

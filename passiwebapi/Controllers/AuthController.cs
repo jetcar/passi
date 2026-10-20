@@ -141,6 +141,9 @@ namespace passi_webapi.Controllers
         [HttpPost, Route("Authorize")]
         public IActionResult Authorize([FromBody] AuthorizeDto authorizeDto)
         {
+            if (authorizeDto == null)
+                return BadRequest("Invalid request");
+
             var sessionDb = _sessionsRepository.CheckSessionAndReturnUser(authorizeDto.SessionId);
             if (sessionDb == null)
                 return BadRequest("Session not found");

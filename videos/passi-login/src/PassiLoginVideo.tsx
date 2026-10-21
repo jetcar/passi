@@ -1,5 +1,6 @@
 import {AbsoluteFill, Img, interpolate, Sequence, staticFile, useCurrentFrame} from 'remotion';
 import {BrowserLogin} from './BrowserLogin';
+import {PhoneChallenge} from './PhoneChallenge';
 
 export const PassiLoginVideo = () => {
   const frame = useCurrentFrame();
@@ -28,6 +29,20 @@ export const PassiLoginVideo = () => {
       </Sequence>
       <Sequence from={120} durationInFrames={240}>
         <BrowserLogin />
+      </Sequence>
+      <Sequence from={360} durationInFrames={270}>
+        <div style={{alignItems: 'center', display: 'flex', gap: 110, height: '100%', justifyContent: 'center', width: '100%'}}>
+          <div style={{maxWidth: 570}}>
+            <div style={{color: '#78bfff', fontSize: 24, fontWeight: 800, letterSpacing: 3}}>STEP TWO</div>
+            <div style={{fontSize: 66, fontWeight: 820, letterSpacing: -2, lineHeight: 1.05, marginTop: 18}}>
+              Approve on your phone.
+            </div>
+            <div style={{color: '#c5d8ec', fontSize: 29, lineHeight: 1.45, marginTop: 28}}>
+              Match the number, then confirm with your fingerprint or PIN.
+            </div>
+          </div>
+          <PhoneChallenge />
+        </div>
       </Sequence>
     </AbsoluteFill>
   );

@@ -1,6 +1,10 @@
 import {AbsoluteFill, Img, interpolate, Sequence, staticFile, useCurrentFrame} from 'remotion';
 import {BrowserLogin} from './BrowserLogin';
+import {BrowserChallenge} from './BrowserChallenge';
 import {PhoneChallenge} from './PhoneChallenge';
+import {FadeScene} from './FadeScene';
+import {OutroScene} from './OutroScene';
+import {SuccessScene} from './SuccessScene';
 
 export const PassiLoginVideo = () => {
   const frame = useCurrentFrame();
@@ -21,28 +25,41 @@ export const PassiLoginVideo = () => {
       }}
     >
       <Sequence durationInFrames={120}>
-        <div style={{alignItems: 'center', display: 'flex', flexDirection: 'column', opacity}}>
-          <Img src={staticFile('passi-icon.png')} style={{borderRadius: 52, height: 180, width: 180}} />
-          <div style={{fontSize: 112, fontWeight: 800, letterSpacing: -5, marginTop: 36}}>Passi</div>
-          <div style={{color: '#c7e3ff', fontSize: 38, marginTop: 16}}>Passwordless login. One secure tap.</div>
-        </div>
+        <FadeScene duration={120}>
+          <div style={{alignItems: 'center', display: 'flex', flexDirection: 'column', opacity}}>
+            <Img src={staticFile('passi-icon.png')} style={{borderRadius: 52, height: 180, width: 180}} />
+            <div style={{fontSize: 112, fontWeight: 800, letterSpacing: -5, marginTop: 36}}>Passi</div>
+            <div style={{color: '#c7e3ff', fontSize: 38, marginTop: 16}}>Passwordless login. One secure tap.</div>
+          </div>
+        </FadeScene>
       </Sequence>
       <Sequence from={120} durationInFrames={240}>
-        <BrowserLogin />
+        <FadeScene duration={240}><BrowserLogin /></FadeScene>
       </Sequence>
-      <Sequence from={360} durationInFrames={270}>
-        <div style={{alignItems: 'center', display: 'flex', gap: 110, height: '100%', justifyContent: 'center', width: '100%'}}>
-          <div style={{maxWidth: 570}}>
-            <div style={{color: '#78bfff', fontSize: 24, fontWeight: 800, letterSpacing: 3}}>STEP TWO</div>
-            <div style={{fontSize: 66, fontWeight: 820, letterSpacing: -2, lineHeight: 1.05, marginTop: 18}}>
-              Approve on your phone.
+      <Sequence from={360} durationInFrames={210}>
+        <FadeScene duration={210}><BrowserChallenge /></FadeScene>
+      </Sequence>
+      <Sequence from={570} durationInFrames={270}>
+        <FadeScene duration={270}>
+          <div style={{alignItems: 'center', display: 'flex', gap: 110, height: '100%', justifyContent: 'center', width: '100%'}}>
+            <div style={{maxWidth: 570}}>
+              <div style={{color: '#78bfff', fontSize: 24, fontWeight: 800, letterSpacing: 3}}>STEP TWO</div>
+              <div style={{fontSize: 66, fontWeight: 820, letterSpacing: -2, lineHeight: 1.05, marginTop: 18}}>
+                Approve on your phone.
+              </div>
+              <div style={{color: '#c5d8ec', fontSize: 29, lineHeight: 1.45, marginTop: 28}}>
+                Match the number, then confirm with your fingerprint or PIN.
+              </div>
             </div>
-            <div style={{color: '#c5d8ec', fontSize: 29, lineHeight: 1.45, marginTop: 28}}>
-              Match the number, then confirm with your fingerprint or PIN.
-            </div>
+            <PhoneChallenge />
           </div>
-          <PhoneChallenge />
-        </div>
+        </FadeScene>
+      </Sequence>
+      <Sequence from={840} durationInFrames={150}>
+        <FadeScene duration={150}><SuccessScene /></FadeScene>
+      </Sequence>
+      <Sequence from={990} durationInFrames={210}>
+        <FadeScene duration={210}><OutroScene /></FadeScene>
       </Sequence>
     </AbsoluteFill>
   );

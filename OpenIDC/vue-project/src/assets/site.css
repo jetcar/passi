@@ -124,7 +124,7 @@ body {
     display: grid;
     grid-template-columns: minmax(0, 1.08fr) minmax(360px, 0.92fr);
     width: min(1160px, 100%);
-    min-height: 680px;
+    min-height: min(680px, calc(100vh - 80px));
     overflow: hidden;
     background: #f8fbff;
     border-radius: 28px;
@@ -325,8 +325,187 @@ body {
     text-align: center;
 }
 
+.auth-challenge-panel {
+    justify-content: center;
+}
+
+.auth-challenge-copy {
+    margin-top: 46px;
+}
+
+.device-list {
+    display: grid;
+    gap: 10px;
+    margin-top: 34px;
+    padding: 20px 22px;
+    border: 1px solid #dce5ef;
+    border-radius: 18px;
+    background: white;
+}
+
+.device-list-label {
+    color: #778497;
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+}
+
+.device-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 44px;
+}
+
+.device-card + .device-card {
+    padding-top: 10px;
+    border-top: 1px solid #edf2f7;
+}
+
+.device-icon {
+    display: grid;
+    flex: 0 0 34px;
+    width: 34px;
+    height: 34px;
+    place-items: center;
+    border-radius: 10px;
+    background: #e8f4ff;
+    color: #137ecb;
+}
+
+.device-icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+.device-name {
+    overflow: hidden;
+    color: #152943;
+    font-size: 1.02rem;
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.device-status {
+    margin-left: auto;
+    padding: 5px 9px;
+    border-radius: 20px;
+    background: #dff7e7;
+    color: #168344;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.auth-waiting-note {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin-top: 22px;
+    color: #728197;
+    font-size: 0.9rem;
+}
+
+.auth-waiting-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #2196f3;
+    box-shadow: 0 0 0 0 rgba(33, 150, 243, 0.45);
+    animation: auth-pulse 1.8s ease-out infinite;
+}
+
+.auth-cancel-button {
+    align-self: flex-start;
+    margin-top: 26px;
+    padding: 8px 0;
+    border: 0;
+    background: transparent;
+    color: #41627e;
+    font-weight: 700;
+    text-decoration: underline;
+    text-decoration-color: #b7c8d8;
+    text-underline-offset: 4px;
+}
+
+.auth-cancel-button:hover {
+    color: #174c7c;
+}
+
+.auth-challenge-number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 54px;
+    background: linear-gradient(145deg, #f2f8ff, #e3f2ff);
+}
+
+.challenge-label {
+    margin: 0;
+    color: #46617d;
+    font-size: 0.98rem;
+    font-weight: 800;
+    letter-spacing: 0.07em;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.challenge-number {
+    display: grid;
+    width: 250px;
+    height: 250px;
+    margin-top: 34px;
+    place-items: center;
+    border: 12px solid #d8eeff;
+    border-radius: 50%;
+    background: #2196f3;
+    box-shadow: 0 20px 55px rgba(33, 150, 243, 0.34);
+    color: white;
+    font-size: 6rem;
+    font-weight: 900;
+    letter-spacing: -0.055em;
+    line-height: 1;
+}
+
+.challenge-number-loading {
+    font-size: 3.4rem;
+    letter-spacing: 0.08em;
+}
+
+.challenge-status {
+    margin: 26px 0 0;
+    color: #728197;
+    font-size: 0.92rem;
+}
+
+.challenge-fallback {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 14px;
+    color: #8996a8;
+    font-size: 0.78rem;
+}
+
+.color-dot {
+    width: 14px;
+    height: 14px;
+    border: 2px solid white;
+    border-radius: 50%;
+    box-shadow: 0 0 0 1px #b8c5d2;
+}
+
 @keyframes auth-spin {
     to { transform: rotate(360deg); }
+}
+
+@keyframes auth-pulse {
+    70% { box-shadow: 0 0 0 8px rgba(33, 150, 243, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(33, 150, 243, 0); }
 }
 
 @media (max-width: 860px) {
@@ -350,6 +529,16 @@ body {
     .auth-visual {
         display: none;
     }
+
+    .auth-challenge-number {
+        padding: 38px;
+    }
+
+    .challenge-number {
+        width: 210px;
+        height: 210px;
+        font-size: 5rem;
+    }
 }
 
 @media (max-width: 520px) {
@@ -372,6 +561,35 @@ body {
 
     .auth-copy {
         margin-top: 56px;
+    }
+
+    .auth-challenge-panel {
+        min-height: auto;
+        padding-bottom: 30px;
+    }
+
+    .auth-challenge-copy {
+        margin-top: 44px;
+    }
+
+    .auth-challenge-number {
+        min-height: 410px;
+        padding: 42px 24px 50px;
+    }
+
+    .challenge-number {
+        width: 190px;
+        height: 190px;
+        border-width: 9px;
+        font-size: 4.6rem;
+    }
+
+    .device-list {
+        padding: 18px;
+    }
+
+    .device-status {
+        display: none;
     }
 }
 

@@ -5,7 +5,7 @@
       <div class="container">
         <div class="text-center">
           <h1 class="display-4 fw-bold mb-3">Our Products</h1>
-          <p class="lead">Innovative authentication and identity solutions</p>
+          <p class="lead">Open-source tools for security, data, and developer productivity</p>
         </div>
       </div>
     </section>
@@ -166,6 +166,49 @@
             </div>
           </div>
 
+          <!-- Streamdek -->
+          <div class="col-lg-6">
+            <div class="product-card h-100">
+              <div class="product-header">
+                <div class="product-icon bg-streamdek">
+                  <i class="bi bi-grid-3x3-gap-fill"></i>
+                </div>
+                <h3 class="product-title">Streamdek</h3>
+                <span class="badge bg-primary">Open Source</span>
+              </div>
+              <div class="product-body">
+                <p class="product-description">
+                  A live Stream Deck dashboard for Codex and Claude Code. See what every agent is doing,
+                  read its latest response, and press a button to reopen the related session.
+                </p>
+
+                <div class="product-features mb-4">
+                  <h5>Key Features:</h5>
+                  <ul>
+                    <li><i class="bi bi-check-circle-fill text-primary"></i> Codex &amp; Claude Code Sessions</li>
+                    <li><i class="bi bi-check-circle-fill text-primary"></i> Live Agent Status &amp; Latest Response</li>
+                    <li><i class="bi bi-check-circle-fill text-primary"></i> One-touch Session Reopening</li>
+                    <li><i class="bi bi-check-circle-fill text-primary"></i> Scheduled Task Grouping</li>
+                    <li><i class="bi bi-check-circle-fill text-primary"></i> Windows, macOS &amp; Linux Installers</li>
+                  </ul>
+                </div>
+
+                <div class="product-actions">
+                  <a href="https://github.com/jetcar/streamdek" target="_blank" class="btn btn-primary">
+                    <i class="bi bi-github me-2"></i>View on GitHub
+                  </a>
+                  <a href="https://github.com/jetcar/streamdek/releases/latest" target="_blank" class="btn btn-outline-secondary">
+                    <i class="bi bi-download me-2"></i>Download
+                  </a>
+                </div>
+
+                <div class="product-tech-stack mt-4">
+                  <small class="text-muted">Built with: TypeScript, Node.js, Stream Deck SDK</small>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Decentralized Social Economy (deksirip) -->
           <div class="col-lg-6">
             <div class="product-card h-100">
@@ -268,7 +311,7 @@
               <p class="mb-0">
                 All products are completely open source and available on GitHub. 
                 We believe in transparency and invite you to review our code, contribute to development, 
-                and build secure authentication solutions for your own projects.
+                and build on them in your own projects.
               </p>
             </div>
           </div>
@@ -347,6 +390,10 @@ onMounted(() => {
 
 .product-icon.bg-info {
   background: linear-gradient(135deg, #0dcaf0 0%, #0a7ea3 100%);
+}
+
+.product-icon.bg-streamdek {
+  background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
 }
 
 .product-icon i {

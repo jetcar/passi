@@ -4,7 +4,7 @@ Passwordless OAuth2 / OpenID Connect two-factor authentication: a .NET backend p
 Instead of a password, the user approves each login on their phone by picking the matching color and signing
 the challenge with a device certificate, which can be protected by a PIN or fingerprint.
 
-- Demo video: https://www.youtube.com/watch?v=tRrWp6LWQNU
+- Demo video: https://www.youtube.com/watch?v=Koe_8YcmYkU
 - Android app: https://play.google.com/store/apps/details?id=com.passi.cloud.passi_android
 - Sample web app: https://passi.cloud
 

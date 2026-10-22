@@ -15,7 +15,7 @@
               <router-link to="/products" class="btn btn-light btn-lg">
                 <i class="bi bi-box-seam me-2"></i>Explore Products
               </router-link>
-              <a href="https://www.youtube.com/watch?v=tRrWp6LWQNU" target="_blank" class="btn btn-outline-light btn-lg">
+              <a href="https://www.youtube.com/watch?v=Koe_8YcmYkU" target="_blank" class="btn btn-outline-light btn-lg">
                 <i class="bi bi-play-circle me-2"></i>Watch Demo
               </a>
             </div>
@@ -140,7 +140,7 @@
           </div>
           <div class="col-lg-6">
             <div class="video-container">
-              <a href="https://www.youtube.com/watch?v=tRrWp6LWQNU" target="_blank" class="video-thumbnail">
+              <a href="https://www.youtube.com/watch?v=Koe_8YcmYkU" target="_blank" class="video-thumbnail">
                 <img src="/img/youtube.png" alt="Watch Demo" class="img-fluid rounded shadow-lg">
                 <div class="play-overlay">
                   <i class="bi bi-play-circle-fill"></i>

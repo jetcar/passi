@@ -116,7 +116,7 @@
                                class="btn btn-outline-dark btn-lg">
                                 <i class="bi bi-github me-2"></i>View on GitHub
                             </a>
-                            <a href="https://www.youtube.com/watch?v=tRrWp6LWQNU" target="_blank" 
+                            <a href="https://www.youtube.com/watch?v=Koe_8YcmYkU" target="_blank" 
                                class="btn btn-outline-danger btn-lg">
                                 <i class="bi bi-youtube me-2"></i>Watch Demo
                             </a>

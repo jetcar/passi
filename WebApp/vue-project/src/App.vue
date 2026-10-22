@@ -153,7 +153,7 @@ onMounted(() => {
                             <a href="https://github.com/jetcar/passi" target="_blank" class="text-white me-3">
                                 <i class="bi bi-github" style="font-size: 1.5rem;"></i>
                             </a>
-                            <a href="https://www.youtube.com/watch?v=tRrWp6LWQNU" target="_blank" class="text-white">
+                            <a href="https://www.youtube.com/watch?v=Koe_8YcmYkU" target="_blank" class="text-white">
                                 <i class="bi bi-youtube" style="font-size: 1.5rem;"></i>
                             </a>
                         </div>
@@ -173,7 +173,7 @@ onMounted(() => {
                         <h6 class="mb-3 text-white">Links</h6>
                         <ul class="list-unstyled">
                             <li class="mb-2"><a href="https://github.com/jetcar/passi" target="_blank" class="text-light text-decoration-none hover-link">GitHub - Passi</a></li>
-                            <li class="mb-2"><a href="https://www.youtube.com/watch?v=tRrWp6LWQNU" target="_blank" class="text-light text-decoration-none hover-link">Demo Video</a></li>
+                            <li class="mb-2"><a href="https://www.youtube.com/watch?v=Koe_8YcmYkU" target="_blank" class="text-light text-decoration-none hover-link">Demo Video</a></li>
                             <li class="mb-2"><router-link to="/news" class="text-light text-decoration-none hover-link">News</router-link></li>
                             <li class="mb-2"><a href="/Home/RegisterApp" class="text-light text-decoration-none hover-link">Register Site</a></li>
                             <li class="mb-2"><router-link to="/Contacts" class="text-light text-decoration-none hover-link">Contact</router-link></li>

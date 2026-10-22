@@ -26,7 +26,7 @@
 
 <template>
 
-    <header>
+    <header v-if="!['Login', 'Login2'].includes($route.name)">
         <div class="nav-page">
             <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
 

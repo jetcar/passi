@@ -22,67 +22,99 @@
                 errorMessage: false,
                 loginForm: true,
                 loading: false,
+                timer: null,
+                activeRequest: null,
             }
         },
 
         beforeUnmount() {
-            clearTimeout(this.timer)
+            this.cancelActiveRequest()
         },
 
         methods: {
-            async handleCancelClick() {
-                this.loginForm = true;
-                this.loading = false;
-                this.errorMessage = false;
+            cancelActiveRequest() {
                 clearTimeout(this.timer)
+                this.timer = null
+                this.activeRequest?.abort()
+                this.activeRequest = null
             },
-            async handleCheckCancelClick() {
+            resetLogin() {
+                this.cancelActiveRequest()
                 this.loginForm = true;
                 this.loading = false;
                 this.errorMessage = false;
-                clearTimeout(this.timer)
-
+            },
+            handleCancelClick() {
+                this.resetLogin()
+            },
+            handleCheckCancelClick() {
+                this.resetLogin()
+            },
+            async getResponseError(response) {
+                try {
+                    const payload = await response.json()
+                    const errors = payload?.errors
+                    if (Array.isArray(errors?.Username) && errors.Username.length) {
+                        return errors.Username[0]
+                    }
+                    if (typeof errors === "string" && errors.trim()) {
+                        return errors
+                    }
+                    if (typeof payload === "string" && payload.trim()) {
+                        return payload
+                    }
+                }
+                catch {
+                    // Fall through to a safe message when the response is not JSON.
+                }
+                return "Passi could not start the login. Please try again."
             },
             async fetchCheck() {
-                const checkRequestOptions = {
-                    method: "GET",
-                    credentials: "include",
-                    redirect: "manual"
-                };
-                var queiry = new URLSearchParams(this.$route.query).toString()
-                fetch(API_CHECK_URL + "?" + queiry + "&sessionId=" + this.LoginResponse.sessionId, checkRequestOptions).then(
-                    (data) => {
-                        if (data.ok) {
-                            data.json().then((json) => {
-                                if (json.redirect_url) {
-                                    // Redirect to the OAuth callback URL with authorization code
-                                    window.location.href = json.redirect_url;
-                                }
-                                else if (json.continue) {
-                                    this.timer = setTimeout(() => this.fetchCheck(), 1000)
-                                }
+                const request = new AbortController()
+                this.activeRequest = request
+                const query = new URLSearchParams(this.$route.query)
+                query.set("sessionId", this.LoginResponse.sessionId)
 
+                try {
+                    const response = await fetch(API_CHECK_URL + "?" + query.toString(), {
+                        method: "GET",
+                        credentials: "include",
+                        redirect: "manual",
+                        signal: request.signal
+                    })
+                    if (this.activeRequest !== request) return
 
-                            })
+                    if (response.ok) {
+                        const result = await response.json()
+                        if (this.activeRequest !== request) return
+
+                        if (result.redirect_url) {
+                            window.location.href = result.redirect_url
                         }
-                        else if (data.type == "opaqueredirect")
-                        {
-                            window.location.replace(data.url)
-                        }
-                        else {
-                            data.json().then((error) => {
-                                this.errorMessage = error.errors
-                            }
-                            )
+                        else if (result.continue) {
+                            this.timer = setTimeout(() => this.fetchCheck(), 1000)
                         }
                     }
-                ).catch((error) =>
-                    this.errorMessage = error
-
-                );
-
+                    else if (response.type === "opaqueredirect") {
+                        window.location.replace(response.url)
+                    }
+                    else {
+                        this.errorMessage = await this.getResponseError(response)
+                    }
+                }
+                catch (error) {
+                    if (error.name !== "AbortError") {
+                        this.errorMessage = "Passi could not check the login request. Please try again."
+                    }
+                }
+                finally {
+                    if (this.activeRequest === request) {
+                        this.activeRequest = null
+                    }
+                }
             },
             async handleLoginClick() {
+                this.cancelActiveRequest()
                 this.errorMessage = false
                 this.LoginInput.Username = this.LoginInput.Username.trim()
                 if (!this.LoginInput.Username) {
@@ -93,30 +125,40 @@
                 this.LoginInput.ReturnUrl = this.$route.query.redirect_uri
                 this.LoginInput.ClientId = this.$route.query.client_id
                 this.LoginInput.Nonce = this.$route.query.nonce
-                const requestOptions = {
-                    method: "GET",
-                    credentials: "include"
-                };
-                var query = new URLSearchParams(this.$route.query)
+                const query = new URLSearchParams(this.$route.query)
                 query.set("username", this.LoginInput.Username)
+                const request = new AbortController()
+                this.activeRequest = request
 
-                var resp = await fetch(API_URL + "?" + query.toString(), requestOptions)
-                if (resp.ok) {
-                    resp.json().then((data) => {
-                        this.LoginResponse = data
+                try {
+                    const response = await fetch(API_URL + "?" + query.toString(), {
+                        method: "GET",
+                        credentials: "include",
+                        signal: request.signal
+                    })
+                    if (this.activeRequest !== request) return
+
+                    if (response.ok) {
+                        this.LoginResponse = await response.json()
+                        if (this.activeRequest !== request) return
                         this.loginForm = false
                         this.loading = false
                         this.fetchCheck()
-                    })
-
+                    }
+                    else {
+                        this.errorMessage = await this.getResponseError(response)
+                        this.loginForm = true
+                    }
                 }
-                else {
-                    var json = await resp.json()
-                    if (json.errors.Username)
-                        this.errorMessage = json.errors.Username[0]
-                    else
-                        this.errorMessage = json.errors
-                    this.loginForm = true
+                catch (error) {
+                    if (error.name !== "AbortError") {
+                        this.errorMessage = "Passi could not start the login. Check your connection and try again."
+                    }
+                }
+                finally {
+                    if (this.activeRequest === request) {
+                        this.activeRequest = null
+                    }
                     this.loading = false
                 }
             },

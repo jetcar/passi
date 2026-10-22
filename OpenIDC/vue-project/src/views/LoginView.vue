@@ -25,6 +25,10 @@
             }
         },
 
+        beforeUnmount() {
+            clearTimeout(this.timer)
+        },
+
         methods: {
             async handleCancelClick() {
                 this.loginForm = true;
@@ -35,6 +39,7 @@
             async handleCheckCancelClick() {
                 this.loginForm = true;
                 this.loading = false;
+                this.errorMessage = false;
                 clearTimeout(this.timer)
 
             },
@@ -185,21 +190,78 @@
             </template>
 
             <template v-else>
-                    <div class="row" v-if="!loginForm">
-                        <div class="col-md-6">
-                            <p>Open Passi on one of these devices to approve the login request:</p>
-                            <ul v-if="LoginResponse.registeredDevices?.length">
-                                <li v-for="device in LoginResponse.registeredDevices" :key="device">{{ device }}</li>
-                            </ul>
-                            <p class="mb-1">Tap this number in the Passi app:</p>
-                            <div class="checkNumber" v-if="LoginResponse.checkNumber" aria-live="polite">{{ LoginResponse.checkNumber }}</div>
-                            <div class="d-flex align-items-center small text-muted">
-                                <span>Older app version? Pick this color ({{ LoginResponse.checkColor }}):</span>
-                                <div class="coloredBox smallBox" :class="LoginResponse.checkColor" :title="LoginResponse.checkColor">&nbsp;</div>
-                            </div>
-                            <button class="btn btn-secondary" name="button" value="cancel" asp-action="CancelLogin" @click="handleCheckCancelClick">Cancel</button>
+                <section class="auth-panel auth-challenge-panel">
+                    <a class="auth-brand" href="/" aria-label="Passi home">
+                        <span class="auth-brand-mark" aria-hidden="true">P</span>
+                        <span>Passi</span>
+                    </a>
+
+                    <div class="auth-copy auth-challenge-copy">
+                        <h1>Check your phone</h1>
+                        <p>Open Passi on a registered device and approve this login request.</p>
+                    </div>
+
+                    <div class="auth-alert" role="alert" v-if="errorMessage">
+                        <span aria-hidden="true">!</span>
+                        <div>{{errorMessage}}</div>
+                    </div>
+
+                    <div class="device-list" aria-label="Registered devices">
+                        <div class="device-list-label">
+                            {{ LoginResponse.registeredDevices?.length === 1 ? 'Available device' : 'Available devices' }}
+                        </div>
+                        <div
+                            class="device-card"
+                            v-for="device in LoginResponse.registeredDevices"
+                            :key="device"
+                        >
+                            <span class="device-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24">
+                                    <rect x="6" y="2" width="12" height="20" rx="2.5" fill="none" stroke="currentColor" stroke-width="2" />
+                                    <path d="M10 5h4M11 19h2" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                                </svg>
+                            </span>
+                            <span class="device-name">{{ device }}</span>
+                            <span class="device-status">Registered</span>
+                        </div>
+                        <div class="device-card" v-if="!LoginResponse.registeredDevices?.length">
+                            <span class="device-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24">
+                                    <rect x="6" y="2" width="12" height="20" rx="2.5" fill="none" stroke="currentColor" stroke-width="2" />
+                                    <path d="M10 5h4M11 19h2" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                                </svg>
+                            </span>
+                            <span class="device-name">Your Passi app</span>
+                            <span class="device-status">Waiting</span>
                         </div>
                     </div>
+
+                    <div class="auth-waiting-note">
+                        <span class="auth-waiting-dot" aria-hidden="true"></span>
+                        The browser will continue automatically after approval.
+                    </div>
+
+                    <button class="auth-cancel-button" type="button" @click="handleCheckCancelClick">
+                        Use another account
+                    </button>
+                </section>
+
+                <aside class="auth-challenge-number" aria-live="polite">
+                    <p class="challenge-label">Tap this number in Passi</p>
+                    <div class="challenge-number" v-if="LoginResponse.checkNumber">
+                        {{ LoginResponse.checkNumber }}
+                    </div>
+                    <div class="challenge-number challenge-number-loading" v-else>••</div>
+                    <p class="challenge-status">Waiting for approval…</p>
+                    <div class="challenge-fallback">
+                        <span>Older app? Match {{ LoginResponse.checkColor }}</span>
+                        <span
+                            class="color-dot"
+                            :class="LoginResponse.checkColor"
+                            :title="LoginResponse.checkColor"
+                        ></span>
+                    </div>
+                </aside>
             </template>
         </div>
     </main>

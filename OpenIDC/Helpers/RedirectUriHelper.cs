@@ -40,6 +40,15 @@ namespace OpenIDC.Helpers
             return string.IsNullOrEmpty(state) ? url : $"{url}&state={Uri.EscapeDataString(state)}";
         }
 
+        public static string BuildAuthorizationErrorResponse(string redirectUri, string error, string description, string state)
+        {
+            var separator = redirectUri.Contains('?') ? "&" : "?";
+            var url = $"{redirectUri}{separator}error={Uri.EscapeDataString(error)}";
+            if (!string.IsNullOrEmpty(description))
+                url += $"&error_description={Uri.EscapeDataString(description)}";
+            return string.IsNullOrEmpty(state) ? url : $"{url}&state={Uri.EscapeDataString(state)}";
+        }
+
         private static bool IsLoopback(string host) =>
             string.Equals(host, "localhost", StringComparison.OrdinalIgnoreCase) || host == "127.0.0.1" || host == "[::1]";
     }

@@ -6,6 +6,7 @@ using RestSharp;
 using Services;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using GoogleTracer;
@@ -68,8 +69,22 @@ public class ApiController : ControllerBase
     [HttpPost]
     [HttpGet]
     [Route("login")]
-    public async Task<IActionResult> Login([FromQuery] string redirect_uri, [FromQuery] string nonce, [FromQuery] string username, [FromQuery] string client_id)
+    public async Task<IActionResult> Login(
+        [FromQuery] string redirect_uri,
+        [FromQuery] string nonce,
+        [FromQuery] string username,
+        [FromQuery] string client_id,
+        [FromQuery] string response_type,
+        [FromQuery] string scope,
+        [FromQuery] string state,
+        [FromQuery] string code_challenge,
+        [FromQuery] string code_challenge_method)
     {
+        var authorizationError = await ValidateAuthorizationRequest(
+            client_id, redirect_uri, response_type, scope, state, code_challenge, code_challenge_method);
+        if (authorizationError != null)
+            return authorizationError;
+
         var request = new RestRequest(_appSetting["startRequest"], Method.Post);
         var possibleCodes = new List<Color>()
         {
@@ -120,6 +135,85 @@ public class ApiController : ControllerBase
         }
 
         return BadRequest(new ApiResponseDto() { errors = "Internal error" });
+    }
+
+    [HttpGet]
+    [Route("authorize")]
+    public async Task<IActionResult> Authorize(
+        [FromQuery] string client_id,
+        [FromQuery] string redirect_uri,
+        [FromQuery] string response_type,
+        [FromQuery] string scope,
+        [FromQuery] string state,
+        [FromQuery] string code_challenge,
+        [FromQuery] string code_challenge_method)
+    {
+        var authorizationError = await ValidateAuthorizationRequest(
+            client_id, redirect_uri, response_type, scope, state, code_challenge, code_challenge_method);
+        return authorizationError ?? Ok(new { valid = true });
+    }
+
+    private async Task<IActionResult> ValidateAuthorizationRequest(
+        string clientId,
+        string redirectUri,
+        string responseType,
+        string scope,
+        string state,
+        string codeChallenge,
+        string codeChallengeMethod)
+    {
+        if (string.IsNullOrWhiteSpace(clientId))
+            return AuthorizationError("invalid_request", "client_id is required", null, state);
+
+        var client = await _clientStore.GetClientAsync(clientId);
+        if (client == null)
+            return AuthorizationError("invalid_request", "Invalid client_id", null, state);
+
+        if (!RedirectUriHelper.IsAllowed(redirectUri, client))
+            return AuthorizationError("invalid_request", "Invalid redirect_uri", null, state);
+
+        if (string.IsNullOrWhiteSpace(responseType))
+            return AuthorizationError("invalid_request", "response_type is required", redirectUri, state);
+
+        if (!string.Equals(responseType, "code", StringComparison.Ordinal))
+            return AuthorizationError("unsupported_response_type", "response_type must be code", redirectUri, state);
+
+        var requestedScopes = scope?.Split(' ', StringSplitOptions.RemoveEmptyEntries) ?? [];
+        if (requestedScopes.Length == 0 || !requestedScopes.Contains("openid", StringComparer.Ordinal))
+            return AuthorizationError("invalid_scope", "scope must include openid", redirectUri, state);
+
+        var allowedScopes = client.AllowedScopes ?? [];
+        var unsupportedScope = requestedScopes.FirstOrDefault(requested =>
+            !allowedScopes.Contains(requested, StringComparer.Ordinal));
+        if (unsupportedScope != null)
+            return AuthorizationError("invalid_scope", $"Unsupported scope: {unsupportedScope}", redirectUri, state);
+
+        if (client.RequiresPkce && string.IsNullOrWhiteSpace(codeChallenge))
+            return AuthorizationError("invalid_request", "PKCE code_challenge is required", redirectUri, state);
+
+        if (string.IsNullOrWhiteSpace(codeChallenge) && !string.IsNullOrWhiteSpace(codeChallengeMethod))
+            return AuthorizationError("invalid_request", "code_challenge_method requires code_challenge", redirectUri, state);
+
+        if (!string.IsNullOrWhiteSpace(codeChallenge) &&
+            !string.IsNullOrWhiteSpace(codeChallengeMethod) &&
+            codeChallengeMethod != "S256" && codeChallengeMethod != "plain")
+            return AuthorizationError("invalid_request", "Unsupported code_challenge_method", redirectUri, state);
+
+        return null;
+    }
+
+    private BadRequestObjectResult AuthorizationError(string error, string description, string redirectUri, string state)
+    {
+        _logger.LogWarning("Authorization request rejected: {Error}. {Description}", error, description);
+        return BadRequest(new
+        {
+            error,
+            error_description = description,
+            errors = description,
+            redirect_url = string.IsNullOrEmpty(redirectUri)
+                ? null
+                : RedirectUriHelper.BuildAuthorizationErrorResponse(redirectUri, error, description, state),
+        });
     }
 
     private static string GetApiErrorMessage(string content)

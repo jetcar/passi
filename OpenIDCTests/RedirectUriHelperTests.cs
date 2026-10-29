@@ -65,5 +65,21 @@ namespace OpenIDCTests
             Assert.That(RedirectUriHelper.BuildAuthorizationResponse("https://site/cb?tenant=1", "abc", null),
                 Is.EqualTo("https://site/cb?tenant=1&code=abc"));
         }
+
+        [Test]
+        public void AuthorizationErrorResponseEncodesDescriptionAndState()
+        {
+            Assert.That(RedirectUriHelper.BuildAuthorizationErrorResponse(
+                    "https://site/cb", "invalid_scope", "Unsupported scope: admin", "x y&z=1"),
+                Is.EqualTo("https://site/cb?error=invalid_scope&error_description=Unsupported%20scope%3A%20admin&state=x%20y%26z%3D1"));
+        }
+
+        [Test]
+        public void AuthorizationErrorResponseKeepsExistingQueryAndOmitsOptionalValues()
+        {
+            Assert.That(RedirectUriHelper.BuildAuthorizationErrorResponse(
+                    "https://site/cb?tenant=1", "invalid_request", null, null),
+                Is.EqualTo("https://site/cb?tenant=1&error=invalid_request"));
+        }
     }
 }

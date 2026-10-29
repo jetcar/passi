@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging.Abstractions;
 using NUnit.Framework;
+using OpenIDC.Models;
+using OpenIDC.Services;
 using RestSharp;
 using Services;
 using WebApiDto;
@@ -19,20 +21,46 @@ namespace OpenIDCTests
     {
         private CapturingRestClient _rest;
 
-        private ApiController Controller()
+        private ApiController Controller(OidcClient client = null)
         {
             _rest = new CapturingRestClient();
             var appSetting = new AppSetting(new ConfigurationBuilder()
                 .AddInMemoryCollection(new Dictionary<string, string> { ["AppSetting:startRequest"] = "/api/auth/start" })
                 .Build()) { PrefferAppsettingFile = true };
 
-            return new ApiController(new FixedRandom(), _rest, appSetting, NullLogger<ApiController>.Instance, null, null);
+            client ??= Client();
+            return new ApiController(new FixedRandom(), _rest, appSetting, NullLogger<ApiController>.Instance,
+                new FixedClientStore(client), null);
         }
+
+        private static OidcClient Client(
+            string clientId = "SampleApp",
+            string redirectUri = "https://site/cb",
+            bool requiresPkce = false) => new()
+        {
+            ClientId = clientId,
+            RedirectUris = new List<string> { redirectUri },
+            AllowedScopes = new List<string> { "openid", "profile", "email" },
+            RequiresPkce = requiresPkce,
+            IsPublicClient = requiresPkce,
+        };
+
+        private static Task<IActionResult> Login(
+            ApiController controller,
+            string clientId = "SampleApp",
+            string redirectUri = "https://site/cb",
+            string responseType = "code",
+            string scope = "openid profile email",
+            string state = "state",
+            string codeChallenge = null,
+            string codeChallengeMethod = null) =>
+            controller.Login(redirectUri, "nonce", "alice@passi.cloud", clientId, responseType, scope, state,
+                codeChallenge, codeChallengeMethod);
 
         [Test]
         public async Task LoginSendsTwoDigitNumberToPassiAndReturnsItToTheLoginPage()
         {
-            var result = await Controller().Login("https://site/cb", "nonce", "alice@passi.cloud", "SampleApp");
+            var result = await Login(Controller());
 
             var sent = (StartLoginDto)_rest.Requests.Single().Parameters.OfType<BodyParameter>().Single().Value;
             Assert.That(sent.CheckNumber, Is.InRange(10, 99));
@@ -48,7 +76,7 @@ namespace OpenIDCTests
             var seenColors = new HashSet<string>();
             for (var i = 0; i < 200; i++)
             {
-                var result = await Controller().Login("https://site/cb", "nonce", "alice@passi.cloud", "SampleApp");
+                var result = await Login(Controller());
                 var page = (CheckInputModel)((OkObjectResult)result).Value;
                 seenColors.Add(page.CheckColor);
             }
@@ -66,7 +94,7 @@ namespace OpenIDCTests
             for (var i = 0; i < 40; i++)
             {
                 var controller = Controller();
-                await controller.Login("https://site/cb", "nonce", "alice@passi.cloud", "SampleApp");
+                await Login(controller);
                 numbers.Add(((StartLoginDto)_rest.Requests.Single().Parameters.OfType<BodyParameter>().Single().Value).CheckNumber!.Value);
             }
 
@@ -83,13 +111,79 @@ namespace OpenIDCTests
             var appSetting = new AppSetting(new ConfigurationBuilder()
                 .AddInMemoryCollection(new Dictionary<string, string> { ["AppSetting:startRequest"] = "/api/auth/start" })
                 .Build()) { PrefferAppsettingFile = true };
-            var controller = new ApiController(new FixedRandom(), rest, appSetting, NullLogger<ApiController>.Instance, null, null);
+            var controller = new ApiController(new FixedRandom(), rest, appSetting, NullLogger<ApiController>.Instance,
+                new FixedClientStore(Client()), null);
 
-            var result = await controller.Login("https://site/cb", "nonce", "alice@passi.cloud", "SampleApp");
+            var result = await Login(controller);
 
             var badRequest = (BadRequestObjectResult)result;
             Assert.That(((ApiResponseDto)badRequest.Value).errors, Is.EqualTo("Internal error"));
         }
+
+        [TestCase(null)]
+        [TestCase("unknown")]
+        public async Task InvalidClientPreventsPassiLogin(string clientId)
+        {
+            var controller = Controller();
+
+            var result = (BadRequestObjectResult)await Login(controller, clientId: clientId);
+
+            Assert.That(_rest.Requests, Is.Empty);
+            Assert.That(Property(result, "error"), Is.EqualTo("invalid_request"));
+            Assert.That(Property(result, "redirect_url"), Is.Null);
+        }
+
+        [Test]
+        public async Task InvalidRedirectUriPreventsPassiLoginWithoutRedirecting()
+        {
+            var controller = Controller();
+
+            var result = (BadRequestObjectResult)await Login(controller, redirectUri: "https://attacker.example/cb");
+
+            Assert.That(_rest.Requests, Is.Empty);
+            Assert.That(Property(result, "error"), Is.EqualTo("invalid_request"));
+            Assert.That(Property(result, "redirect_url"), Is.Null);
+        }
+
+        [Test]
+        public async Task UnsupportedResponseTypePreventsPassiLoginAndReturnsSafeOAuthError()
+        {
+            var controller = Controller();
+
+            var result = (BadRequestObjectResult)await Login(controller, responseType: "token");
+
+            Assert.That(_rest.Requests, Is.Empty);
+            Assert.That(Property(result, "error"), Is.EqualTo("unsupported_response_type"));
+            Assert.That(Property(result, "redirect_url"), Is.EqualTo(
+                "https://site/cb?error=unsupported_response_type&error_description=response_type%20must%20be%20code&state=state"));
+        }
+
+        [Test]
+        public async Task UnsupportedScopePreventsPassiLoginAndReturnsSafeOAuthError()
+        {
+            var controller = Controller();
+
+            var result = (BadRequestObjectResult)await Login(controller, scope: "openid admin");
+
+            Assert.That(_rest.Requests, Is.Empty);
+            Assert.That(Property(result, "error"), Is.EqualTo("invalid_scope"));
+            Assert.That(Property(result, "redirect_url"), Does.StartWith("https://site/cb?error=invalid_scope"));
+        }
+
+        [Test]
+        public async Task RequiredPkcePreventsPassiLoginWhenChallengeIsMissing()
+        {
+            var controller = Controller(Client(requiresPkce: true));
+
+            var result = (BadRequestObjectResult)await Login(controller);
+
+            Assert.That(_rest.Requests, Is.Empty);
+            Assert.That(Property(result, "error"), Is.EqualTo("invalid_request"));
+            Assert.That(Property(result, "redirect_url"), Does.Contain("PKCE"));
+        }
+
+        private static object Property(BadRequestObjectResult result, string name) =>
+            result.Value?.GetType().GetProperty(name)?.GetValue(result.Value);
 
         private class FixedRandom : IRandomGenerator
         {
@@ -122,6 +216,21 @@ namespace OpenIDCTests
                     Content = $"{{\"SessionId\":\"{Guid.NewGuid()}\",\"RegisteredDevices\":[]}}",
                 });
             }
+        }
+
+        private class FixedClientStore : IClientStore
+        {
+            private readonly OidcClient _client;
+
+            public FixedClientStore(OidcClient client) => _client = client;
+
+            public Task<OidcClient> FindByClientIdAsync(string clientId) =>
+                Task.FromResult(_client?.ClientId == clientId ? _client : null);
+
+            public Task<OidcClient> GetClientAsync(string clientId) => FindByClientIdAsync(clientId);
+            public Task CreateClientAsync(OidcClient client) => Task.CompletedTask;
+            public Task DeleteClientAsync(string clientId) => Task.CompletedTask;
+            public Task<bool> ValidateClientAsync(string clientId, string clientSecret) => Task.FromResult(false);
         }
     }
 }

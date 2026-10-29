@@ -108,7 +108,7 @@ namespace OpenIDCTests
                 RedirectUris = new List<string> { RedirectUri },
             });
 
-            var controller = new ApiController(new FixedRandom(), rest, appSetting, NullLogger<ApiController>.Instance, clientStore, new FakeAuthCodeStore());
+            var controller = new ApiController(new FixedRandom(), rest, appSetting, NullLogger<ApiController>.Instance, clientStore, new FakeAuthCodeStore(), new AllowAllLoginRateLimiter());
 
             var result = await controller.Check(sessionId: "session", nonce: "nonce", client_id: ClientId, redirect_uri: RedirectUri,
                 scope: null, state: null, code_challenge: null, code_challenge_method: null);
@@ -141,7 +141,7 @@ namespace OpenIDCTests
                 RedirectUris = new List<string> { RedirectUri },
             });
 
-            var controller = new ApiController(new FixedRandom(), rest, appSetting, NullLogger<ApiController>.Instance, clientStore, new FakeAuthCodeStore());
+            var controller = new ApiController(new FixedRandom(), rest, appSetting, NullLogger<ApiController>.Instance, clientStore, new FakeAuthCodeStore(), new AllowAllLoginRateLimiter());
 
             var result = await controller.Check(sessionId: "session", nonce: "nonce", client_id: ClientId, redirect_uri: RedirectUri,
                 scope: null, state: null, code_challenge: null, code_challenge_method: null);
@@ -231,7 +231,7 @@ namespace OpenIDCTests
                 RedirectUris = new List<string> { RedirectUri },
             });
 
-            var controller = new ApiController(new FixedRandom(), rest, appSetting, NullLogger<ApiController>.Instance, clientStore, new FakeAuthCodeStore());
+            var controller = new ApiController(new FixedRandom(), rest, appSetting, NullLogger<ApiController>.Instance, clientStore, new FakeAuthCodeStore(), new AllowAllLoginRateLimiter());
 
             return await controller.Check(sessionId: "session", nonce: nonce, client_id: ClientId, redirect_uri: RedirectUri,
                 scope: null, state: state, code_challenge: codeChallenge, code_challenge_method: codeChallenge == null ? null : "S256");
@@ -280,6 +280,15 @@ namespace OpenIDCTests
         {
             public Task<string> CreateAuthorizationCodeAsync(AuthorizationCode authCode) => Task.FromResult("code123");
             public Task<AuthorizationCode> ConsumeAuthorizationCodeAsync(string code) => Task.FromResult<AuthorizationCode>(null);
+        }
+
+        private class AllowAllLoginRateLimiter : ILoginRateLimiter
+        {
+            public bool TryAcquire(Microsoft.AspNetCore.Http.HttpContext context, string username, out TimeSpan retryAfter)
+            {
+                retryAfter = TimeSpan.Zero;
+                return true;
+            }
         }
 
         private class SequencedRestClient : IMyRestClient

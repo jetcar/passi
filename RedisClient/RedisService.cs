@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
 using ConfigurationManager;
 using GoogleTracer;
 using Newtonsoft.Json;
@@ -87,6 +89,38 @@ namespace RedisClient
             return default(T);
         }
 
+        public bool TryAcquireFixedWindow(string key, int permitLimit, TimeSpan window, out TimeSpan retryAfter)
+        {
+            if (string.IsNullOrWhiteSpace(key)) throw new ArgumentException("A rate-limit key is required.", nameof(key));
+            if (permitLimit <= 0) throw new ArgumentOutOfRangeException(nameof(permitLimit));
+            if (window <= TimeSpan.Zero) throw new ArgumentOutOfRangeException(nameof(window));
+
+            // Redis documents this INCR + expiry Lua pattern for race-free fixed-window limiting:
+            // https://redis.io/docs/latest/commands/incr/#pattern-rate-limiter
+            const string script = @"
+local current = redis.call('INCR', KEYS[1])
+local ttl = redis.call('PTTL', KEYS[1])
+if current == 1 or ttl < 0 then
+    redis.call('PEXPIRE', KEYS[1], ARGV[1])
+    ttl = tonumber(ARGV[1])
+end
+return { current, ttl }";
+
+            using var redis = _redisManager.GetClient();
+            var result = redis.ExecLuaAsList(
+                script,
+                new[] { key },
+                new[] { ((long)Math.Ceiling(window.TotalMilliseconds)).ToString(CultureInfo.InvariantCulture) });
+            if (result == null || result.Count != 2)
+                throw new InvalidOperationException("Redis returned an invalid rate-limit response.");
+
+            var current = long.Parse(result[0], CultureInfo.InvariantCulture);
+            var ttlMilliseconds = long.Parse(result[1], CultureInfo.InvariantCulture);
+            var acquired = current <= permitLimit;
+            retryAfter = acquired ? TimeSpan.Zero : TimeSpan.FromMilliseconds(Math.Max(1, ttlMilliseconds));
+            return acquired;
+        }
+
         /// <summary>
         /// Add stores through IRedisClient.Set&lt;string&gt;, which ServiceStack JSON-encodes into a quoted
         /// string literal. Get&lt;string&gt; undoes that, but a GET queued in a transaction hands back the raw
@@ -107,5 +141,10 @@ namespace RedisClient
         void Delete<T>(string key);
 
         T GetAndDelete<T>(string key);
+
+        bool TryAcquireFixedWindow(string key, int permitLimit, TimeSpan window, out TimeSpan retryAfter)
+        {
+            throw new NotSupportedException("This Redis service does not support rate limiting.");
+        }
     }
 }

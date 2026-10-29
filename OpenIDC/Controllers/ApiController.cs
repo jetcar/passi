@@ -1,5 +1,6 @@
 ﻿using ConfigurationManager;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using RestSharp;
@@ -35,6 +36,7 @@ public class ApiController : ControllerBase
     private readonly ILogger<ApiController> _logger;
     private readonly IClientStore _clientStore;
     private readonly IAuthorizationCodeStore _authCodeStore;
+    private readonly ILoginRateLimiter _loginRateLimiter;
 
     public ApiController(
         IRandomGenerator randomGenerator,
@@ -42,7 +44,8 @@ public class ApiController : ControllerBase
         AppSetting appSetting,
         ILogger<ApiController> logger,
         IClientStore clientStore,
-        IAuthorizationCodeStore authCodeStore)
+        IAuthorizationCodeStore authCodeStore,
+        ILoginRateLimiter loginRateLimiter)
     {
         _randomGenerator = randomGenerator;
         _myRestClient = myRestClient;
@@ -50,6 +53,7 @@ public class ApiController : ControllerBase
         _logger = logger;
         _clientStore = clientStore;
         _authCodeStore = authCodeStore;
+        _loginRateLimiter = loginRateLimiter;
     }
 
 
@@ -84,6 +88,31 @@ public class ApiController : ControllerBase
             client_id, redirect_uri, response_type, scope, state, code_challenge, code_challenge_method);
         if (authorizationError != null)
             return authorizationError;
+
+        try
+        {
+            if (!_loginRateLimiter.TryAcquire(HttpContext, username, out var retryAfter))
+            {
+                Response.Headers.RetryAfter = Math.Max(1, (int)Math.Ceiling(retryAfter.TotalSeconds))
+                    .ToString(System.Globalization.CultureInfo.InvariantCulture);
+                return AuthorizationError(
+                    "temporarily_unavailable",
+                    "Too many login attempts. Please try again later.",
+                    redirect_uri,
+                    state,
+                    StatusCodes.Status429TooManyRequests);
+            }
+        }
+        catch (Exception exception)
+        {
+            _logger.LogError(exception, "Login rate limiter failed.");
+            return AuthorizationError(
+                "temporarily_unavailable",
+                "Login is temporarily unavailable.",
+                redirect_uri,
+                state,
+                StatusCodes.Status503ServiceUnavailable);
+        }
 
         var request = new RestRequest(_appSetting["startRequest"], Method.Post);
         var possibleCodes = new List<Color>()
@@ -202,10 +231,15 @@ public class ApiController : ControllerBase
         return null;
     }
 
-    private BadRequestObjectResult AuthorizationError(string error, string description, string redirectUri, string state)
+    private IActionResult AuthorizationError(
+        string error,
+        string description,
+        string redirectUri,
+        string state,
+        int statusCode = StatusCodes.Status400BadRequest)
     {
         _logger.LogWarning("Authorization request rejected: {Error}. {Description}", error, description);
-        return BadRequest(new
+        var payload = new
         {
             error,
             error_description = description,
@@ -213,7 +247,10 @@ public class ApiController : ControllerBase
             redirect_url = string.IsNullOrEmpty(redirectUri)
                 ? null
                 : RedirectUriHelper.BuildAuthorizationErrorResponse(redirectUri, error, description, state),
-        });
+        };
+        return statusCode == StatusCodes.Status400BadRequest
+            ? BadRequest(payload)
+            : StatusCode(statusCode, payload);
     }
 
     private static string GetApiErrorMessage(string content)

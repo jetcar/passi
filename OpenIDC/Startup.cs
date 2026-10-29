@@ -53,6 +53,7 @@ public class Startup
         services.AddSingleton<IClientStore, ClientStore>();
         services.AddSingleton<IAuthorizationCodeStore, AuthorizationCodeStore>();
         services.AddSingleton<IRefreshTokenStore, RefreshTokenStore>();
+        services.AddSingleton<ILoginRateLimiter, LoginRateLimiter>();
 
         // Configure signing credentials
         var certPath = "/myapp/cert/certs/certificate.crt";
@@ -137,7 +138,7 @@ public class Startup
     {
         app.UseForwardedHeaders(new ForwardedHeadersOptions
         {
-            ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedHost | ForwardedHeaders.XForwardedProto
+            ForwardedHeaders = ForwardedHeaders.XForwardedProto
         });
 
         app.Map(new PathString("/openidc"), (appBuilder) =>

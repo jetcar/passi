@@ -5,6 +5,7 @@ using System.Net;
 using System.Threading.Tasks;
 using ConfigurationManager;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging.Abstractions;
 using NUnit.Framework;
@@ -21,7 +22,7 @@ namespace OpenIDCTests
     {
         private CapturingRestClient _rest;
 
-        private ApiController Controller(OidcClient client = null)
+        private ApiController Controller(OidcClient client = null, ILoginRateLimiter loginRateLimiter = null)
         {
             _rest = new CapturingRestClient();
             var appSetting = new AppSetting(new ConfigurationBuilder()
@@ -29,8 +30,11 @@ namespace OpenIDCTests
                 .Build()) { PrefferAppsettingFile = true };
 
             client ??= Client();
-            return new ApiController(new FixedRandom(), _rest, appSetting, NullLogger<ApiController>.Instance,
-                new FixedClientStore(client), null);
+            var controller = new ApiController(new FixedRandom(), _rest, appSetting, NullLogger<ApiController>.Instance,
+                new FixedClientStore(client), null, loginRateLimiter ?? new FixedLoginRateLimiter(true));
+            controller.ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() };
+            controller.HttpContext.Connection.RemoteIpAddress = IPAddress.Parse("192.0.2.10");
+            return controller;
         }
 
         private static OidcClient Client(
@@ -112,7 +116,8 @@ namespace OpenIDCTests
                 .AddInMemoryCollection(new Dictionary<string, string> { ["AppSetting:startRequest"] = "/api/auth/start" })
                 .Build()) { PrefferAppsettingFile = true };
             var controller = new ApiController(new FixedRandom(), rest, appSetting, NullLogger<ApiController>.Instance,
-                new FixedClientStore(Client()), null);
+                new FixedClientStore(Client()), null, new FixedLoginRateLimiter(true));
+            controller.ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() };
 
             var result = await Login(controller);
 
@@ -194,7 +199,34 @@ namespace OpenIDCTests
             Assert.That(_rest.Requests, Is.Empty);
         }
 
-        private static object Property(BadRequestObjectResult result, string name) =>
+        [Test]
+        public async Task RateLimitPreventsPassiLoginAndReturnsSafeOAuthError()
+        {
+            var controller = Controller(loginRateLimiter: new FixedLoginRateLimiter(false));
+
+            var result = (ObjectResult)await Login(controller);
+
+            Assert.That(result.StatusCode, Is.EqualTo(StatusCodes.Status429TooManyRequests));
+            Assert.That(_rest.Requests, Is.Empty);
+            Assert.That(controller.Response.Headers.RetryAfter.ToString(), Is.EqualTo("300"));
+            Assert.That(Property(result, "error"), Is.EqualTo("temporarily_unavailable"));
+            Assert.That(Property(result, "redirect_url"), Does.StartWith(
+                "https://site/cb?error=temporarily_unavailable"));
+        }
+
+        [Test]
+        public async Task RateLimiterFailurePreventsPassiLogin()
+        {
+            var controller = Controller(loginRateLimiter: new ThrowingLoginRateLimiter());
+
+            var result = (ObjectResult)await Login(controller);
+
+            Assert.That(result.StatusCode, Is.EqualTo(StatusCodes.Status503ServiceUnavailable));
+            Assert.That(_rest.Requests, Is.Empty);
+            Assert.That(Property(result, "error"), Is.EqualTo("temporarily_unavailable"));
+        }
+
+        private static object Property(ObjectResult result, string name) =>
             result.Value?.GetType().GetProperty(name)?.GetValue(result.Value);
 
         private class FixedRandom : IRandomGenerator
@@ -243,6 +275,25 @@ namespace OpenIDCTests
             public Task CreateClientAsync(OidcClient client) => Task.CompletedTask;
             public Task DeleteClientAsync(string clientId) => Task.CompletedTask;
             public Task<bool> ValidateClientAsync(string clientId, string clientSecret) => Task.FromResult(false);
+        }
+
+        private class FixedLoginRateLimiter : ILoginRateLimiter
+        {
+            private readonly bool _allowed;
+
+            public FixedLoginRateLimiter(bool allowed) => _allowed = allowed;
+
+            public bool TryAcquire(HttpContext context, string username, out TimeSpan retryAfter)
+            {
+                retryAfter = TimeSpan.FromMinutes(5);
+                return _allowed;
+            }
+        }
+
+        private class ThrowingLoginRateLimiter : ILoginRateLimiter
+        {
+            public bool TryAcquire(HttpContext context, string username, out TimeSpan retryAfter) =>
+                throw new InvalidOperationException("Redis unavailable");
         }
     }
 }

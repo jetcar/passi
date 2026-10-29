@@ -2,6 +2,7 @@
 
     const API_URL = `/openidc/api/login`
     const API_CHECK_URL = `/openidc/api/check`
+    const API_AUTHORIZE_URL = `/openidc/api/authorize`
 
     export default {
         data() {
@@ -24,7 +25,13 @@
                 loading: false,
                 timer: null,
                 activeRequest: null,
+                authorizationReady: false,
+                authorizationChecking: true,
             }
+        },
+
+        mounted() {
+            this.validateAuthorizationRequest()
         },
 
         beforeUnmount() {
@@ -53,21 +60,72 @@
             async getResponseError(response) {
                 try {
                     const payload = await response.json()
+                    const redirectUrl = typeof payload?.redirect_url === "string"
+                        ? payload.redirect_url
+                        : null
                     const errors = payload?.errors
                     if (Array.isArray(errors?.Username) && errors.Username.length) {
-                        return errors.Username[0]
+                        return { message: errors.Username[0], redirectUrl }
                     }
                     if (typeof errors === "string" && errors.trim()) {
-                        return errors
+                        return { message: errors, redirectUrl }
+                    }
+                    if (typeof payload?.error_description === "string" && payload.error_description.trim()) {
+                        return { message: payload.error_description, redirectUrl }
                     }
                     if (typeof payload === "string" && payload.trim()) {
-                        return payload
+                        return { message: payload, redirectUrl }
                     }
+                    return { message: "Passi could not start the login. Please try again.", redirectUrl }
                 }
                 catch {
                     // Fall through to a safe message when the response is not JSON.
                 }
-                return "Passi could not start the login. Please try again."
+                return { message: "Passi could not start the login. Please try again.", redirectUrl: null }
+            },
+            async handleErrorResponse(response) {
+                const error = await this.getResponseError(response)
+                if (error.redirectUrl) {
+                    window.location.replace(error.redirectUrl)
+                    return true
+                }
+                this.errorMessage = error.message
+                return false
+            },
+            async validateAuthorizationRequest() {
+                const request = new AbortController()
+                this.activeRequest = request
+                this.authorizationChecking = true
+                this.authorizationReady = false
+                this.errorMessage = false
+
+                try {
+                    const query = new URLSearchParams(this.$route.query)
+                    const response = await fetch(API_AUTHORIZE_URL + "?" + query.toString(), {
+                        method: "GET",
+                        credentials: "include",
+                        signal: request.signal
+                    })
+                    if (this.activeRequest !== request) return
+
+                    if (response.ok) {
+                        this.authorizationReady = true
+                    }
+                    else {
+                        await this.handleErrorResponse(response)
+                    }
+                }
+                catch (error) {
+                    if (error.name !== "AbortError") {
+                        this.errorMessage = "Passi could not validate the login request. Please try again."
+                    }
+                }
+                finally {
+                    if (this.activeRequest === request) {
+                        this.activeRequest = null
+                    }
+                    this.authorizationChecking = false
+                }
             },
             async fetchCheck() {
                 const request = new AbortController()
@@ -94,17 +152,23 @@
                         else if (result.continue) {
                             this.timer = setTimeout(() => this.fetchCheck(), 1000)
                         }
+                        else {
+                            this.errorMessage = "Passi returned an invalid login response. Please try again."
+                            this.loginForm = true
+                        }
                     }
                     else if (response.type === "opaqueredirect") {
                         window.location.replace(response.url)
                     }
                     else {
-                        this.errorMessage = await this.getResponseError(response)
+                        await this.handleErrorResponse(response)
+                        this.loginForm = true
                     }
                 }
                 catch (error) {
                     if (error.name !== "AbortError") {
                         this.errorMessage = "Passi could not check the login request. Please try again."
+                        this.loginForm = true
                     }
                 }
                 finally {
@@ -116,6 +180,12 @@
             async handleLoginClick() {
                 this.cancelActiveRequest()
                 this.errorMessage = false
+                if (!this.authorizationReady) {
+                    this.errorMessage = this.authorizationChecking
+                        ? "Passi is validating the login request."
+                        : "This login request is invalid."
+                    return
+                }
                 this.LoginInput.Username = this.LoginInput.Username.trim()
                 if (!this.LoginInput.Username) {
                     this.errorMessage = "Enter your Passi username to continue."
@@ -146,7 +216,7 @@
                         this.fetchCheck()
                     }
                     else {
-                        this.errorMessage = await this.getResponseError(response)
+                        await this.handleErrorResponse(response)
                         this.loginForm = true
                     }
                 }
@@ -195,12 +265,12 @@
                             autocomplete="username"
                             placeholder="alex@example.com"
                             v-model="LoginInput.Username"
-                            :disabled="loading"
+                            :disabled="loading || authorizationChecking || !authorizationReady"
                             autofocus
                         >
-                        <button class="auth-primary-button" type="submit" :disabled="loading">
-                            <span class="auth-spinner" aria-hidden="true" v-if="loading"></span>
-                            {{ loading ? 'Starting secure login…' : 'Continue with Passi' }}
+                        <button class="auth-primary-button" type="submit" :disabled="loading || authorizationChecking || !authorizationReady">
+                            <span class="auth-spinner" aria-hidden="true" v-if="loading || authorizationChecking"></span>
+                            {{ authorizationChecking ? 'Validating request…' : loading ? 'Starting secure login…' : 'Continue with Passi' }}
                         </button>
                     </form>
 

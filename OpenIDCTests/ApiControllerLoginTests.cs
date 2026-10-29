@@ -182,6 +182,18 @@ namespace OpenIDCTests
             Assert.That(Property(result, "redirect_url"), Does.Contain("PKCE"));
         }
 
+        [Test]
+        public async Task AuthorizePreflightValidatesWithoutStartingPassiLogin()
+        {
+            var controller = Controller();
+
+            var result = await controller.Authorize(
+                "SampleApp", "https://site/cb", "code", "openid profile email", "state", null, null);
+
+            Assert.That(result, Is.TypeOf<OkObjectResult>());
+            Assert.That(_rest.Requests, Is.Empty);
+        }
+
         private static object Property(BadRequestObjectResult result, string name) =>
             result.Value?.GetType().GetProperty(name)?.GetValue(result.Value);
 

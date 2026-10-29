@@ -6,9 +6,12 @@
 
     export default {
         data() {
+            const loginHint = typeof this.$route.query.login_hint === "string"
+                ? this.$route.query.login_hint.trim()
+                : ""
             return {
                 LoginInput: {
-                    Username: "",
+                    Username: loginHint,
                     ReturnUrl: this.$route.query.redirect_uri,
                     ClientId: this.$route.query.client_id,
                     Nonce: this.$route.query.nonce,
@@ -27,6 +30,7 @@
                 activeRequest: null,
                 authorizationReady: false,
                 authorizationChecking: true,
+                autoLoginPending: Boolean(loginHint),
             }
         },
 
@@ -110,6 +114,10 @@
 
                     if (response.ok) {
                         this.authorizationReady = true
+                        if (this.autoLoginPending) {
+                            this.autoLoginPending = false
+                            await this.handleLoginClick()
+                        }
                     }
                     else {
                         await this.handleErrorResponse(response)

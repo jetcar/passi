@@ -143,7 +143,7 @@ namespace WebApp
                 applicationBuilder.UseAuthorization();
                 applicationBuilder.UseCorrelationId(); // Add correlation ID tracking for all requests
 
-                // Authorization server metadata for MCP clients that look for it on this host instead of /openidc.
+                // Reject discovery paths that imply /mcp is an authorization server.
                 applicationBuilder.UseNewsMcpDiscovery();
 
                 // Other OAuth discovery probes must get a real 404, not the SPA's index.html. The MCP

@@ -6,13 +6,15 @@
 
     export default {
         data() {
+            const loginHint = typeof this.$route.query.login_hint === "string"
+                ? this.$route.query.login_hint.trim()
+                : ""
             return {
                 LoginInput: {
-                    Username: "",
+                    Username: loginHint,
                     ReturnUrl: this.$route.query.redirect_uri,
                     ClientId: this.$route.query.client_id,
                     Nonce: this.$route.query.nonce,
-                    query: new URLSearchParams(this.$route.query).toString()
                 },
                 LoginResponse: {
                     checkColor: "red",
@@ -27,6 +29,8 @@
                 activeRequest: null,
                 authorizationReady: false,
                 authorizationChecking: true,
+                autoLoginPending: Boolean(loginHint),
+                loginToken: null,
             }
         },
 
@@ -39,6 +43,9 @@
         },
 
         methods: {
+            authorizationQuery() {
+                return new URLSearchParams(window.location.search)
+            },
             cancelActiveRequest() {
                 clearTimeout(this.timer)
                 this.timer = null
@@ -50,6 +57,9 @@
                 this.loginForm = true;
                 this.loading = false;
                 this.errorMessage = false;
+                this.authorizationReady = false
+                this.loginToken = null
+                this.validateAuthorizationRequest()
             },
             handleCancelClick() {
                 this.resetLogin()
@@ -92,24 +102,35 @@
                 this.errorMessage = error.message
                 return false
             },
-            async validateAuthorizationRequest() {
+            async validateAuthorizationRequest(preserveError = false) {
                 const request = new AbortController()
                 this.activeRequest = request
                 this.authorizationChecking = true
                 this.authorizationReady = false
-                this.errorMessage = false
+                if (!preserveError) this.errorMessage = false
 
                 try {
-                    const query = new URLSearchParams(this.$route.query)
+                    const query = this.authorizationQuery()
                     const response = await fetch(API_AUTHORIZE_URL + "?" + query.toString(), {
                         method: "GET",
                         credentials: "include",
+                        cache: "no-store",
                         signal: request.signal
                     })
                     if (this.activeRequest !== request) return
 
                     if (response.ok) {
+                        const result = await response.json()
+                        if (typeof result?.login_token !== "string" || !result.login_token) {
+                            this.errorMessage = "Passi returned an invalid login token. Please try again."
+                            return
+                        }
+                        this.loginToken = result.login_token
                         this.authorizationReady = true
+                        if (this.autoLoginPending) {
+                            this.autoLoginPending = false
+                            await this.handleLoginClick()
+                        }
                     }
                     else {
                         await this.handleErrorResponse(response)
@@ -130,12 +151,12 @@
             async fetchCheck() {
                 const request = new AbortController()
                 this.activeRequest = request
-                const query = new URLSearchParams(this.$route.query)
+                const query = this.authorizationQuery()
                 query.set("sessionId", this.LoginResponse.sessionId)
 
                 try {
                     const response = await fetch(API_CHECK_URL + "?" + query.toString(), {
-                        method: "GET",
+                        method: "POST",
                         credentials: "include",
                         redirect: "manual",
                         signal: request.signal
@@ -155,20 +176,31 @@
                         else {
                             this.errorMessage = "Passi returned an invalid login response. Please try again."
                             this.loginForm = true
+                            this.loginToken = null
+                            this.authorizationReady = false
+                            await this.validateAuthorizationRequest(true)
                         }
                     }
                     else if (response.type === "opaqueredirect") {
                         window.location.replace(response.url)
                     }
                     else {
-                        await this.handleErrorResponse(response)
+                        const redirected = await this.handleErrorResponse(response)
                         this.loginForm = true
+                        if (!redirected) {
+                            this.loginToken = null
+                            this.authorizationReady = false
+                            await this.validateAuthorizationRequest(true)
+                        }
                     }
                 }
                 catch (error) {
                     if (error.name !== "AbortError") {
                         this.errorMessage = "Passi could not check the login request. Please try again."
                         this.loginForm = true
+                        this.loginToken = null
+                        this.authorizationReady = false
+                        await this.validateAuthorizationRequest(true)
                     }
                 }
                 finally {
@@ -186,6 +218,12 @@
                         : "This login request is invalid."
                     return
                 }
+                if (!this.loginToken) {
+                    this.authorizationReady = false
+                    this.errorMessage = "Passi must validate this login request again."
+                    await this.validateAuthorizationRequest(true)
+                    return
+                }
                 this.LoginInput.Username = this.LoginInput.Username.trim()
                 if (!this.LoginInput.Username) {
                     this.errorMessage = "Enter your Passi username to continue."
@@ -195,20 +233,25 @@
                 this.LoginInput.ReturnUrl = this.$route.query.redirect_uri
                 this.LoginInput.ClientId = this.$route.query.client_id
                 this.LoginInput.Nonce = this.$route.query.nonce
-                const query = new URLSearchParams(this.$route.query)
+                const query = this.authorizationQuery()
                 query.set("username", this.LoginInput.Username)
                 const request = new AbortController()
                 this.activeRequest = request
 
                 try {
                     const response = await fetch(API_URL + "?" + query.toString(), {
-                        method: "GET",
+                        method: "POST",
                         credentials: "include",
+                        headers: {
+                            "X-Passi-Login-Token": this.loginToken
+                        },
                         signal: request.signal
                     })
                     if (this.activeRequest !== request) return
 
                     if (response.ok) {
+                        this.loginToken = null
+                        this.authorizationReady = false
                         this.LoginResponse = await response.json()
                         if (this.activeRequest !== request) return
                         this.loginForm = false
@@ -216,13 +259,21 @@
                         this.fetchCheck()
                     }
                     else {
-                        await this.handleErrorResponse(response)
+                        const redirected = await this.handleErrorResponse(response)
                         this.loginForm = true
+                        if (!redirected) {
+                            this.loginToken = null
+                            this.authorizationReady = false
+                            await this.validateAuthorizationRequest(true)
+                        }
                     }
                 }
                 catch (error) {
                     if (error.name !== "AbortError") {
                         this.errorMessage = "Passi could not start the login. Check your connection and try again."
+                        this.loginToken = null
+                        this.authorizationReady = false
+                        await this.validateAuthorizationRequest(true)
                     }
                 }
                 finally {

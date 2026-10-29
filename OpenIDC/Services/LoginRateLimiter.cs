@@ -14,6 +14,7 @@ namespace OpenIDC.Services
     public interface ILoginRateLimiter
     {
         bool TryAcquire(HttpContext context, string username, out TimeSpan retryAfter);
+        bool TryAcquireToken(HttpContext context, out TimeSpan retryAfter);
     }
 
     public class LoginRateLimiter : ILoginRateLimiter
@@ -22,6 +23,7 @@ namespace OpenIDC.Services
         private readonly IRedisService _redis;
         private readonly int _ipPermitLimit;
         private readonly int _usernamePermitLimit;
+        private readonly int _tokenPermitLimit;
         private readonly TimeSpan _window;
         private readonly Func<IPAddress, bool> _isTrustedProxy;
 
@@ -31,7 +33,8 @@ namespace OpenIDC.Services
                 PositiveSetting(settings["LoginRateLimitPerIp"], 10),
                 PositiveSetting(settings["LoginRateLimitPerUsername"], 3),
                 TimeSpan.FromSeconds(PositiveSetting(settings["LoginRateLimitWindowSeconds"], 300)),
-                new TrustedProxyResolver(settings["TrustedProxyHosts"] ?? "haproxy").Contains)
+                new TrustedProxyResolver(settings["TrustedProxyHosts"] ?? "haproxy").Contains,
+                PositiveSetting(settings["LoginStartTokenRateLimitPerIp"], 30))
         {
         }
 
@@ -40,14 +43,17 @@ namespace OpenIDC.Services
             int ipPermitLimit,
             int usernamePermitLimit,
             TimeSpan window,
-            Func<IPAddress, bool> isTrustedProxy = null)
+            Func<IPAddress, bool> isTrustedProxy = null,
+            int tokenPermitLimit = 30)
         {
             _redis = redis ?? throw new ArgumentNullException(nameof(redis));
             if (ipPermitLimit <= 0) throw new ArgumentOutOfRangeException(nameof(ipPermitLimit));
             if (usernamePermitLimit <= 0) throw new ArgumentOutOfRangeException(nameof(usernamePermitLimit));
+            if (tokenPermitLimit <= 0) throw new ArgumentOutOfRangeException(nameof(tokenPermitLimit));
             if (window <= TimeSpan.Zero) throw new ArgumentOutOfRangeException(nameof(window));
             _ipPermitLimit = ipPermitLimit;
             _usernamePermitLimit = usernamePermitLimit;
+            _tokenPermitLimit = tokenPermitLimit;
             _window = window;
             _isTrustedProxy = isTrustedProxy ?? (_ => false);
         }
@@ -63,9 +69,15 @@ namespace OpenIDC.Services
                 Key("username", normalizedUsername), _usernamePermitLimit, _window, out retryAfter);
         }
 
+        public bool TryAcquireToken(HttpContext context, out TimeSpan retryAfter) =>
+            _redis.TryAcquireFixedWindow(
+                Key("token-ip", ClientIp(context)), _tokenPermitLimit, _window, out retryAfter);
+
         private string ClientIp(HttpContext context)
         {
             var remoteIp = context?.Connection.RemoteIpAddress;
+            if (remoteIp == null)
+                throw new InvalidOperationException("The client IP address is unavailable.");
             if (!_isTrustedProxy(remoteIp))
                 return NormalizeIp(remoteIp);
 

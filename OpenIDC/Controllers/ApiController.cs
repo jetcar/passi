@@ -37,6 +37,7 @@ public class ApiController : ControllerBase
     private readonly IClientStore _clientStore;
     private readonly IAuthorizationCodeStore _authCodeStore;
     private readonly ILoginRateLimiter _loginRateLimiter;
+    private readonly ILoginStartTokenService _loginStartTokenService;
 
     public ApiController(
         IRandomGenerator randomGenerator,
@@ -45,7 +46,8 @@ public class ApiController : ControllerBase
         ILogger<ApiController> logger,
         IClientStore clientStore,
         IAuthorizationCodeStore authCodeStore,
-        ILoginRateLimiter loginRateLimiter)
+        ILoginRateLimiter loginRateLimiter,
+        ILoginStartTokenService loginStartTokenService)
     {
         _randomGenerator = randomGenerator;
         _myRestClient = myRestClient;
@@ -54,6 +56,7 @@ public class ApiController : ControllerBase
         _clientStore = clientStore;
         _authCodeStore = authCodeStore;
         _loginRateLimiter = loginRateLimiter;
+        _loginStartTokenService = loginStartTokenService;
     }
 
 
@@ -71,23 +74,52 @@ public class ApiController : ControllerBase
     }
 
     [HttpPost]
-    [HttpGet]
     [Route("login")]
     public async Task<IActionResult> Login(
         [FromQuery] string redirect_uri,
         [FromQuery] string nonce,
         [FromQuery] string username,
+        [FromQuery] string login_hint,
         [FromQuery] string client_id,
         [FromQuery] string response_type,
         [FromQuery] string scope,
         [FromQuery] string state,
         [FromQuery] string code_challenge,
-        [FromQuery] string code_challenge_method)
+        [FromQuery] string code_challenge_method,
+        [FromHeader(Name = "X-Passi-Login-Token")] string loginToken)
     {
+        if (HasRepeatedAuthorizationParameter())
+            return AuthorizationError("invalid_request", "Authorization parameters must not be repeated.", null, state);
+
         var authorizationError = await ValidateAuthorizationRequest(
             client_id, redirect_uri, response_type, scope, state, code_challenge, code_challenge_method);
         if (authorizationError != null)
             return authorizationError;
+
+        var loginTokenRequest = LoginTokenRequest(
+            client_id, redirect_uri, response_type, scope, state, nonce, login_hint, code_challenge, code_challenge_method);
+
+        try
+        {
+            if (!_loginStartTokenService.TryConsume(HttpContext, loginToken, loginTokenRequest))
+            {
+                return AuthorizationError(
+                    "invalid_request",
+                    "Login token is missing, expired, or invalid.",
+                    null,
+                    state);
+            }
+        }
+        catch (Exception exception)
+        {
+            _logger.LogError(exception, "Login token validation failed.");
+            return AuthorizationError(
+                "temporarily_unavailable",
+                "Login is temporarily unavailable.",
+                null,
+                state,
+                StatusCodes.Status503ServiceUnavailable);
+        }
 
         try
         {
@@ -138,10 +170,28 @@ public class ApiController : ControllerBase
         {
             _logger.LogDebug("response:" + result.Content);
             var loginResponceDto = JsonConvert.DeserializeObject<LoginResponceDto>(result.Content);
-            if (loginResponceDto == null)
+            if (loginResponceDto == null || loginResponceDto.SessionId == Guid.Empty)
             {
                 _logger.LogWarning("Login start request returned an empty response.");
                 return BadRequest(new ApiResponseDto() { errors = "Internal error" });
+            }
+
+            try
+            {
+                _loginStartTokenService.BindSession(
+                    HttpContext,
+                    loginResponceDto.SessionId.ToString("D"),
+                    loginTokenRequest);
+            }
+            catch (Exception exception)
+            {
+                _logger.LogError(exception, "Login session binding failed.");
+                return AuthorizationError(
+                    "temporarily_unavailable",
+                    "Login is temporarily unavailable.",
+                    null,
+                    state,
+                    StatusCodes.Status503ServiceUnavailable);
             }
 
             var color = startLoginDto.CheckColor.ToString();
@@ -174,12 +224,115 @@ public class ApiController : ControllerBase
         [FromQuery] string response_type,
         [FromQuery] string scope,
         [FromQuery] string state,
+        [FromQuery] string nonce,
+        [FromQuery] string login_hint,
         [FromQuery] string code_challenge,
         [FromQuery] string code_challenge_method)
     {
+        Response.Headers.CacheControl = "no-store";
+        Response.Headers.Pragma = "no-cache";
+
+        if (!IsSameOriginRequest())
+            return StatusCode(StatusCodes.Status403Forbidden, new { errors = "Cross-site login requests are not allowed." });
+
+        if (HasRepeatedAuthorizationParameter())
+            return AuthorizationError("invalid_request", "Authorization parameters must not be repeated.", null, state);
+
         var authorizationError = await ValidateAuthorizationRequest(
             client_id, redirect_uri, response_type, scope, state, code_challenge, code_challenge_method);
-        return authorizationError ?? Ok(new { valid = true });
+        if (authorizationError != null)
+            return authorizationError;
+
+        try
+        {
+            if (!_loginRateLimiter.TryAcquireToken(HttpContext, out var retryAfter))
+            {
+                Response.Headers.RetryAfter = Math.Max(1, (int)Math.Ceiling(retryAfter.TotalSeconds))
+                    .ToString(System.Globalization.CultureInfo.InvariantCulture);
+                return AuthorizationError(
+                    "temporarily_unavailable",
+                    "Too many login requests. Please try again later.",
+                    redirect_uri,
+                    state,
+                    StatusCodes.Status429TooManyRequests);
+            }
+        }
+        catch (Exception exception)
+        {
+            _logger.LogError(exception, "Login token rate limiter failed.");
+            return AuthorizationError(
+                "temporarily_unavailable",
+                "Login is temporarily unavailable.",
+                redirect_uri,
+                state,
+                StatusCodes.Status503ServiceUnavailable);
+        }
+
+        try
+        {
+            var loginToken = _loginStartTokenService.Issue(HttpContext, LoginTokenRequest(
+                client_id, redirect_uri, response_type, scope, state, nonce, login_hint, code_challenge, code_challenge_method));
+            return Ok(new { valid = true, login_token = loginToken });
+        }
+        catch (Exception exception)
+        {
+            _logger.LogError(exception, "Login token issuance failed.");
+            return AuthorizationError(
+                "temporarily_unavailable",
+                "Login is temporarily unavailable.",
+                redirect_uri,
+                state,
+                StatusCodes.Status503ServiceUnavailable);
+        }
+    }
+
+    private static LoginStartTokenRequest LoginTokenRequest(
+        string clientId,
+        string redirectUri,
+        string responseType,
+        string scope,
+        string state,
+        string nonce,
+        string loginHint,
+        string codeChallenge,
+        string codeChallengeMethod) => new()
+    {
+        ClientId = clientId,
+        RedirectUri = redirectUri,
+        ResponseType = responseType,
+        Scope = scope,
+        State = state,
+        Nonce = nonce,
+        LoginHint = loginHint,
+        CodeChallenge = codeChallenge,
+        CodeChallengeMethod = codeChallengeMethod,
+    };
+
+    private bool IsSameOriginRequest()
+    {
+        var fetchSite = Request.Headers["Sec-Fetch-Site"].ToString();
+        if (!string.IsNullOrEmpty(fetchSite))
+            return string.Equals(fetchSite, "same-origin", StringComparison.OrdinalIgnoreCase);
+
+        var expectedOrigin = $"{Request.Scheme}://{Request.Host}";
+        var origin = Request.Headers["Origin"].ToString().TrimEnd('/');
+        if (!string.IsNullOrEmpty(origin))
+            return string.Equals(origin, expectedOrigin, StringComparison.OrdinalIgnoreCase);
+
+        var referer = Request.Headers["Referer"].ToString();
+        return Uri.TryCreate(referer, UriKind.Absolute, out var refererUri) &&
+               string.Equals(refererUri.GetLeftPart(UriPartial.Authority), expectedOrigin, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private bool HasRepeatedAuthorizationParameter()
+    {
+        if (HttpContext == null) return false;
+        string[] names =
+        [
+            "client_id", "redirect_uri", "response_type", "scope", "state", "nonce", "login_hint",
+            "code_challenge", "code_challenge_method"
+        ];
+        return names.Any(name => Request.Query[name].Count > 1);
     }
 
     private async Task<IActionResult> ValidateAuthorizationRequest(
@@ -288,13 +441,14 @@ public class ApiController : ControllerBase
     }
 
     [HttpPost]
-    [HttpGet]
     [Route("check")]
     public async Task<IActionResult> Check(
         [FromQuery] string sessionId,
         [FromQuery] string nonce,
+        [FromQuery] string login_hint,
         [FromQuery] string client_id,
         [FromQuery] string redirect_uri,
+        [FromQuery] string response_type,
         [FromQuery] string scope,
         [FromQuery] string state,
         [FromQuery] string code_challenge,
@@ -302,6 +456,9 @@ public class ApiController : ControllerBase
     {
         _logger.LogInformation("Check endpoint called - SessionId: {SessionId}, ClientId: {ClientId}, RedirectUri: {RedirectUri}",
             sessionId, client_id, redirect_uri);
+
+        if (HasRepeatedAuthorizationParameter())
+            return AuthorizationError("invalid_request", "Authorization parameters must not be repeated.", null, state);
 
         // Validate client and redirect_uri BEFORE processing authentication
         var client = await _clientStore.GetClientAsync(client_id);
@@ -317,6 +474,30 @@ public class ApiController : ControllerBase
             _logger.LogWarning("Invalid redirect_uri: {RedirectUri} for client: {ClientId}. Registered URIs: {RegisteredUris}",
                 redirect_uri, client_id, string.Join(", ", client.RedirectUris ?? new List<string>()));
             return BadRequest(new ApiResponseDto() { errors = "Invalid redirect_uri - must exactly match registered URI including protocol (http/https)" });
+        }
+
+        var loginTokenRequest = LoginTokenRequest(
+            client_id, redirect_uri, response_type, scope, state, nonce, login_hint, code_challenge, code_challenge_method);
+        try
+        {
+            if (!_loginStartTokenService.IsSessionBound(HttpContext, sessionId, loginTokenRequest))
+            {
+                return AuthorizationError(
+                    "invalid_request",
+                    "Login session is missing, expired, or invalid.",
+                    null,
+                    state);
+            }
+        }
+        catch (Exception exception)
+        {
+            _logger.LogError(exception, "Login session validation failed.");
+            return AuthorizationError(
+                "temporarily_unavailable",
+                "Login is temporarily unavailable.",
+                null,
+                state,
+                StatusCodes.Status503ServiceUnavailable);
         }
 
         var request = new RestRequest(_appSetting["checkRequest"] + "?sessionId=" + sessionId,
@@ -379,6 +560,28 @@ public class ApiController : ControllerBase
 
                         if (isValid)
                         {
+                            try
+                            {
+                                if (!_loginStartTokenService.TryConsumeSession(HttpContext, sessionId, loginTokenRequest))
+                                {
+                                    return AuthorizationError(
+                                        "invalid_request",
+                                        "Login session is missing, expired, or already used.",
+                                        null,
+                                        state);
+                                }
+                            }
+                            catch (Exception exception)
+                            {
+                                _logger.LogError(exception, "Login session consumption failed.");
+                                return AuthorizationError(
+                                    "temporarily_unavailable",
+                                    "Login is temporarily unavailable.",
+                                    null,
+                                    state,
+                                    StatusCodes.Status503ServiceUnavailable);
+                            }
+
                             // Create authorization code using new OIDC services
                             List<string> scopes = !string.IsNullOrEmpty(scope)
                                 ? [.. scope.Split(' ')]

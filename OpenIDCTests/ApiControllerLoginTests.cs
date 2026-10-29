@@ -22,7 +22,10 @@ namespace OpenIDCTests
     {
         private CapturingRestClient _rest;
 
-        private ApiController Controller(OidcClient client = null, ILoginRateLimiter loginRateLimiter = null)
+        private ApiController Controller(
+            OidcClient client = null,
+            ILoginRateLimiter loginRateLimiter = null,
+            ILoginStartTokenService loginStartTokenService = null)
         {
             _rest = new CapturingRestClient();
             var appSetting = new AppSetting(new ConfigurationBuilder()
@@ -31,9 +34,11 @@ namespace OpenIDCTests
 
             client ??= Client();
             var controller = new ApiController(new FixedRandom(), _rest, appSetting, NullLogger<ApiController>.Instance,
-                new FixedClientStore(client), null, loginRateLimiter ?? new FixedLoginRateLimiter(true));
+                new FixedClientStore(client), null, loginRateLimiter ?? new FixedLoginRateLimiter(true),
+                loginStartTokenService ?? new FixedLoginStartTokenService(true));
             controller.ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() };
             controller.HttpContext.Connection.RemoteIpAddress = IPAddress.Parse("192.0.2.10");
+            controller.Request.Headers["Sec-Fetch-Site"] = "same-origin";
             return controller;
         }
 
@@ -58,8 +63,8 @@ namespace OpenIDCTests
             string state = "state",
             string codeChallenge = null,
             string codeChallengeMethod = null) =>
-            controller.Login(redirectUri, "nonce", "alice@passi.cloud", clientId, responseType, scope, state,
-                codeChallenge, codeChallengeMethod);
+            controller.Login(redirectUri, "nonce", "alice@passi.cloud", null, clientId, responseType, scope, state,
+                codeChallenge, codeChallengeMethod, "login-token");
 
         [Test]
         public async Task LoginSendsTwoDigitNumberToPassiAndReturnsItToTheLoginPage()
@@ -116,7 +121,8 @@ namespace OpenIDCTests
                 .AddInMemoryCollection(new Dictionary<string, string> { ["AppSetting:startRequest"] = "/api/auth/start" })
                 .Build()) { PrefferAppsettingFile = true };
             var controller = new ApiController(new FixedRandom(), rest, appSetting, NullLogger<ApiController>.Instance,
-                new FixedClientStore(Client()), null, new FixedLoginRateLimiter(true));
+                new FixedClientStore(Client()), null, new FixedLoginRateLimiter(true),
+                new FixedLoginStartTokenService(true));
             controller.ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() };
 
             var result = await Login(controller);
@@ -193,10 +199,67 @@ namespace OpenIDCTests
             var controller = Controller();
 
             var result = await controller.Authorize(
-                "SampleApp", "https://site/cb", "code", "openid profile email", "state", null, null);
+                "SampleApp", "https://site/cb", "code", "openid profile email", "state", "nonce", null, null, null);
 
             Assert.That(result, Is.TypeOf<OkObjectResult>());
+            Assert.That(Property((OkObjectResult)result, "login_token"), Is.EqualTo("login-token"));
+            Assert.That(controller.Response.Headers.CacheControl.ToString(), Is.EqualTo("no-store"));
             Assert.That(_rest.Requests, Is.Empty);
+        }
+
+        [Test]
+        public async Task TokenIssuanceRateLimitPreventsTokenCreation()
+        {
+            var tokens = new FixedLoginStartTokenService(true);
+            var controller = Controller(
+                loginRateLimiter: new FixedLoginRateLimiter(true, false),
+                loginStartTokenService: tokens);
+
+            var result = (ObjectResult)await controller.Authorize(
+                "SampleApp", "https://site/cb", "code", "openid profile email", "state", "nonce", null, null, null);
+
+            Assert.That(result.StatusCode, Is.EqualTo(StatusCodes.Status429TooManyRequests));
+            Assert.That(tokens.IssueCount, Is.Zero);
+            Assert.That(_rest.Requests, Is.Empty);
+        }
+
+        [Test]
+        public async Task MissingOrInvalidLoginTokenPreventsPassiLogin()
+        {
+            var controller = Controller(loginStartTokenService: new FixedLoginStartTokenService(false));
+
+            var result = (BadRequestObjectResult)await Login(controller);
+
+            Assert.That(_rest.Requests, Is.Empty);
+            Assert.That(Property(result, "error"), Is.EqualTo("invalid_request"));
+        }
+
+        [Test]
+        public async Task CrossSiteAuthorizeRequestIsRejectedBeforeTokenIssuance()
+        {
+            var tokens = new FixedLoginStartTokenService(true);
+            var controller = Controller(loginStartTokenService: tokens);
+            controller.Request.Headers["Sec-Fetch-Site"] = "cross-site";
+
+            var result = (ObjectResult)await controller.Authorize(
+                "SampleApp", "https://site/cb", "code", "openid profile email", "state", "nonce", null, null, null);
+
+            Assert.That(result.StatusCode, Is.EqualTo(StatusCodes.Status403Forbidden));
+            Assert.That(tokens.IssueCount, Is.Zero);
+        }
+
+        [Test]
+        public async Task RepeatedAuthorizationParameterIsRejectedBeforeTokenIssuance()
+        {
+            var tokens = new FixedLoginStartTokenService(true);
+            var controller = Controller(loginStartTokenService: tokens);
+            controller.Request.QueryString = new QueryString("?client_id=SampleApp&client_id=other");
+
+            var result = (BadRequestObjectResult)await controller.Authorize(
+                "SampleApp", "https://site/cb", "code", "openid profile email", "state", "nonce", null, null, null);
+
+            Assert.That(Property(result, "error"), Is.EqualTo("invalid_request"));
+            Assert.That(tokens.IssueCount, Is.Zero);
         }
 
         [Test]
@@ -280,13 +343,24 @@ namespace OpenIDCTests
         private class FixedLoginRateLimiter : ILoginRateLimiter
         {
             private readonly bool _allowed;
+            private readonly bool _tokenAllowed;
 
-            public FixedLoginRateLimiter(bool allowed) => _allowed = allowed;
+            public FixedLoginRateLimiter(bool allowed, bool tokenAllowed = true)
+            {
+                _allowed = allowed;
+                _tokenAllowed = tokenAllowed;
+            }
 
             public bool TryAcquire(HttpContext context, string username, out TimeSpan retryAfter)
             {
                 retryAfter = TimeSpan.FromMinutes(5);
                 return _allowed;
+            }
+
+            public bool TryAcquireToken(HttpContext context, out TimeSpan retryAfter)
+            {
+                retryAfter = TimeSpan.FromMinutes(5);
+                return _tokenAllowed;
             }
         }
 
@@ -294,6 +368,27 @@ namespace OpenIDCTests
         {
             public bool TryAcquire(HttpContext context, string username, out TimeSpan retryAfter) =>
                 throw new InvalidOperationException("Redis unavailable");
+
+            public bool TryAcquireToken(HttpContext context, out TimeSpan retryAfter) =>
+                throw new InvalidOperationException("Redis unavailable");
+        }
+
+        private sealed class FixedLoginStartTokenService : ILoginStartTokenService
+        {
+            private readonly bool _valid;
+
+            public FixedLoginStartTokenService(bool valid) => _valid = valid;
+            public int IssueCount { get; private set; }
+            public string Issue(HttpContext context, LoginStartTokenRequest request)
+            {
+                IssueCount++;
+                return "login-token";
+            }
+            public bool TryConsume(HttpContext context, string token, LoginStartTokenRequest request) =>
+                _valid && token == "login-token";
+            public void BindSession(HttpContext context, string sessionId, LoginStartTokenRequest request) { }
+            public bool IsSessionBound(HttpContext context, string sessionId, LoginStartTokenRequest request) => _valid;
+            public bool TryConsumeSession(HttpContext context, string sessionId, LoginStartTokenRequest request) => _valid;
         }
     }
 }

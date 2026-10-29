@@ -43,6 +43,31 @@ namespace OpenIDCTests
         }
 
         [Test]
+        public void LoginStartTokensAreRateLimitedByIp()
+        {
+            var limiter = new LoginRateLimiter(
+                new InMemoryRedisService(),
+                10,
+                10,
+                TimeSpan.FromMinutes(5),
+                tokenPermitLimit: 2);
+            var context = new DefaultHttpContext();
+            context.Connection.RemoteIpAddress = System.Net.IPAddress.Parse("192.0.2.10");
+
+            Assert.That(limiter.TryAcquireToken(context, out _), Is.True);
+            Assert.That(limiter.TryAcquireToken(context, out _), Is.True);
+            Assert.That(limiter.TryAcquireToken(context, out _), Is.False);
+        }
+
+        [Test]
+        public void MissingClientIpFailsClosedInsteadOfSharingAGlobalBucket()
+        {
+            var limiter = new LoginRateLimiter(new InMemoryRedisService(), 10, 10, TimeSpan.FromMinutes(5));
+
+            Assert.Throws<InvalidOperationException>(() => limiter.TryAcquireToken(new DefaultHttpContext(), out _));
+        }
+
+        [Test]
         public void IgnoresUnprocessedForwardedHeader()
         {
             var limiter = new LoginRateLimiter(new InMemoryRedisService(), 2, 10, TimeSpan.FromMinutes(5));

@@ -27,6 +27,91 @@ namespace OpenIDCTests
         private const string ClientId = "SampleApp";
 
         [Test]
+        public async Task CheckRejectsUnboundSessionBeforeCallingPassi()
+        {
+            var appSetting = new AppSetting(new ConfigurationBuilder()
+                .AddInMemoryCollection(new Dictionary<string, string> { ["AppSetting:checkRequest"] = "/api/auth/check" })
+                .Build())
+            { PrefferAppsettingFile = true };
+            var clientStore = new FixedClientStore(new OidcClient
+            {
+                ClientId = ClientId,
+                RedirectUris = new List<string> { RedirectUri },
+            });
+            var controller = new ApiController(
+                new FixedRandom(),
+                new SequencedRestClient(Array.Empty<RestResponse>()),
+                appSetting,
+                NullLogger<ApiController>.Instance,
+                clientStore,
+                new FakeAuthCodeStore(),
+                new AllowAllLoginRateLimiter(),
+                new RejectingLoginStartTokenService());
+
+            var result = await controller.Check(
+                sessionId: "session",
+                nonce: "nonce",
+                login_hint: null,
+                client_id: ClientId,
+                redirect_uri: RedirectUri,
+                response_type: "code",
+                scope: "openid",
+                state: "state",
+                code_challenge: null,
+                code_challenge_method: null);
+
+            Assert.That(result, Is.TypeOf<BadRequestObjectResult>());
+        }
+
+        [Test]
+        public async Task ApprovedSessionCreatesExactlyOneAuthorizationCode()
+        {
+            var cert = MakeSelfSignedCert(DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddDays(1), out var rsa);
+            var randomString = "5551234567";
+            var rest = new SequencedRestClient(new[]
+            {
+                MakeJsonResponse(new CheckResponceDto { Username = "alice@passi.cloud", PublicCertThumbprint = "thumb" }),
+                MakeJsonResponse(new CertificateDto { Thumbprint = "thumb", PublicCert = Convert.ToBase64String(cert.RawData) }),
+                MakeJsonResponse(new SessionMinDto { SignedHash = Sign(randomString, rsa), RandomString = randomString }),
+            });
+            var appSetting = new AppSetting(new ConfigurationBuilder()
+                .AddInMemoryCollection(new Dictionary<string, string> { ["AppSetting:checkRequest"] = "/api/auth/check" })
+                .Build())
+            { PrefferAppsettingFile = true };
+            var clientStore = new FixedClientStore(new OidcClient
+            {
+                ClientId = ClientId,
+                RedirectUris = new List<string> { RedirectUri },
+            });
+            var authCodes = new CountingAuthCodeStore();
+            var controller = new ApiController(
+                new FixedRandom(),
+                rest,
+                appSetting,
+                NullLogger<ApiController>.Instance,
+                clientStore,
+                authCodes,
+                new AllowAllLoginRateLimiter(),
+                new SingleUseLoginStartTokenService());
+
+            async Task<IActionResult> Check() => await controller.Check(
+                sessionId: "session",
+                nonce: "nonce",
+                login_hint: null,
+                client_id: ClientId,
+                redirect_uri: RedirectUri,
+                response_type: "code",
+                scope: "openid",
+                state: "state",
+                code_challenge: null,
+                code_challenge_method: null);
+
+            Assert.That(await Check(), Is.TypeOf<OkObjectResult>());
+            Assert.That(await Check(), Is.TypeOf<BadRequestObjectResult>());
+            Assert.That(authCodes.CreateCount, Is.EqualTo(1));
+        }
+
+        [Test]
         public async Task CheckRejectsAnExpiredCertificate()
         {
             var result = await RunCheck(MakeSelfSignedCert(notBefore: DateTimeOffset.UtcNow.AddDays(-2), notAfter: DateTimeOffset.UtcNow.AddDays(-1)));
@@ -108,10 +193,10 @@ namespace OpenIDCTests
                 RedirectUris = new List<string> { RedirectUri },
             });
 
-            var controller = new ApiController(new FixedRandom(), rest, appSetting, NullLogger<ApiController>.Instance, clientStore, new FakeAuthCodeStore(), new AllowAllLoginRateLimiter());
+            var controller = new ApiController(new FixedRandom(), rest, appSetting, NullLogger<ApiController>.Instance, clientStore, new FakeAuthCodeStore(), new AllowAllLoginRateLimiter(), new AllowAllLoginStartTokenService());
 
             var result = await controller.Check(sessionId: "session", nonce: "nonce", client_id: ClientId, redirect_uri: RedirectUri,
-                scope: null, state: null, code_challenge: null, code_challenge_method: null);
+                login_hint: null, response_type: "code", scope: null, state: null, code_challenge: null, code_challenge_method: null);
 
             Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
         }
@@ -141,10 +226,10 @@ namespace OpenIDCTests
                 RedirectUris = new List<string> { RedirectUri },
             });
 
-            var controller = new ApiController(new FixedRandom(), rest, appSetting, NullLogger<ApiController>.Instance, clientStore, new FakeAuthCodeStore(), new AllowAllLoginRateLimiter());
+            var controller = new ApiController(new FixedRandom(), rest, appSetting, NullLogger<ApiController>.Instance, clientStore, new FakeAuthCodeStore(), new AllowAllLoginRateLimiter(), new AllowAllLoginStartTokenService());
 
             var result = await controller.Check(sessionId: "session", nonce: "nonce", client_id: ClientId, redirect_uri: RedirectUri,
-                scope: null, state: null, code_challenge: null, code_challenge_method: null);
+                login_hint: null, response_type: "code", scope: null, state: null, code_challenge: null, code_challenge_method: null);
 
             var badRequest = (BadRequestObjectResult)result;
             Assert.That(((ApiResponseDto)badRequest.Value).errors, Is.EqualTo("Invalid Certificate"));
@@ -231,10 +316,10 @@ namespace OpenIDCTests
                 RedirectUris = new List<string> { RedirectUri },
             });
 
-            var controller = new ApiController(new FixedRandom(), rest, appSetting, NullLogger<ApiController>.Instance, clientStore, new FakeAuthCodeStore(), new AllowAllLoginRateLimiter());
+            var controller = new ApiController(new FixedRandom(), rest, appSetting, NullLogger<ApiController>.Instance, clientStore, new FakeAuthCodeStore(), new AllowAllLoginRateLimiter(), new AllowAllLoginStartTokenService());
 
             return await controller.Check(sessionId: "session", nonce: nonce, client_id: ClientId, redirect_uri: RedirectUri,
-                scope: null, state: state, code_challenge: codeChallenge, code_challenge_method: codeChallenge == null ? null : "S256");
+                login_hint: null, response_type: "code", scope: null, state: state, code_challenge: codeChallenge, code_challenge_method: codeChallenge == null ? null : "S256");
         }
 
         private static RestResponse MakeJsonResponse<T>(T value)
@@ -282,11 +367,66 @@ namespace OpenIDCTests
             public Task<AuthorizationCode> ConsumeAuthorizationCodeAsync(string code) => Task.FromResult<AuthorizationCode>(null);
         }
 
+        private sealed class CountingAuthCodeStore : IAuthorizationCodeStore
+        {
+            public int CreateCount { get; private set; }
+
+            public Task<string> CreateAuthorizationCodeAsync(AuthorizationCode authCode)
+            {
+                CreateCount++;
+                return Task.FromResult("code123");
+            }
+
+            public Task<AuthorizationCode> ConsumeAuthorizationCodeAsync(string code) =>
+                Task.FromResult<AuthorizationCode>(null);
+        }
+
         private class AllowAllLoginRateLimiter : ILoginRateLimiter
         {
             public bool TryAcquire(Microsoft.AspNetCore.Http.HttpContext context, string username, out TimeSpan retryAfter)
             {
                 retryAfter = TimeSpan.Zero;
+                return true;
+            }
+
+            public bool TryAcquireToken(Microsoft.AspNetCore.Http.HttpContext context, out TimeSpan retryAfter)
+            {
+                retryAfter = TimeSpan.Zero;
+                return true;
+            }
+        }
+
+        private sealed class AllowAllLoginStartTokenService : ILoginStartTokenService
+        {
+            public string Issue(Microsoft.AspNetCore.Http.HttpContext context, LoginStartTokenRequest request) => "token";
+            public bool TryConsume(Microsoft.AspNetCore.Http.HttpContext context, string token, LoginStartTokenRequest request) => true;
+            public void BindSession(Microsoft.AspNetCore.Http.HttpContext context, string sessionId, LoginStartTokenRequest request) { }
+            public bool IsSessionBound(Microsoft.AspNetCore.Http.HttpContext context, string sessionId, LoginStartTokenRequest request) => true;
+            public bool TryConsumeSession(Microsoft.AspNetCore.Http.HttpContext context, string sessionId, LoginStartTokenRequest request) => true;
+        }
+
+        private sealed class RejectingLoginStartTokenService : ILoginStartTokenService
+        {
+            public string Issue(Microsoft.AspNetCore.Http.HttpContext context, LoginStartTokenRequest request) => "token";
+            public bool TryConsume(Microsoft.AspNetCore.Http.HttpContext context, string token, LoginStartTokenRequest request) => false;
+            public void BindSession(Microsoft.AspNetCore.Http.HttpContext context, string sessionId, LoginStartTokenRequest request) { }
+            public bool IsSessionBound(Microsoft.AspNetCore.Http.HttpContext context, string sessionId, LoginStartTokenRequest request) => false;
+            public bool TryConsumeSession(Microsoft.AspNetCore.Http.HttpContext context, string sessionId, LoginStartTokenRequest request) => false;
+        }
+
+        private sealed class SingleUseLoginStartTokenService : ILoginStartTokenService
+        {
+            private bool _available = true;
+
+            public string Issue(Microsoft.AspNetCore.Http.HttpContext context, LoginStartTokenRequest request) => "token";
+            public bool TryConsume(Microsoft.AspNetCore.Http.HttpContext context, string token, LoginStartTokenRequest request) => false;
+            public void BindSession(Microsoft.AspNetCore.Http.HttpContext context, string sessionId, LoginStartTokenRequest request) { }
+            public bool IsSessionBound(Microsoft.AspNetCore.Http.HttpContext context, string sessionId, LoginStartTokenRequest request) => _available;
+
+            public bool TryConsumeSession(Microsoft.AspNetCore.Http.HttpContext context, string sessionId, LoginStartTokenRequest request)
+            {
+                if (!_available) return false;
+                _available = false;
                 return true;
             }
         }

@@ -36,8 +36,10 @@ namespace OpenIDCTests
             var service = new LoginStartTokenService(new InMemoryRedisService(), TimeSpan.FromMinutes(5));
             var issueContext = new DefaultHttpContext();
             var token = service.Issue(issueContext, Request());
+            var cookie = CookieValue(issueContext.Response.Headers.SetCookie.ToString());
 
             Assert.That(service.TryConsume(ContextWithCookie("different"), token, Request()), Is.False);
+            Assert.That(service.TryConsume(ContextWithCookie(cookie), token, Request()), Is.True);
         }
 
         [Test]
@@ -50,9 +52,61 @@ namespace OpenIDCTests
             var modified = Request("https://attacker.example/cb");
 
             Assert.That(service.TryConsume(ContextWithCookie(cookie), token, modified), Is.False);
+            Assert.That(service.TryConsume(ContextWithCookie(cookie), token, Request()), Is.True);
         }
 
-        private static LoginStartTokenRequest Request(string redirectUri = "https://site/cb") => new()
+        [Test]
+        public void MissingAndEmptyAuthorizationValuesHaveDifferentBindings()
+        {
+            var service = new LoginStartTokenService(new InMemoryRedisService(), TimeSpan.FromMinutes(5));
+            var issueContext = new DefaultHttpContext();
+            var request = Request(loginHint: null);
+            var token = service.Issue(issueContext, request);
+            var cookie = CookieValue(issueContext.Response.Headers.SetCookie.ToString());
+            var withEmptyHint = Request(loginHint: string.Empty);
+
+            Assert.That(service.TryConsume(ContextWithCookie(cookie), token, withEmptyHint), Is.False);
+            Assert.That(service.TryConsume(ContextWithCookie(cookie), token, request), Is.True);
+        }
+
+        [Test]
+        public void IssuingTokenRefreshesExistingBrowserCookieLifetime()
+        {
+            var service = new LoginStartTokenService(new InMemoryRedisService(), TimeSpan.FromMinutes(5));
+            var context = ContextWithCookie("existing-session");
+
+            service.Issue(context, Request());
+
+            Assert.That(context.Response.Headers.SetCookie.ToString(), Does.Contain("existing-session"));
+            Assert.That(context.Response.Headers.SetCookie.ToString(), Does.Contain("max-age=3600"));
+        }
+
+        [Test]
+        public void LoginSessionBindingIsBrowserAndRequestBoundAndSingleUse()
+        {
+            var redis = new InMemoryRedisService();
+            var service = new LoginStartTokenService(
+                redis,
+                TimeSpan.FromMinutes(5),
+                TimeSpan.FromMinutes(10));
+            var context = ContextWithCookie("browser-session");
+            var request = Request();
+
+            service.BindSession(context, "session-id", request);
+
+            Assert.That(service.IsSessionBound(context, "session-id", request), Is.True);
+            Assert.That(service.IsSessionBound(ContextWithCookie("other-browser"), "session-id", request), Is.False);
+            Assert.That(service.IsSessionBound(context, "session-id", Request("https://other/cb")), Is.False);
+            Assert.That(service.TryConsumeSession(ContextWithCookie("other-browser"), "session-id", request), Is.False);
+            Assert.That(service.TryConsumeSession(context, "session-id", Request("https://other/cb")), Is.False);
+            Assert.That(service.TryConsumeSession(context, "session-id", request), Is.True);
+            Assert.That(service.TryConsumeSession(context, "session-id", request), Is.False);
+            Assert.That(redis.LastExpiry, Is.EqualTo(TimeSpan.FromMinutes(10)));
+        }
+
+        private static LoginStartTokenRequest Request(
+            string redirectUri = "https://site/cb",
+            string loginHint = "alice@passi.cloud") => new()
         {
             ClientId = "SampleApp",
             RedirectUri = redirectUri,
@@ -60,6 +114,7 @@ namespace OpenIDCTests
             Scope = "openid profile",
             State = "state",
             Nonce = "nonce",
+            LoginHint = loginHint,
             CodeChallenge = "challenge",
             CodeChallengeMethod = "S256",
         };

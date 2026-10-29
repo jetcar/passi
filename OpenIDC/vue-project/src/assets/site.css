@@ -530,8 +530,23 @@ body {
         display: none;
     }
 
+    .auth-challenge-panel {
+        display: contents;
+    }
+
+    .auth-challenge-intro {
+        order: 1;
+        padding: 38px 38px 0;
+    }
+
     .auth-challenge-number {
+        order: 2;
         padding: 38px;
+    }
+
+    .auth-challenge-details {
+        order: 3;
+        padding: 0 38px 42px;
     }
 
     .challenge-number {
@@ -563,18 +578,21 @@ body {
         margin-top: 56px;
     }
 
-    .auth-challenge-panel {
-        min-height: auto;
-        padding-bottom: 30px;
+    .auth-challenge-intro {
+        padding: 28px 24px 0;
     }
 
     .auth-challenge-copy {
-        margin-top: 44px;
+        margin-top: 28px;
     }
 
     .auth-challenge-number {
-        min-height: 410px;
-        padding: 42px 24px 50px;
+        min-height: 0;
+        padding: 30px 24px 34px;
+    }
+
+    .auth-challenge-details {
+        padding: 0 24px 30px;
     }
 
     .challenge-number {

@@ -54,6 +54,7 @@ public class Startup
         services.AddSingleton<IAuthorizationCodeStore, AuthorizationCodeStore>();
         services.AddSingleton<IRefreshTokenStore, RefreshTokenStore>();
         services.AddSingleton<ILoginRateLimiter, LoginRateLimiter>();
+        services.AddSingleton<ILoginStartTokenService, LoginStartTokenService>();
 
         // Configure signing credentials
         var certPath = "/myapp/cert/certs/certificate.crt";

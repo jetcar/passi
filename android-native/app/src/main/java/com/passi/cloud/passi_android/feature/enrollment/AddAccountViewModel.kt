@@ -11,6 +11,9 @@ import com.passi.cloud.passi_android.domain.model.Provider
 import com.passi.cloud.passi_android.domain.repository.AccountsRepository
 import com.passi.cloud.passi_android.domain.repository.ProvidersRepository
 import com.passi.cloud.passi_android.domain.service.EnrollmentService
+import com.passi.cloud.passi_android.R
+import com.passi.cloud.passi_android.localization.UiText
+import com.passi.cloud.passi_android.localization.toUiText
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -23,8 +26,8 @@ data class AddAccountUiState(
     val providers: List<Provider> = emptyList(),
     val selectedProviderId: String? = null,
     val email: String = "",
-    val emailError: String? = null,
-    val responseError: String? = null,
+    val emailError: UiText? = null,
+    val responseError: UiText? = null,
     val isSubmitting: Boolean = false,
 )
 
@@ -59,13 +62,13 @@ class AddAccountViewModel(
     fun submit(onSuccess: () -> Unit) {
         val email = _uiState.value.email.trim()
         if (!EMAIL_REGEX.matches(email)) {
-            _uiState.value = _uiState.value.copy(emailError = "invalid Email")
+            _uiState.value = _uiState.value.copy(emailError = UiText.Resource(R.string.error_invalid_email))
             return
         }
 
         val provider = _uiState.value.providers.firstOrNull { it.id.toString() == _uiState.value.selectedProviderId }
         if (provider == null) {
-            _uiState.value = _uiState.value.copy(responseError = "Select provider")
+            _uiState.value = _uiState.value.copy(responseError = UiText.Resource(R.string.error_select_provider))
             return
         }
 
@@ -89,7 +92,7 @@ class AddAccountViewModel(
             }.onFailure { error ->
                 _uiState.value = _uiState.value.copy(
                     isSubmitting = false,
-                    responseError = error.message ?: "Network error. Try again",
+                    responseError = error.toUiText(R.string.error_network),
                 )
             }
         }

@@ -9,6 +9,9 @@ import com.passi.cloud.passi_android.data.local.PendingEnrollmentStore
 import com.passi.cloud.passi_android.domain.repository.AccountsRepository
 import com.passi.cloud.passi_android.domain.repository.ProvidersRepository
 import com.passi.cloud.passi_android.domain.service.EnrollmentService
+import com.passi.cloud.passi_android.R
+import com.passi.cloud.passi_android.localization.UiText
+import com.passi.cloud.passi_android.localization.toUiText
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -18,7 +21,7 @@ import java.util.UUID
 data class ConfirmCodeUiState(
     val email: String = "",
     val code: String = "",
-    val responseError: String? = null,
+    val responseError: UiText? = null,
     val isSubmitting: Boolean = false,
     val isMissingContext: Boolean = false,
 )
@@ -37,7 +40,10 @@ class ConfirmCodeViewModel(
     init {
         val pending = pendingEnrollmentStore.read()
         _uiState.value = if (pending == null) {
-            ConfirmCodeUiState(isMissingContext = true, responseError = "No pending signup found")
+            ConfirmCodeUiState(
+                isMissingContext = true,
+                responseError = UiText.Resource(R.string.error_no_pending_signup),
+            )
         } else {
             ConfirmCodeUiState(email = pending.email)
         }
@@ -50,12 +56,15 @@ class ConfirmCodeViewModel(
     fun submit(onSuccess: () -> Unit) {
         val pending = pendingEnrollmentStore.read()
         if (pending == null) {
-            _uiState.value = _uiState.value.copy(responseError = "No pending signup found", isMissingContext = true)
+            _uiState.value = _uiState.value.copy(
+                responseError = UiText.Resource(R.string.error_no_pending_signup),
+                isMissingContext = true,
+            )
             return
         }
         if (_uiState.value.code.length != requiredCodeLength) {
             _uiState.value = _uiState.value.copy(
-                responseError = "Enter the 6-digit confirmation code",
+                responseError = UiText.Resource(R.string.error_confirmation_code_length),
             )
             return
         }
@@ -65,7 +74,7 @@ class ConfirmCodeViewModel(
             if (provider == null) {
                 _uiState.value = _uiState.value.copy(
                     isSubmitting = false,
-                    responseError = "Provider not found",
+                    responseError = UiText.Resource(R.string.provider_not_found),
                 )
                 return@launch
             }
@@ -87,7 +96,7 @@ class ConfirmCodeViewModel(
             }.onFailure { error ->
                 _uiState.value = _uiState.value.copy(
                     isSubmitting = false,
-                    responseError = error.message ?: "Network error. Try again",
+                    responseError = error.toUiText(R.string.error_network),
                 )
             }
         }

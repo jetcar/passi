@@ -10,6 +10,9 @@ import com.passi.cloud.passi_android.domain.biometric.BiometricCertificateServic
 import com.passi.cloud.passi_android.domain.certificate.CertificateRotationService
 import com.passi.cloud.passi_android.domain.model.Account
 import com.passi.cloud.passi_android.domain.repository.AccountsRepository
+import com.passi.cloud.passi_android.R
+import com.passi.cloud.passi_android.localization.UiText
+import com.passi.cloud.passi_android.localization.toUiText
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,10 +24,10 @@ data class UpdateCertificateUiState(
     val newPin: String = "",
     val confirmPin: String = "",
     val useBiometricForCurrentCertificate: Boolean = false,
-    val oldPinError: String? = null,
-    val newPinError: String? = null,
-    val confirmPinError: String? = null,
-    val responseError: String? = null,
+    val oldPinError: UiText? = null,
+    val newPinError: UiText? = null,
+    val confirmPinError: UiText? = null,
+    val responseError: UiText? = null,
     val isSubmitting: Boolean = false,
 )
 
@@ -58,7 +61,7 @@ class UpdateCertificateViewModel(
     }
 
     fun onBiometricPromptError(message: String) {
-        _uiState.value = _uiState.value.copy(responseError = message)
+        _uiState.value = _uiState.value.copy(responseError = UiText.Dynamic(message))
     }
 
     fun confirmBiometricForCurrentCertificate() {
@@ -73,23 +76,29 @@ class UpdateCertificateViewModel(
         val account = _uiState.value.account ?: return
 
         if (account.hasFingerprint && !_uiState.value.useBiometricForCurrentCertificate && account.pinLength == 0) {
-            _uiState.value = _uiState.value.copy(responseError = "Confirm biometric before rotating this certificate")
+            _uiState.value = _uiState.value.copy(
+                responseError = UiText.Resource(R.string.error_biometric_required_for_rotation),
+            )
             return
         }
 
         if (account.pinLength > 0 && !_uiState.value.useBiometricForCurrentCertificate && _uiState.value.oldPin.length < 4) {
-            _uiState.value = _uiState.value.copy(oldPinError = "Invalid old pin")
+            _uiState.value = _uiState.value.copy(oldPinError = UiText.Resource(R.string.error_invalid_old_pin))
             return
         }
 
         val wantsPin = _uiState.value.newPin.isNotEmpty() || _uiState.value.confirmPin.isNotEmpty()
         if (wantsPin) {
             if (_uiState.value.newPin.length < 4) {
-                _uiState.value = _uiState.value.copy(newPinError = "Pin1 should be min 4 numbers")
+                _uiState.value = _uiState.value.copy(
+                    newPinError = UiText.Resource(R.string.error_pin_length, listOf(4)),
+                )
                 return
             }
             if (_uiState.value.newPin != _uiState.value.confirmPin) {
-                _uiState.value = _uiState.value.copy(confirmPinError = "Pin2 doesn't match with Pin1")
+                _uiState.value = _uiState.value.copy(
+                    confirmPinError = UiText.Resource(R.string.error_pin_mismatch),
+                )
                 return
             }
         }
@@ -118,11 +127,11 @@ class UpdateCertificateViewModel(
                 )
                 onDone()
             }.onFailure { error ->
-                val message = error.message ?: "Network error. Try again"
+                val isInvalidOldPin = error.message == "Invalid old pin" || error.message == "Invalid old PIN"
                 _uiState.value = _uiState.value.copy(
                     isSubmitting = false,
-                    responseError = if (message == "Invalid old pin") null else message,
-                    oldPinError = if (message == "Invalid old pin") message else null,
+                    responseError = if (isInvalidOldPin) null else error.toUiText(R.string.error_network),
+                    oldPinError = if (isInvalidOldPin) UiText.Resource(R.string.error_invalid_old_pin) else null,
                 )
             }
         }

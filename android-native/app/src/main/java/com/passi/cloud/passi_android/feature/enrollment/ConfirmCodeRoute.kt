@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -26,7 +27,9 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.passi.cloud.passi_android.PassiApplication
+import com.passi.cloud.passi_android.R
 import com.passi.cloud.passi_android.ui.NumberPad
+import com.passi.cloud.passi_android.localization.asString
 
 @Composable
 fun ConfirmCodeRoute(
@@ -74,7 +77,7 @@ internal fun ConfirmCodeScreen(
         ) {
             if (uiState.responseError != null) {
                 Text(
-                    text = uiState.responseError.orEmpty(),
+                    text = uiState.responseError.asString(),
                     color = Color.Black,
                     textAlign = TextAlign.Center,
                 )
@@ -82,7 +85,7 @@ internal fun ConfirmCodeScreen(
 
             Text(uiState.email, color = Color.Black, textAlign = TextAlign.Center)
 
-            Text("Confirmation Code", color = Color.Black)
+            Text(stringResource(R.string.confirmation_code), color = Color.Black)
 
             Text(
                 text = uiState.code,
@@ -112,7 +115,7 @@ internal fun ConfirmCodeScreen(
                 ),
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                Text("Cancel")
+                Text(stringResource(R.string.cancel))
             }
         }
     }

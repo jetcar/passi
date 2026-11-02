@@ -9,6 +9,9 @@ import com.passi.cloud.passi_android.data.auth.PendingSessionStore
 import com.passi.cloud.passi_android.domain.auth.AuthSessionService
 import com.passi.cloud.passi_android.domain.model.Account
 import com.passi.cloud.passi_android.domain.repository.AccountsRepository
+import com.passi.cloud.passi_android.R
+import com.passi.cloud.passi_android.localization.UiText
+import com.passi.cloud.passi_android.localization.toUiText
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,7 +23,7 @@ data class SessionPinUiState(
     val pin: String = "",
     val pinLength: Int = 4,
     val hasFingerprint: Boolean = false,
-    val responseError: String? = null,
+    val responseError: UiText? = null,
     val isSubmitting: Boolean = false,
 )
 
@@ -35,7 +38,9 @@ class SessionPinViewModel(
     init {
         val session = pendingSessionStore.read()
         if (session == null) {
-            _uiState.value = SessionPinUiState(responseError = "No pending session found")
+            _uiState.value = SessionPinUiState(
+                responseError = UiText.Resource(R.string.error_no_pending_session),
+            )
         } else {
             viewModelScope.launch {
                 val account = accountsRepository.getAccount(session.accountId)
@@ -55,7 +60,9 @@ class SessionPinViewModel(
 
     fun submit(onAuthorized: () -> Unit) {
         val session = pendingSessionStore.read() ?: run {
-            _uiState.value = _uiState.value.copy(responseError = "No pending session found")
+            _uiState.value = _uiState.value.copy(
+                responseError = UiText.Resource(R.string.error_no_pending_session),
+            )
             return
         }
 
@@ -70,19 +77,21 @@ class SessionPinViewModel(
                 .onFailure { error ->
                     _uiState.value = _uiState.value.copy(
                         isSubmitting = false,
-                        responseError = error.message ?: "Network error. Try again",
+                        responseError = error.toUiText(R.string.error_network),
                     )
                 }
         }
     }
 
     fun onBiometricPromptError(message: String) {
-        _uiState.value = _uiState.value.copy(responseError = message, isSubmitting = false)
+        _uiState.value = _uiState.value.copy(responseError = UiText.Dynamic(message), isSubmitting = false)
     }
 
     fun authorizeWithBiometric(onAuthorized: () -> Unit) {
         val session = pendingSessionStore.read() ?: run {
-            _uiState.value = _uiState.value.copy(responseError = "No pending session found")
+            _uiState.value = _uiState.value.copy(
+                responseError = UiText.Resource(R.string.error_no_pending_session),
+            )
             return
         }
 
@@ -97,7 +106,7 @@ class SessionPinViewModel(
                 .onFailure { error ->
                     _uiState.value = _uiState.value.copy(
                         isSubmitting = false,
-                        responseError = error.message ?: "Network error. Try again",
+                        responseError = error.toUiText(R.string.error_network),
                     )
                 }
         }

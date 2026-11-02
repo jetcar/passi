@@ -1,6 +1,7 @@
 package com.passi.cloud.passi_android
 
 import com.google.common.truth.Truth.assertThat
+import com.passi.cloud.passi_android.localization.UiText
 import com.passi.cloud.passi_android.feature.enrollment.AddAccountViewModel
 import com.passi.cloud.passi_android.feature.enrollment.ConfirmCodeViewModel
 import com.passi.cloud.passi_android.feature.enrollment.FinishEnrollmentViewModel
@@ -25,7 +26,7 @@ class EnrollmentUseCaseTests : CoroutineViewModelTest() {
         viewModel.onEmailChanged("not-an-email")
         viewModel.submit {}
 
-        assertThat(viewModel.uiState.value.emailError).isEqualTo("invalid Email")
+        assertThat(viewModel.uiState.value.emailError).isEqualTo(UiText.Resource(R.string.error_invalid_email))
     }
 
     @Test
@@ -93,7 +94,7 @@ class EnrollmentUseCaseTests : CoroutineViewModelTest() {
         viewModel.submit {}
         advanceUntilIdle()
 
-        assertThat(viewModel.uiState.value.responseError).isEqualTo("Enter the 6-digit confirmation code")
+        assertThat(viewModel.uiState.value.responseError).isEqualTo(UiText.Resource(R.string.error_confirmation_code_length))
     }
 
     @Test
@@ -111,7 +112,7 @@ class EnrollmentUseCaseTests : CoroutineViewModelTest() {
         viewModel.onPinConfirmationChanged("123")
         viewModel.submit {}
 
-        assertThat(viewModel.uiState.value.pinError).isEqualTo("Pin1 should be min 4 numbers")
+        assertThat(viewModel.uiState.value.pinError).isEqualTo(UiText.Resource(R.string.error_pin_length, listOf(4)))
     }
 
     @Test

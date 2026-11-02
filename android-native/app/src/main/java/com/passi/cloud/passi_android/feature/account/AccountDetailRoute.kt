@@ -33,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -41,8 +42,10 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.passi.cloud.passi_android.PassiApplication
+import com.passi.cloud.passi_android.R
 import com.passi.cloud.passi_android.ui.IPhoneConfirmationSheet
 import com.passi.cloud.passi_android.ui.rememberBiometricPromptLauncher
+import com.passi.cloud.passi_android.localization.asString
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -64,8 +67,8 @@ fun AccountDetailRoute(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var showDeleteConfirmation by remember { mutableStateOf(false) }
     val launchBiometricPrompt = rememberBiometricPromptLauncher(
-        title = "Enable biometric",
-        subtitle = "Confirm your biometric credential to enable biometric approvals",
+        title = stringResource(R.string.biometric_enable_title),
+        subtitle = stringResource(R.string.biometric_enable_subtitle),
         onSuccess = viewModel::enableBiometric,
         onError = viewModel::onBiometricPromptError,
     )
@@ -117,7 +120,7 @@ internal fun AccountDetailScreen(
             IconButton(onClick = onBack) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                    contentDescription = "Back",
+                    contentDescription = stringResource(R.string.back),
                     tint = Color.White,
                     modifier = Modifier.size(28.dp),
                 )
@@ -132,21 +135,21 @@ internal fun AccountDetailScreen(
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             Text(
-                text = uiState.responseError.orEmpty(),
+                text = uiState.responseError.asString(),
                 modifier = Modifier.fillMaxWidth(),
                 color = MaterialTheme.colorScheme.error,
                 textAlign = TextAlign.Center,
             )
 
             uiState.account?.let { account ->
-                DetailLabelValue(label = "Current user:", value = account.email)
-                DetailLabelValue(label = "Certificate Thumbprint:", value = account.thumbprint.orEmpty())
-                DetailLabelValue(label = "Certificate valid from:", value = account.validFrom.toString())
-                DetailLabelValue(label = "Certificate valid to:", value = account.validTo.toString())
-                DetailLabelValue(label = "Identity provider:", value = uiState.provider?.name.orEmpty())
+                DetailLabelValue(label = stringResource(R.string.current_user), value = account.email)
+                DetailLabelValue(label = stringResource(R.string.certificate_thumbprint), value = account.thumbprint.orEmpty())
+                DetailLabelValue(label = stringResource(R.string.certificate_valid_from), value = account.validFrom.toString())
+                DetailLabelValue(label = stringResource(R.string.certificate_valid_to), value = account.validTo.toString())
+                DetailLabelValue(label = stringResource(R.string.identity_provider), value = uiState.provider?.name.orEmpty())
 
                 ActionButton(
-                    text = "Update Certificate",
+                    text = stringResource(R.string.update_certificate),
                     onClick = onUpdateCertificate,
                 )
 
@@ -155,7 +158,7 @@ internal fun AccountDetailScreen(
                         OutlinedTextField(
                             value = uiState.biometricPin,
                             onValueChange = onBiometricPinChanged,
-                            label = { Text("Current pin") },
+                            label = { Text(stringResource(R.string.current_pin)) },
                             isError = uiState.biometricPinError != null,
                             visualTransformation = PasswordVisualTransformation(),
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
@@ -165,7 +168,7 @@ internal fun AccountDetailScreen(
                         )
                         if (uiState.biometricPinError != null) {
                             Text(
-                                text = uiState.biometricPinError.orEmpty(),
+                                text = uiState.biometricPinError.asString(),
                                 modifier = Modifier.padding(horizontal = 20.dp),
                                 color = MaterialTheme.colorScheme.error,
                             )
@@ -173,7 +176,9 @@ internal fun AccountDetailScreen(
                     }
 
                     ActionButton(
-                        text = if (uiState.isEnablingBiometric) "Adding Fingerprint..." else "Add Fingerprint",
+                        text = stringResource(
+                            if (uiState.isEnablingBiometric) R.string.adding_fingerprint else R.string.add_fingerprint,
+                        ),
                         onClick = onLaunchBiometric,
                         enabled = !uiState.isEnablingBiometric,
                         showProgress = uiState.isEnablingBiometric,
@@ -181,17 +186,19 @@ internal fun AccountDetailScreen(
                 }
 
                 ActionButton(
-                    text = "Manage devices",
+                    text = stringResource(R.string.manage_devices),
                     onClick = onManageDevices,
                 )
 
                 ActionButton(
-                    text = if (uiState.isDeleting) "Deleting account..." else "Delete account",
+                    text = stringResource(
+                        if (uiState.isDeleting) R.string.deleting_account else R.string.delete_account,
+                    ),
                     onClick = onShowDeleteConfirmation,
                     enabled = !uiState.isDeleting,
                 )
             } ?: Text(
-                text = "Account not found",
+                text = stringResource(R.string.account_not_found),
                 color = Color.Black,
                 style = MaterialTheme.typography.bodyLarge,
             )
@@ -202,9 +209,9 @@ internal fun AccountDetailScreen(
 
     if (showDeleteConfirmation) {
         IPhoneConfirmationSheet(
-            title = "Delete account?",
-            message = "This removes the account and its approvals from this provider.",
-            confirmLabel = "Delete Account",
+            title = stringResource(R.string.delete_account_title),
+            message = stringResource(R.string.delete_account_message),
+            confirmLabel = stringResource(R.string.delete_account),
             onConfirm = onDeleteConfirmed,
             onDismiss = onDismissDeleteConfirmation,
         )

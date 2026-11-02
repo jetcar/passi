@@ -25,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -32,12 +33,12 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.passi.cloud.passi_android.PassiApplication
+import com.passi.cloud.passi_android.R
 import com.passi.cloud.passi_android.ui.NumberPad
 import com.passi.cloud.passi_android.ui.rememberBiometricPromptLauncher
+import com.passi.cloud.passi_android.localization.asString
 
 private val SessionPinBlue = Color(0xFF2196F3)
-private const val BIOMETRIC_CANCELLED_MESSAGE = "Biometric authentication cancelled"
-
 @Composable
 fun SessionPinRoute(
     onCancel: () -> Unit,
@@ -53,12 +54,13 @@ fun SessionPinRoute(
     )
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val launchedBiometric = remember { mutableStateOf(false) }
+    val biometricCancelledMessage = stringResource(R.string.biometric_authentication_cancelled)
     val launchBiometricPrompt = rememberBiometricPromptLauncher(
-        title = "Confirm by biometric",
-        subtitle = "Use your biometric credential instead of the PIN",
+        title = stringResource(R.string.biometric_confirm_title),
+        subtitle = stringResource(R.string.biometric_confirm_subtitle),
         onSuccess = { viewModel.authorizeWithBiometric(onAuthorized) },
         onError = { message ->
-            if (message == BIOMETRIC_CANCELLED_MESSAGE) {
+            if (message == biometricCancelledMessage) {
                 viewModel.cancel(onCancel)
             } else {
                 viewModel.onBiometricPromptError(message)
@@ -120,14 +122,14 @@ internal fun SessionPinScreen(
         ) {
             if (uiState.responseError != null) {
                 Text(
-                    text = uiState.responseError.orEmpty(),
+                    text = uiState.responseError.asString(),
                     color = Color.Black,
                     textAlign = TextAlign.Center,
                 )
                 Spacer(modifier = Modifier.height(8.dp))
             }
 
-            Text("Pin", color = Color.Black, textAlign = TextAlign.Center)
+            Text(stringResource(R.string.pin), color = Color.Black, textAlign = TextAlign.Center)
             Spacer(modifier = Modifier.height(4.dp))
 
             // PIN display field (aquamarine background, masked)
@@ -149,7 +151,7 @@ internal fun SessionPinScreen(
                     onClick = { onPinChanged("") },
                     modifier = Modifier.align(Alignment.CenterEnd),
                 ) {
-                    Text("X", color = Color.Black)
+                    Text(stringResource(R.string.clear), color = Color.Black)
                 }
             }
 
@@ -171,7 +173,7 @@ internal fun SessionPinScreen(
                 colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = Color.Black),
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                Text("Cancel")
+                Text(stringResource(R.string.cancel))
             }
         }
     }

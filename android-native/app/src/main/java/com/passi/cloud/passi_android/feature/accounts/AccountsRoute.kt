@@ -32,6 +32,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -48,9 +49,12 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.passi.cloud.passi_android.PassiApplication
+import com.passi.cloud.passi_android.R
 import com.passi.cloud.passi_android.feature.update.AppUpdateBanner
 import com.passi.cloud.passi_android.feature.update.AppUpdateViewModel
 import com.passi.cloud.passi_android.feature.update.openPlayStoreListing
+import com.passi.cloud.passi_android.localization.LanguageSelector
+import com.passi.cloud.passi_android.localization.asString
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 
@@ -161,10 +165,11 @@ internal fun AccountsScreen(
                 .padding(horizontal = 12.dp, vertical = 10.dp),
             horizontalArrangement = Arrangement.End,
         ) {
+            LanguageSelector()
             IconButton(onClick = onOpenProviders) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Outlined.List,
-                    contentDescription = "Menu",
+                    contentDescription = stringResource(R.string.menu),
                     tint = Color.Black,
                 )
             }
@@ -203,13 +208,13 @@ internal fun AccountsScreen(
                         verticalArrangement = Arrangement.spacedBy(6.dp),
                     ) {
                         if (uiState.isForegroundPolling) {
-                            Text("Foreground polling active", style = MaterialTheme.typography.bodySmall)
+                            Text(stringResource(R.string.accounts_foreground_polling), style = MaterialTheme.typography.bodySmall)
                         }
                         if (uiState.syncError != null) {
-                            Text(uiState.syncError.orEmpty(), color = MaterialTheme.colorScheme.error)
+                            Text(uiState.syncError.asString(), color = MaterialTheme.colorScheme.error)
                         }
                         if (uiState.deleteError != null) {
-                            Text(uiState.deleteError.orEmpty(), color = MaterialTheme.colorScheme.error)
+                            Text(uiState.deleteError.asString(), color = MaterialTheme.colorScheme.error)
                         }
                     }
                 }
@@ -232,17 +237,17 @@ internal fun AccountsScreen(
         ) {
             BottomActionIcon(
                 imageVector = Icons.Outlined.AddCircle,
-                label = "Add",
+                label = stringResource(R.string.add),
                 onClick = onAddAccount,
             )
             BottomActionIcon(
                 imageVector = Icons.Outlined.Delete,
-                label = if (uiState.isDeleteMode) "Done" else "Delete",
+                label = stringResource(if (uiState.isDeleteMode) R.string.done else R.string.delete),
                 onClick = onToggleDeleteMode,
             )
             BottomActionGlyph(
                 glyph = "S",
-                label = if (uiState.isSyncing) "Syncing" else "Sync",
+                label = stringResource(if (uiState.isSyncing) R.string.syncing else R.string.sync),
                 enabled = !uiState.isSyncing,
                 onClick = onSync,
             )
@@ -300,7 +305,7 @@ private fun AccountRow(
                 IconButton(onClick = onRevealDelete) {
                     Icon(
                         imageVector = Icons.Outlined.Delete,
-                        contentDescription = "Reveal delete",
+                        contentDescription = stringResource(R.string.reveal_delete),
                         tint = Color.Black,
                     )
                 }
@@ -321,14 +326,14 @@ private fun AccountRow(
                 )
                 if (inactive) {
                     Text(
-                        text = "REMOVED!",
+                        text = stringResource(R.string.account_removed),
                         color = Color.Black,
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.Bold,
                     )
                 } else if (!isConfirmed) {
                     Text(
-                        text = "PENDING CONFIRMATION",
+                        text = stringResource(R.string.account_pending_confirmation),
                         color = Color(0xFFE65100),
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.Bold,
@@ -347,12 +352,12 @@ private fun AccountRow(
                     if (isDeleting) {
                         CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
                     } else {
-                        Text("Delete")
+                        Text(stringResource(R.string.delete))
                     }
                 }
             } else if (!isConfirmed && !deleteMode) {
                 Button(onClick = onOpen) {
-                    Text("Enter Code")
+                    Text(stringResource(R.string.enter_code))
                 }
             }
         }

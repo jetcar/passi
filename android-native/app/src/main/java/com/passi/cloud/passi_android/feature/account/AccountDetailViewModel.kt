@@ -12,6 +12,9 @@ import com.passi.cloud.passi_android.domain.model.Account
 import com.passi.cloud.passi_android.domain.model.Provider
 import com.passi.cloud.passi_android.domain.repository.AccountsRepository
 import com.passi.cloud.passi_android.domain.repository.ProvidersRepository
+import com.passi.cloud.passi_android.R
+import com.passi.cloud.passi_android.localization.UiText
+import com.passi.cloud.passi_android.localization.toUiText
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,8 +24,8 @@ data class AccountDetailUiState(
     val account: Account? = null,
     val provider: Provider? = null,
     val biometricPin: String = "",
-    val biometricPinError: String? = null,
-    val responseError: String? = null,
+    val biometricPinError: UiText? = null,
+    val responseError: UiText? = null,
     val isDeleting: Boolean = false,
     val isEnablingBiometric: Boolean = false,
 )
@@ -60,7 +63,7 @@ class AccountDetailViewModel(
                 .onFailure { error ->
                     _uiState.value = _uiState.value.copy(
                         isDeleting = false,
-                        responseError = error.message ?: "Network error. Try again",
+                        responseError = error.toUiText(R.string.error_network),
                     )
                 }
         }
@@ -75,7 +78,7 @@ class AccountDetailViewModel(
     }
 
     fun onBiometricPromptError(message: String) {
-        _uiState.value = _uiState.value.copy(responseError = message)
+        _uiState.value = _uiState.value.copy(responseError = UiText.Dynamic(message))
     }
 
     fun enableBiometric() {
@@ -84,7 +87,7 @@ class AccountDetailViewModel(
             return
         }
         if (account.pinLength > 0 && _uiState.value.biometricPin.length < 4) {
-            _uiState.value = _uiState.value.copy(biometricPinError = "Invalid Pin")
+            _uiState.value = _uiState.value.copy(biometricPinError = UiText.Resource(R.string.error_invalid_pin))
             return
         }
 
@@ -103,11 +106,11 @@ class AccountDetailViewModel(
                     isEnablingBiometric = false,
                 )
             }.onFailure { error ->
-                val message = error.message ?: "Biometric setup failed"
+                val isInvalidPin = error.message == "Invalid Pin" || error.message == "Invalid PIN"
                 _uiState.value = _uiState.value.copy(
                     isEnablingBiometric = false,
-                    responseError = if (message == "Invalid Pin") null else message,
-                    biometricPinError = if (message == "Invalid Pin") message else null,
+                    responseError = if (isInvalidPin) null else error.toUiText(R.string.error_biometric_setup),
+                    biometricPinError = if (isInvalidPin) UiText.Resource(R.string.error_invalid_pin) else null,
                 )
             }
         }

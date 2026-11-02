@@ -26,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -33,8 +34,10 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.passi.cloud.passi_android.PassiApplication
+import com.passi.cloud.passi_android.R
 import com.passi.cloud.passi_android.ui.NumberPad
 import com.passi.cloud.passi_android.ui.rememberBiometricPromptLauncher
+import com.passi.cloud.passi_android.localization.asString
 
 @Composable
 fun UpdateCertificateRoute(
@@ -52,8 +55,8 @@ fun UpdateCertificateRoute(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val account = uiState.account
     val launchBiometricPrompt = rememberBiometricPromptLauncher(
-        title = "Update certificate",
-        subtitle = "Confirm your biometric credential to rotate this certificate",
+        title = stringResource(R.string.biometric_update_certificate_title),
+        subtitle = stringResource(R.string.biometric_update_certificate_subtitle),
         onSuccess = viewModel::confirmBiometricForCurrentCertificate,
         onError = viewModel::onBiometricPromptError,
     )
@@ -94,7 +97,7 @@ internal fun UpdateCertificateScreen(
     ) {
         if (uiState.responseError != null) {
             Text(
-                text = uiState.responseError.orEmpty(),
+                text = uiState.responseError.asString(),
                 color = Color.Black,
                 textAlign = TextAlign.Center,
             )
@@ -103,9 +106,9 @@ internal fun UpdateCertificateScreen(
 
         if (account != null && account.pinLength > 0 && !uiState.useBiometricForCurrentCertificate) {
             if (uiState.oldPinError != null) {
-                Text(uiState.oldPinError.orEmpty(), color = Color.Black, textAlign = TextAlign.Center)
+                Text(uiState.oldPinError.asString(), color = Color.Black, textAlign = TextAlign.Center)
             }
-            Text("Old Pin", color = Color.Black, textAlign = TextAlign.Center)
+            Text(stringResource(R.string.old_pin), color = Color.Black, textAlign = TextAlign.Center)
             CertPinFieldRow(
                 maskedValue = "●".repeat(uiState.oldPin.length),
                 hasError = uiState.oldPinError != null,
@@ -129,9 +132,9 @@ internal fun UpdateCertificateScreen(
             ) {
                 Text(
                     if (uiState.useBiometricForCurrentCertificate) {
-                        "Biometric confirmed for current certificate"
+                    stringResource(R.string.biometric_current_certificate_confirmed)
                     } else {
-                        "Use biometric for current certificate"
+                    stringResource(R.string.biometric_use_current_certificate)
                     }
                 )
             }
@@ -139,9 +142,9 @@ internal fun UpdateCertificateScreen(
         }
 
         if (uiState.newPinError != null) {
-            Text(uiState.newPinError.orEmpty(), color = Color.Black, textAlign = TextAlign.Center)
+                Text(uiState.newPinError.asString(), color = Color.Black, textAlign = TextAlign.Center)
         }
-        Text("Pin", color = Color.Black, textAlign = TextAlign.Center)
+            Text(stringResource(R.string.pin), color = Color.Black, textAlign = TextAlign.Center)
         CertPinFieldRow(
             maskedValue = "●".repeat(uiState.newPin.length),
             hasError = uiState.newPinError != null,
@@ -152,9 +155,9 @@ internal fun UpdateCertificateScreen(
         Spacer(modifier = Modifier.height(8.dp))
 
         if (uiState.confirmPinError != null) {
-            Text(uiState.confirmPinError.orEmpty(), color = Color.Black, textAlign = TextAlign.Center)
+                Text(uiState.confirmPinError.asString(), color = Color.Black, textAlign = TextAlign.Center)
         }
-        Text("Pin confirmation", color = Color.Black, textAlign = TextAlign.Center)
+            Text(stringResource(R.string.pin_confirmation), color = Color.Black, textAlign = TextAlign.Center)
         CertPinFieldRow(
             maskedValue = "●".repeat(uiState.confirmPin.length),
             hasError = uiState.confirmPinError != null,
@@ -195,7 +198,7 @@ internal fun UpdateCertificateScreen(
             ),
             modifier = Modifier.fillMaxWidth(),
         ) {
-            Text("Cancel")
+                Text(stringResource(R.string.cancel))
         }
     }
 }
@@ -232,7 +235,7 @@ private fun CertPinFieldRow(
             onClick = onClear,
             modifier = Modifier.align(Alignment.CenterEnd),
         ) {
-            Text("X", color = Color.Black)
+            Text(stringResource(R.string.clear), color = Color.Black)
         }
     }
 }

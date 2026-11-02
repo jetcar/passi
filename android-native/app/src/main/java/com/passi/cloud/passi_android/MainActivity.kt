@@ -11,13 +11,13 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.FragmentActivity
+import androidx.appcompat.app.AppCompatActivity
 import com.passi.cloud.passi_android.ui.PassiApp
 import com.passi.cloud.passi_android.notifications.FullScreenIntentPrompt
 import com.passi.cloud.passi_android.notifications.OverlayPermissionPrompt
 import com.passi.cloud.passi_android.notifications.PassiNotifications
 
-class MainActivity : FragmentActivity() {
+class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         ensureNotificationChannel(this)
@@ -77,10 +77,10 @@ class MainActivity : FragmentActivity() {
 
             val channel = NotificationChannel(
                 NOTIFICATION_CHANNEL_ID,
-                "Passi Notifications",
+                context.getString(R.string.notification_channel_name),
                 NotificationManager.IMPORTANCE_HIGH,
             ).apply {
-                description = "Authentication requests for Passi"
+                description = context.getString(R.string.notification_channel_description)
             }
             val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             manager.createNotificationChannel(channel)

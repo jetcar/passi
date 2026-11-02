@@ -26,10 +26,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.passi.cloud.passi_android.PassiApplication
+import com.passi.cloud.passi_android.R
 
 private val EditorBlue = Color(0xFF2196F3)
 
@@ -64,7 +66,7 @@ fun ProviderEditorRoute(
             IconButton(onClick = onBack) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                    contentDescription = "Back",
+                    contentDescription = stringResource(R.string.back),
                     tint = Color.White,
                     modifier = Modifier.size(28.dp),
                 )
@@ -78,21 +80,21 @@ fun ProviderEditorRoute(
                 .padding(horizontal = 16.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            ProviderField("Name", uiState.name) { value -> viewModel.update { it.copy(name = value) } }
-            ProviderField("Base URL", uiState.baseUrl) { value -> viewModel.update { it.copy(baseUrl = value) } }
-            ProviderField("Signup", uiState.signup) { value -> viewModel.update { it.copy(signup = value) } }
-            ProviderField("Signup confirmation", uiState.signupConfirmation) { value -> viewModel.update { it.copy(signupConfirmation = value) } }
-            ProviderField("Signup check", uiState.signupCheck) { value -> viewModel.update { it.copy(signupCheck = value) } }
-            ProviderField("Token update", uiState.tokenUpdate) { value -> viewModel.update { it.copy(tokenUpdate = value) } }
-            ProviderField("Cancel check", uiState.cancelCheck) { value -> viewModel.update { it.copy(cancelCheck = value) } }
-            ProviderField("Authorize", uiState.authorize) { value -> viewModel.update { it.copy(authorize = value) } }
-            ProviderField("Time", uiState.time) { value -> viewModel.update { it.copy(time = value) } }
-            ProviderField("Update certificate", uiState.updateCertificate) { value -> viewModel.update { it.copy(updateCertificate = value) } }
-            ProviderField("Get active session", uiState.checkForStartedSessions) { value -> viewModel.update { it.copy(checkForStartedSessions = value) } }
-            ProviderField("Sync accounts", uiState.syncAccounts) { value -> viewModel.update { it.copy(syncAccounts = value) } }
-            ProviderField("Delete account", uiState.deleteAccount) { value -> viewModel.update { it.copy(deleteAccount = value) } }
-            ProviderField("List devices", uiState.listDevices) { value -> viewModel.update { it.copy(listDevices = value) } }
-            ProviderField("Delete device", uiState.deleteDevice) { value -> viewModel.update { it.copy(deleteDevice = value) } }
+            ProviderField(stringResource(R.string.provider_name), uiState.name) { value -> viewModel.update { it.copy(name = value) } }
+            ProviderField(stringResource(R.string.provider_base_url), uiState.baseUrl) { value -> viewModel.update { it.copy(baseUrl = value) } }
+            ProviderField(stringResource(R.string.provider_signup), uiState.signup) { value -> viewModel.update { it.copy(signup = value) } }
+            ProviderField(stringResource(R.string.provider_signup_confirmation), uiState.signupConfirmation) { value -> viewModel.update { it.copy(signupConfirmation = value) } }
+            ProviderField(stringResource(R.string.provider_signup_check), uiState.signupCheck) { value -> viewModel.update { it.copy(signupCheck = value) } }
+            ProviderField(stringResource(R.string.provider_token_update), uiState.tokenUpdate) { value -> viewModel.update { it.copy(tokenUpdate = value) } }
+            ProviderField(stringResource(R.string.provider_cancel_check), uiState.cancelCheck) { value -> viewModel.update { it.copy(cancelCheck = value) } }
+            ProviderField(stringResource(R.string.provider_authorize), uiState.authorize) { value -> viewModel.update { it.copy(authorize = value) } }
+            ProviderField(stringResource(R.string.provider_time), uiState.time) { value -> viewModel.update { it.copy(time = value) } }
+            ProviderField(stringResource(R.string.provider_update_certificate), uiState.updateCertificate) { value -> viewModel.update { it.copy(updateCertificate = value) } }
+            ProviderField(stringResource(R.string.provider_active_session), uiState.checkForStartedSessions) { value -> viewModel.update { it.copy(checkForStartedSessions = value) } }
+            ProviderField(stringResource(R.string.provider_sync_accounts), uiState.syncAccounts) { value -> viewModel.update { it.copy(syncAccounts = value) } }
+            ProviderField(stringResource(R.string.provider_delete_account), uiState.deleteAccount) { value -> viewModel.update { it.copy(deleteAccount = value) } }
+            ProviderField(stringResource(R.string.provider_list_devices), uiState.listDevices) { value -> viewModel.update { it.copy(listDevices = value) } }
+            ProviderField(stringResource(R.string.provider_delete_device), uiState.deleteDevice) { value -> viewModel.update { it.copy(deleteDevice = value) } }
 
             Button(
                 onClick = { viewModel.update { it.copy(isDefault = !it.isDefault) } },
@@ -100,7 +102,7 @@ fun ProviderEditorRoute(
                 colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = Color.Black),
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                Text(if (uiState.isDefault) "Default provider" else "Mark as default")
+                Text(stringResource(if (uiState.isDefault) R.string.provider_is_default else R.string.provider_mark_default))
             }
 
             Button(
@@ -109,7 +111,7 @@ fun ProviderEditorRoute(
                 colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = Color.Black),
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                Text("Save")
+                Text(stringResource(R.string.save))
             }
 
             Button(
@@ -118,7 +120,7 @@ fun ProviderEditorRoute(
                 colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = Color.Black),
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                Text("Cancel")
+                Text(stringResource(R.string.cancel))
             }
         }
     }

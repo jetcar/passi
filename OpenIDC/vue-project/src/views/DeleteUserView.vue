@@ -89,16 +89,16 @@
             <div>
                 <div>
                     <div class="lead">
-                        <h1>Delete my account</h1>
+                        <h1>{{ $t('deleteAccount.title') }}</h1>
                     </div>
                     <div class="error-page" v-if="errorMessage">
                         <div class="lead">
-                            <h1>Error</h1>
+                            <h1>{{ $t('common.error') }}</h1>
                         </div>
                         <div class="row">
                             <div class="col-sm-6">
                                 <div class="alert alert-danger">
-                                    Sorry, there was an error
+                                    {{ $t('deleteAccount.errorIntro') }}
                                     <div>{{errorMessage}}</div>
                                 </div>
                             </div>
@@ -111,17 +111,17 @@
                                 <div class="card-body">
                                     <div v-if="loading">
                                         <div class="spinner-border" role="status">
-                                            <span class="sr-only"></span>
+                                            <span class="sr-only">{{ $t('common.loading') }}</span>
                                         </div>
                                         <br />
-                                        <button class="btn btn-secondary" name="button" @click="handleCancelClick" value="cancel">Cancel</button>
+                                        <button class="btn btn-secondary" name="button" @click="handleCancelClick" value="cancel">{{ $t('common.cancel') }}</button>
                                     </div>
                                     <br />
                                     <div class="form-group" v-if="!loading">
-                                        <label for="username">Username</label>
-                                        <input class="form-control" placeholder="Username" v-model="DeleteInput.username" name="username" id="username" autofocus>
+                                        <label for="username">{{ $t('deleteAccount.username') }}</label>
+                                        <input class="form-control" :placeholder="$t('deleteAccount.usernamePlaceholder')" v-model="DeleteInput.username" name="username" id="username" autofocus>
                                     </div>
-                                    <button class="btn btn-primary" name="button" v-if="!loading" @click="handleDeleteClick" value="delete">Delete</button>
+                                    <button class="btn btn-primary" name="button" v-if="!loading" @click="handleDeleteClick" value="delete">{{ $t('deleteAccount.delete') }}</button>
                                 </div>
                             </div>
                         </div>
@@ -132,18 +132,18 @@
                                 <div class="card-body">
                                     <div v-if="loading">
                                         <div class="spinner-border" role="status">
-                                            <span class="sr-only"></span>
+                                            <span class="sr-only">{{ $t('common.loading') }}</span>
                                         </div>
                                         <br />
-                                        <button class="btn btn-secondary" name="button" @click="handleCancelConfirmClick" value="cancel">Cancel</button>
+                                        <button class="btn btn-secondary" name="button" @click="handleCancelConfirmClick" value="cancel">{{ $t('common.cancel') }}</button>
                                     </div>
                                     <br />
                                     <div class="form-group" v-if="!loading">
-                                        <p>Check emailbox for confirmation code</p>
-                                        <label for="username">Confirmation Code</label>
-                                        <input class="form-control" placeholder="Code" v-model="DeleteInput.code" name="code" id="code" autofocus>
+                                        <p>{{ $t('deleteAccount.checkEmail') }}</p>
+                                        <label for="code">{{ $t('deleteAccount.confirmationCode') }}</label>
+                                        <input class="form-control" :placeholder="$t('deleteAccount.codePlaceholder')" v-model="DeleteInput.code" name="code" id="code" autofocus>
                                     </div>
-                                    <button class="btn btn-primary" name="button" v-if="!loading" @click="handleDeleteConfirmClick" value="delete">Confirm Delete</button>
+                                    <button class="btn btn-primary" name="button" v-if="!loading" @click="handleDeleteConfirmClick" value="delete">{{ $t('deleteAccount.confirmDelete') }}</button>
                                 </div>
                             </div>
                         </div>
@@ -151,12 +151,12 @@
                     <div class="row" v-if="!confirmForm && !loginForm">
                         <div class="col-md-6">
                             <div class="card">
-                                <p>Account is deleted</p>
+                                <p>{{ $t('deleteAccount.deleted') }}</p>
                             </div>
                         </div>
                     </div>
                 </div>
-                <a href='https://play.google.com/store/apps/details?id=com.passi.cloud.passi_android&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img style="max-width: 200px" alt='Get it on Google Play' src='/img/en_badge_web_generic.png' /></a>
+                <a href='https://play.google.com/store/apps/details?id=com.passi.cloud.passi_android&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img style="max-width: 200px" :alt="$t('deleteAccount.googlePlayAlt')" src='/img/en_badge_web_generic.png' /></a>
                 <br />
             </div>
         </div>

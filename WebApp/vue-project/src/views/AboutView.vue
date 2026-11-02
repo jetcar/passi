@@ -4,8 +4,8 @@
             <div class="row justify-content-center">
                 <div class="col-lg-10">
                     <div class="text-center mb-5">
-                        <h1 class="display-4 fw-bold mb-3">About Me</h1>
-                        <p class="lead text-muted">Solutions Architect & .NET Developer | Estonia</p>
+                        <h1 class="display-4 fw-bold mb-3">{{ $t('about.title') }}</h1>
+                        <p class="lead text-muted">{{ $t('about.role') }}</p>
                         <p class="text-muted">
                             <i class="bi bi-envelope me-2"></i>admin@passi.cloud
                         </p>
@@ -15,27 +15,19 @@
                         <div class="card-body p-5">
                             <h2 class="h3 mb-4">
                                 <i class="bi bi-person text-primary me-2"></i>
-                                Professional Summary
+                                {{ $t('about.professionalTitle') }}
                             </h2>
                             <p class="lead">
-                                I am a highly experienced .NET developer and architect with over 15 years of expertise in designing, 
-                                developing, and implementing scalable software solutions.
+                                {{ $t('about.professional1') }}
                             </p>
                             <p>
-                                My career has been built on a deep understanding of the .NET ecosystem, from full-stack development 
-                                to cloud-based architecture and microservices. I thrive on solving complex technical challenges and 
-                                delivering innovative solutions that drive business success.
+                                {{ $t('about.professional2') }}
                             </p>
                             <p>
-                                I leverage AI extensively in my development workflow, integrating AI agents and tools to maximize 
-                                productivity and code quality. My approach combines traditional software engineering expertise with 
-                                modern AI-assisted development practices.
+                                {{ $t('about.professional3') }}
                             </p>
                             <p class="mb-0">
-                                With a strong background in software architecture, I excel in leading development teams, optimizing 
-                                systems for performance, and ensuring seamless integration across diverse platforms. My passion for 
-                                continuous learning keeps me up-to-date with the latest industry trends and technologies, allowing 
-                                me to design forward-thinking, efficient systems.
+                                {{ $t('about.professional4') }}
                             </p>
                         </div>
                     </div>
@@ -44,23 +36,13 @@
                         <div class="card-body p-5">
                             <h2 class="h3 mb-4">
                                 <i class="bi bi-code-slash text-primary me-2"></i>
-                                Technical Expertise
+                                {{ $t('about.expertiseTitle') }}
                             </h2>
                             <p>
-                                Core competencies and technologies:
+                                {{ $t('about.expertiseIntro') }}
                             </p>
                             <ul class="feature-list">
-                                <li><strong>.NET Ecosystem:</strong> ASP.NET Core, .NET Framework, C#</li>
-                                <li><strong>Java:</strong> Java development, Spring Framework, Maven/Gradle</li>
-                                <li><strong>AI & Automation:</strong> AI agent development, AI-assisted coding, GitHub Copilot integration</li>
-                                <li><strong>Open Source:</strong> OpenID Connect (OIDC) implementations, OAuth2 authorization servers</li>
-                                <li><strong>Architecture:</strong> Microservices, Cloud-based architecture, Scalable systems</li>
-                                <li><strong>Databases:</strong> PostgreSQL, MS SQL, AuroraDB, Redis</li>
-                                <li><strong>Cloud & DevOps:</strong> Cloud migration, Docker, CI/CD pipelines</li>
-                                <li><strong>Frontend:</strong> Vue.js, WPF, JavaScript/TypeScript</li>
-                                <li><strong>APIs:</strong> RESTful services, OAuth2/OIDC</li>
-                                <li><strong>Mobile:</strong> Android (MAUI), native development</li>
-                                <li><strong>Authentication:</strong> PKI, Certificate-based systems, Passwordless solutions</li>
+                                <li v-for="key in expertiseKeys" :key="key">{{ $t(key) }}</li>
                             </ul>
                         </div>
                     </div>
@@ -69,23 +51,16 @@
                         <div class="card-body p-5">
                             <h2 class="h3 mb-4">
                                 <i class="bi bi-rocket text-primary me-2"></i>
-                                Personal Projects
+                                {{ $t('about.projectsTitle') }}
                             </h2>
                             <p>
-                                <strong>Passi</strong> - A passwordless OAuth2 2FA authentication solution demonstrating my passion 
-                                for security and user experience:
+                                {{ $t('about.projectsIntro') }}
                             </p>
                             <ul class="feature-list">
-                                <li>Certificate-based authentication with public-key cryptography</li>
-                                <li>Custom OpenID Connect (OIDC) server implementation from scratch</li>
-                                <li>OAuth2 authorization server with PKCE-only authentication</li>
-                                <li>Native Android application for mobile authentication</li>
-                                <li>Full-stack implementation: ASP.NET Core, Vue.js, PostgreSQL, Redis</li>
-                                <li>Open source projects available on GitHub</li>
+                                <li v-for="key in projectKeys" :key="key">{{ $t(key) }}</li>
                             </ul>
                             <p class="mb-0">
-                                This project showcases my ability to bridge complex security requirements with practical, 
-                                user-friendly solutions—eliminating passwords while enhancing security.
+                                {{ $t('about.projectsOutro') }}
                             </p>
                         </div>
                     </div>
@@ -94,34 +69,32 @@
                         <div class="card-body p-5">
                             <h2 class="h3 mb-4">
                                 <i class="bi bi-chat-quote text-primary me-2"></i>
-                                Why I Build
+                                {{ $t('about.whyTitle') }}
                             </h2>
                             <blockquote class="blockquote mb-0">
                                 <p class="fs-5">
-                                    "The best technology is the technology you don't notice—until you realize 
-                                    you can't live without it."
+                                    “{{ $t('about.quote') }}”
                                 </p>
                             </blockquote>
                             <p class="mt-4 mb-0">
-                                I create tools that disappear into the background, making people's digital lives easier 
-                                while keeping them safe. That's what drives me every day.
+                                {{ $t('about.whyText') }}
                             </p>
                         </div>
                     </div>
 
                     <div class="text-center mt-5">
-                        <h3 class="mb-4">Let's Connect</h3>
+                        <h3 class="mb-4">{{ $t('about.connect') }}</h3>
                         <div class="d-flex justify-content-center gap-3 flex-wrap">
                             <a href="https://github.com/jetcar/passi" target="_blank" 
                                class="btn btn-outline-dark btn-lg">
-                                <i class="bi bi-github me-2"></i>View on GitHub
+                                <i class="bi bi-github me-2"></i>{{ $t('common.viewGithub') }}
                             </a>
                             <a href="https://www.youtube.com/watch?v=Koe_8YcmYkU" target="_blank" 
                                class="btn btn-outline-danger btn-lg">
-                                <i class="bi bi-youtube me-2"></i>Watch Demo
+                                <i class="bi bi-youtube me-2"></i>{{ $t('common.watchDemo') }}
                             </a>
                             <router-link to="/Contacts" class="btn btn-outline-primary btn-lg">
-                                <i class="bi bi-envelope me-2"></i>Get in Touch
+                                <i class="bi bi-envelope me-2"></i>{{ $t('about.getInTouch') }}
                             </router-link>
                         </div>
                     </div>
@@ -132,6 +105,8 @@
 </template>
 
 <script setup lang="ts">
+const expertiseKeys = Array.from({ length: 11 }, (_, index) => `about.expertise${index + 1}`)
+const projectKeys = Array.from({ length: 6 }, (_, index) => `about.project${index + 1}`)
 </script>
 
 <style scoped>

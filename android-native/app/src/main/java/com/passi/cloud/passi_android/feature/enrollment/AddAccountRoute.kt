@@ -26,12 +26,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.passi.cloud.passi_android.PassiApplication
+import com.passi.cloud.passi_android.R
+import com.passi.cloud.passi_android.localization.asString
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -88,7 +91,7 @@ internal fun AddAccountScreen(
                 onValueChange = {},
                 readOnly = true,
                 textStyle = MaterialTheme.typography.bodyLarge.copy(textAlign = TextAlign.Center, color = Color.Black),
-                label = { Text("IdentityProvider", color = Color.Black) },
+                label = { Text(stringResource(R.string.identity_provider), color = Color.Black) },
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -113,21 +116,21 @@ internal fun AddAccountScreen(
         Spacer(modifier = Modifier.padding(top = 8.dp))
 
         Text(
-            text = uiState.responseError.orEmpty(),
+            text = uiState.responseError.asString(),
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center,
             color = Color.Black,
         )
 
         Text(
-            text = uiState.emailError.orEmpty(),
+            text = uiState.emailError.asString(),
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center,
             color = Color.Black,
         )
 
         Text(
-            text = "Email",
+            text = stringResource(R.string.email),
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center,
             color = Color.Black,
@@ -144,7 +147,7 @@ internal fun AddAccountScreen(
         )
 
         PillButton(
-            text = "Register",
+            text = stringResource(R.string.register),
             enabled = !uiState.isSubmitting,
             onClick = onSubmit,
             showProgress = uiState.isSubmitting,
@@ -154,7 +157,7 @@ internal fun AddAccountScreen(
         )
 
         PillButton(
-            text = "Cancel",
+            text = stringResource(R.string.cancel),
             onClick = onBack,
             modifier = Modifier
                 .fillMaxWidth()

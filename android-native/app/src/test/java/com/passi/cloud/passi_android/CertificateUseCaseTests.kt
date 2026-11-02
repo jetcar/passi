@@ -1,6 +1,7 @@
 package com.passi.cloud.passi_android
 
 import com.google.common.truth.Truth.assertThat
+import com.passi.cloud.passi_android.localization.UiText
 import com.passi.cloud.passi_android.data.selection.SelectedAccountStore
 import com.passi.cloud.passi_android.feature.certificate.UpdateCertificateViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -25,7 +26,7 @@ class CertificateUseCaseTests : CoroutineViewModelTest() {
         advanceUntilIdle()
         viewModel.rotate {}
 
-        assertThat(viewModel.uiState.value.responseError).isEqualTo("Confirm biometric before rotating this certificate")
+        assertThat(viewModel.uiState.value.responseError).isEqualTo(UiText.Resource(R.string.error_biometric_required_for_rotation))
     }
 
     @Test
@@ -44,7 +45,7 @@ class CertificateUseCaseTests : CoroutineViewModelTest() {
         viewModel.onOldPinChanged("12")
         viewModel.rotate {}
 
-        assertThat(viewModel.uiState.value.oldPinError).isEqualTo("Invalid old pin")
+        assertThat(viewModel.uiState.value.oldPinError).isEqualTo(UiText.Resource(R.string.error_invalid_old_pin))
     }
 
     @Test

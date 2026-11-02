@@ -16,6 +16,9 @@ import com.passi.cloud.passi_android.domain.repository.AccountsRepository
 import com.passi.cloud.passi_android.domain.repository.ProvidersRepository
 import java.util.UUID
 import com.passi.cloud.passi_android.domain.service.PendingEnrollment
+import com.passi.cloud.passi_android.R
+import com.passi.cloud.passi_android.localization.UiText
+import com.passi.cloud.passi_android.localization.toUiText
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -28,13 +31,13 @@ data class AccountsUiState(
     val versionLabel: String = "",
     val providers: List<Provider> = emptyList(),
     val accounts: List<Account> = emptyList(),
-    val syncError: String? = null,
+    val syncError: UiText? = null,
     val isSyncing: Boolean = false,
     val isForegroundPolling: Boolean = false,
     val isDeleteMode: Boolean = false,
     val revealedDeleteAccountIds: Set<java.util.UUID> = emptySet(),
     val isDeletingAccountIds: Set<java.util.UUID> = emptySet(),
-    val deleteError: String? = null,
+    val deleteError: UiText? = null,
 )
 
 class AccountsViewModel(
@@ -130,7 +133,7 @@ class AccountsViewModel(
                 updateBusyState(false)
                 if (surfaceErrors) {
                     _uiState.value = _uiState.value.copy(
-                        syncError = error.message ?: "Network error. Try again",
+                        syncError = error.toUiText(R.string.error_network),
                     )
                 }
             }
@@ -138,7 +141,7 @@ class AccountsViewModel(
     }
 
     fun showMainError(message: String) {
-        _uiState.value = _uiState.value.copy(syncError = message)
+        _uiState.value = _uiState.value.copy(syncError = UiText.Dynamic(message))
     }
 
     fun openAccount(account: Account, onOpenAccount: () -> Unit, onResumeEnrollment: () -> Unit) {
@@ -195,7 +198,7 @@ class AccountsViewModel(
             _uiState.value = _uiState.value.copy(
                 isDeletingAccountIds = _uiState.value.isDeletingAccountIds - account.id,
                 revealedDeleteAccountIds = _uiState.value.revealedDeleteAccountIds - account.id,
-                deleteError = serverResult.exceptionOrNull()?.message,
+                deleteError = serverResult.exceptionOrNull()?.toUiText(R.string.error_network),
             )
         }
     }

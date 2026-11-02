@@ -1,11 +1,13 @@
+import { i18n } from '../i18n'
+
 const API_URL = `/api/news`
 
 export const REACTIONS = [
-    { key: 'like', emoji: '👍', label: 'Like' },
-    { key: 'love', emoji: '❤️', label: 'Love' },
-    { key: 'celebrate', emoji: '🎉', label: 'Celebrate' },
-    { key: 'rocket', emoji: '🚀', label: 'Rocket' },
-    { key: 'eyes', emoji: '👀', label: 'Interesting' },
+    { key: 'like', emoji: '👍', labelKey: 'reactions.like' },
+    { key: 'love', emoji: '❤️', labelKey: 'reactions.love' },
+    { key: 'celebrate', emoji: '🎉', labelKey: 'reactions.celebrate' },
+    { key: 'rocket', emoji: '🚀', labelKey: 'reactions.rocket' },
+    { key: 'eyes', emoji: '👀', labelKey: 'reactions.interesting' },
 ]
 
 let contextPromise = null
@@ -31,16 +33,26 @@ export async function request(method, path, body = undefined) {
     }
     if (body !== undefined) headers['Content-Type'] = 'application/json'
 
-    const response = await fetch(`${API_URL}${path}`, {
-        method,
-        headers,
-        body: body === undefined ? undefined : JSON.stringify(body),
-    })
+    let response
+    try {
+        response = await fetch(`${API_URL}${path}`, {
+            method,
+            headers,
+            body: body === undefined ? undefined : JSON.stringify(body),
+        })
+    } catch {
+        throw new Error(i18n.global.t('common.networkError'))
+    }
     if (response.status === 204) return null
     const text = await response.text()
-    const data = text ? JSON.parse(text) : null
+    let data = null
+    try {
+        data = text ? JSON.parse(text) : null
+    } catch {
+        throw new Error(i18n.global.t('common.invalidResponse'))
+    }
     if (!response.ok) {
-        const error = new Error((data && data.errors) || `Request failed (${response.status})`)
+        const error = new Error((data && data.errors) || i18n.global.t('common.requestFailed', { status: response.status }))
         error.status = response.status
         throw error
     }
@@ -64,5 +76,5 @@ export const admin = {
 
 export function formatDate(value) {
     if (!value) return ''
-    return new Date(value).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })
+    return new Intl.DateTimeFormat(i18n.global.locale.value, { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(value))
 }

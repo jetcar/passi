@@ -26,7 +26,7 @@
     <main>
         <div class="container">
             <div class="text-center">
-                <h1 class="display-4">User Info</h1>
+                <h1 class="display-4">{{ $t('userInfo.title') }}</h1>
                 <div class="form-group row">
                     <template v-for="claim in Claims">
                         <label for="email" class="col-sm-2 col-form-label">{{claim.type}}</label>

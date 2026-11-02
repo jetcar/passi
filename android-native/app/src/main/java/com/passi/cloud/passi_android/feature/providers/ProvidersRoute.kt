@@ -33,11 +33,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.passi.cloud.passi_android.PassiApplication
+import com.passi.cloud.passi_android.R
 import com.passi.cloud.passi_android.domain.model.Provider
+import com.passi.cloud.passi_android.localization.asString
 
 private val Blue = Color(0xFF2196F3)
 
@@ -75,7 +78,7 @@ fun ProvidersRoute(
             IconButton(onClick = onBack) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                    contentDescription = "Back",
+                    contentDescription = stringResource(R.string.back),
                     tint = Color.White,
                     modifier = Modifier.size(28.dp),
                 )
@@ -84,7 +87,7 @@ fun ProvidersRoute(
 
         if (uiState.responseError != null) {
             Text(
-                text = uiState.responseError.orEmpty(),
+                text = uiState.responseError.asString(),
                 color = Color.Black,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
             )
@@ -123,7 +126,7 @@ fun ProvidersRoute(
             IconButton(onClick = { viewModel.addProvider(onAddProvider) }) {
                 Icon(
                     imageVector = Icons.Filled.Add,
-                    contentDescription = "Add provider",
+                    contentDescription = stringResource(R.string.add_provider),
                     tint = Color.White,
                     modifier = Modifier.size(28.dp),
                 )
@@ -131,7 +134,7 @@ fun ProvidersRoute(
             IconButton(onClick = { isDeleteMode = !isDeleteMode; if (!isDeleteMode) revealedDeleteIds = emptySet() }) {
                 Icon(
                     imageVector = Icons.Filled.Delete,
-                    contentDescription = "Delete mode",
+                    contentDescription = stringResource(R.string.delete_mode),
                     tint = Color.White,
                     modifier = Modifier.size(28.dp),
                 )
@@ -160,7 +163,7 @@ private fun ProviderRow(
             IconButton(onClick = onDeleteReveal, modifier = Modifier.size(36.dp)) {
                 Icon(
                     imageVector = Icons.Filled.Delete,
-                    contentDescription = "Reveal delete",
+                    contentDescription = stringResource(R.string.reveal_delete),
                     tint = Color.Black,
                 )
             }
@@ -177,7 +180,7 @@ private fun ProviderRow(
                 shape = RoundedCornerShape(4.dp),
                 modifier = Modifier.size(width = 80.dp, height = 36.dp),
             ) {
-                Text("Delete")
+                Text(stringResource(R.string.delete))
             }
         }
     }

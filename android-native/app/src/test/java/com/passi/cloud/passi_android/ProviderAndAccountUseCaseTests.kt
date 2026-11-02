@@ -1,6 +1,7 @@
 package com.passi.cloud.passi_android
 
 import com.google.common.truth.Truth.assertThat
+import com.passi.cloud.passi_android.localization.UiText
 import com.passi.cloud.passi_android.data.selection.SelectedAccountStore
 import com.passi.cloud.passi_android.data.selection.SelectedProviderStore
 import com.passi.cloud.passi_android.domain.model.ManagedDevice
@@ -83,7 +84,7 @@ class ProviderAndAccountUseCaseTests : CoroutineViewModelTest() {
         viewModel.onBiometricPinChanged("12")
         viewModel.enableBiometric()
 
-        assertThat(viewModel.uiState.value.biometricPinError).isEqualTo("Invalid Pin")
+        assertThat(viewModel.uiState.value.biometricPinError).isEqualTo(UiText.Resource(R.string.error_invalid_pin))
     }
 
     @Test

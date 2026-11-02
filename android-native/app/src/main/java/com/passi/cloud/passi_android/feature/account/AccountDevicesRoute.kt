@@ -29,16 +29,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.passi.cloud.passi_android.PassiApplication
+import com.passi.cloud.passi_android.R
 import com.passi.cloud.passi_android.domain.model.ManagedDevice
 import com.passi.cloud.passi_android.ui.IPhoneConfirmationSheet
+import com.passi.cloud.passi_android.localization.asString
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 
 @Composable
 fun AccountDevicesRoute(
@@ -96,7 +101,7 @@ internal fun AccountDevicesScreen(
             IconButton(onClick = onBack) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                    contentDescription = "Back",
+                    contentDescription = stringResource(R.string.back),
                     tint = Color.White,
                     modifier = Modifier.size(28.dp),
                 )
@@ -119,7 +124,7 @@ internal fun AccountDevicesScreen(
 
         if (uiState.responseError != null) {
             Text(
-                text = uiState.responseError.orEmpty(),
+                text = uiState.responseError.asString(),
                 color = Color.Red,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -134,18 +139,18 @@ internal fun AccountDevicesScreen(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            item(key = "current-header") { SectionHeader("This device") }
+            item(key = "current-header") { SectionHeader(stringResource(R.string.this_device)) }
             item(key = "current") {
                 if (currentDevice != null) {
                     DeviceRow(device = currentDevice, isRemoving = false, onRemove = {})
                 } else if (!uiState.isLoading) {
-                    EmptyText("This device is not registered for this account.")
+                    EmptyText(stringResource(R.string.device_not_registered))
                 }
             }
 
-            item(key = "others-header") { SectionHeader("Other devices") }
+            item(key = "others-header") { SectionHeader(stringResource(R.string.other_devices)) }
             if (otherDevices.isEmpty() && !uiState.isLoading) {
-                item(key = "others-empty") { EmptyText("No other devices are connected to this account.") }
+                item(key = "others-empty") { EmptyText(stringResource(R.string.no_other_devices)) }
             }
             items(otherDevices, key = { it.deviceId }) { device ->
                 DeviceRow(
@@ -159,9 +164,9 @@ internal fun AccountDevicesScreen(
 
     pendingDevice?.let { device ->
         IPhoneConfirmationSheet(
-            title = "Remove device?",
-            message = "${device.displayName} will stop receiving login approvals for this account.",
-            confirmLabel = "Remove Device",
+            title = stringResource(R.string.remove_device_title),
+            message = stringResource(R.string.remove_device_message, device.displayName),
+            confirmLabel = stringResource(R.string.remove_device),
             onConfirm = { onConfirmRemove(device) },
             onDismiss = onDismissRemove,
         )
@@ -198,6 +203,10 @@ private fun DeviceRow(
     isRemoving: Boolean,
     onRemove: () -> Unit,
 ) {
+    val locale = LocalConfiguration.current.locales[0]
+    val dateFormatter = remember(locale) {
+        DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT).withLocale(locale)
+    }
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -213,15 +222,18 @@ private fun DeviceRow(
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(device.displayName, color = Color.Black, fontWeight = FontWeight.SemiBold)
-                Text("ID ${device.shortIdentifier}", color = Color.Black, fontSize = 12.sp)
+                Text(stringResource(R.string.device_id, device.shortIdentifier), color = Color.Black, fontSize = 12.sp)
                 Text(
-                    text = "Registered ${device.creationTime.atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))}",
+                    text = stringResource(
+                        R.string.device_registered,
+                        device.creationTime.atZone(ZoneId.systemDefault()).format(dateFormatter),
+                    ),
                     color = Color.Black,
                     fontSize = 12.sp,
                 )
             }
             if (device.isCurrent) {
-                Text("Current", color = Color(0xFF2196F3), fontWeight = FontWeight.Medium)
+                Text(stringResource(R.string.current_device), color = Color(0xFF2196F3), fontWeight = FontWeight.Medium)
             }
         }
         if (!device.isCurrent) {
@@ -238,7 +250,7 @@ private fun DeviceRow(
                 if (isRemoving) {
                     CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
                 } else {
-                    Text("Remove device")
+                    Text(stringResource(R.string.remove_device))
                 }
             }
         }

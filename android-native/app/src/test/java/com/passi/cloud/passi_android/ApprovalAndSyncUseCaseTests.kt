@@ -1,6 +1,7 @@
 package com.passi.cloud.passi_android
 
 import com.google.common.truth.Truth.assertThat
+import com.passi.cloud.passi_android.localization.UiText
 import com.passi.cloud.passi_android.data.auth.PendingSessionStore
 import com.passi.cloud.passi_android.data.local.PendingEnrollmentStore
 import com.passi.cloud.passi_android.data.selection.SelectedAccountStore
@@ -103,8 +104,22 @@ class ApprovalAndSyncUseCaseTests : CoroutineViewModelTest() {
             onAuthorized = {},
         )
 
-        assertThat(viewModel.uiState.value.colorError).isEqualTo("Invalid confirmation color. Go back and try again.")
+        assertThat(viewModel.uiState.value.colorError).isEqualTo(UiText.Resource(R.string.error_invalid_confirmation_color))
         assertThat(viewModel.uiState.value.isButtonEnabled).isFalse()
+    }
+
+    @Test
+    fun sessionChallengeCancelReportsLocalizedMissingSessionMessage() = runViewModelTest {
+        val viewModel = SessionChallengeViewModel(
+            pendingSessionStore = PendingSessionStore(),
+            accountsRepository = inMemoryAccountsRepository(),
+            authSessionService = FakeAuthSessionService(),
+        )
+        var cancellationMessage: String? = null
+
+        viewModel.cancel("Localized missing session") { cancellationMessage = it }
+
+        assertThat(cancellationMessage).isEqualTo("Localized missing session")
     }
 
     @Test
@@ -141,7 +156,7 @@ class ApprovalAndSyncUseCaseTests : CoroutineViewModelTest() {
             onAuthorized = { anyFlowStarted = true },
         )
 
-        assertThat(viewModel.uiState.value.colorError).isEqualTo("Invalid confirmation number. Go back and try again.")
+        assertThat(viewModel.uiState.value.colorError).isEqualTo(UiText.Resource(R.string.error_invalid_confirmation_number))
         assertThat(viewModel.uiState.value.isButtonEnabled).isFalse()
         assertThat(anyFlowStarted).isFalse()
     }
@@ -224,7 +239,7 @@ class ApprovalAndSyncUseCaseTests : CoroutineViewModelTest() {
         assertThat(authorized).isFalse()
         assertThat(authService.lastAuthorizedPin).isNull()
         assertThat(viewModel.uiState.value.unlockRequired).isFalse()
-        assertThat(viewModel.uiState.value.responseError).isEqualTo("Unlock your phone to approve this login")
+        assertThat(viewModel.uiState.value.responseError).isEqualTo(UiText.Resource(R.string.error_unlock_to_approve))
     }
 
     @Test

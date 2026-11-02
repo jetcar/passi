@@ -86,12 +86,12 @@
                     if (typeof payload === "string" && payload.trim()) {
                         return { message: payload, redirectUrl }
                     }
-                    return { message: "Passi could not start the login. Please try again.", redirectUrl }
+                    return { message: this.$t('login.errors.startFailed'), redirectUrl }
                 }
                 catch {
                     // Fall through to a safe message when the response is not JSON.
                 }
-                return { message: "Passi could not start the login. Please try again.", redirectUrl: null }
+                return { message: this.$t('login.errors.startFailed'), redirectUrl: null }
             },
             async handleErrorResponse(response) {
                 const error = await this.getResponseError(response)
@@ -122,7 +122,7 @@
                     if (response.ok) {
                         const result = await response.json()
                         if (typeof result?.login_token !== "string" || !result.login_token) {
-                            this.errorMessage = "Passi returned an invalid login token. Please try again."
+                            this.errorMessage = this.$t('login.errors.invalidToken')
                             return
                         }
                         this.loginToken = result.login_token
@@ -138,7 +138,7 @@
                 }
                 catch (error) {
                     if (error.name !== "AbortError") {
-                        this.errorMessage = "Passi could not validate the login request. Please try again."
+                        this.errorMessage = this.$t('login.errors.validationFailed')
                     }
                 }
                 finally {
@@ -174,7 +174,7 @@
                             this.timer = setTimeout(() => this.fetchCheck(), 1000)
                         }
                         else {
-                            this.errorMessage = "Passi returned an invalid login response. Please try again."
+                            this.errorMessage = this.$t('login.errors.invalidResponse')
                             this.loginForm = true
                             this.loginToken = null
                             this.authorizationReady = false
@@ -196,7 +196,7 @@
                 }
                 catch (error) {
                     if (error.name !== "AbortError") {
-                        this.errorMessage = "Passi could not check the login request. Please try again."
+                        this.errorMessage = this.$t('login.errors.checkFailed')
                         this.loginForm = true
                         this.loginToken = null
                         this.authorizationReady = false
@@ -214,19 +214,19 @@
                 this.errorMessage = false
                 if (!this.authorizationReady) {
                     this.errorMessage = this.authorizationChecking
-                        ? "Passi is validating the login request."
-                        : "This login request is invalid."
+                        ? this.$t('login.errors.validating')
+                        : this.$t('login.errors.invalidRequest')
                     return
                 }
                 if (!this.loginToken) {
                     this.authorizationReady = false
-                    this.errorMessage = "Passi must validate this login request again."
+                    this.errorMessage = this.$t('login.errors.revalidate')
                     await this.validateAuthorizationRequest(true)
                     return
                 }
                 this.LoginInput.Username = this.LoginInput.Username.trim()
                 if (!this.LoginInput.Username) {
-                    this.errorMessage = "Enter your Passi username to continue."
+                    this.errorMessage = this.$t('login.errors.usernameRequired')
                     return
                 }
                 this.loading = true
@@ -270,7 +270,7 @@
                 }
                 catch (error) {
                     if (error.name !== "AbortError") {
-                        this.errorMessage = "Passi could not start the login. Check your connection and try again."
+                        this.errorMessage = this.$t('login.errors.connectionFailed')
                         this.loginToken = null
                         this.authorizationReady = false
                         await this.validateAuthorizationRequest(true)
@@ -291,14 +291,14 @@
         <div class="auth-shell">
             <template v-if="loginForm">
                 <section class="auth-panel auth-login-panel">
-                    <a class="auth-brand" href="/" aria-label="Passi home">
+                    <a class="auth-brand" href="/" :aria-label="$t('login.homeAria')">
                         <span class="auth-brand-mark" aria-hidden="true">P</span>
                         <span>Passi</span>
                     </a>
 
                     <div class="auth-copy">
-                        <h1>Welcome back</h1>
-                        <p>Enter your Passi username to continue securely.</p>
+                        <h1>{{ $t('login.welcomeTitle') }}</h1>
+                        <p>{{ $t('login.welcomeSubtitle') }}</p>
                     </div>
 
                     <div class="auth-alert" role="alert" v-if="errorMessage">
@@ -307,32 +307,32 @@
                     </div>
 
                     <form class="auth-form" @submit.prevent="handleLoginClick">
-                        <label for="username">Username</label>
+                        <label for="username">{{ $t('login.username') }}</label>
                         <input
                             id="username"
                             name="username"
                             type="text"
                             inputmode="email"
                             autocomplete="username"
-                            placeholder="alex@example.com"
+                            :placeholder="$t('login.usernamePlaceholder')"
                             v-model="LoginInput.Username"
                             :disabled="loading || authorizationChecking || !authorizationReady"
                             autofocus
                         >
                         <button class="auth-primary-button" type="submit" :disabled="loading || authorizationChecking || !authorizationReady">
                             <span class="auth-spinner" aria-hidden="true" v-if="loading || authorizationChecking"></span>
-                            {{ authorizationChecking ? 'Validating request…' : loading ? 'Starting secure login…' : 'Continue with Passi' }}
+                            {{ authorizationChecking ? $t('login.validating') : loading ? $t('login.starting') : $t('login.continue') }}
                         </button>
                     </form>
 
                     <p class="auth-privacy-note">
-                        No password is sent or stored in this browser.
+                        {{ $t('login.privacy') }}
                     </p>
                 </section>
 
-                <aside class="auth-visual" aria-label="Passwordless authentication">
+                <aside class="auth-visual" :aria-label="$t('login.passwordlessAria')">
                     <div class="auth-visual-circle" aria-hidden="true">
-                        <svg class="auth-lock" viewBox="0 0 180 180" role="img" aria-label="Secure lock">
+                        <svg class="auth-lock" viewBox="0 0 180 180" role="img" :aria-label="$t('login.secureLockAria')">
                             <defs>
                                 <linearGradient id="lockBody" x1="0" y1="0" x2="1" y2="1">
                                     <stop offset="0" stop-color="#ffd05b" />
@@ -348,21 +348,21 @@
                             <rect x="132" y="92" width="14" height="38" rx="7" fill="#d1c2e8" />
                         </svg>
                     </div>
-                    <p>Your password stays with you.</p>
+                    <p>{{ $t('login.passwordStays') }}</p>
                 </aside>
             </template>
 
             <template v-else>
                 <div class="auth-panel auth-challenge-panel">
                     <section class="auth-challenge-intro">
-                        <a class="auth-brand" href="/" aria-label="Passi home">
+                        <a class="auth-brand" href="/" :aria-label="$t('login.homeAria')">
                             <span class="auth-brand-mark" aria-hidden="true">P</span>
                             <span>Passi</span>
                         </a>
 
                         <div class="auth-copy auth-challenge-copy">
-                            <h1>Check your phone</h1>
-                            <p>Open Passi on a registered device and approve this login request.</p>
+                            <h1>{{ $t('login.challenge.title') }}</h1>
+                            <p>{{ $t('login.challenge.subtitle') }}</p>
                         </div>
 
                         <div class="auth-alert" role="alert" v-if="errorMessage">
@@ -372,9 +372,9 @@
                     </section>
 
                     <div class="auth-challenge-details">
-                        <div class="device-list" aria-label="Registered devices">
+                        <div class="device-list" :aria-label="$t('login.challenge.registeredDevicesAria')">
                             <div class="device-list-label">
-                                {{ LoginResponse.registeredDevices?.length === 1 ? 'Available device' : 'Available devices' }}
+                                {{ $t('login.challenge.availableDevices', LoginResponse.registeredDevices?.length || 0) }}
                             </div>
                             <div
                                 class="device-card"
@@ -388,7 +388,7 @@
                                     </svg>
                                 </span>
                                 <span class="device-name">{{ device }}</span>
-                                <span class="device-status">Registered</span>
+                                <span class="device-status">{{ $t('login.challenge.registered') }}</span>
                             </div>
                             <div class="device-card" v-if="!LoginResponse.registeredDevices?.length">
                                 <span class="device-icon" aria-hidden="true">
@@ -397,35 +397,35 @@
                                         <path d="M10 5h4M11 19h2" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
                                     </svg>
                                 </span>
-                                <span class="device-name">Your Passi app</span>
-                                <span class="device-status">Waiting</span>
+                                <span class="device-name">{{ $t('login.challenge.fallbackDevice') }}</span>
+                                <span class="device-status">{{ $t('login.challenge.waiting') }}</span>
                             </div>
                         </div>
 
                         <div class="auth-waiting-note">
                             <span class="auth-waiting-dot" aria-hidden="true"></span>
-                            The browser will continue automatically after approval.
+                            {{ $t('login.challenge.browserContinues') }}
                         </div>
 
                         <button class="auth-cancel-button" type="button" @click="handleCheckCancelClick">
-                            Use another account
+                            {{ $t('login.challenge.useAnother') }}
                         </button>
                     </div>
                 </div>
 
                 <aside class="auth-challenge-number" aria-live="polite">
-                    <p class="challenge-label">Tap this number in Passi</p>
+                    <p class="challenge-label">{{ $t('login.challenge.tapNumber') }}</p>
                     <div class="challenge-number" v-if="LoginResponse.checkNumber">
                         {{ LoginResponse.checkNumber }}
                     </div>
                     <div class="challenge-number challenge-number-loading" v-else>••</div>
-                    <p class="challenge-status">Waiting for approval…</p>
+                    <p class="challenge-status">{{ $t('login.challenge.waitingApproval') }}</p>
                     <div class="challenge-fallback">
-                        <span>Older app? Match {{ LoginResponse.checkColor }}</span>
+                        <span>{{ $t('login.challenge.olderApp', { color: LoginResponse.checkColor }) }}</span>
                         <span
                             class="color-dot"
                             :class="LoginResponse.checkColor"
-                            :title="LoginResponse.checkColor"
+                            :title="$t('login.challenge.colorTitle', { color: LoginResponse.checkColor })"
                         ></span>
                     </div>
                 </aside>

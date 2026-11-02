@@ -24,11 +24,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.passi.cloud.passi_android.PassiApplication
+import com.passi.cloud.passi_android.R
 
 private val ProviderDetailBlue = Color(0xFF2196F3)
 
@@ -63,7 +65,7 @@ fun ProviderDetailRoute(
             IconButton(onClick = onBack) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                    contentDescription = "Back",
+                    contentDescription = stringResource(R.string.back),
                     tint = Color.White,
                     modifier = Modifier.size(28.dp),
                 )
@@ -77,17 +79,20 @@ fun ProviderDetailRoute(
                 .padding(horizontal = 20.dp, vertical = 8.dp),
         ) {
             uiState.provider?.let { provider ->
-                ProviderLabelValue("Identity provider:", provider.name)
-                ProviderLabelValue("IsDefault", provider.isDefault.toString())
-                ProviderLabelValue("Base Url:", provider.baseUrl)
-                ProviderLabelValue("SignupPath:", provider.apiPaths.signup)
-                ProviderLabelValue("Authorize:", provider.apiPaths.authorize)
-                ProviderLabelValue("CancelCheck:", provider.apiPaths.cancelCheck)
-                ProviderLabelValue("CheckForStartedSessions:", provider.apiPaths.checkForStartedSessions)
-                ProviderLabelValue("DeleteAccount:", provider.apiPaths.deleteAccount)
-                ProviderLabelValue("SignupCheck:", provider.apiPaths.signupCheck)
-                ProviderLabelValue("SignupConfirmation:", provider.apiPaths.signupConfirmation)
-            } ?: Text("Provider not found", color = Color.Black)
+                ProviderLabelValue(stringResource(R.string.identity_provider), provider.name)
+                ProviderLabelValue(
+                    stringResource(R.string.provider_is_default_label),
+                    stringResource(if (provider.isDefault) R.string.yes else R.string.no),
+                )
+                ProviderLabelValue(stringResource(R.string.provider_base_url), provider.baseUrl)
+                ProviderLabelValue(stringResource(R.string.provider_signup_path), provider.apiPaths.signup)
+                ProviderLabelValue(stringResource(R.string.provider_authorize_path), provider.apiPaths.authorize)
+                ProviderLabelValue(stringResource(R.string.provider_cancel_check_path), provider.apiPaths.cancelCheck)
+                ProviderLabelValue(stringResource(R.string.provider_active_sessions_path), provider.apiPaths.checkForStartedSessions)
+                ProviderLabelValue(stringResource(R.string.provider_delete_account_path), provider.apiPaths.deleteAccount)
+                ProviderLabelValue(stringResource(R.string.provider_signup_check_path), provider.apiPaths.signupCheck)
+                ProviderLabelValue(stringResource(R.string.provider_signup_confirmation_path), provider.apiPaths.signupConfirmation)
+            } ?: Text(stringResource(R.string.provider_not_found), color = Color.Black)
         }
 
         uiState.provider?.let {
@@ -102,7 +107,7 @@ fun ProviderDetailRoute(
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 8.dp),
             ) {
-                Text("Edit")
+                Text(stringResource(R.string.edit))
             }
         }
     }

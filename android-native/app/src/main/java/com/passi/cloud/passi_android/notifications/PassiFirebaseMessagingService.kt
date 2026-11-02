@@ -6,6 +6,7 @@ import com.google.firebase.messaging.RemoteMessage
 import com.google.gson.Gson
 import com.passi.cloud.passi_android.MainActivity
 import com.passi.cloud.passi_android.PassiApplication
+import com.passi.cloud.passi_android.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -25,7 +26,7 @@ class PassiFirebaseMessagingService : FirebaseMessagingService() {
     override fun onMessageReceived(message: RemoteMessage) {
         super.onMessageReceived(message)
 
-        val title = message.notification?.title ?: message.data["title"] ?: "Passi login"
+        val title = message.notification?.title ?: message.data["title"] ?: getString(R.string.notification_login_title)
         val body = message.data["body"] ?: message.notification?.body
         val payload = body?.let { runCatching { gson.fromJson(it, FirebaseNotificationPayload::class.java) }.getOrNull() }
 
@@ -34,7 +35,7 @@ class PassiFirebaseMessagingService : FirebaseMessagingService() {
         PassiNotifications.showLoginNotification(
             context = this,
             title = title,
-            contentText = payload?.ReturnHost ?: "Open Passi to review the request",
+            contentText = payload?.ReturnHost ?: getString(R.string.notification_login_body),
         )
     }
 

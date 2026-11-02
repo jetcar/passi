@@ -19,7 +19,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.passi.cloud.passi_android.R
 
 @Composable
 internal fun AppUpdateBanner(
@@ -43,15 +45,15 @@ internal fun AppUpdateBanner(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = "A new version is available",
+                    text = stringResource(R.string.app_update_available),
                     modifier = Modifier.weight(1f),
                     color = Color.White,
                 )
                 TextButton(onClick = onDismiss) {
-                    Text("Later", color = Color.White)
+                    Text(stringResource(R.string.later), color = Color.White)
                 }
                 Button(onClick = onUpdate) {
-                    Text("Update")
+                    Text(stringResource(R.string.update))
                 }
             }
         }

@@ -10,6 +10,9 @@ import com.passi.cloud.passi_android.domain.account.AccountManagementService
 import com.passi.cloud.passi_android.domain.model.Account
 import com.passi.cloud.passi_android.domain.model.ManagedDevice
 import com.passi.cloud.passi_android.domain.repository.AccountsRepository
+import com.passi.cloud.passi_android.R
+import com.passi.cloud.passi_android.localization.UiText
+import com.passi.cloud.passi_android.localization.toUiText
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,7 +23,7 @@ data class AccountDevicesUiState(
     val devices: List<ManagedDevice> = emptyList(),
     val isLoading: Boolean = true,
     val isRemoving: Boolean = false,
-    val responseError: String? = null,
+    val responseError: UiText? = null,
 )
 
 class AccountDevicesViewModel(
@@ -41,7 +44,10 @@ class AccountDevicesViewModel(
             val accountId = selectedAccountStore.read()
             val account = accountId?.let { accountsRepository.getAccount(it) }
             if (account == null) {
-                _uiState.value = AccountDevicesUiState(isLoading = false, responseError = "Account not found")
+                _uiState.value = AccountDevicesUiState(
+                    isLoading = false,
+                    responseError = UiText.Resource(R.string.account_not_found),
+                )
                 return@launch
             }
 
@@ -59,7 +65,7 @@ class AccountDevicesViewModel(
                     _uiState.value = _uiState.value.copy(
                         account = account,
                         isLoading = false,
-                        responseError = error.message ?: "Network error. Try again",
+                        responseError = error.toUiText(R.string.error_network),
                     )
                 }
         }
@@ -77,7 +83,7 @@ class AccountDevicesViewModel(
                 .onFailure { error ->
                     _uiState.value = _uiState.value.copy(
                         isRemoving = false,
-                        responseError = error.message ?: "Network error. Try again",
+                        responseError = error.toUiText(R.string.error_network),
                     )
                 }
         }

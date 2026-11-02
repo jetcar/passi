@@ -31,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.font.FontWeight
@@ -40,13 +41,13 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.passi.cloud.passi_android.PassiApplication
+import com.passi.cloud.passi_android.R
 import com.passi.cloud.passi_android.domain.model.ConfirmationColor
 import com.passi.cloud.passi_android.ui.rememberBiometricPromptLauncher
+import com.passi.cloud.passi_android.localization.asString
 import java.time.Instant
 import java.time.Duration
 import kotlinx.coroutines.delay
-
-private const val BIOMETRIC_CANCELLED_MESSAGE = "Biometric authentication cancelled"
 
 @Composable
 fun SessionChallengeRoute(
@@ -66,6 +67,8 @@ fun SessionChallengeRoute(
         )
     )
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val biometricCancelledMessage = stringResource(R.string.biometric_authentication_cancelled)
+    val noPendingSessionMessage = stringResource(R.string.error_no_pending_session)
 
     // Shown over the lock screen: ask Android to unlock (PIN/fingerprint) before the approval continues.
     LaunchedEffect(uiState.unlockRequired) {
@@ -82,12 +85,12 @@ fun SessionChallengeRoute(
         })
     }
     val launchBiometricPrompt = rememberBiometricPromptLauncher(
-        title = "Approve session",
-        subtitle = "Confirm your biometric credential to approve this session",
+        title = stringResource(R.string.biometric_approve_title),
+        subtitle = stringResource(R.string.biometric_approve_subtitle),
         onSuccess = { viewModel.authorizeWithBiometric(onAuthorized) },
         onError = { message ->
-            if (message == BIOMETRIC_CANCELLED_MESSAGE) {
-                viewModel.cancel(onCancel)
+            if (message == biometricCancelledMessage) {
+                viewModel.cancel(noPendingSessionMessage, onCancel)
             } else {
                 viewModel.onBiometricPromptError(message)
             }
@@ -124,7 +127,7 @@ fun SessionChallengeRoute(
                 onAuthorized = onAuthorized,
             )
         },
-        onCancel = { viewModel.cancel(onCancel) },
+        onCancel = { viewModel.cancel(noPendingSessionMessage, onCancel) },
     )
 }
 
@@ -153,7 +156,7 @@ internal fun SessionChallengeScreen(
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Text(
-                text = "${timeLeftSeconds}s",
+                text = stringResource(R.string.seconds_remaining, timeLeftSeconds),
                 color = Color.Black,
                 fontSize = 18.sp,
                 textAlign = TextAlign.Center,
@@ -182,7 +185,7 @@ internal fun SessionChallengeScreen(
 
             if (uiState.colorError != null) {
                 Text(
-                    text = uiState.colorError.orEmpty(),
+                    text = uiState.colorError.asString(),
                     color = Color.Black,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth(),
@@ -191,7 +194,7 @@ internal fun SessionChallengeScreen(
 
             if (uiState.responseError != null) {
                 Text(
-                    text = uiState.responseError.orEmpty(),
+                    text = uiState.responseError.asString(),
                     color = Color.Black,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth(),
@@ -239,7 +242,9 @@ internal fun SessionChallengeScreen(
             Spacer(modifier = Modifier.height(12.dp))
 
             Text(
-                text = if (useNumbers) "Tap the number shown in your browser" else "Tap the matching color",
+                text = stringResource(
+                    if (useNumbers) R.string.tap_number_in_browser else R.string.tap_matching_color,
+                ),
                 color = Color.Black.copy(alpha = 0.75f),
                 fontSize = 13.sp,
                 textAlign = TextAlign.Center,
@@ -253,7 +258,7 @@ internal fun SessionChallengeScreen(
                 colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = Color.Black),
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                Text("Cancel")
+                Text(stringResource(R.string.cancel))
             }
         }
     }

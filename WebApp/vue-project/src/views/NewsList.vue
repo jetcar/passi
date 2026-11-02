@@ -28,7 +28,7 @@
                     this.posts.push(...page)
                     this.hasMore = page.length === PAGE_SIZE
                 } catch (e) {
-                    this.error = 'Could not load news.'
+                    this.error = this.$t('news.loadError')
                 } finally {
                     this.loading = false
                 }
@@ -41,15 +41,15 @@
     <div class="news-page">
         <section class="news-hero text-white">
             <div class="container">
-                <h1 class="display-5 fw-bold mb-2">News</h1>
-                <p class="lead mb-0">Releases, changes and what's next for Passi.</p>
+                <h1 class="display-5 fw-bold mb-2">{{ $t('news.title') }}</h1>
+                <p class="lead mb-0">{{ $t('news.subtitle') }}</p>
             </div>
         </section>
 
         <div class="container py-5">
             <div class="d-flex justify-content-end gap-2 mb-4">
                 <router-link v-if="isAdmin" to="/news/admin" class="btn btn-outline-primary btn-sm">
-                    <i class="bi bi-pencil-square me-1"></i>Manage posts
+                    <i class="bi bi-pencil-square me-1"></i>{{ $t('news.managePosts') }}
                 </router-link>
                 <a href="/news/rss.xml" class="btn btn-outline-secondary btn-sm" target="_blank">
                     <i class="bi bi-rss me-1"></i>RSS
@@ -57,7 +57,7 @@
             </div>
 
             <div v-if="error" class="alert alert-danger">{{ error }}</div>
-            <p v-else-if="!loading && posts.length === 0" class="text-muted text-center py-5">No news yet. Check back soon.</p>
+            <p v-else-if="!loading && posts.length === 0" class="text-muted text-center py-5">{{ $t('news.noNews') }}</p>
 
             <article v-for="post in posts" :key="post.slug" class="news-card card mb-4">
                 <div class="card-body p-4">
@@ -68,14 +68,14 @@
                     <p v-if="post.summary" class="text-muted mb-3">{{ post.summary }}</p>
                     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
                         <ReactionBar :slug="post.slug" :reactions="post.reactions" compact />
-                        <router-link :to="`/news/${post.slug}`" class="read-more">Read more <i class="bi bi-arrow-right"></i></router-link>
+                        <router-link :to="`/news/${post.slug}`" class="read-more">{{ $t('news.readMore') }} <i class="bi bi-arrow-right"></i></router-link>
                     </div>
                 </div>
             </article>
 
             <div class="text-center">
-                <div v-if="loading" class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading</span></div>
-                <button v-else-if="hasMore" class="btn btn-outline-primary" @click="loadMore">Load more</button>
+                <div v-if="loading" class="spinner-border text-primary" role="status"><span class="visually-hidden">{{ $t('common.loading') }}</span></div>
+                <button v-else-if="hasMore" class="btn btn-outline-primary" @click="loadMore">{{ $t('news.loadMore') }}</button>
             </div>
         </div>
     </div>

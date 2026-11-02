@@ -7,8 +7,10 @@ import androidx.biometric.BiometricPrompt
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
+import com.passi.cloud.passi_android.R
 
 @Composable
 fun rememberBiometricPromptLauncher(
@@ -19,18 +21,45 @@ fun rememberBiometricPromptLauncher(
 ): () -> Unit {
     val context = LocalContext.current
     val activity = remember(context) { context.findActivity() }
+    val unavailableMessage = stringResource(R.string.biometric_prompt_unavailable)
+    val cancelledMessage = stringResource(R.string.biometric_authentication_cancelled)
+    val cancelLabel = stringResource(R.string.cancel)
+    val noHardwareMessage = stringResource(R.string.biometric_no_hardware)
+    val hardwareUnavailableMessage = stringResource(R.string.biometric_hardware_unavailable)
+    val noneEnrolledMessage = stringResource(R.string.biometric_none_enrolled)
+    val authenticationUnavailableMessage = stringResource(R.string.biometric_authentication_unavailable)
 
-    return remember(activity, title, subtitle, onSuccess, onError) {
+    return remember(
+        activity,
+        title,
+        subtitle,
+        onSuccess,
+        onError,
+        unavailableMessage,
+        cancelledMessage,
+        cancelLabel,
+        noHardwareMessage,
+        hardwareUnavailableMessage,
+        noneEnrolledMessage,
+        authenticationUnavailableMessage,
+    ) {
         fun launchPrompt() {
             val currentActivity = activity ?: run {
-                onError("Biometric prompt is unavailable")
+                onError(unavailableMessage)
                 return
             }
 
             val manager = BiometricManager.from(currentActivity)
             val capability = manager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_WEAK)
             if (capability != BiometricManager.BIOMETRIC_SUCCESS) {
-                onError(capability.toErrorMessage())
+                onError(
+                    when (capability) {
+                        BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE -> noHardwareMessage
+                        BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE -> hardwareUnavailableMessage
+                        BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED -> noneEnrolledMessage
+                        else -> authenticationUnavailableMessage
+                    },
+                )
                 return
             }
 
@@ -49,7 +78,7 @@ fun rememberBiometricPromptLauncher(
                                 BiometricPrompt.ERROR_USER_CANCELED,
                                 BiometricPrompt.ERROR_CANCELED,
                                 BiometricPrompt.ERROR_TIMEOUT,
-                                -> "Biometric authentication cancelled"
+                                -> cancelledMessage
                                 else -> errString.toString()
                             }
                         )
@@ -60,7 +89,7 @@ fun rememberBiometricPromptLauncher(
             val promptInfo = BiometricPrompt.PromptInfo.Builder()
                 .setTitle(title)
                 .setSubtitle(subtitle)
-                .setNegativeButtonText("Cancel")
+                .setNegativeButtonText(cancelLabel)
                 .build()
 
             prompt.authenticate(promptInfo)
@@ -74,11 +103,4 @@ private fun Context.findActivity(): FragmentActivity? = when (this) {
     is FragmentActivity -> this
     is ContextWrapper -> baseContext.findActivity()
     else -> null
-}
-
-private fun Int.toErrorMessage(): String = when (this) {
-    BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE -> "No biometric hardware found"
-    BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE -> "Biometric hardware is unavailable"
-    BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED -> "No biometric credential is enrolled on this device"
-    else -> "Biometric authentication is unavailable"
 }

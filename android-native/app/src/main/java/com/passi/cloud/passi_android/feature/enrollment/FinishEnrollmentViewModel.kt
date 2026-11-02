@@ -10,6 +10,9 @@ import com.passi.cloud.passi_android.domain.enrollment.CertificateGenerator
 import com.passi.cloud.passi_android.domain.repository.AccountsRepository
 import com.passi.cloud.passi_android.domain.repository.ProvidersRepository
 import com.passi.cloud.passi_android.domain.service.EnrollmentService
+import com.passi.cloud.passi_android.R
+import com.passi.cloud.passi_android.localization.UiText
+import com.passi.cloud.passi_android.localization.toUiText
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,9 +23,9 @@ data class FinishEnrollmentUiState(
     val email: String = "",
     val pin: String = "",
     val pinConfirmation: String = "",
-    val pinError: String? = null,
-    val pinConfirmationError: String? = null,
-    val responseError: String? = null,
+    val pinError: UiText? = null,
+    val pinConfirmationError: UiText? = null,
+    val responseError: UiText? = null,
     val isMissingContext: Boolean = false,
     val isSubmitting: Boolean = false,
 )
@@ -43,7 +46,7 @@ class FinishEnrollmentViewModel(
         _uiState.value = if (pending == null) {
             FinishEnrollmentUiState(
                 isMissingContext = true,
-                responseError = "No pending signup found",
+                responseError = UiText.Resource(R.string.error_no_pending_signup),
             )
         } else {
             FinishEnrollmentUiState(email = pending.email)
@@ -76,14 +79,14 @@ class FinishEnrollmentViewModel(
 
         if (pin.length < MIN_PIN_LENGTH) {
             _uiState.value = _uiState.value.copy(
-                pinError = "Pin1 should be min $MIN_PIN_LENGTH numbers",
+                pinError = UiText.Resource(R.string.error_pin_length, listOf(MIN_PIN_LENGTH)),
             )
             return
         }
 
         if (pin != pinConfirmation) {
             _uiState.value = _uiState.value.copy(
-                pinConfirmationError = "Pin2 doesn't match with Pin1",
+                pinConfirmationError = UiText.Resource(R.string.error_pin_mismatch),
             )
             return
         }
@@ -94,7 +97,10 @@ class FinishEnrollmentViewModel(
     private fun finalizeEnrollment(pinLength: Int, onDone: () -> Unit) {
         val pending = pendingEnrollmentStore.read()
         if (pending == null) {
-            _uiState.value = _uiState.value.copy(responseError = "No pending signup found", isMissingContext = true)
+            _uiState.value = _uiState.value.copy(
+                responseError = UiText.Resource(R.string.error_no_pending_signup),
+                isMissingContext = true,
+            )
             return
         }
 
@@ -102,13 +108,19 @@ class FinishEnrollmentViewModel(
             _uiState.value = _uiState.value.copy(isSubmitting = true, responseError = null)
             val account = accountsRepository.getAccount(UUID.fromString(pending.accountId))
             if (account == null) {
-                _uiState.value = _uiState.value.copy(isSubmitting = false, responseError = "Pending account not found")
+                _uiState.value = _uiState.value.copy(
+                    isSubmitting = false,
+                    responseError = UiText.Resource(R.string.error_pending_account_not_found),
+                )
                 return@launch
             }
 
             val provider = providersRepository.getProvider(account.providerId)
             if (provider == null) {
-                _uiState.value = _uiState.value.copy(isSubmitting = false, responseError = "Provider not found")
+                _uiState.value = _uiState.value.copy(
+                    isSubmitting = false,
+                    responseError = UiText.Resource(R.string.provider_not_found),
+                )
                 return@launch
             }
 
@@ -118,7 +130,7 @@ class FinishEnrollmentViewModel(
             }.getOrElse { error ->
                 _uiState.value = _uiState.value.copy(
                     isSubmitting = false,
-                    responseError = error.message ?: "Certificate generation failed",
+                    responseError = UiText.Resource(R.string.error_certificate_generation),
                 )
                 return@launch
             }
@@ -159,7 +171,7 @@ class FinishEnrollmentViewModel(
             }.onFailure { error ->
                 _uiState.value = _uiState.value.copy(
                     isSubmitting = false,
-                    responseError = error.message ?: "Network error. Try again",
+                    responseError = error.toUiText(R.string.error_network),
                 )
             }
         }

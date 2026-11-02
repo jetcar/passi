@@ -1,0 +1,21 @@
+{
+  "common": { "loading": "Laadimine…", "cancel": "Tühista", "error": "Viga" },
+  "locale": { "selectorLabel": "Keel", "languages": { "en": "English", "et": "Eesti", "ru": "Русский", "de": "Deutsch", "fr": "Français", "es": "Español" } },
+  "nav": { "logout": "Logi välja" },
+  "home": {
+    "title": "Tere tulemast Passi IdentityServerisse",
+    "version": "versioon {version}",
+    "discoveryDescription": "IdentityServer avaldab {discoveryLink}, kust leiad metaandmed, kõigi otspunktide lingid, võtmematerjali ja muud.",
+    "discoveryLink": "avastusdokumendi",
+    "claimsDescription": "Praeguse seansi nõuete vaatamiseks klõpsa {claimsLink}.",
+    "claimsLink": "siin"
+  },
+  "deleteAccount": {
+    "title": "Kustuta minu konto", "errorIntro": "Vabandust, tekkis viga", "username": "Kasutajanimi", "usernamePlaceholder": "Kasutajanimi", "delete": "Kustuta", "checkEmail": "Kontrolli e-postist kinnituskoodi.", "confirmationCode": "Kinnituskood", "codePlaceholder": "Kood", "confirmDelete": "Kinnita kustutamine", "deleted": "Konto on kustutatud", "googlePlayAlt": "Laadi alla Google Playst"
+  },
+  "login": {
+    "homeAria": "Passi avaleht", "welcomeTitle": "Tere tulemast tagasi", "welcomeSubtitle": "Turvaliseks jätkamiseks sisesta oma Passi kasutajanimi.", "username": "Kasutajanimi", "usernamePlaceholder": "alex@example.com", "validating": "Päringu kontrollimine…", "starting": "Turvalise sisselogimise alustamine…", "continue": "Jätka Passiga", "privacy": "Selles brauseris ei saadeta ega salvestata parooli.", "passwordlessAria": "Paroolita autentimine", "secureLockAria": "Turvaline lukk", "passwordStays": "Sinu parool jääb sinu juurde.",
+    "errors": { "startFailed": "Passi ei saanud sisselogimist alustada. Proovi uuesti.", "invalidToken": "Passi tagastas vigase sisselogimistõendi. Proovi uuesti.", "validationFailed": "Passi ei saanud sisselogimispäringut kontrollida. Proovi uuesti.", "invalidResponse": "Passi tagastas vigase sisselogimisvastuse. Proovi uuesti.", "checkFailed": "Passi ei saanud sisselogimispäringut kontrollida. Proovi uuesti.", "validating": "Passi kontrollib sisselogimispäringut.", "invalidRequest": "See sisselogimispäring on vigane.", "revalidate": "Passi peab sisselogimispäringu uuesti kontrollima.", "usernameRequired": "Jätkamiseks sisesta oma Passi kasutajanimi.", "connectionFailed": "Passi ei saanud sisselogimist alustada. Kontrolli ühendust ja proovi uuesti." },
+    "challenge": { "title": "Kontrolli telefoni", "subtitle": "Ava Passi registreeritud seadmes ja kinnita sisselogimispäring.", "registeredDevicesAria": "Registreeritud seadmed", "availableDevices": "Saadaolev seade | Saadaolevad seadmed", "registered": "Registreeritud", "fallbackDevice": "Sinu Passi rakendus", "waiting": "Ootel", "browserContinues": "Brauser jätkab pärast kinnitamist automaatselt.", "useAnother": "Kasuta teist kontot", "tapNumber": "Puuduta Passis seda numbrit", "waitingApproval": "Kinnituse ootel…", "olderApp": "Vanem rakendus? Vali {color}", "colorTitle": "Kinnitusvärv: {color}" }
+  }
+}

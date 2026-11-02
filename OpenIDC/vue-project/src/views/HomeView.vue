@@ -15,19 +15,21 @@
                 <div class="welcome-page">
                     <h1>
                         <!--<img src="~/icon.jpg">-->
-                        Welcome to Passi IdentityServer
-                        <small class="text-muted">(version {{version}})</small>
+                        {{ $t('home.title') }}
+                        <small class="text-muted">({{ $t('home.version', { version }) }})</small>
                     </h1>
 
                     <ul>
-                        <li>
-                            IdentityServer publishes a
-                            <a href="~/.well-known/openid-configuration">discovery document</a>
-                            where you can find metadata and links to all the endpoints, key material, etc.
-                        </li>
-                        <li>
-                            Click <a href="~/diagnostics">here</a> to see the claims for your current session.
-                        </li>
+                        <i18n-t keypath="home.discoveryDescription" tag="li">
+                            <template #discoveryLink>
+                                <a href="~/.well-known/openid-configuration">{{ $t('home.discoveryLink') }}</a>
+                            </template>
+                        </i18n-t>
+                        <i18n-t keypath="home.claimsDescription" tag="li">
+                            <template #claimsLink>
+                                <a href="~/diagnostics">{{ $t('home.claimsLink') }}</a>
+                            </template>
+                        </i18n-t>
                     </ul>
                 </div>
             </div>

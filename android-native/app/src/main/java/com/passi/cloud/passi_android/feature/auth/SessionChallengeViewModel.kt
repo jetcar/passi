@@ -11,6 +11,9 @@ import com.passi.cloud.passi_android.domain.model.Account
 import com.passi.cloud.passi_android.domain.model.ConfirmationColor
 import com.passi.cloud.passi_android.domain.model.NotificationSession
 import com.passi.cloud.passi_android.domain.repository.AccountsRepository
+import com.passi.cloud.passi_android.R
+import com.passi.cloud.passi_android.localization.UiText
+import com.passi.cloud.passi_android.localization.toUiText
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -22,8 +25,8 @@ data class SessionChallengeUiState(
     val colorOptions: List<ConfirmationColor> = emptyList(),
     /** 2-digit choices (correct + decoys); empty when the server sent no number and colors are used. */
     val numberOptions: List<Int> = emptyList(),
-    val responseError: String? = null,
-    val colorError: String? = null,
+    val responseError: UiText? = null,
+    val colorError: UiText? = null,
     val isButtonEnabled: Boolean = false,
     val isLoading: Boolean = false,
     /** Correct answer given on a locked phone: the UI must ask Android to unlock before approval continues. */
@@ -44,14 +47,16 @@ class SessionChallengeViewModel(
     init {
         val session = pendingSessionStore.read()
         if (session == null) {
-            _uiState.value = SessionChallengeUiState(responseError = "No pending session found")
+            _uiState.value = SessionChallengeUiState(
+                responseError = UiText.Resource(R.string.error_no_pending_session),
+            )
         } else {
             viewModelScope.launch {
                 val account = accountsRepository.getAccount(session.accountId)
                 if (account == null) {
                     _uiState.value = SessionChallengeUiState(
                         session = session,
-                        responseError = "Account not found for this session",
+                        responseError = UiText.Resource(R.string.error_session_account_not_found),
                     )
                 } else {
                     _uiState.value = SessionChallengeUiState(
@@ -73,7 +78,7 @@ class SessionChallengeViewModel(
         onAuthorized: () -> Unit,
     ) = onChallengeAnswered(
         isCorrect = { it.confirmationColor == color },
-        errorMessage = "Invalid confirmation color. Go back and try again.",
+        errorMessage = UiText.Resource(R.string.error_invalid_confirmation_color),
         onRequirePin = onRequirePin,
         onRequireBiometric = onRequireBiometric,
         onAuthorized = onAuthorized,
@@ -86,7 +91,7 @@ class SessionChallengeViewModel(
         onAuthorized: () -> Unit,
     ) = onChallengeAnswered(
         isCorrect = { it.confirmationNumber == number },
-        errorMessage = "Invalid confirmation number. Go back and try again.",
+        errorMessage = UiText.Resource(R.string.error_invalid_confirmation_number),
         onRequirePin = onRequirePin,
         onRequireBiometric = onRequireBiometric,
         onAuthorized = onAuthorized,
@@ -94,20 +99,24 @@ class SessionChallengeViewModel(
 
     private fun onChallengeAnswered(
         isCorrect: (NotificationSession) -> Boolean,
-        errorMessage: String,
+        errorMessage: UiText,
         onRequirePin: () -> Unit,
         onRequireBiometric: () -> Unit,
         onAuthorized: () -> Unit,
     ) {
         val session = _uiState.value.session
         if (session == null) {
-            _uiState.value = _uiState.value.copy(responseError = "No pending session found")
+            _uiState.value = _uiState.value.copy(
+                responseError = UiText.Resource(R.string.error_no_pending_session),
+            )
             return
         }
 
         val account = _uiState.value.account
         if (account == null) {
-            _uiState.value = _uiState.value.copy(responseError = "Account not found for this session")
+            _uiState.value = _uiState.value.copy(
+                responseError = UiText.Resource(R.string.error_session_account_not_found),
+            )
             return
         }
 
@@ -142,13 +151,17 @@ class SessionChallengeViewModel(
         continueAfterUnlock = null
         _uiState.value = _uiState.value.copy(
             unlockRequired = false,
-            responseError = if (unlocked) _uiState.value.responseError else "Unlock your phone to approve this login",
+            responseError = if (unlocked) {
+                _uiState.value.responseError
+            } else {
+                UiText.Resource(R.string.error_unlock_to_approve)
+            },
         )
         if (unlocked) proceed?.invoke()
     }
 
     fun onBiometricPromptError(message: String) {
-        _uiState.value = _uiState.value.copy(responseError = message, isLoading = false)
+        _uiState.value = _uiState.value.copy(responseError = UiText.Dynamic(message), isLoading = false)
     }
 
     fun authorizeWithBiometric(onAuthorized: () -> Unit) {
@@ -164,7 +177,7 @@ class SessionChallengeViewModel(
                 .onFailure { error ->
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
-                        responseError = error.message ?: "Network error. Try again",
+                        responseError = error.toUiText(R.string.error_network),
                     )
                 }
         }
@@ -184,15 +197,15 @@ class SessionChallengeViewModel(
                 .onFailure { error ->
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
-                        responseError = error.message ?: "Network error. Try again",
+                        responseError = error.toUiText(R.string.error_network),
                     )
                 }
         }
     }
 
-    fun cancel(onCancelled: (String?) -> Unit) {
+    fun cancel(missingSessionMessage: String, onCancelled: (String?) -> Unit) {
         val session = _uiState.value.session ?: run {
-            onCancelled("No pending session found")
+            onCancelled(missingSessionMessage)
             return
         }
 

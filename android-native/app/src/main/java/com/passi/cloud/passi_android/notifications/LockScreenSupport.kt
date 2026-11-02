@@ -8,6 +8,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
+import com.passi.cloud.passi_android.R
 
 /** Android 14+ may deny full-screen intents; then the user has to allow them in system settings. Ask once. */
 object FullScreenIntentPrompt {
@@ -26,14 +27,14 @@ object FullScreenIntentPrompt {
 
         prefs.edit().putBoolean(KEY_ASKED, true).apply()
         AlertDialog.Builder(activity)
-            .setTitle("Show login requests right away")
-            .setMessage("Allow Passi to use full-screen notifications so login requests open immediately, even when your phone is locked. You'll still need to unlock to approve.")
-            .setPositiveButton("Open settings") { _, _ ->
+            .setTitle(activity.getString(R.string.permission_full_screen_title))
+            .setMessage(activity.getString(R.string.permission_full_screen_message))
+            .setPositiveButton(activity.getString(R.string.open_settings)) { _, _ ->
                 activity.startActivity(
                     Intent(Settings.ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT, Uri.parse("package:${activity.packageName}")),
                 )
             }
-            .setNegativeButton("Not now", null)
+            .setNegativeButton(activity.getString(R.string.not_now), null)
             .show()
     }
 
@@ -61,14 +62,14 @@ object OverlayPermissionPrompt {
 
         prefs.edit().putBoolean(KEY_ASKED, true).apply()
         AlertDialog.Builder(activity)
-            .setTitle("Open Passi for login requests")
-            .setMessage("To open login requests automatically while you use your phone, allow Passi to \"Display over other apps\". Otherwise you'll need to tap the notification.")
-            .setPositiveButton("Open settings") { _, _ ->
+            .setTitle(activity.getString(R.string.permission_overlay_title))
+            .setMessage(activity.getString(R.string.permission_overlay_message))
+            .setPositiveButton(activity.getString(R.string.open_settings)) { _, _ ->
                 activity.startActivity(
                     Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:${activity.packageName}")),
                 )
             }
-            .setNegativeButton("Not now", null)
+            .setNegativeButton(activity.getString(R.string.not_now), null)
             .show()
         return true
     }

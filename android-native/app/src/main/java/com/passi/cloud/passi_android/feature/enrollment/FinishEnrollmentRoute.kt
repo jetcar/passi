@@ -25,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -32,7 +33,9 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.passi.cloud.passi_android.PassiApplication
+import com.passi.cloud.passi_android.R
 import com.passi.cloud.passi_android.ui.NumberPad
+import com.passi.cloud.passi_android.localization.asString
 
 @Composable
 fun FinishEnrollmentRoute(
@@ -85,18 +88,18 @@ internal fun FinishEnrollmentScreen(
         ) {
             if (uiState.responseError != null) {
                 Text(
-                    text = uiState.responseError.orEmpty(),
+                    text = uiState.responseError.asString(),
                     color = Color.Black,
                     textAlign = TextAlign.Center,
                 )
             }
 
-            Text("Secure account by pin.", color = Color.Black)
+            Text(stringResource(R.string.secure_account_by_pin), color = Color.Black)
 
             if (uiState.pinError != null) {
-                Text(uiState.pinError.orEmpty(), color = Color.Black, textAlign = TextAlign.Center)
+                Text(uiState.pinError.asString(), color = Color.Black, textAlign = TextAlign.Center)
             }
-            Text("Pin", color = Color.Black, textAlign = TextAlign.Center)
+            Text(stringResource(R.string.pin), color = Color.Black, textAlign = TextAlign.Center)
             PinFieldRow(
                 maskedValue = "●".repeat(uiState.pin.length),
                 hasError = uiState.pinError != null,
@@ -106,9 +109,9 @@ internal fun FinishEnrollmentScreen(
             )
 
             if (uiState.pinConfirmationError != null) {
-                Text(uiState.pinConfirmationError.orEmpty(), color = Color.Black, textAlign = TextAlign.Center)
+                Text(uiState.pinConfirmationError.asString(), color = Color.Black, textAlign = TextAlign.Center)
             }
-            Text("Pin confirmation", color = Color.Black, textAlign = TextAlign.Center)
+            Text(stringResource(R.string.pin_confirmation), color = Color.Black, textAlign = TextAlign.Center)
             PinFieldRow(
                 maskedValue = "●".repeat(uiState.pinConfirmation.length),
                 hasError = uiState.pinConfirmationError != null,
@@ -146,7 +149,7 @@ internal fun FinishEnrollmentScreen(
                 ),
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                Text("Skip")
+                Text(stringResource(R.string.skip))
             }
         }
     }
@@ -184,7 +187,7 @@ private fun PinFieldRow(
             onClick = onClear,
             modifier = Modifier.align(Alignment.CenterEnd),
         ) {
-            Text("X", color = Color.Black)
+            Text(stringResource(R.string.clear), color = Color.Black)
         }
     }
 }

@@ -1,318 +1,138 @@
+<script setup lang="ts">
+import { onMounted } from 'vue'
+
+type Action = { href: string; labelKey: string; icon: string; className: string }
+type Product = {
+  key: string
+  icon: string
+  iconClass: string
+  badgeKey: string
+  badgeClass: string
+  featureClass: string
+  actions: Action[]
+  extra?: 'demo' | 'star'
+  playStore?: boolean
+}
+
+const products: Product[] = [
+  {
+    key: 'passi', icon: 'bi-fingerprint', iconClass: '', badgeKey: 'openSource', badgeClass: 'bg-success', featureClass: 'text-success',
+    actions: [
+      { href: 'https://github.com/jetcar/passi', labelKey: 'common.viewGithub', icon: 'bi-github', className: 'btn-primary' },
+      { href: '/Home/RegisterApp', labelKey: 'products.registerWebsite', icon: 'bi-tools', className: 'btn-outline-secondary' },
+    ], extra: 'demo', playStore: true,
+  },
+  {
+    key: 'eid', icon: 'bi-credit-card-2-front-fill', iconClass: 'bg-info', badgeKey: 'openSource', badgeClass: 'bg-info', featureClass: 'text-info',
+    actions: [
+      { href: 'https://github.com/jetcar/eid-openidc', labelKey: 'common.viewGithub', icon: 'bi-github', className: 'btn-info text-white' },
+      { href: 'https://github.com/jetcar/eid-openidc#readme', labelKey: 'common.documentation', icon: 'bi-book', className: 'btn-outline-secondary' },
+    ], extra: 'star',
+  },
+  {
+    key: 'crashes', icon: 'bi-car-front-fill', iconClass: 'bg-danger', badgeKey: 'openData', badgeClass: 'bg-danger', featureClass: 'text-danger',
+    actions: [
+      { href: 'https://github.com/jetcar/tallinn-crashes', labelKey: 'common.viewGithub', icon: 'bi-github', className: 'btn-danger' },
+      { href: 'https://github.com/jetcar/tallinn-crashes/blob/main/REPORT.md', labelKey: 'common.report', icon: 'bi-bar-chart', className: 'btn-outline-secondary' },
+    ],
+  },
+  {
+    key: 'streamdek', icon: 'bi-grid-3x3-gap-fill', iconClass: 'bg-streamdek', badgeKey: 'openSource', badgeClass: 'bg-primary', featureClass: 'text-primary',
+    actions: [
+      { href: 'https://github.com/jetcar/streamdek', labelKey: 'common.viewGithub', icon: 'bi-github', className: 'btn-primary' },
+      { href: 'https://github.com/jetcar/streamdek/releases/latest', labelKey: 'common.download', icon: 'bi-download', className: 'btn-outline-secondary' },
+    ],
+  },
+  {
+    key: 'economy', icon: 'bi-diagram-3-fill', iconClass: 'bg-success', badgeKey: 'openResearch', badgeClass: 'bg-success', featureClass: 'text-success',
+    actions: [
+      { href: 'https://github.com/jetcar/deksirip', labelKey: 'common.viewGithub', icon: 'bi-github', className: 'btn-success' },
+      { href: 'https://github.com/jetcar/deksirip/blob/main/README.en.md', labelKey: 'products.readConcept', icon: 'bi-book', className: 'btn-outline-secondary' },
+    ],
+  },
+  {
+    key: 'charp2p', icon: 'bi-chat-dots-fill', iconClass: 'bg-warning', badgeKey: 'inDevelopment', badgeClass: 'bg-warning text-dark', featureClass: 'text-warning',
+    actions: [
+      { href: 'https://github.com/jetcar/charp2p', labelKey: 'common.viewGithub', icon: 'bi-github', className: 'btn-warning' },
+      { href: 'https://github.com/jetcar/charp2p#readme', labelKey: 'common.documentation', icon: 'bi-book', className: 'btn-outline-secondary' },
+    ],
+  },
+]
+
+const featureKeys = (product: Product) => Array.from({ length: 5 }, (_, index) => `products.items.${product.key}.feature${index + 1}`)
+
+onMounted(() => {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) entry.target.classList.add('visible')
+    })
+  })
+  document.querySelectorAll('.product-card').forEach(el => observer.observe(el))
+})
+</script>
+
 <template>
   <div class="products-page">
-    <!-- Header -->
     <section class="products-header bg-gradient text-white py-5">
-      <div class="container">
-        <div class="text-center">
-          <h1 class="display-4 fw-bold mb-3">Our Products</h1>
-          <p class="lead">Open-source tools for security, data, and developer productivity</p>
-        </div>
+      <div class="container text-center">
+        <h1 class="display-4 fw-bold mb-3">{{ $t('products.title') }}</h1>
+        <p class="lead">{{ $t('products.subtitle') }}</p>
       </div>
     </section>
 
-    <!-- Products Grid -->
     <section class="products-section py-5">
       <div class="container">
         <div class="row g-4">
-          
-          <!-- Passi Passwordless Auth -->
-          <div class="col-lg-6">
+          <div v-for="product in products" :key="product.key" class="col-lg-6">
             <div class="product-card h-100">
               <div class="product-header">
-                <div class="product-icon">
-                  <i class="bi bi-fingerprint"></i>
-                </div>
-                <h3 class="product-title">Passi Passwordless Auth</h3>
-                <span class="badge bg-success">Open Source</span>
+                <div class="product-icon" :class="product.iconClass"><i class="bi" :class="product.icon"></i></div>
+                <h3 class="product-title">{{ $t(`products.items.${product.key}.title`) }}</h3>
+                <span class="badge" :class="product.badgeClass">{{ $t(`products.badges.${product.badgeKey}`) }}</span>
               </div>
               <div class="product-body">
-                <p class="product-description">
-                  Revolutionary passwordless authentication system powered by OAuth2 and certificate-based security. 
-                  No passwords to remember, no passwords to steal - just seamless, secure authentication.
-                </p>
-                
+                <p class="product-description">{{ $t(`products.items.${product.key}.description`) }}</p>
                 <div class="product-features mb-4">
-                  <h5>Key Features:</h5>
+                  <h5>{{ $t('products.keyFeatures') }}</h5>
                   <ul>
-                    <li><i class="bi bi-check-circle-fill text-success"></i> OAuth2 Protocol</li>
-                    <li><i class="bi bi-check-circle-fill text-success"></i> Certificate-Based Auth</li>
-                    <li><i class="bi bi-check-circle-fill text-success"></i> Zero-Trust Security</li>
-                    <li><i class="bi bi-check-circle-fill text-success"></i> Mobile App Integration</li>
-                    <li><i class="bi bi-check-circle-fill text-success"></i> Email Verification</li>
+                    <li v-for="key in featureKeys(product)" :key="key">
+                      <i class="bi bi-check-circle-fill" :class="product.featureClass"></i>{{ $t(key) }}
+                    </li>
                   </ul>
                 </div>
-
                 <div class="product-actions">
-                  <a href="https://github.com/jetcar/passi" target="_blank" class="btn btn-primary">
-                    <i class="bi bi-github me-2"></i>View on GitHub
-                  </a>
-                  <a href="/Home/RegisterApp" class="btn btn-outline-secondary">
-                    <i class="bi bi-tools me-2"></i>Register Website
+                  <a v-for="action in product.actions" :key="action.href" :href="action.href" target="_blank" class="btn" :class="action.className">
+                    <i class="bi me-2" :class="action.icon"></i>{{ $t(action.labelKey) }}
                   </a>
                 </div>
-
                 <div class="product-tech-stack mt-4">
-                  <small class="text-muted">Built with: ASP.NET Core, Vue.js, OAuth2</small>
+                  <small class="text-muted">{{ $t(`products.items.${product.key}.tech`) }}</small>
                 </div>
-
-                <div class="mt-3">
+                <div v-if="product.extra === 'demo'" class="mt-3">
                   <a href="https://www.youtube.com/watch?v=Koe_8YcmYkU" target="_blank" class="text-decoration-none">
-                    <i class="bi bi-play-circle-fill text-danger"></i>
-                    <span class="text-muted ms-1">Watch Demo Video</span>
+                    <i class="bi bi-play-circle-fill text-danger"></i><span class="text-muted ms-1">{{ $t('products.watchDemoVideo') }}</span>
                   </a>
                 </div>
-
-                <div class="mt-3">
-                  <a href="https://play.google.com/store/apps/details?id=com.passi.cloud.passi_android" target="_blank">
-                    <img src="/img/en_badge_web_generic.png" alt="Get it on Google Play" style="max-width: 150px">
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- eID OpenID Connect -->
-          <div class="col-lg-6">
-            <div class="product-card h-100">
-              <div class="product-header">
-                <div class="product-icon bg-info">
-                  <i class="bi bi-credit-card-2-front-fill"></i>
-                </div>
-                <h3 class="product-title">eID OpenID Connect</h3>
-                <span class="badge bg-info">Open Source</span>
-              </div>
-              <div class="product-body">
-                <p class="product-description">
-                  An innovative OpenID Connect implementation based on SK solutions, supporting 
-                  Smart-ID, Mobile-ID, and ID-card authentication services. Provides secure, 
-                  government-grade authentication for your applications with full OpenIDC support.
-                </p>
-                
-                <div class="product-features mb-4">
-                  <h5>Key Features:</h5>
-                  <ul>
-                    <li><i class="bi bi-check-circle-fill text-info"></i> eID Card Authentication</li>
-                    <li><i class="bi bi-check-circle-fill text-info"></i> OpenID Connect Protocol</li>
-                    <li><i class="bi bi-check-circle-fill text-info"></i> Government-grade Security</li>
-                    <li><i class="bi bi-check-circle-fill text-info"></i> Multi-platform Support</li>
-                    <li><i class="bi bi-check-circle-fill text-info"></i> Easy Integration</li>
-                  </ul>
-                </div>
-
-                <div class="product-actions">
-                  <a href="https://github.com/jetcar/eid-openidc" target="_blank" class="btn btn-info text-white">
-                    <i class="bi bi-github me-2"></i>View on GitHub
-                  </a>
-                  <a href="https://github.com/jetcar/eid-openidc#readme" target="_blank" class="btn btn-outline-secondary">
-                    <i class="bi bi-book me-2"></i>Documentation
-                  </a>
-                </div>
-
-                <div class="product-tech-stack mt-4">
-                  <small class="text-muted">Built with: Java, OpenID Connect, SK Solutions APIs</small>
-                </div>
-
-                <div class="github-stats mt-3">
+                <div v-if="product.extra === 'star'" class="mt-3">
                   <a href="https://github.com/jetcar/eid-openidc" target="_blank" class="text-decoration-none">
-                    <i class="bi bi-star-fill text-warning"></i>
-                    <span class="text-muted ms-1">Star on GitHub</span>
+                    <i class="bi bi-star-fill text-warning"></i><span class="text-muted ms-1">{{ $t('products.starGithub') }}</span>
+                  </a>
+                </div>
+                <div v-if="product.playStore" class="mt-3">
+                  <a href="https://play.google.com/store/apps/details?id=com.passi.cloud.passi_android" target="_blank">
+                    <img src="/img/en_badge_web_generic.png" :alt="$t('common.googlePlay')" style="max-width: 150px">
                   </a>
                 </div>
               </div>
             </div>
           </div>
-
-          <!-- Tallinn Crash Statistics -->
-          <div class="col-lg-6">
-            <div class="product-card h-100">
-              <div class="product-header">
-                <div class="product-icon bg-danger">
-                  <i class="bi bi-car-front-fill"></i>
-                </div>
-                <h3 class="product-title">Tallinn Crash Statistics</h3>
-                <span class="badge bg-danger">Open Data</span>
-              </div>
-              <div class="product-body">
-                <p class="product-description">
-                  Automated data collection showing where car crashes happen in Tallinn. A scheduled
-                  GitHub Action gathers police-registered injury crashes from Transpordiamet open data
-                  and driver-reported Waze accident alerts, and publishes per-street and per-year reports.
-                </p>
-
-                <div class="product-features mb-4">
-                  <h5>Key Features:</h5>
-                  <ul>
-                    <li><i class="bi bi-check-circle-fill text-danger"></i> Official Transpordiamet Data (2011–now)</li>
-                    <li><i class="bi bi-check-circle-fill text-danger"></i> Waze Accident Alerts</li>
-                    <li><i class="bi bi-check-circle-fill text-danger"></i> Hourly Automated Collection</li>
-                    <li><i class="bi bi-check-circle-fill text-danger"></i> Per-street &amp; Per-year Reports</li>
-                    <li><i class="bi bi-check-circle-fill text-danger"></i> CSV Datasets</li>
-                  </ul>
-                </div>
-
-                <div class="product-actions">
-                  <a href="https://github.com/jetcar/tallinn-crashes" target="_blank" class="btn btn-danger">
-                    <i class="bi bi-github me-2"></i>View on GitHub
-                  </a>
-                  <a href="https://github.com/jetcar/tallinn-crashes/blob/main/REPORT.md" target="_blank" class="btn btn-outline-secondary">
-                    <i class="bi bi-bar-chart me-2"></i>Report
-                  </a>
-                </div>
-
-                <div class="product-tech-stack mt-4">
-                  <small class="text-muted">Built with: Python, GitHub Actions, Estonian Open Data</small>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Streamdek -->
-          <div class="col-lg-6">
-            <div class="product-card h-100">
-              <div class="product-header">
-                <div class="product-icon bg-streamdek">
-                  <i class="bi bi-grid-3x3-gap-fill"></i>
-                </div>
-                <h3 class="product-title">Streamdek</h3>
-                <span class="badge bg-primary">Open Source</span>
-              </div>
-              <div class="product-body">
-                <p class="product-description">
-                  A live Stream Deck dashboard for Codex and Claude Code. See what every agent is doing,
-                  read its latest response, and press a button to reopen the related session.
-                </p>
-
-                <div class="product-features mb-4">
-                  <h5>Key Features:</h5>
-                  <ul>
-                    <li><i class="bi bi-check-circle-fill text-primary"></i> Codex &amp; Claude Code Sessions</li>
-                    <li><i class="bi bi-check-circle-fill text-primary"></i> Live Agent Status &amp; Latest Response</li>
-                    <li><i class="bi bi-check-circle-fill text-primary"></i> One-touch Session Reopening</li>
-                    <li><i class="bi bi-check-circle-fill text-primary"></i> Scheduled Task Grouping</li>
-                    <li><i class="bi bi-check-circle-fill text-primary"></i> Windows, macOS &amp; Linux Installers</li>
-                  </ul>
-                </div>
-
-                <div class="product-actions">
-                  <a href="https://github.com/jetcar/streamdek" target="_blank" class="btn btn-primary">
-                    <i class="bi bi-github me-2"></i>View on GitHub
-                  </a>
-                  <a href="https://github.com/jetcar/streamdek/releases/latest" target="_blank" class="btn btn-outline-secondary">
-                    <i class="bi bi-download me-2"></i>Download
-                  </a>
-                </div>
-
-                <div class="product-tech-stack mt-4">
-                  <small class="text-muted">Built with: TypeScript, Node.js, Stream Deck SDK</small>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Decentralized Social Economy (deksirip) -->
-          <div class="col-lg-6">
-            <div class="product-card h-100">
-              <div class="product-header">
-                <div class="product-icon bg-success">
-                  <i class="bi bi-diagram-3-fill"></i>
-                </div>
-                <h3 class="product-title">Decentralized Social Economy</h3>
-                <span class="badge bg-success">Open Research</span>
-              </div>
-              <div class="product-body">
-                <p class="product-description">
-                  A research project modelling a society with social ownership, a social dividend,
-                  decentralized resource allocation and high automation. Experts and AI analyse,
-                  citizens decide. Includes an adversarial critique, a quantitative Sweden baseline,
-                  and a book on where economic surplus has gone through history.
-                </p>
-
-                <div class="product-features mb-4">
-                  <h5>Key Features:</h5>
-                  <ul>
-                    <li><i class="bi bi-check-circle-fill text-success"></i> Refined Concept &amp; Open Questions</li>
-                    <li><i class="bi bi-check-circle-fill text-success"></i> Adversarial Critique</li>
-                    <li><i class="bi bi-check-circle-fill text-success"></i> Sweden Baseline Calculation</li>
-                    <li><i class="bi bi-check-circle-fill text-success"></i> Economic History Book</li>
-                    <li><i class="bi bi-check-circle-fill text-success"></i> Russian &amp; English</li>
-                  </ul>
-                </div>
-
-                <div class="product-actions">
-                  <a href="https://github.com/jetcar/deksirip" target="_blank" class="btn btn-success">
-                    <i class="bi bi-github me-2"></i>View on GitHub
-                  </a>
-                  <a href="https://github.com/jetcar/deksirip/blob/main/README.en.md" target="_blank" class="btn btn-outline-secondary">
-                    <i class="bi bi-book me-2"></i>Read Concept
-                  </a>
-                </div>
-
-                <div class="product-tech-stack mt-4">
-                  <small class="text-muted">Format: Markdown texts, CSV models · CC BY 4.0</small>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- CharP2P -->
-          <div class="col-lg-6">
-            <div class="product-card h-100">
-              <div class="product-header">
-                <div class="product-icon bg-warning">
-                  <i class="bi bi-chat-dots-fill"></i>
-                </div>
-                <h3 class="product-title">CharP2P</h3>
-                <span class="badge bg-warning text-dark">In Development</span>
-              </div>
-              <div class="product-body">
-                <p class="product-description">
-                  A private, peer-to-peer group chat for Windows and Android. A shared invite opens the app,
-                  finds online group members through an open peer-discovery network, and synchronizes
-                  messages directly or through a relay &mdash; with no central chat service storing your messages.
-                </p>
-
-                <div class="product-features mb-4">
-                  <h5>Key Features:</h5>
-                  <ul>
-                    <li><i class="bi bi-check-circle-fill text-warning"></i> Private, Invite-only Groups</li>
-                    <li><i class="bi bi-check-circle-fill text-warning"></i> End-to-end Protected Messages</li>
-                    <li><i class="bi bi-check-circle-fill text-warning"></i> Open DHT Discovery &amp; Relay Fallback</li>
-                    <li><i class="bi bi-check-circle-fill text-warning"></i> No Central Message Storage</li>
-                    <li><i class="bi bi-check-circle-fill text-warning"></i> Windows &amp; Android Apps</li>
-                  </ul>
-                </div>
-
-                <div class="product-actions">
-                  <a href="https://github.com/jetcar/charp2p" target="_blank" class="btn btn-warning">
-                    <i class="bi bi-github me-2"></i>View on GitHub
-                  </a>
-                  <a href="https://github.com/jetcar/charp2p#readme" target="_blank" class="btn btn-outline-secondary">
-                    <i class="bi bi-book me-2"></i>Documentation
-                  </a>
-                </div>
-
-                <div class="product-tech-stack mt-4">
-                  <small class="text-muted">Built with: Rust, libp2p, Tauri</small>
-                </div>
-              </div>
-            </div>
-          </div>
-
         </div>
 
-        <!-- Additional Info Section -->
         <div class="row mt-5">
           <div class="col-12">
             <div class="info-box p-4 bg-light rounded">
-              <h4 class="mb-3">
-                <i class="bi bi-info-circle-fill text-primary me-2"></i>
-                Open Source & Transparent
-              </h4>
-              <p class="mb-0">
-                All products are completely open source and available on GitHub. 
-                We believe in transparency and invite you to review our code, contribute to development, 
-                and build on them in your own projects.
-              </p>
+              <h4 class="mb-3"><i class="bi bi-info-circle-fill text-primary me-2"></i>{{ $t('products.infoTitle') }}</h4>
+              <p class="mb-0">{{ $t('products.infoText') }}</p>
             </div>
           </div>
         </div>
@@ -321,145 +141,27 @@
   </div>
 </template>
 
-<script setup lang="ts">
-import { onMounted } from 'vue'
-
-onMounted(() => {
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('visible')
-      }
-    })
-  })
-
-  document.querySelectorAll('.product-card').forEach((el) => observer.observe(el))
-})
-</script>
-
 <style scoped>
-.products-header {
-  padding: 60px 0;
-}
-
-.bg-gradient {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}
-
-.products-section {
-  padding: 60px 0;
-}
-
-.product-card {
-  background: white;
-  border-radius: 20px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-  transition: all 0.4s ease;
-  opacity: 0;
-  transform: translateY(30px);
-}
-
-.product-card.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.product-card:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-}
-
-.product-header {
-  padding: 2rem;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-  position: relative;
-}
-
-.product-icon {
-  width: 80px;
-  height: 80px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 1rem;
-  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
-}
-
-.product-icon.bg-info {
-  background: linear-gradient(135deg, #0dcaf0 0%, #0a7ea3 100%);
-}
-
-.product-icon.bg-streamdek {
-  background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
-}
-
-.product-icon i {
-  font-size: 2.5rem;
-  color: white;
-}
-
-.product-title {
-  font-size: 1.75rem;
-  font-weight: bold;
-  margin-bottom: 0.5rem;
-  color: #2d3748;
-}
-
-.product-body {
-  padding: 2rem;
-}
-
-.product-description {
-  color: #4a5568;
-  font-size: 1.05rem;
-  line-height: 1.7;
-  margin-bottom: 1.5rem;
-}
-
-.product-features ul {
-  list-style: none;
-  padding: 0;
-}
-
-.product-features li {
-  padding: 0.5rem 0;
-  color: #4a5568;
-}
-
-.product-features i {
-  margin-right: 0.5rem;
-}
-
-.product-actions {
-  display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-.product-actions .btn {
-  flex: 1;
-  min-width: 150px;
-}
-
-.product-tech-stack {
-  padding-top: 1rem;
-  border-top: 1px solid #e2e8f0;
-}
-
-.info-box {
-  border-left: 4px solid #667eea;
-}
-
-@media (max-width: 768px) {
-  .product-actions {
-    flex-direction: column;
-  }
-  
-  .product-actions .btn {
-    width: 100%;
-  }
-}
+.products-header { padding: 60px 0; }
+.bg-gradient { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+.products-section { padding: 60px 0; }
+.product-card { background: white; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,.1); overflow: hidden; transition: all .4s ease; opacity: 0; transform: translateY(30px); }
+.product-card.visible { opacity: 1; transform: translateY(0); }
+.product-card:hover { transform: translateY(-10px); box-shadow: 0 20px 40px rgba(0,0,0,.15); }
+.product-header { padding: 2rem; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); position: relative; }
+.product-icon { width: 80px; height: 80px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 20px; display: flex; align-items: center; justify-content: center; margin-bottom: 1rem; box-shadow: 0 5px 15px rgba(102,126,234,.3); }
+.product-icon.bg-info { background: linear-gradient(135deg, #0dcaf0 0%, #0a7ea3 100%); }
+.product-icon.bg-streamdek { background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); }
+.product-icon i { font-size: 2.5rem; color: white; }
+.product-title { font-size: 1.75rem; font-weight: bold; margin-bottom: .5rem; color: #2d3748; }
+.product-body { padding: 2rem; }
+.product-description { color: #4a5568; font-size: 1.05rem; line-height: 1.7; margin-bottom: 1.5rem; }
+.product-features ul { list-style: none; padding: 0; }
+.product-features li { padding: .5rem 0; color: #4a5568; }
+.product-features i { margin-right: .5rem; }
+.product-actions { display: flex; gap: 1rem; flex-wrap: wrap; }
+.product-actions .btn { flex: 1; min-width: 150px; }
+.product-tech-stack { padding-top: 1rem; border-top: 1px solid #e2e8f0; }
+.info-box { border-left: 4px solid #667eea; }
+@media (max-width: 768px) { .product-actions { flex-direction: column; } .product-actions .btn { width: 100%; } }
 </style>

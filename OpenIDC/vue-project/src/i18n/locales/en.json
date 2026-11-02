@@ -1,0 +1,83 @@
+{
+  "common": {
+    "loading": "Loading…",
+    "cancel": "Cancel",
+    "error": "Error"
+  },
+  "locale": {
+    "selectorLabel": "Language",
+    "languages": {
+      "en": "English",
+      "et": "Eesti",
+      "ru": "Русский",
+      "de": "Deutsch",
+      "fr": "Français",
+      "es": "Español"
+    }
+  },
+  "nav": {
+    "logout": "Logout"
+  },
+  "home": {
+    "title": "Welcome to Passi IdentityServer",
+    "version": "version {version}",
+    "discoveryDescription": "IdentityServer publishes a {discoveryLink} where you can find metadata and links to all endpoints, key material, and more.",
+    "discoveryLink": "discovery document",
+    "claimsDescription": "Click {claimsLink} to see the claims for your current session.",
+    "claimsLink": "here"
+  },
+  "deleteAccount": {
+    "title": "Delete my account",
+    "errorIntro": "Sorry, there was an error",
+    "username": "Username",
+    "usernamePlaceholder": "Username",
+    "delete": "Delete",
+    "checkEmail": "Check your email for the confirmation code.",
+    "confirmationCode": "Confirmation code",
+    "codePlaceholder": "Code",
+    "confirmDelete": "Confirm deletion",
+    "deleted": "Account deleted",
+    "googlePlayAlt": "Get it on Google Play"
+  },
+  "login": {
+    "homeAria": "Passi home",
+    "welcomeTitle": "Welcome back",
+    "welcomeSubtitle": "Enter your Passi username to continue securely.",
+    "username": "Username",
+    "usernamePlaceholder": "alex@example.com",
+    "validating": "Validating request…",
+    "starting": "Starting secure login…",
+    "continue": "Continue with Passi",
+    "privacy": "No password is sent or stored in this browser.",
+    "passwordlessAria": "Passwordless authentication",
+    "secureLockAria": "Secure lock",
+    "passwordStays": "Your password stays with you.",
+    "errors": {
+      "startFailed": "Passi could not start the login. Please try again.",
+      "invalidToken": "Passi returned an invalid login token. Please try again.",
+      "validationFailed": "Passi could not validate the login request. Please try again.",
+      "invalidResponse": "Passi returned an invalid login response. Please try again.",
+      "checkFailed": "Passi could not check the login request. Please try again.",
+      "validating": "Passi is validating the login request.",
+      "invalidRequest": "This login request is invalid.",
+      "revalidate": "Passi must validate this login request again.",
+      "usernameRequired": "Enter your Passi username to continue.",
+      "connectionFailed": "Passi could not start the login. Check your connection and try again."
+    },
+    "challenge": {
+      "title": "Check your phone",
+      "subtitle": "Open Passi on a registered device and approve this login request.",
+      "registeredDevicesAria": "Registered devices",
+      "availableDevices": "Available device | Available devices",
+      "registered": "Registered",
+      "fallbackDevice": "Your Passi app",
+      "waiting": "Waiting",
+      "browserContinues": "The browser will continue automatically after approval.",
+      "useAnother": "Use another account",
+      "tapNumber": "Tap this number in Passi",
+      "waitingApproval": "Waiting for approval…",
+      "olderApp": "Older app? Match {color}",
+      "colorTitle": "Confirmation color: {color}"
+    }
+  }
+}

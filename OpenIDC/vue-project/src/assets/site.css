@@ -110,6 +110,37 @@ body {
     min-height: 100vh;
 }
 
+.locale-switcher {
+    position: fixed;
+    z-index: 1000;
+    top: 16px;
+    right: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border: 1px solid rgba(16, 36, 62, 0.16);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow: 0 4px 16px rgba(7, 17, 31, 0.14);
+    color: #10243e;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.locale-switcher select {
+    border: 1px solid #b9c8d8;
+    border-radius: 7px;
+    background: white;
+    color: #10243e;
+    font: inherit;
+}
+
+.locale-switcher select:focus-visible {
+    outline: 3px solid rgba(33, 150, 243, 0.32);
+    outline-offset: 2px;
+}
+
 .auth-page {
     min-height: 100vh;
     display: grid;

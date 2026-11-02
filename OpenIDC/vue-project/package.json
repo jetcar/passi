@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "vite",
     "build": "run-p type-check \"build-only {@}\" --",
+    "test": "node --test tests/catalog-parity.test.mjs",
     "preview": "vite preview",
     "build-only": "vite build",
     "type-check": "vue-tsc --noEmit -p tsconfig.app.json --composite false"
@@ -16,6 +17,7 @@
     "bootstrap": "^5.3.8",
     "bootstrap-vue-next": "^1.2.2",
     "vue": "^3.5.43",
+    "vue-i18n": "^11.4.17",
     "vue-router": "^5.3.1"
   },
   "devDependencies": {

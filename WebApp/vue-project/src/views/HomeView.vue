@@ -6,17 +6,17 @@
         <div class="row align-items-center min-vh-75">
           <div class="col-lg-6">
             <h1 class="display-3 fw-bold mb-4 animate-fade-in">
-              Passwordless Authentication Made Simple
+              {{ $t('home.title') }}
             </h1>
             <p class="lead mb-4 text-light">
-              Welcome to the future of secure authentication with OAuth2. No passwords, just seamless security powered by certificates and mobile apps.
+              {{ $t('home.subtitle') }}
             </p>
             <div class="d-flex gap-3 flex-wrap">
               <router-link to="/products" class="btn btn-light btn-lg">
-                <i class="bi bi-box-seam me-2"></i>Explore Products
+                <i class="bi bi-box-seam me-2"></i>{{ $t('home.exploreProducts') }}
               </router-link>
               <a href="https://www.youtube.com/watch?v=Koe_8YcmYkU" target="_blank" class="btn btn-outline-light btn-lg">
-                <i class="bi bi-play-circle me-2"></i>Watch Demo
+                <i class="bi bi-play-circle me-2"></i>{{ $t('common.watchDemo') }}
               </a>
             </div>
           </div>
@@ -34,10 +34,10 @@
       <div class="container">
         <div class="d-flex justify-content-between align-items-end mb-4">
           <div>
-            <h2 class="display-6 fw-bold mb-1">Latest News</h2>
-            <p class="text-muted mb-0">What's new in Passi</p>
+            <h2 class="display-6 fw-bold mb-1">{{ $t('home.latestNews') }}</h2>
+            <p class="text-muted mb-0">{{ $t('home.latestSubtitle') }}</p>
           </div>
-          <router-link to="/news" class="btn btn-outline-primary">All news <i class="bi bi-arrow-right ms-1"></i></router-link>
+          <router-link to="/news" class="btn btn-outline-primary">{{ $t('home.allNews') }} <i class="bi bi-arrow-right ms-1"></i></router-link>
         </div>
         <div class="row g-4">
           <div v-for="post in news" :key="post.slug" class="col-md-4">
@@ -58,8 +58,8 @@
     <section class="how-it-works-section py-5 bg-light">
       <div class="container">
         <div class="text-center mb-5">
-          <h2 class="display-5 fw-bold">How It Works</h2>
-          <p class="text-muted">Simple, secure, and passwordless</p>
+          <h2 class="display-5 fw-bold">{{ $t('home.howTitle') }}</h2>
+          <p class="text-muted">{{ $t('home.howSubtitle') }}</p>
         </div>
         <div class="row g-4">
           <div class="col-md-4">
@@ -68,8 +68,8 @@
               <div class="step-icon mb-3">
                 <i class="bi bi-envelope-check-fill text-primary" style="font-size: 3rem;"></i>
               </div>
-              <h4>Confirm Email</h4>
-              <p class="text-muted">Start by verifying your email address</p>
+              <h4>{{ $t('home.confirmEmail') }}</h4>
+              <p class="text-muted">{{ $t('home.confirmEmailText') }}</p>
             </div>
           </div>
           <div class="col-md-4">
@@ -78,8 +78,8 @@
               <div class="step-icon mb-3">
                 <i class="bi bi-phone-fill text-success" style="font-size: 3rem;"></i>
               </div>
-              <h4>Mobile App Setup</h4>
-              <p class="text-muted">Our app generates a certificate and sends the public key to our server</p>
+              <h4>{{ $t('home.mobileSetup') }}</h4>
+              <p class="text-muted">{{ $t('home.mobileSetupText') }}</p>
             </div>
           </div>
           <div class="col-md-4">
@@ -88,8 +88,8 @@
               <div class="step-icon mb-3">
                 <i class="bi bi-shield-check text-warning" style="font-size: 3rem;"></i>
               </div>
-              <h4>Secure Login</h4>
-              <p class="text-muted">Authenticate by signing a random string - no password needed!</p>
+              <h4>{{ $t('home.secureLogin') }}</h4>
+              <p class="text-muted">{{ $t('home.secureLoginText') }}</p>
             </div>
           </div>
         </div>
@@ -101,7 +101,7 @@
       <div class="container">
         <div class="row align-items-center">
           <div class="col-lg-6">
-            <h2 class="display-5 fw-bold mb-4">Why Choose Passi</h2>
+            <h2 class="display-5 fw-bold mb-4">{{ $t('home.whyTitle') }}</h2>
             <div class="feature-list">
               <div class="feature-item mb-4">
                 <div class="d-flex align-items-start">
@@ -109,8 +109,8 @@
                     <i class="bi bi-lock-fill"></i>
                   </div>
                   <div>
-                    <h5>Zero-Trust Authentication</h5>
-                    <p class="text-muted">Approve certificate thumbprints for an extra layer of security</p>
+                    <h5>{{ $t('home.zeroTrust') }}</h5>
+                    <p class="text-muted">{{ $t('home.zeroTrustText') }}</p>
                   </div>
                 </div>
               </div>
@@ -120,8 +120,10 @@
                     <i class="bi bi-github"></i>
                   </div>
                   <div>
-                    <h5>Open Source</h5>
-                    <p class="text-muted">Complete transparency - our entire codebase is available on <a href="https://github.com/jetcar/passi" target="_blank">GitHub</a></p>
+                    <h5>{{ $t('home.openSource') }}</h5>
+                    <i18n-t keypath="home.openSourceText" tag="p" class="text-muted">
+                      <template #github><a href="https://github.com/jetcar/passi" target="_blank">GitHub</a></template>
+                    </i18n-t>
                   </div>
                 </div>
               </div>
@@ -131,8 +133,8 @@
                     <i class="bi bi-lightning-fill"></i>
                   </div>
                   <div>
-                    <h5>OAuth2 Standard</h5>
-                    <p class="text-muted">Built on industry-standard OAuth2 protocol</p>
+                    <h5>{{ $t('home.oauthStandard') }}</h5>
+                    <p class="text-muted">{{ $t('home.oauthStandardText') }}</p>
                   </div>
                 </div>
               </div>
@@ -141,7 +143,7 @@
           <div class="col-lg-6">
             <div class="video-container">
               <a href="https://www.youtube.com/watch?v=Koe_8YcmYkU" target="_blank" class="video-thumbnail">
-                <img src="/img/youtube.png" alt="Watch Demo" class="img-fluid rounded shadow-lg">
+                <img src="/img/youtube.png" :alt="$t('common.watchDemo')" class="img-fluid rounded shadow-lg">
                 <div class="play-overlay">
                   <i class="bi bi-play-circle-fill"></i>
                 </div>
@@ -155,10 +157,10 @@
     <!-- Download Section -->
     <section class="download-section py-5 bg-gradient text-white">
       <div class="container text-center">
-        <h2 class="display-5 fw-bold mb-4">Get Started Today</h2>
-        <p class="lead mb-4">Download the mobile app and experience passwordless authentication</p>
+        <h2 class="display-5 fw-bold mb-4">{{ $t('home.getStarted') }}</h2>
+        <p class="lead mb-4">{{ $t('home.getStartedText') }}</p>
         <a href="https://play.google.com/store/apps/details?id=com.passi.cloud.passi_android" target="_blank">
-          <img src="/img/en_badge_web_generic.png" alt="Get it on Google Play" style="max-width: 200px">
+          <img src="/img/en_badge_web_generic.png" :alt="$t('common.googlePlay')" style="max-width: 200px">
         </a>
       </div>
     </section>
@@ -168,12 +170,12 @@
       <div class="container">
         <div class="row align-items-center">
           <div class="col-lg-8">
-            <h3 class="fw-bold mb-2">Want to see how it works?</h3>
-            <p class="text-muted mb-0">Our entire codebase is open source and available for review</p>
+            <h3 class="fw-bold mb-2">{{ $t('home.ctaTitle') }}</h3>
+            <p class="text-muted mb-0">{{ $t('home.ctaText') }}</p>
           </div>
           <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
             <a href="https://github.com/jetcar/passi" target="_blank" class="btn btn-dark btn-lg">
-              <i class="bi bi-github me-2"></i>View on GitHub
+              <i class="bi bi-github me-2"></i>{{ $t('common.viewGithub') }}
             </a>
           </div>
         </div>

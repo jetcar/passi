@@ -29,7 +29,7 @@
                 try {
                     this.state = await setReaction(this.slug, key, !this.isMine(key))
                 } catch (e) {
-                    this.error = e.status === 429 ? 'Slow down a little, try again in a minute.' : 'Could not save your reaction.'
+                    this.error = e.status === 429 ? this.$t('reactions.rateLimit') : this.$t('reactions.saveError')
                 } finally {
                     this.busy = false
                 }
@@ -42,7 +42,7 @@
     <div class="reaction-bar" :class="{ compact }">
         <button v-for="option in options" :key="option.key" type="button"
                 class="reaction" :class="{ mine: isMine(option.key) }"
-                :title="option.label" :aria-label="option.label" :aria-pressed="isMine(option.key)"
+                :title="$t(option.labelKey)" :aria-label="$t(option.labelKey)" :aria-pressed="isMine(option.key)"
                 :disabled="busy" @click.prevent.stop="toggle(option.key)">
             <span class="emoji">{{ option.emoji }}</span>
             <span class="count">{{ state.counts?.[option.key] || 0 }}</span>

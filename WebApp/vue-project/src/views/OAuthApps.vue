@@ -22,36 +22,59 @@
         },
 
         async created() {
-            await this.loadContext()
-            await this.fetchClients()
+            if (await this.loadContext()) await this.fetchClients()
+            else this.loading = false
         },
 
         methods: {
             async loadContext() {
-                const response = await fetch(`${API_URL}/context`)
-                if (response.status === 401) {
-                    this.error = 'Please log in to manage your applications.'
-                    return
+                let response
+                try {
+                    response = await fetch(`${API_URL}/context`)
+                } catch {
+                    this.error = this.$t('common.networkError')
+                    return false
                 }
-                const context = await response.json()
+                if (response.status === 401) {
+                    this.error = this.$t('oauth.loginRequired')
+                    return false
+                }
+                let context
+                try {
+                    context = await response.json()
+                } catch {
+                    this.error = this.$t('common.invalidResponse')
+                    return false
+                }
                 this.csrfToken = context.csrfToken
                 this.csrfHeaderName = context.csrfHeaderName || this.csrfHeaderName
                 this.discoveryUrl = context.discoveryUrl
+                return true
             },
 
             async request(method, path = '', body = undefined) {
                 const headers = { [this.csrfHeaderName]: this.csrfToken }
                 if (body !== undefined) headers['Content-Type'] = 'application/json'
-                const response = await fetch(`${API_URL}${path}`, {
-                    method,
-                    headers,
-                    body: body === undefined ? undefined : JSON.stringify(body),
-                })
+                let response
+                try {
+                    response = await fetch(`${API_URL}${path}`, {
+                        method,
+                        headers,
+                        body: body === undefined ? undefined : JSON.stringify(body),
+                    })
+                } catch {
+                    throw new Error(this.$t('common.networkError'))
+                }
                 if (response.status === 204) return null
                 const text = await response.text()
-                const data = text ? JSON.parse(text) : null
+                let data = null
+                try {
+                    data = text ? JSON.parse(text) : null
+                } catch {
+                    throw new Error(this.$t('common.invalidResponse'))
+                }
                 if (!response.ok) {
-                    throw new Error((data && data.errors) || `Request failed (${response.status})`)
+                    throw new Error((data && data.errors) || this.$t('common.requestFailed', { status: response.status }))
                 }
                 return data
             },
@@ -110,7 +133,7 @@
             },
 
             async rotateSecret(client) {
-                if (!confirm(`Generate a new secret for "${client.displayName}"? The current secret stops working immediately.`)) return
+                if (!confirm(this.$t('oauth.confirmRotate', { name: client.displayName }))) return
                 this.error = ''
                 try {
                     this.issued = await this.request('POST', `/${encodeURIComponent(client.clientId)}/secret`)
@@ -120,7 +143,7 @@
             },
 
             async deleteClient(client) {
-                if (!confirm(`Delete "${client.displayName}"? Users will no longer be able to sign in to it with Passi.`)) return
+                if (!confirm(this.$t('oauth.confirmDelete', { name: client.displayName }))) return
                 this.error = ''
                 try {
                     await this.request('DELETE', `/${encodeURIComponent(client.clientId)}`)
@@ -136,7 +159,7 @@
             },
 
             typeLabel(type) {
-                return type === 'web' ? 'Website' : 'App'
+                return type === 'web' ? this.$t('oauth.website') : this.$t('oauth.app')
             },
         }
     }
@@ -145,64 +168,64 @@
 <template>
     <main>
         <div class="container py-4">
-            <h1 class="display-6 mb-1">My OAuth apps</h1>
+            <h1 class="display-6 mb-1">{{ $t('oauth.title') }}</h1>
             <p class="text-muted">
-                Register your own website or application to let users sign in with Passi.
-                <span v-if="discoveryUrl">OpenID Connect discovery: <code>{{ discoveryUrl }}</code></span>
+                {{ $t('oauth.intro') }}
+                <span v-if="discoveryUrl">{{ $t('oauth.discovery') }} <code>{{ discoveryUrl }}</code></span>
             </p>
 
             <div v-if="error" class="alert alert-danger">{{ error }}</div>
 
             <div v-if="issued" class="alert alert-success">
-                <h5 class="alert-heading">Credentials for "{{ issued.displayName }}"</h5>
+                <h5 class="alert-heading">{{ $t('oauth.credentialsFor', { name: issued.displayName }) }}</h5>
                 <div class="mb-1">
-                    Client ID: <code>{{ issued.clientId }}</code>
-                    <button class="btn btn-sm btn-link" @click="copy(issued.clientId)"><i class="bi bi-clipboard"></i></button>
+                    {{ $t('oauth.clientId') }}: <code>{{ issued.clientId }}</code>
+                    <button class="btn btn-sm btn-link" :aria-label="$t('oauth.copyClientId')" @click="copy(issued.clientId)"><i class="bi bi-clipboard"></i></button>
                 </div>
                 <div v-if="issued.clientSecret">
-                    Client secret: <code>{{ issued.clientSecret }}</code>
-                    <button class="btn btn-sm btn-link" @click="copy(issued.clientSecret)"><i class="bi bi-clipboard"></i></button>
-                    <div class="small mt-1"><strong>Copy it now</strong> — it is stored hashed and will not be shown again.</div>
+                    {{ $t('oauth.clientSecret') }}: <code>{{ issued.clientSecret }}</code>
+                    <button class="btn btn-sm btn-link" :aria-label="$t('oauth.copyClientSecret')" @click="copy(issued.clientSecret)"><i class="bi bi-clipboard"></i></button>
+                    <div class="small mt-1"><strong>{{ $t('oauth.copyNow') }}</strong> — {{ $t('oauth.secretWarning') }}</div>
                 </div>
-                <div v-else class="small">App clients have no secret; use the authorization code flow with PKCE.</div>
-                <button class="btn btn-sm btn-outline-success mt-2" @click="issued = null">Done</button>
+                <div v-else class="small">{{ $t('oauth.appNoSecret') }}</div>
+                <button class="btn btn-sm btn-outline-success mt-2" @click="issued = null">{{ $t('common.done') }}</button>
             </div>
 
             <div class="card mb-4">
                 <div class="card-body">
-                    <h5 class="card-title">Register a new application</h5>
+                    <h5 class="card-title">{{ $t('oauth.registerNew') }}</h5>
                     <form @submit.prevent="createClient">
                         <div class="mb-3">
-                            <label class="form-label" for="appName">Name</label>
+                            <label class="form-label" for="appName">{{ $t('oauth.name') }}</label>
                             <input id="appName" class="form-control" v-model="form.displayName" maxlength="100" required />
                         </div>
                         <div class="mb-3">
-                            <label class="form-label d-block">Type</label>
+                            <label class="form-label d-block">{{ $t('oauth.type') }}</label>
                             <div class="form-check form-check-inline">
                                 <input class="form-check-input" type="radio" id="typeWeb" value="web" v-model="form.clientType" />
-                                <label class="form-check-label" for="typeWeb">Website (server-side, gets a client secret)</label>
+                                <label class="form-check-label" for="typeWeb">{{ $t('oauth.webType') }}</label>
                             </div>
                             <div class="form-check form-check-inline">
                                 <input class="form-check-input" type="radio" id="typeApp" value="app" v-model="form.clientType" />
-                                <label class="form-check-label" for="typeApp">App / SPA (no secret, PKCE)</label>
+                                <label class="form-check-label" for="typeApp">{{ $t('oauth.appType') }}</label>
                             </div>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label" for="appUris">Redirect URIs (one per line)</label>
+                            <label class="form-label" for="appUris">{{ $t('oauth.redirectUris') }}</label>
                             <textarea id="appUris" class="form-control" rows="3" v-model="form.redirectUris"
                                       placeholder="https://example.com/callback" required></textarea>
-                            <div class="form-text">Must use https (http is allowed only for localhost).</div>
+                            <div class="form-text">{{ $t('oauth.redirectHint') }}</div>
                         </div>
                         <button type="submit" class="btn btn-primary" :disabled="saving">
-                            <span v-if="saving" class="spinner-border spinner-border-sm me-1"></span>Register
+                            <span v-if="saving" class="spinner-border spinner-border-sm me-1"></span>{{ $t('common.register') }}
                         </button>
                     </form>
                 </div>
             </div>
 
-            <h5>Registered applications</h5>
-            <div v-if="loading" class="text-muted">Loading…</div>
-            <div v-else-if="clients.length === 0" class="text-muted">You haven't registered any applications yet.</div>
+            <h5>{{ $t('oauth.registered') }}</h5>
+            <div v-if="loading" class="text-muted">{{ $t('common.loading') }}…</div>
+            <div v-else-if="clients.length === 0" class="text-muted">{{ $t('oauth.noApps') }}</div>
             <div v-for="client in clients" :key="client.clientId" class="card mb-2">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-start">
@@ -210,14 +233,14 @@
                             <h6 class="mb-1">{{ client.displayName }}
                                 <span class="badge bg-secondary ms-1">{{ typeLabel(client.clientType) }}</span>
                             </h6>
-                            <div class="small">Client ID: <code>{{ client.clientId }}</code>
-                                <button class="btn btn-sm btn-link p-0 ms-1" @click="copy(client.clientId)"><i class="bi bi-clipboard"></i></button>
+                            <div class="small">{{ $t('oauth.clientId') }}: <code>{{ client.clientId }}</code>
+                                <button class="btn btn-sm btn-link p-0 ms-1" :aria-label="$t('oauth.copyClientId')" @click="copy(client.clientId)"><i class="bi bi-clipboard"></i></button>
                             </div>
                         </div>
                         <div class="btn-group btn-group-sm">
-                            <button class="btn btn-outline-secondary" @click="startEdit(client)">Edit</button>
-                            <button v-if="client.clientType === 'web'" class="btn btn-outline-secondary" @click="rotateSecret(client)">New secret</button>
-                            <button class="btn btn-outline-danger" @click="deleteClient(client)">Delete</button>
+                            <button class="btn btn-outline-secondary" @click="startEdit(client)">{{ $t('common.edit') }}</button>
+                            <button v-if="client.clientType === 'web'" class="btn btn-outline-secondary" @click="rotateSecret(client)">{{ $t('oauth.newSecret') }}</button>
+                            <button class="btn btn-outline-danger" @click="deleteClient(client)">{{ $t('common.delete') }}</button>
                         </div>
                     </div>
 
@@ -227,8 +250,8 @@
                     <form v-else class="mt-2" @submit.prevent="saveEdit(client)">
                         <input class="form-control form-control-sm mb-2" v-model="editForm.displayName" maxlength="100" required />
                         <textarea class="form-control form-control-sm mb-2" rows="3" v-model="editForm.redirectUris" required></textarea>
-                        <button type="submit" class="btn btn-sm btn-primary me-1">Save</button>
-                        <button type="button" class="btn btn-sm btn-outline-secondary" @click="editingId = null">Cancel</button>
+                        <button type="submit" class="btn btn-sm btn-primary me-1">{{ $t('common.save') }}</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" @click="editingId = null">{{ $t('common.cancel') }}</button>
                     </form>
                 </div>
             </div>

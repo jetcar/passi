@@ -1,11 +1,18 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
-import { ref, onMounted } from 'vue'
+import { computed, ref, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { localeOptions, setLocale } from './i18n'
 
 const API_URL = `/api/UserLoggedIn`
 
 const isLoggedIn = ref(false)
 const webmailUrl = '/mailler'
+const { locale } = useI18n()
+const selectedLocale = computed({
+    get: () => locale.value,
+    set: value => setLocale(value),
+})
 
 const fetchData = async () => {
     try {
@@ -33,7 +40,7 @@ onMounted(() => {
                     
                     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" 
                             data-bs-target="#navbarNav" aria-controls="navbarNav" 
-                            aria-expanded="false" aria-label="Toggle navigation">
+                            aria-expanded="false" :aria-label="$t('navigation.toggle')">
                         <span class="navbar-toggler-icon"></span>
                     </button>
                     
@@ -41,44 +48,44 @@ onMounted(() => {
                         <ul class="navbar-nav me-auto">
                             <li class="nav-item">
                                 <router-link to="/" class="nav-link" active-class="active">
-                                    <i class="bi bi-house-door me-1"></i>Home
+                                    <i class="bi bi-house-door me-1"></i>{{ $t('navigation.home') }}
                                 </router-link>
                             </li>
                             <li class="nav-item">
                                 <router-link to="/news" class="nav-link" active-class="active">
-                                    <i class="bi bi-megaphone me-1"></i>News
+                                    <i class="bi bi-megaphone me-1"></i>{{ $t('navigation.news') }}
                                 </router-link>
                             </li>
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle" href="#" role="button" 
                                    data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i class="bi bi-box-seam me-1"></i>Products
+                                    <i class="bi bi-box-seam me-1"></i>{{ $t('navigation.products') }}
                                 </a>
                                 <ul class="dropdown-menu">
                                     <li>
                                         <router-link to="/products" class="dropdown-item">
-                                            <i class="bi bi-grid me-2"></i>All Products
+                                            <i class="bi bi-grid me-2"></i>{{ $t('navigation.allProducts') }}
                                         </router-link>
                                     </li>
                                     <li><hr class="dropdown-divider"></li>
                                     <li>
                                         <a href="/Home/RegisterApp" class="dropdown-item">
-                                            <i class="bi bi-fingerprint me-2"></i>Passi Auth
+                                            <i class="bi bi-fingerprint me-2"></i>{{ $t('products.items.passi.title') }}
                                         </a>
                                     </li>
                                     <li>
                                         <a href="https://github.com/jetcar/eid-openidc" target="_blank" class="dropdown-item">
-                                            <i class="bi bi-credit-card me-2"></i>eID OpenIDC
+                                            <i class="bi bi-credit-card me-2"></i>{{ $t('products.items.eid.title') }}
                                         </a>
                                     </li>
                                     <li>
                                         <a href="https://github.com/jetcar/tallinn-crashes" target="_blank" class="dropdown-item">
-                                            <i class="bi bi-car-front me-2"></i>Tallinn Crash Statistics
+                                            <i class="bi bi-car-front me-2"></i>{{ $t('products.items.crashes.title') }}
                                         </a>
                                     </li>
                                     <li>
                                         <a href="https://github.com/jetcar/deksirip" target="_blank" class="dropdown-item">
-                                            <i class="bi bi-diagram-3 me-2"></i>Decentralized Social Economy
+                                            <i class="bi bi-diagram-3 me-2"></i>{{ $t('products.items.economy.title') }}
                                         </a>
                                     </li>
                                     <li>
@@ -90,12 +97,12 @@ onMounted(() => {
                             </li>
                             <li class="nav-item" v-if="isLoggedIn">
                                 <router-link to="/UserInfo" class="nav-link">
-                                    <i class="bi bi-person me-1"></i>User Info
+                                    <i class="bi bi-person me-1"></i>{{ $t('navigation.userInfo') }}
                                 </router-link>
                             </li>
                             <li class="nav-item" v-if="isLoggedIn">
                                 <router-link to="/OAuthApps" class="nav-link">
-                                    <i class="bi bi-key me-1"></i>My OAuth apps
+                                    <i class="bi bi-key me-1"></i>{{ $t('navigation.oauthApps') }}
                                 </router-link>
                             </li>
                         </ul>
@@ -103,32 +110,41 @@ onMounted(() => {
                         <ul class="navbar-nav ms-auto">
                             <li class="nav-item">
                                 <router-link to="/about" class="nav-link">
-                                    <i class="bi bi-info-circle me-1"></i>About
+                                    <i class="bi bi-info-circle me-1"></i>{{ $t('navigation.about') }}
                                 </router-link>
                             </li>
                             <li class="nav-item">
                                 <a :href="webmailUrl" class="nav-link" target="_blank" rel="noopener noreferrer">
-                                    <i class="bi bi-envelope-at me-1"></i>Webmail
+                                    <i class="bi bi-envelope-at me-1"></i>{{ $t('navigation.webmail') }}
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <router-link to="/Contacts" class="nav-link">
-                                    <i class="bi bi-envelope me-1"></i>Contact
+                                    <i class="bi bi-envelope me-1"></i>{{ $t('navigation.contact') }}
                                 </router-link>
                             </li>
                             <li class="nav-item">
                                 <router-link to="/PrivacyPolicy" class="nav-link">
-                                    <i class="bi bi-shield-lock me-1"></i>Privacy
+                                    <i class="bi bi-shield-lock me-1"></i>{{ $t('navigation.privacy') }}
                                 </router-link>
+                            </li>
+                            <li class="nav-item d-flex align-items-center px-2">
+                                <label class="visually-hidden" for="locale-selector">{{ $t('common.language') }}</label>
+                                <select id="locale-selector" v-model="selectedLocale" class="form-select form-select-sm locale-selector"
+                                        :aria-label="$t('accessibility.languageSelector')">
+                                    <option v-for="option in localeOptions" :key="option.code" :value="option.code">
+                                        {{ option.label }}
+                                    </option>
+                                </select>
                             </li>
                             <li class="nav-item" v-if="!isLoggedIn">
                                 <a class="nav-link btn btn-outline-light btn-sm ms-2" href="/Auth/Login">
-                                    <i class="bi bi-box-arrow-in-right me-1"></i>Login
+                                    <i class="bi bi-box-arrow-in-right me-1"></i>{{ $t('navigation.login') }}
                                 </a>
                             </li>
                             <li class="nav-item" v-else>
                                 <a class="nav-link btn btn-outline-light btn-sm ms-2" href="/Auth/Logout">
-                                    <i class="bi bi-box-arrow-right me-1"></i>Logout
+                                    <i class="bi bi-box-arrow-right me-1"></i>{{ $t('navigation.logout') }}
                                 </a>
                             </li>
                         </ul>
@@ -148,52 +164,52 @@ onMounted(() => {
                         <h5 class="mb-3">
                             <i class="bi bi-fingerprint me-2"></i>Passi
                         </h5>
-                        <p class="text-muted">Passwordless authentication made simple. Secure, seamless, and built on open standards.</p>
+                        <p class="text-muted">{{ $t('footer.description') }}</p>
                         <div class="social-links mt-3">
-                            <a href="https://github.com/jetcar/passi" target="_blank" class="text-white me-3">
+                            <a href="https://github.com/jetcar/passi" target="_blank" class="text-white me-3" :aria-label="$t('accessibility.github')">
                                 <i class="bi bi-github" style="font-size: 1.5rem;"></i>
                             </a>
-                            <a href="https://www.youtube.com/watch?v=Koe_8YcmYkU" target="_blank" class="text-white">
+                            <a href="https://www.youtube.com/watch?v=Koe_8YcmYkU" target="_blank" class="text-white" :aria-label="$t('accessibility.youtube')">
                                 <i class="bi bi-youtube" style="font-size: 1.5rem;"></i>
                             </a>
                         </div>
                     </div>
                     <div class="col-md-2 mb-4">
-                        <h6 class="mb-3 text-white">Products</h6>
+                        <h6 class="mb-3 text-white">{{ $t('footer.products') }}</h6>
                         <ul class="list-unstyled">
-                            <li class="mb-2"><router-link to="/products" class="text-light text-decoration-none hover-link">All Products</router-link></li>
-                            <li class="mb-2"><a href="/Home/RegisterApp" class="text-light text-decoration-none hover-link">Passi Auth</a></li>
-                            <li class="mb-2"><a href="https://github.com/jetcar/eid-openidc" target="_blank" class="text-light text-decoration-none hover-link">eID OpenIDC</a></li>
-                            <li class="mb-2"><a href="https://github.com/jetcar/tallinn-crashes" target="_blank" class="text-light text-decoration-none hover-link">Tallinn Crash Statistics</a></li>
-                            <li class="mb-2"><a href="https://github.com/jetcar/deksirip" target="_blank" class="text-light text-decoration-none hover-link">Decentralized Social Economy</a></li>
+                            <li class="mb-2"><router-link to="/products" class="text-light text-decoration-none hover-link">{{ $t('navigation.allProducts') }}</router-link></li>
+                            <li class="mb-2"><a href="/Home/RegisterApp" class="text-light text-decoration-none hover-link">{{ $t('products.items.passi.title') }}</a></li>
+                            <li class="mb-2"><a href="https://github.com/jetcar/eid-openidc" target="_blank" class="text-light text-decoration-none hover-link">{{ $t('products.items.eid.title') }}</a></li>
+                            <li class="mb-2"><a href="https://github.com/jetcar/tallinn-crashes" target="_blank" class="text-light text-decoration-none hover-link">{{ $t('products.items.crashes.title') }}</a></li>
+                            <li class="mb-2"><a href="https://github.com/jetcar/deksirip" target="_blank" class="text-light text-decoration-none hover-link">{{ $t('products.items.economy.title') }}</a></li>
                             <li class="mb-2"><a href="https://github.com/jetcar/charp2p" target="_blank" class="text-light text-decoration-none hover-link">CharP2P</a></li>
                         </ul>
                     </div>
                     <div class="col-md-3 mb-4">
-                        <h6 class="mb-3 text-white">Links</h6>
+                        <h6 class="mb-3 text-white">{{ $t('footer.links') }}</h6>
                         <ul class="list-unstyled">
                             <li class="mb-2"><a href="https://github.com/jetcar/passi" target="_blank" class="text-light text-decoration-none hover-link">GitHub - Passi</a></li>
-                            <li class="mb-2"><a href="https://www.youtube.com/watch?v=Koe_8YcmYkU" target="_blank" class="text-light text-decoration-none hover-link">Demo Video</a></li>
-                            <li class="mb-2"><router-link to="/news" class="text-light text-decoration-none hover-link">News</router-link></li>
-                            <li class="mb-2"><a href="/Home/RegisterApp" class="text-light text-decoration-none hover-link">Register Site</a></li>
-                            <li class="mb-2"><router-link to="/Contacts" class="text-light text-decoration-none hover-link">Contact</router-link></li>
-                            <li class="mb-2"><router-link to="/PrivacyPolicy" class="text-light text-decoration-none hover-link">Privacy Policy</router-link></li>
+                            <li class="mb-2"><a href="https://www.youtube.com/watch?v=Koe_8YcmYkU" target="_blank" class="text-light text-decoration-none hover-link">{{ $t('footer.demoVideo') }}</a></li>
+                            <li class="mb-2"><router-link to="/news" class="text-light text-decoration-none hover-link">{{ $t('navigation.news') }}</router-link></li>
+                            <li class="mb-2"><a href="/Home/RegisterApp" class="text-light text-decoration-none hover-link">{{ $t('footer.registerSite') }}</a></li>
+                            <li class="mb-2"><router-link to="/Contacts" class="text-light text-decoration-none hover-link">{{ $t('navigation.contact') }}</router-link></li>
+                            <li class="mb-2"><router-link to="/PrivacyPolicy" class="text-light text-decoration-none hover-link">{{ $t('navigation.privacy') }}</router-link></li>
                         </ul>
                     </div>
                     <div class="col-md-3 mb-4">
-                        <h6 class="mb-3 text-white">Download</h6>
+                        <h6 class="mb-3 text-white">{{ $t('footer.download') }}</h6>
                         <a href="https://play.google.com/store/apps/details?id=com.passi.cloud.passi_android" target="_blank">
-                            <img src="/img/en_badge_web_generic.png" alt="Get it on Google Play" style="max-width: 150px">
+                            <img src="/img/en_badge_web_generic.png" :alt="$t('common.googlePlay')" style="max-width: 150px">
                         </a>
                     </div>
                 </div>
                 <hr class="my-4 border-secondary">
                 <div class="row">
                     <div class="col-md-6 text-center text-md-start">
-                        <small class="text-muted">&copy; {{ new Date().getFullYear() }} Passi. Open source and transparent.</small>
+                        <small class="text-muted">{{ $t('footer.copyright', { year: new Date().getFullYear() }) }}</small>
                     </div>
                     <div class="col-md-6 text-center text-md-end">
-                        <small class="text-muted">Built with Vue.js & OAuth2</small>
+                        <small class="text-muted">{{ $t('footer.builtWith') }}</small>
                     </div>
                 </div>
             </div>
@@ -230,6 +246,11 @@ body {
 
 .navbar {
     padding: 0.75rem 1rem;
+}
+
+.locale-selector {
+    width: auto;
+    min-width: 7rem;
 }
 
 .navbar-brand {

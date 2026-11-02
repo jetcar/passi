@@ -14,6 +14,7 @@
         },
         watch: {
             '$route.params.slug': { handler: 'load', immediate: true },
+            '$i18n.locale'() { this.updateTitle() },
         },
         methods: {
             formatDate,
@@ -25,13 +26,16 @@
                 this.error = ''
                 try {
                     this.post = await getPost(slug)
-                    document.title = `${this.post.title} · Passi News`
+                    this.updateTitle()
                 } catch (e) {
                     if (e.status === 404) this.notFound = true
-                    else this.error = 'Could not load this post.'
+                    else this.error = this.$t('news.postLoadError')
                 } finally {
                     this.loading = false
                 }
+            },
+            updateTitle() {
+                if (this.post) document.title = this.$t('news.documentTitle', { title: this.post.title })
             },
         },
         unmounted() {
@@ -42,14 +46,14 @@
 
 <template>
     <div class="container py-5 news-post">
-        <router-link to="/news" class="back-link"><i class="bi bi-arrow-left me-1"></i>All news</router-link>
+        <router-link to="/news" class="back-link"><i class="bi bi-arrow-left me-1"></i>{{ $t('news.allNews') }}</router-link>
 
         <div v-if="loading" class="text-center py-5">
-            <div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading</span></div>
+            <div class="spinner-border text-primary" role="status"><span class="visually-hidden">{{ $t('common.loading') }}</span></div>
         </div>
         <div v-else-if="notFound" class="py-5 text-center">
-            <h1 class="h3">Post not found</h1>
-            <p class="text-muted">It may have been moved or unpublished.</p>
+            <h1 class="h3">{{ $t('news.postNotFound') }}</h1>
+            <p class="text-muted">{{ $t('news.postGone') }}</p>
         </div>
         <div v-else-if="error" class="alert alert-danger mt-4">{{ error }}</div>
 
@@ -64,7 +68,7 @@
             <div class="post-body" v-html="post.html"></div>
 
             <footer class="mt-5 pt-4 border-top">
-                <p class="text-muted mb-2">What do you think?</p>
+                <p class="text-muted mb-2">{{ $t('news.reactionPrompt') }}</p>
                 <ReactionBar :slug="post.slug" :reactions="post.reactions" />
             </footer>
         </article>

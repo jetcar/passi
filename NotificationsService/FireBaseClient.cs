@@ -63,7 +63,7 @@ namespace NotificationsService
         public async Task<string> SendAsync(Message message)
         {
             var payload = BuildPayload(message);
-            _logger.LogInformation("ExternalServiceCatcherClient: forwarding notification to test mail service. payload={Payload}", payload);
+            _logger.LogInformation("ExternalServiceCatcherClient: forwarding notification to test mail service");
 
             try
             {

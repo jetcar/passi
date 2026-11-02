@@ -113,12 +113,10 @@ namespace passi_webapi.Controllers
             });
 
             // For an existing account the server keeps its canonical GUID and ignores the freshly
-            // generated one the client sent. Surface that divergence so a "account not found" on the
-            // client (a local lookup keyed on the canonical GUID) is diagnosable server-side.
+            // generated one the client sent. Record the mismatch without logging account identifiers.
             if (!Guid.TryParse(signupConfirmationDto.Guid, out var clientGuid) || clientGuid != accountGuid)
             {
-                _logger.Warn("Confirmation account GUID reconciled. Client sent {0}, canonical is {1}.",
-                    signupConfirmationDto.Guid, accountGuid);
+                _logger.Warn("Confirmation account GUID reconciled.");
             }
 
             return Ok(new SignupConfirmationResponseDto { AccountGuid = accountGuid.ToString() });

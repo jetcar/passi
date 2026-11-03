@@ -34,3 +34,15 @@ test('all supported locale catalogs match the English catalog', async () => {
         }
     }
 })
+
+test('locale messages escape literal at signs for vue-i18n', async () => {
+    for (const locale of localeCodes) {
+        for (const [key, value] of flatten(await readCatalog(locale))) {
+            assert.equal(
+                value.replaceAll("{'@'}", '').includes('@'),
+                false,
+                `${locale}.${key} contains an unescaped @`,
+            )
+        }
+    }
+})

@@ -44,7 +44,7 @@
     "welcomeTitle": "Welcome back",
     "welcomeSubtitle": "Enter your Passi username to continue securely.",
     "username": "Username",
-    "usernamePlaceholder": "alex@example.com",
+    "usernamePlaceholder": "alex{'@'}example.com",
     "validating": "Validating request…",
     "starting": "Starting secure login…",
     "continue": "Continue with Passi",

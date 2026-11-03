@@ -29,8 +29,7 @@ namespace Services
                 email = _appSetting["testMail"];
             if (email == null || client == null)
                 return "ok";
-            var message = MailHelper.CreateSingleTemplateEmail(new EmailAddress(_appSetting["EmailFrom"]), new EmailAddress(email),
-                "d-b6873d40e5c74e6bab695b5bf12a636e", new { code = code });
+            var message = CreateMessage(_appSetting["EmailFrom"], email, code);
             var responce = await client.SendEmailAsync(message);
             if (!responce.IsSuccessStatusCode)
                 throw new BadRequestException(await responce.Body.ReadAsStringAsync());
@@ -43,12 +42,22 @@ namespace Services
                 email = _appSetting["testMail"];
             if (email == null || client == null)
                 return "ok";
-            var message = MailHelper.CreateSingleTemplateEmail(new EmailAddress(_appSetting["EmailFrom"]), new EmailAddress(email),
-                "d-b6873d40e5c74e6bab695b5bf12a636e", new { code = code });
+            var message = CreateMessage(_appSetting["EmailFrom"], email, code);
             var responce = await client.SendEmailAsync(message);
             if (!responce.IsSuccessStatusCode)
                 throw new BadRequestException(await responce.Body.ReadAsStringAsync());
             return await responce.Body.ReadAsStringAsync();
+        }
+
+        internal static SendGridMessage CreateMessage(string from, string to, string code)
+        {
+            var content = PassiEmailTemplate.CreateConfirmationCode(code);
+            return MailHelper.CreateSingleEmail(
+                new EmailAddress(from),
+                new EmailAddress(to),
+                content.Subject,
+                content.PlainText,
+                content.Html);
         }
     }
 }

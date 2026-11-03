@@ -1,4 +1,7 @@
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using ConfigurationManager;
 using Microsoft.Extensions.Configuration;
@@ -68,5 +71,24 @@ public class SmtpEmailSenderTests
         var result = await sender.SendDeletingEmailAsync("ignored@example.com", "123456");
 
         Assert.That(result, Is.EqualTo("ok"));
+    }
+
+    [Test]
+    public void MessageContainsTheSharedLocalTemplateWithPlainTextFallback()
+    {
+        using var message = SmtpEmailSender.CreateMessage(
+            "admin@passi.cloud",
+            "someone@example.com",
+            "123456");
+        var plainTextView = message.AlternateViews.Single(view => view.ContentType.MediaType == "text/plain");
+        using var reader = new StreamReader(plainTextView.ContentStream, Encoding.UTF8, leaveOpen: true);
+        var plainText = reader.ReadToEnd();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(message.Subject, Is.EqualTo("Passi confirmation code: 123456"));
+            Assert.That(message.Body, Does.Contain(">123456</p>"));
+            Assert.That(plainText, Does.Contain("confirmation code is: 123456"));
+        });
     }
 }

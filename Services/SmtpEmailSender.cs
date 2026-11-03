@@ -3,6 +3,7 @@ using System;
 using System.Net;
 using GoogleTracer;
 using System.Net.Mail;
+using System.Net.Mime;
 using System.Threading.Tasks;
 using log4net;
 
@@ -41,15 +42,7 @@ namespace Services
                 email = _appSetting["testMail"];
             if (email == null || client == null)
                 return Task.FromResult(SuccessResult);
-            var message = new MailMessage(_appSetting["emailFrom"], email)
-            {
-                IsBodyHtml = true,
-                Subject = $"Passi code {code}",
-                Body = "<html><body><table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" >" +
-                "<tr><td>Enter this code in application.</td></tr>" +
-                $"<tr><td><b>{code}</b></td></tr>" +
-                "</table></body></html>"
-            };
+            var message = CreateMessage(_appSetting["emailFrom"], email, code);
             return TrySendWithRetryAsync(message);
         }
 
@@ -79,16 +72,24 @@ namespace Services
                 email = _appSetting["testMail"];
             if (email == null || client == null)
                 return Task.FromResult(SuccessResult);
-            var message = new MailMessage(_appSetting["emailFrom"], email)
+            var message = CreateMessage(_appSetting["emailFrom"], email, code);
+            return TrySendWithRetryAsync(message);
+        }
+
+        internal static MailMessage CreateMessage(string from, string to, string code)
+        {
+            var content = PassiEmailTemplate.CreateConfirmationCode(code);
+            var message = new MailMessage(from, to)
             {
                 IsBodyHtml = true,
-                Subject = $"Passi code {code}",
-                Body = "<html><body><table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" >" +
-                "<tr><td>Enter this code in application.</td></tr>" +
-                $"<tr><td><b>{code}</b></td></tr>" +
-                "</table></body></html>"
+                Subject = content.Subject,
+                Body = content.Html
             };
-            return TrySendWithRetryAsync(message);
+            message.AlternateViews.Add(AlternateView.CreateAlternateViewFromString(
+                content.PlainText,
+                null,
+                MediaTypeNames.Text.Plain));
+            return message;
         }
     }
 }

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using ConfigurationManager;
 using Microsoft.Extensions.Configuration;
@@ -41,5 +42,25 @@ public class SendgridEmailSenderTests
         var result = await sender.SendDeletingEmailAsync("ignored@example.com", "123456");
 
         Assert.That(result, Is.EqualTo("ok"));
+    }
+
+    [Test]
+    public void MessageContainsLocalContentInsteadOfAHostedTemplate()
+    {
+        var message = SendgridEmailSender.CreateMessage(
+            "admin@passi.cloud",
+            "someone@example.com",
+            "123456");
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(message.TemplateId, Is.Null.Or.Empty);
+            Assert.That(message.Personalizations.Single().Subject,
+                Is.EqualTo("Passi confirmation code: 123456"));
+            Assert.That(message.Contents.Any(content =>
+                content.Type == "text/plain" && content.Value.Contains("123456")), Is.True);
+            Assert.That(message.Contents.Any(content =>
+                content.Type == "text/html" && content.Value.Contains(">123456</p>")), Is.True);
+        });
     }
 }

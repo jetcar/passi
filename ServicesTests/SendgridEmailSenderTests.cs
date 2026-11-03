@@ -55,7 +55,8 @@ public class SendgridEmailSenderTests
         Assert.Multiple(() =>
         {
             Assert.That(message.TemplateId, Is.Null.Or.Empty);
-            Assert.That(message.Subject, Is.EqualTo("Passi confirmation code: 123456"));
+            Assert.That(message.Personalizations.Single().Subject,
+                Is.EqualTo("Passi confirmation code: 123456"));
             Assert.That(message.Contents.Any(content =>
                 content.Type == "text/plain" && content.Value.Contains("123456")), Is.True);
             Assert.That(message.Contents.Any(content =>

@@ -35,7 +35,7 @@ fi
 
 # Reload HAProxy gracefully
 echo "$(date): Reloading HAProxy..."
-if docker exec haproxy kill -USR2 1 2>&1; then
+if docker kill --signal=USR2 haproxy 2>&1; then
     echo "$(date): HAProxy reloaded successfully"
 else
     echo "$(date): Warning - Could not reload HAProxy. It may reload on restart."

@@ -9,20 +9,21 @@ DOMAIN="${RENEWED_DOMAINS:-${DOMAIN:-passi.cloud}}"
 
 echo "$(date): Deploying certificate for domains: $DOMAIN"
 
-# Get the first domain from the list
-MAIN_DOMAIN=$(echo $DOMAIN | cut -d' ' -f1)
+# Certbot supplies the actual certificate directory when invoking a renewal hook.
+# Domain ordering is not a reliable way to identify a multi-domain certificate.
+CERT_PATH="${RENEWED_LINEAGE:-$CERT_DIR/${DOMAIN:-passi.cloud}}"
 
-if [ ! -d "$CERT_DIR/$MAIN_DOMAIN" ]; then
-    echo "ERROR: Certificate directory not found: $CERT_DIR/$MAIN_DOMAIN"
+if [ ! -d "$CERT_PATH" ]; then
+    echo "ERROR: Certificate directory not found: $CERT_PATH"
     exit 1
 fi
 
-echo "$(date): Found certificate directory: $CERT_DIR/$MAIN_DOMAIN"
+echo "$(date): Found certificate directory: $CERT_PATH"
 
 # Combine certificate and key for HAProxy (PEM format)
 # HAProxy needs: private key + certificate + intermediate certificates
-cat "$CERT_DIR/$MAIN_DOMAIN/privkey.pem" \
-    "$CERT_DIR/$MAIN_DOMAIN/fullchain.pem" \
+cat "$CERT_PATH/privkey.pem" \
+    "$CERT_PATH/fullchain.pem" \
     > "$HAPROXY_CERT_DIR/passi_cloud_haproxy.ca-bundle"
 
 if [ $? -eq 0 ]; then
@@ -34,7 +35,7 @@ fi
 
 # Reload HAProxy gracefully
 echo "$(date): Reloading HAProxy..."
-if docker exec haproxy kill -USR2 1 2>&1; then
+if docker kill --signal=USR2 haproxy 2>&1; then
     echo "$(date): HAProxy reloaded successfully"
 else
     echo "$(date): Warning - Could not reload HAProxy. It may reload on restart."

@@ -68,6 +68,10 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     env_file:
       - ../passi_config/dev.env
+    environment:
+      # DOMAIN remains the certificate directory name used by renewal/deployment.
+      DOMAIN: passi.cloud
+      CERTBOT_DOMAINS: passi.cloud mail.passi.cloud www.passi.cloud finance.passi.cloud
     networks:
       - haproxy_net
     restart: unless-stopped

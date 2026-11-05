@@ -1,27 +1,26 @@
 #!/bin/sh
 
-# Initial certificate request script
-# Run this once to get your first certificate
+# Request a certificate or expand the existing certificate with additional names.
 
 DOMAIN="${DOMAIN:-passi.cloud}"
+CERTBOT_DOMAINS="${CERTBOT_DOMAINS:-$DOMAIN}"
 EMAIL="${CERTBOT_EMAIL:-admin@passi.cloud}"
 STAGING="${STAGING:-false}"
 
 echo "=== Requesting Let's Encrypt Certificate ==="
-echo "Domain(s): $DOMAIN"
+echo "Domain(s): $CERTBOT_DOMAINS"
 echo "Email: $EMAIL"
 echo ""
 
 # Build certbot command
-CMD="certbot certonly --webroot --webroot-path=/var/www/certbot"
-CMD="$CMD --email $EMAIL"
-CMD="$CMD --agree-tos"
-CMD="$CMD --non-interactive"
+set -- certbot certonly --webroot --webroot-path=/var/www/certbot \
+    --email "$EMAIL" --agree-tos --non-interactive \
+    --cert-name "$DOMAIN" --expand
 
 # Add staging flag if testing
 if [ "$STAGING" = "true" ]; then
     echo "⚠ Using Let's Encrypt STAGING server (for testing)"
-    CMD="$CMD --staging"
+    set -- "$@" --staging
 else
     echo "✓ Using Let's Encrypt PRODUCTION server"
 fi
@@ -36,17 +35,19 @@ echo "Pre-flight test file created"
 ls -la /var/www/certbot/.well-known/acme-challenge/
 
 # Add all domains
-for d in $DOMAIN; do
-    CMD="$CMD -d $d"
+# Split the space-separated list without expanding shell wildcards.
+set -f
+for d in $CERTBOT_DOMAINS; do
+    set -- "$@" -d "$d"
     echo "  - $d"
 done
 
 echo ""
 echo "Requesting certificate..."
 # Request certificate with verbose output
-echo "Certbot command: certbot certonly --webroot --webroot-path=/var/www/certbot -d $DOMAIN"
+echo "Certbot command: $*"
 echo ""
-eval $CMD -v
+"$@" -v
 
 if [ $? -eq 0 ]; then
     echo ""
@@ -54,7 +55,7 @@ if [ $? -eq 0 ]; then
     echo ""
     echo "Deploying certificate to HAProxy format..."
     # Deploy the certificate
-    /scripts/deploy-cert.sh
+    /scripts/deploy-cert.sh || exit $?
     echo ""
     echo "=== Setup Complete ==="
     certbot certificates

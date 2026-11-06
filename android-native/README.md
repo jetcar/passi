@@ -5,6 +5,20 @@ Native Android client for Passi (Kotlin, Jetpack Compose), published on Google P
 
 See [USE_CASES.md](USE_CASES.md) for the end-user use cases.
 
+## Install the APK
+
+Google Play is the recommended installation method. For direct installation:
+
+1. Open [GitHub Releases](https://github.com/jetcar/passi/releases) on the Android device and download the
+   `Passi-<version>.apk` asset from the newest `android-v*` release.
+2. Open the downloaded file. When Android asks, allow the browser or file manager to install unknown apps.
+3. Review the Android and Play Protect warnings, then tap **Install**.
+4. Open Passi, enter the provider URL if required, and enroll the account with its email confirmation code.
+
+Only install APKs downloaded from this repository. If Android reports that the package conflicts with the Google
+Play version, keep the Play version or uninstall it before sideloading; uninstalling deletes Passi's local accounts
+and device certificates, so those accounts must be enrolled again.
+
 ## Features
 
 - Account enrollment: terms, email, confirmation code, optional PIN, self-signed certificate generation
@@ -52,5 +66,5 @@ Release builds use R8 minification and resource shrinking (`app/proguard-rules.p
 
 Releases go through the manual GitHub Actions workflow `.github/workflows/google-play-release.yml`. Pick the
 track (`internal`/`alpha`/`beta`/`production`), the release status and the display version. It builds a signed
-AAB and uploads it to Google Play. `versionCode` is derived from the workflow run number. The monthly
-dependency-update workflow also creates a production draft automatically.
+AAB for Google Play and a signed APK for the matching `android-v*` GitHub Release. `versionCode` is derived from
+the workflow run number. The monthly dependency-update workflow also creates a production draft automatically.

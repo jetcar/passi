@@ -6,11 +6,18 @@ Native SwiftUI client for iOS 16 or later. It supports enrollment, provider and 
 
 No Mac is required.
 
-1. Open [Actions → iOS unsigned IPA](https://github.com/jetcar/passi/actions/workflows/ios-ipa.yml) and choose **Run workflow**.
-2. Download the `Passi-unsigned-ipa` artifact after the workflow succeeds.
-3. Extract the matching IPA, such as `Passi-0.1.1-unsigned.ipa`, from the downloaded ZIP.
-4. Open the IPA in [Sideloadly](https://sideloadly.io/), connect the iPhone, enter the Apple ID used for signing, and start the sideload.
-5. If iOS asks, enable Developer Mode and trust the developer profile in device settings.
+1. Open [GitHub Releases](https://github.com/jetcar/passi/releases) and download the
+   `Passi-<version>-unsigned.ipa` asset from the newest `ios-v*` release.
+2. Install [Sideloadly](https://sideloadly.io/) on a Windows PC or Mac.
+3. Connect the iPhone by USB, unlock it, tap **Trust** if prompted, and select it in Sideloadly.
+4. Drag the IPA into Sideloadly, enter the Apple ID used for signing, and start the sideload.
+5. On iOS 16 or later, enable **Settings → Privacy & Security → Developer Mode** and restart when prompted.
+6. If the app is still marked as untrusted, open **Settings → General → VPN & Device Management**, select the
+   Apple ID used to sign it, and trust it.
+
+If no release asset is available, open
+[Actions → iOS unsigned IPA](https://github.com/jetcar/passi/actions/workflows/ios-ipa.yml), choose **Run workflow**,
+and download the `Passi-unsigned-ipa` artifact after it succeeds.
 
 A free Apple developer account signs the app for seven days. Sideloadly Daemon can refresh it when the iPhone is available over USB or configured Wi-Fi. Reuse the same Apple ID and bundle ID when updating.
 

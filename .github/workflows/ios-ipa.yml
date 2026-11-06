@@ -2,13 +2,19 @@ name: iOS unsigned IPA
 
 on:
   workflow_dispatch:
+    inputs:
+      publish_release:
+        description: Publish the IPA on an ios-v* GitHub Release
+        required: true
+        default: true
+        type: boolean
   push:
     paths:
       - "ios/**"
       - ".github/workflows/ios-ipa.yml"
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
@@ -84,3 +90,20 @@ jobs:
           path: build/Passi-*-unsigned.ipa
           if-no-files-found: error
           retention-days: 30
+
+      - name: Publish IPA to GitHub Release
+        if: github.event_name == 'workflow_dispatch' && inputs.publish_release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          app_version="$(awk -F'"' '/MARKETING_VERSION:/ { print $2; exit }' ios/project.yml)"
+          tag="ios-v${app_version}"
+          if gh release view "${tag}" >/dev/null 2>&1; then
+            gh release upload "${tag}" "${IPA_PATH}" --clobber
+          else
+            gh release create "${tag}" "${IPA_PATH}" \
+              --target "${GITHUB_SHA}" \
+              --title "Passi iOS ${app_version}" \
+              --notes "Unsigned iOS build for installation with Sideloadly. Requires iOS 16 or later."
+          fi

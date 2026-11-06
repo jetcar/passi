@@ -27,6 +27,15 @@ on:
         description: Visible app version, for example 1.54
         required: true
         type: string
+      publish_google_play:
+        description: Upload the AAB to Google Play
+        required: true
+        default: true
+        type: boolean
+      source_ref:
+        description: Optional tag, branch, or commit to build instead of the dispatched ref
+        required: false
+        type: string
 
 permissions:
   contents: write # push the android-v<version> release tag
@@ -45,6 +54,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.source_ref || github.ref }}
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -96,7 +107,7 @@ jobs:
           $versionCode = ${{ github.run_number }} + 1000
           "PASSI_ANDROID_VERSION_CODE=$versionCode" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
 
-      - name: Build signed Android App Bundle
+      - name: Build signed Android App Bundle and APK
         shell: pwsh
         env:
           PASSI_ANDROID_SIGNING_STORE_PASS: ${{ secrets.PASSI_ANDROID_SIGNING_STORE_PASS }}
@@ -104,7 +115,7 @@ jobs:
           PASSI_ANDROID_KEY_ALIAS: ${{ secrets.PASSI_ANDROID_KEY_ALIAS }}
         run: |
           Push-Location $env:ANDROID_NATIVE_DIR
-          .\gradlew.bat :app:bundleRelease `
+          .\gradlew.bat :app:bundleRelease :app:assembleRelease `
             -PPASSI_ANDROID_KEYSTORE_PATH="$env:PASSI_ANDROID_KEYSTORE_PATH" `
             -PPASSI_ANDROID_SIGNING_STORE_PASS="$env:PASSI_ANDROID_SIGNING_STORE_PASS" `
             -PPASSI_ANDROID_KEY_ALIAS="$env:PASSI_ANDROID_KEY_ALIAS" `
@@ -113,6 +124,30 @@ jobs:
             -PPASSI_ANDROID_VERSION_CODE="$env:PASSI_ANDROID_VERSION_CODE" `
             --no-daemon
           Pop-Location
+
+      - name: Locate generated APK
+        id: apk
+        shell: pwsh
+        run: |
+          $apk = Get-ChildItem -Path android-native\app\build\outputs\apk\release -Filter *.apk -Recurse |
+            Sort-Object LastWriteTime -Descending |
+            Select-Object -First 1
+
+          if (-not $apk) {
+            throw 'No signed Android Package (.apk) was generated.'
+          }
+
+          $releaseName = "Passi-${{ inputs.display_version }}.apk"
+          $releasePath = Join-Path $env:RUNNER_TEMP $releaseName
+          Copy-Item -LiteralPath $apk.FullName -Destination $releasePath
+          "path=$releasePath" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+
+      - name: Upload signed APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Passi-${{ inputs.display_version }}-apk
+          path: ${{ steps.apk.outputs.path }}
+          if-no-files-found: error
 
       - name: Locate generated AAB
         id: aab
@@ -129,6 +164,7 @@ jobs:
           "path=$($bundle.FullName)" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
 
       - name: Upload to Google Play
+        if: inputs.publish_google_play
         uses: r0adkll/upload-google-play@v1
         with:
           serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
@@ -139,13 +175,21 @@ jobs:
           track: ${{ inputs.track }}
           status: ${{ inputs.release_status }}
 
-      - name: Tag release
+      - name: Publish signed APK to GitHub Release
         shell: pwsh
         env:
           DISPLAY_VERSION: ${{ inputs.display_version }}
+          GH_TOKEN: ${{ github.token }}
+          APK_PATH: ${{ steps.apk.outputs.path }}
         run: |
-          # The monthly dependency workflow computes the next version from these tags.
           $tag = "android-v$env:DISPLAY_VERSION"
-          git tag $tag
-          git push origin $tag
-          if ($LASTEXITCODE -ne 0) { Write-Warning "Could not push tag $tag (it may already exist)"; exit 0 }
+          $target = git rev-parse HEAD
+          gh release view $tag *> $null
+          if ($LASTEXITCODE -eq 0) {
+            gh release upload $tag "$env:APK_PATH" --clobber
+          } else {
+            gh release create $tag "$env:APK_PATH" `
+              --target $target `
+              --title "Passi Android $env:DISPLAY_VERSION" `
+              --notes "Signed Android APK for direct installation. The Google Play build remains the recommended installation method."
+          }

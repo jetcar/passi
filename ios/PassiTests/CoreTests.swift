@@ -43,6 +43,74 @@ final class CoreTests: XCTestCase {
         XCTAssertEqual(numbers.count, 3)
         XCTAssertEqual(numbers.filter { $0 == 42 }.count, 1)
     }
+
+    func testPollingRequestsActiveSessionFromServer() async throws {
+        PollingURLProtocol.reset()
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.protocolClasses = [PollingURLProtocol.self]
+        let api = PassiAPI(session: URLSession(configuration: configuration))
+        let accountID = UUID(uuidString: "22222222-2222-2222-2222-222222222222")!
+        let account = Account(
+            id: accountID,
+            providerID: Provider.passi.id,
+            email: "user@example.com",
+            deviceID: "device-1",
+            isConfirmed: true,
+            thumbprint: "thumbprint",
+            validFrom: Date(),
+            validTo: Date().addingTimeInterval(86_400),
+            inactive: false,
+            publicCertificate: nil,
+            keyTag: nil,
+            pinLength: 0,
+            pinSalt: nil,
+            pinVerifier: nil,
+            biometricsEnabled: false
+        )
+
+        let result = try await api.pollPendingSession(
+            deviceID: "device-1",
+            accounts: [account],
+            providers: [.passi]
+        )
+
+        XCTAssertNil(result)
+        XCTAssertEqual(PollingURLProtocol.requestPaths, [
+            "/passiapi/api/Auth/SyncAccounts",
+            "/passiapi/api/Auth/GetActiveSession"
+        ])
+    }
+}
+
+private final class PollingURLProtocol: URLProtocol {
+    nonisolated(unsafe) private static var recordedPaths: [String] = []
+    private static let lock = NSLock()
+
+    static var requestPaths: [String] {
+        lock.withLock { recordedPaths }
+    }
+
+    static func reset() {
+        lock.withLock { recordedPaths = [] }
+    }
+
+    override class func canInit(with request: URLRequest) -> Bool { true }
+    override class func canonicalRequest(for request: URLRequest) -> URLRequest { request }
+
+    override func startLoading() {
+        guard let url = request.url else {
+            client?.urlProtocol(self, didFailWithError: URLError(.badURL))
+            return
+        }
+        Self.lock.withLock { Self.recordedPaths.append(url.path) }
+        let body = url.path.hasSuffix("SyncAccounts") ? Data("[]".utf8) : Data("null".utf8)
+        let response = HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: nil)!
+        client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
+        client?.urlProtocol(self, didLoad: body)
+        client?.urlProtocolDidFinishLoading(self)
+    }
+
+    override func stopLoading() {}
 }
 
 private struct SeededGenerator: RandomNumberGenerator {

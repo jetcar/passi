@@ -9,6 +9,8 @@ final class PassiStore: ObservableObject {
     @Published var pendingSession: NotificationSession?
     @Published var isBusy = false
     @Published var errorMessage: String?
+    @Published private(set) var lastPollAttemptAt: Date?
+    @Published private(set) var lastPollError: String?
 
     let deviceID: String
     private let defaults: UserDefaults
@@ -153,16 +155,26 @@ final class PassiStore: ObservableObject {
     }
 
     func poll(surfaceErrors: Bool = false) async {
-        guard !isBusy, !accounts.isEmpty else { return }
+        guard !isBusy else { return }
+        let confirmedAccounts = accounts.filter(\.isConfirmed)
+        guard !confirmedAccounts.isEmpty else {
+            lastPollError = "Add a confirmed account before checking for login requests."
+            if surfaceErrors { errorMessage = lastPollError }
+            return
+        }
         isBusy = true
         defer { isBusy = false }
         do {
             pendingSession = try await api.pollPendingSession(
                 deviceID: deviceID,
-                accounts: accounts.filter(\.isConfirmed),
+                accounts: confirmedAccounts,
                 providers: providers
             )
+            lastPollAttemptAt = Date()
+            lastPollError = nil
         } catch {
+            lastPollAttemptAt = Date()
+            lastPollError = error.localizedDescription
             if surfaceErrors { errorMessage = error.localizedDescription }
         }
     }

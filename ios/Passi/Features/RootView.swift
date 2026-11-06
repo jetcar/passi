@@ -9,11 +9,29 @@ private enum AppRoute: Hashable {
 
 struct RootView: View {
     @EnvironmentObject private var store: PassiStore
+    @Environment(\.scenePhase) private var scenePhase
     @State private var path: [AppRoute] = []
 
     var body: some View {
         NavigationStack(path: $path) {
             List {
+                Section {
+                    Button {
+                        Task { await store.poll(surfaceErrors: true) }
+                    } label: {
+                        HStack {
+                            Label(store.isBusy ? "Checking server…" : "Refresh", systemImage: "arrow.clockwise")
+                            Spacer()
+                            if store.isBusy { ProgressView() }
+                        }
+                    }
+                    .disabled(store.isBusy)
+
+                    Text(pollStatus)
+                        .font(.caption)
+                        .foregroundStyle(store.lastPollError == nil ? Color.secondary : Color.red)
+                }
+
                 if store.accounts.isEmpty {
                     VStack(spacing: 10) {
                         Image(systemName: "person.badge.key").font(.largeTitle).foregroundStyle(.secondary)
@@ -41,11 +59,6 @@ struct RootView: View {
                     }
                 }
                 ToolbarItemGroup(placement: .navigationBarTrailing) {
-                    Button { Task { await store.poll(surfaceErrors: true) } } label: {
-                        Label("Refresh", systemImage: "arrow.clockwise")
-                    }
-                    .disabled(store.isBusy)
-
                     NavigationLink(value: AppRoute.enrollment) {
                         Label("Add account", systemImage: "plus")
                     }
@@ -56,6 +69,9 @@ struct RootView: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .padding(.vertical, 6)
+            }
+            .refreshable {
+                await store.poll(surfaceErrors: true)
             }
             .navigationDestination(for: AppRoute.self) { route in
                 switch route {
@@ -78,12 +94,26 @@ struct RootView: View {
         } message: {
             Text(store.errorMessage ?? "")
         }
-        .task {
-            while !Task.isCancelled {
+        .task(id: scenePhase) {
+            guard scenePhase == .active else { return }
+            while !Task.isCancelled && scenePhase == .active {
                 await store.poll()
-                try? await Task.sleep(nanoseconds: 5_000_000_000)
+                do {
+                    try await Task.sleep(nanoseconds: 5_000_000_000)
+                } catch {
+                    return
+                }
             }
         }
+    }
+
+    private var pollStatus: String {
+        if store.isBusy { return "Asking the server for pending login requests…" }
+        if let error = store.lastPollError { return error }
+        if let lastAttempt = store.lastPollAttemptAt {
+            return "Server checked at \(lastAttempt.formatted(date: .omitted, time: .standard))."
+        }
+        return "The server is checked every five seconds while Passi is open."
     }
 
     private var errorBinding: Binding<Bool> {

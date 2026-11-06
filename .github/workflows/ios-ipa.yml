@@ -19,7 +19,7 @@ permissions:
 jobs:
   build:
     runs-on: macos-15
-    timeout-minutes: 25
+    timeout-minutes: 45
     env:
       DEVELOPER_DIR: /Applications/Xcode_16.4.app/Contents/Developer
       XCODEGEN_VERSION: 2.46.0
@@ -45,6 +45,14 @@ jobs:
           app_version="$(awk -F'"' '/MARKETING_VERSION:/ { print $2; exit }' ios/project.yml)"
           test -n "${app_version}"
           echo "IPA_PATH=build/Passi-${app_version}-unsigned.ipa" >> "${GITHUB_ENV}"
+
+      - name: Ensure iOS simulator runtime
+        shell: bash
+        run: |
+          if ! xcrun simctl list devices available | grep -q 'iPhone'; then
+            xcodebuild -downloadPlatform iOS
+          fi
+          xcrun simctl list devices available | grep 'iPhone 16 Pro ('
 
       - name: Run iOS simulator tests
         run: |

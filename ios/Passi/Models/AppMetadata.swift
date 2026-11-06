@@ -1,3 +1,5 @@
+import Foundation
+
 enum AppMetadata {
     static let name = "Passi"
     static var version: String {

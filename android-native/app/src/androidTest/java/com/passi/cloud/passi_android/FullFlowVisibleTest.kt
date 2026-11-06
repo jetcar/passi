@@ -183,7 +183,7 @@ class FullFlowVisibleTest {
                         ?.takeUnless { it.isJsonNull }
                         ?.asString
                         .orEmpty()
-                    val subjectMatch = Regex("""Passi code (\d+)""").find(subject)
+                    val subjectMatch = Regex("""Passi confirmation code: (\d+)""").find(subject)
                     if (subjectMatch != null) {
                         return subjectMatch.groupValues[1]
                     }

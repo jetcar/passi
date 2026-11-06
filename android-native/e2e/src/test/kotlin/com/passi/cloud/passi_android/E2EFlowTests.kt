@@ -7,6 +7,7 @@ import com.google.gson.JsonParser
 import com.passi.cloud.passi_android.data.crypto.BouncyCastleCertificateGenerator
 import com.passi.cloud.passi_android.data.remote.PassiApiClient
 import com.passi.cloud.passi_android.data.repository.BackendEnrollmentService
+import com.passi.cloud.passi_android.domain.enrollment.GeneratedCertificate
 import com.passi.cloud.passi_android.domain.model.ApiPaths
 import com.passi.cloud.passi_android.domain.model.Provider
 import kotlinx.coroutines.runBlocking
@@ -14,11 +15,16 @@ import org.junit.AfterClass
 import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Test
+import java.io.ByteArrayInputStream
 import java.io.InputStreamReader
-import java.net.ServerSocket
 import java.net.HttpURLConnection
+import java.net.ServerSocket
 import java.net.URL
+import java.security.KeyStore
+import java.security.PrivateKey
+import java.security.Signature
 import java.time.Duration
+import java.util.Base64
 import java.util.UUID
 
 class E2EFlowTests {
@@ -68,7 +74,7 @@ class E2EFlowTests {
                 "-e", "POSTGRES_PASSWORD=test1",
                 "-e", "POSTGRES_USER=postgres",
                 "-e", "POSTGRES_DB=Passi",
-                "postgres:15.5",
+                "postgres:15.19-bookworm",
             )
             waitForLog(postgresName, "database system is ready to accept connections", occurrences = 2)
 
@@ -335,12 +341,15 @@ class E2EFlowTests {
 
     private data class RegisteredAccount(
         val accountGuid: String,
-        val thumbprint: String,
-    )
+        val certificate: GeneratedCertificate,
+    ) {
+        val thumbprint: String get() = certificate.thumbprint
+    }
 
     private data class ActiveSessionSnapshot(
         val sessionId: String,
         val accountGuid: String,
+        val randomString: String,
     )
 
     private fun waitForEmailCode(targetEmail: String, timeoutSeconds: Int = 30): String {
@@ -375,7 +384,7 @@ class E2EFlowTests {
                         ?.takeUnless { it.isJsonNull }
                         ?.asString
                         .orEmpty()
-                    val subjectMatch = Regex("""Passi code (\d+)""").find(subject)
+                    val subjectMatch = Regex("""Passi confirmation code: (\d+)""").find(subject)
                     if (subjectMatch != null) {
                         return subjectMatch.groupValues[1]
                     }
@@ -594,7 +603,7 @@ class E2EFlowTests {
         assertThat(activeB.sessionId).isEqualTo(startedSessionId)
 
         println("[TEST] Step 9: authorize from device A and verify check returns pass")
-        authorizeSession(activeA.sessionId, registrationA.thumbprint)
+        authorizeSession(activeA, registrationA, pin)
         val checkStatus = checkLoginSessionStatus(activeA.sessionId)
         println("[TEST] /api/Auth/check status: $checkStatus")
         assertThat(checkStatus).isEqualTo(200)
@@ -637,7 +646,7 @@ class E2EFlowTests {
 
         return RegisteredAccount(
             accountGuid = pending.accountId,
-            thumbprint = cert.thumbprint,
+            certificate = cert,
         )
     }
 
@@ -706,8 +715,9 @@ class E2EFlowTests {
                 val obj = JsonParser.parseString(response.body).asJsonObject
                 val sessionId = obj.readString("sessionId", "SessionId")
                 val accountGuid = obj.readString("accountGuid", "AccountGuid")
-                if (sessionId == expectedSessionId && accountGuid != null) {
-                    return ActiveSessionSnapshot(sessionId = sessionId, accountGuid = accountGuid)
+                val randomString = obj.readString("randomString", "RandomString")
+                if (sessionId == expectedSessionId && accountGuid != null && randomString != null) {
+                    return ActiveSessionSnapshot(sessionId = sessionId, accountGuid = accountGuid, randomString = randomString)
                 }
             }
             Thread.sleep(500)
@@ -715,14 +725,23 @@ class E2EFlowTests {
         throw AssertionError("No active session for device $deviceId within ${timeoutSeconds}s. lastBody=$lastBody")
     }
 
-    private suspend fun authorizeSession(sessionId: String, thumbprint: String) {
+    private suspend fun authorizeSession(session: ActiveSessionSnapshot, registration: RegisteredAccount, pin: String) {
+        val cert = registration.certificate
+        val password = (cert.salt + pin).toCharArray()
+        val keyStore = KeyStore.getInstance("PKCS12")
+        ByteArrayInputStream(Base64.getDecoder().decode(cert.privateCertBinary)).use { keyStore.load(it, password) }
+        val privateKey = keyStore.getKey(keyStore.aliases().nextElement(), password) as PrivateKey
+        val signature = Signature.getInstance("SHA512withRSA")
+        signature.initSign(privateKey)
+        signature.update(session.randomString.toByteArray(Charsets.UTF_8))
+        val signedHash = Base64.getEncoder().encodeToString(signature.sign())
         val response = apiClient.postJson(
             baseUrl = provider.baseUrl,
             path = provider.apiPaths.authorize,
             payload = AuthorizeRequest(
-                signedHash = "e2e-signed-${UUID.randomUUID()}",
-                publicCertThumbprint = thumbprint,
-                sessionId = sessionId,
+                signedHash = signedHash,
+                publicCertThumbprint = registration.thumbprint,
+                sessionId = session.sessionId,
             ),
         )
         println("[TEST] authorizeSession: status=${response.statusCode} body=${response.body}")

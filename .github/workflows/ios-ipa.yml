@@ -1,0 +1,79 @@
+name: iOS unsigned IPA
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "ios/**"
+      - ".github/workflows/ios-ipa.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-15
+    timeout-minutes: 25
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_16.4.app/Contents/Developer
+      XCODEGEN_VERSION: 2.46.0
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Install XcodeGen
+        shell: bash
+        run: |
+          curl --fail --location --silent --show-error \
+            "https://github.com/yonaskolb/XcodeGen/releases/download/${XCODEGEN_VERSION}/xcodegen.zip" \
+            --output "${RUNNER_TEMP}/xcodegen.zip"
+          unzip -q "${RUNNER_TEMP}/xcodegen.zip" -d "${RUNNER_TEMP}"
+          echo "${RUNNER_TEMP}/xcodegen/bin" >> "${GITHUB_PATH}"
+
+      - name: Generate Xcode project
+        run: xcodegen generate --spec ios/project.yml
+
+      - name: Run iOS simulator tests
+        run: |
+          xcodebuild \
+            -project ios/Passi.xcodeproj \
+            -scheme Passi \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -destination 'platform=iOS Simulator,name=iPhone 16 Pro,OS=latest' \
+            -derivedDataPath build/ios-simulator \
+            CODE_SIGNING_ALLOWED=NO \
+            test
+
+      - name: Build unsigned iPhone application
+        run: |
+          xcodebuild \
+            -project ios/Passi.xcodeproj \
+            -scheme Passi \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build/ios-device \
+            CURRENT_PROJECT_VERSION="${GITHUB_RUN_NUMBER}" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY='' \
+            build
+
+      - name: Package and verify IPA
+        shell: bash
+        run: |
+          bash ios/scripts/package-ipa.sh \
+            build/ios-device/Build/Products/Release-iphoneos/Passi.app \
+            build/Passi-unsigned.ipa
+          unzip -t build/Passi-unsigned.ipa
+          unzip -Z1 build/Passi-unsigned.ipa | grep -Fx 'Payload/Passi.app/Passi'
+          unzip -Z1 build/Passi-unsigned.ipa | grep -Fx 'Payload/Passi.app/Assets.car'
+
+      - name: Upload unsigned IPA
+        uses: actions/upload-artifact@v7
+        with:
+          name: Passi-unsigned-ipa
+          path: build/Passi-unsigned.ipa
+          if-no-files-found: error
+          retention-days: 30

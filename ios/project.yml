@@ -1,0 +1,65 @@
+name: Passi
+
+options:
+  minimumXcodeGenVersion: 2.46.0
+  deploymentTarget:
+    iOS: "16.0"
+
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+
+packages:
+  SwiftCertificates:
+    url: https://github.com/apple/swift-certificates.git
+    from: 1.21.1
+  SwiftASN1:
+    url: https://github.com/apple/swift-asn1.git
+    from: 1.1.0
+
+targets:
+  Passi:
+    type: application
+    platform: iOS
+    deploymentTarget: "16.0"
+    sources:
+      - path: Passi
+    dependencies:
+      - package: SwiftCertificates
+        product: X509
+      - package: SwiftASN1
+        product: SwiftASN1
+    settings:
+      base:
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        PRODUCT_BUNDLE_IDENTIFIER: com.passi.cloud.ios
+        PRODUCT_NAME: Passi
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: Passi
+        INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.utilities
+        INFOPLIST_KEY_NSFaceIDUsageDescription: Passi uses Face ID to confirm login approvals.
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UIRequiresFullScreen: YES
+        INFOPLIST_KEY_UISupportedInterfaceOrientations: UIInterfaceOrientationPortrait
+        TARGETED_DEVICE_FAMILY: "1"
+        CODE_SIGN_STYLE: Automatic
+    scheme:
+      gatherCoverageData: true
+      testTargets:
+        - PassiTests
+
+  PassiTests:
+    type: bundle.unit-test
+    platform: iOS
+    deploymentTarget: "16.0"
+    sources:
+      - path: PassiTests
+    dependencies:
+      - target: Passi
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.passi.cloud.ios.tests
+        GENERATE_INFOPLIST_FILE: YES
+        CODE_SIGNING_ALLOWED: NO

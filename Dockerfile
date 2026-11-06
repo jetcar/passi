@@ -11,7 +11,9 @@ RUN npm run build
 
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 # Pick up OS security patches released after the base image was built.
-RUN apt-get update \
+ARG OS_PATCH_RUN_ID
+RUN : "$OS_PATCH_RUN_ID" \
+    && apt-get update \
     && apt-get upgrade -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 WORKDIR /src

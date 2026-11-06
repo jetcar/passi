@@ -40,7 +40,7 @@ if errorlevel 1 exit /b 1
 
 echo Starting UI-E2E services...
 docker network create %NET% >nul
-docker run -d --name %PG% --network %NET% --network-alias postgres -e POSTGRES_PASSWORD=test1 -e POSTGRES_USER=postgres -e POSTGRES_DB=Passi postgres:15.5 >nul
+docker run -d --name %PG% --network %NET% --network-alias postgres -e POSTGRES_PASSWORD=test1 -e POSTGRES_USER=postgres -e POSTGRES_DB=Passi postgres:15.19-bookworm >nul
 docker run -d --name %REDIS% --network %NET% --network-alias redis redis:7-alpine >nul
 docker run -d --name %MAILHOG% --network %NET% --network-alias mailhog -p 8025:8025 mailhog/mailhog:latest >nul
 docker run -d --name %API% --network %NET% --network-alias passiwebapi -p 5004:5004 ^

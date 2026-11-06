@@ -58,6 +58,8 @@ jobs:
         with:
           context: .
           file: Dockerfile
+          build-args: |
+            OS_PATCH_RUN_ID=${{ github.run_id }}-${{ github.run_attempt }}
           push: true
           provenance: false
           sbom: false
@@ -127,6 +129,8 @@ jobs:
         with:
           context: .
           file: ${{ matrix.dockerfile }}
+          build-args: |
+            OS_PATCH_RUN_ID=${{ github.run_id }}-${{ github.run_attempt }}
           push: true
           provenance: false
           sbom: false

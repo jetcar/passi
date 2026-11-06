@@ -8,7 +8,7 @@ No Mac is required.
 
 1. Open [Actions → iOS unsigned IPA](https://github.com/jetcar/passi/actions/workflows/ios-ipa.yml) and choose **Run workflow**.
 2. Download the `Passi-unsigned-ipa` artifact after the workflow succeeds.
-3. Extract `Passi-unsigned.ipa` from the downloaded ZIP.
+3. Extract the matching IPA, such as `Passi-0.1.1-unsigned.ipa`, from the downloaded ZIP.
 4. Open the IPA in [Sideloadly](https://sideloadly.io/), connect the iPhone, enter the Apple ID used for signing, and start the sideload.
 5. If iOS asks, enable Developer Mode and trust the developer profile in device settings.
 

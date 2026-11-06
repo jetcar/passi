@@ -33,6 +33,13 @@ jobs:
       - name: Generate Xcode project
         run: xcodegen generate --spec ios/project.yml
 
+      - name: Read app version
+        shell: bash
+        run: |
+          app_version="$(awk -F'"' '/MARKETING_VERSION:/ { print $2; exit }' ios/project.yml)"
+          test -n "${app_version}"
+          echo "IPA_PATH=build/Passi-${app_version}-unsigned.ipa" >> "${GITHUB_ENV}"
+
       - name: Run iOS simulator tests
         run: |
           xcodebuild \
@@ -65,15 +72,15 @@ jobs:
         run: |
           bash ios/scripts/package-ipa.sh \
             build/ios-device/Build/Products/Release-iphoneos/Passi.app \
-            build/Passi-unsigned.ipa
-          unzip -t build/Passi-unsigned.ipa
-          unzip -Z1 build/Passi-unsigned.ipa | grep -Fx 'Payload/Passi.app/Passi'
-          unzip -Z1 build/Passi-unsigned.ipa | grep -Fx 'Payload/Passi.app/Assets.car'
+            "${IPA_PATH}"
+          unzip -t "${IPA_PATH}"
+          unzip -Z1 "${IPA_PATH}" | grep -Fx 'Payload/Passi.app/Passi'
+          unzip -Z1 "${IPA_PATH}" | grep -Fx 'Payload/Passi.app/Assets.car'
 
       - name: Upload unsigned IPA
         uses: actions/upload-artifact@v7
         with:
           name: Passi-unsigned-ipa
-          path: build/Passi-unsigned.ipa
+          path: build/Passi-*-unsigned.ipa
           if-no-files-found: error
           retention-days: 30

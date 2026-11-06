@@ -21,5 +21,8 @@ namespace WebApiDto
         public Guid SessionId { get; set; }
         public string ReturnHost { get; set; }
         public Guid AccountGuid { get; set; }
+        public string DeviceId { get; set; }
+        public string UnlinkToken { get; set; }
+        public string ApiBaseUrl { get; set; }
     }
 }

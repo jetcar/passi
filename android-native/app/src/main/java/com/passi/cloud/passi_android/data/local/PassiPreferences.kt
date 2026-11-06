@@ -204,6 +204,7 @@ private data class StoredProvider(
     val deleteAccount: String,
     val listDevices: String? = null,
     val deleteDevice: String? = null,
+    val unlinkDevice: String? = null,
 ) {
     fun toDomain(): Provider = Provider(
         id = UUID.fromString(id),
@@ -223,6 +224,7 @@ private data class StoredProvider(
             deleteAccount = deleteAccount,
             listDevices = listDevices.orEmpty().ifBlank { ApiPaths.defaultPaths().listDevices },
             deleteDevice = deleteDevice.orEmpty().ifBlank { ApiPaths.defaultPaths().deleteDevice },
+            unlinkDevice = unlinkDevice.orEmpty().ifBlank { ApiPaths.defaultPaths().unlinkDevice },
         ),
         isDefault = isDefault,
     )
@@ -246,6 +248,7 @@ private data class StoredProvider(
             deleteAccount = provider.apiPaths.deleteAccount,
             listDevices = provider.apiPaths.listDevices,
             deleteDevice = provider.apiPaths.deleteDevice,
+            unlinkDevice = provider.apiPaths.unlinkDevice,
         )
     }
 }

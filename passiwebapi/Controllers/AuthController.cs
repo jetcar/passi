@@ -15,6 +15,7 @@ using WebApiDto;
 using WebApiDto.Auth;
 using WebApiDto.Auth.Dto;
 using Services;
+using passi_webapi.DeviceSecurity;
 
 namespace passi_webapi.Controllers
 {
@@ -26,11 +27,17 @@ namespace passi_webapi.Controllers
         private ISessionsRepository _sessionsRepository;
         private IUserRepository _userRepository;
         private IFirebaseService _firebaseService;
-        public AuthController(ISessionsRepository sessionsRepository, IUserRepository userRepository, IFirebaseService firebaseService)
+        private IDeviceUnlinkService _deviceUnlinkService;
+        public AuthController(
+            ISessionsRepository sessionsRepository,
+            IUserRepository userRepository,
+            IFirebaseService firebaseService,
+            IDeviceUnlinkService deviceUnlinkService)
         {
             _sessionsRepository = sessionsRepository;
             _userRepository = userRepository;
             _firebaseService = firebaseService;
+            _deviceUnlinkService = deviceUnlinkService;
         }
 
         [HttpGet, Route("Cancel")]
@@ -73,28 +80,32 @@ namespace passi_webapi.Controllers
             catch (Exception)
             {
             }
-            var notificationPayload = JsonConvert.SerializeObject(
-                new FirebaseNotificationDto()
-                {
-                    Sender = startLoginDto.ClientId,
-                    ReturnHost = host,
-                    SessionId = sessionDb.Guid,
-                    AccountGuid = user.Guid
-                });
-            var notificationTokens = registeredDevices
-                .Select(x => x.NotificationToken)
-                .Where(x => !string.IsNullOrWhiteSpace(x))
-                .Distinct()
+            var notificationDevices = registeredDevices
+                .Where(x => !string.IsNullOrWhiteSpace(x.NotificationToken))
+                .GroupBy(x => x.NotificationToken)
+                .Select(x => x.First())
                 .ToList();
 
-            if (!notificationTokens.Any() && !string.IsNullOrWhiteSpace(user.Device?.NotificationToken))
+            if (!notificationDevices.Any() && !string.IsNullOrWhiteSpace(user.Device?.NotificationToken))
             {
-                notificationTokens.Add(user.Device.NotificationToken);
+                notificationDevices.Add(user.Device);
             }
 
-            foreach (var notificationToken in notificationTokens)
+            foreach (var device in notificationDevices)
             {
-                _firebaseService.SendNotification(notificationToken, "Passi login", notificationPayload, host, sessionDb.Guid);
+                var userDeviceId = user.UserDevices.FirstOrDefault(x => x.DeviceId == device.Id)?.Id;
+                var notificationPayload = JsonConvert.SerializeObject(
+                    new FirebaseNotificationDto()
+                    {
+                        Sender = startLoginDto.ClientId,
+                        ReturnHost = host,
+                        SessionId = sessionDb.Guid,
+                        AccountGuid = user.Guid,
+                        DeviceId = device.DeviceId,
+                        UnlinkToken = _deviceUnlinkService.Issue(user.Id, device.Id, userDeviceId),
+                        ApiBaseUrl = _deviceUnlinkService.ApiBaseUrl,
+                    });
+                _firebaseService.SendNotification(device.NotificationToken, "Passi login", notificationPayload, host, sessionDb.Guid);
             }
 
             Guid sessionid = sessionDb.Guid;
@@ -290,6 +301,17 @@ namespace passi_webapi.Controllers
                     transaction.Commit();
                 }
             });
+
+            return Ok();
+        }
+
+        [HttpPost, Route("UnlinkDevice")]
+        public IActionResult UnlinkDevice([FromBody] UnlinkDeviceDto unlinkDeviceDto)
+        {
+            if (unlinkDeviceDto == null || !_deviceUnlinkService.TryUnlink(unlinkDeviceDto.UnlinkToken))
+            {
+                return BadRequest("Invalid or expired unlink token");
+            }
 
             return Ok();
         }

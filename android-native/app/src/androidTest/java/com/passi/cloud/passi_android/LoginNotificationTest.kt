@@ -59,6 +59,52 @@ class LoginNotificationTest {
     }
 
     @Test
+    fun missingAccountNotificationOffersDeviceRemovalWithoutOpeningLogin() {
+        PassiNotifications.showMissingAccountNotification(
+            context = context,
+            apiBaseUrl = "https://passi.cloud/passiapi",
+            unlinkToken = "single-use-token",
+        )
+
+        waitFor { activeCount() == 1 }
+        val posted = manager.activeNotifications.single().notification
+        assertEquals("Account is not on this device", posted.extras.getString(Notification.EXTRA_TITLE))
+        assertEquals("Remove device", posted.actions.single().title.toString())
+        assertEquals(null, posted.fullScreenIntent)
+    }
+
+    @Test
+    fun openingAppPreservesMissingAccountRemovalAction() {
+        PassiNotifications.showMissingAccountNotification(
+            context = context,
+            apiBaseUrl = "https://passi.cloud/passiapi",
+            unlinkToken = "single-use-token",
+        )
+
+        ActivityScenario.launch(MainActivity::class.java).use {
+            waitFor { activeCount() == 1 }
+            assertEquals("Remove device", manager.activeNotifications.single().notification.actions.single().title.toString())
+        }
+    }
+
+    @Test
+    fun missingAccountNotificationsForDifferentLinksDoNotReplaceEachOther() {
+        PassiNotifications.showMissingAccountNotification(
+            context = context,
+            apiBaseUrl = "https://passi.cloud/passiapi",
+            unlinkToken = "first-token",
+        )
+        PassiNotifications.showMissingAccountNotification(
+            context = context,
+            apiBaseUrl = "https://passi.cloud/passiapi",
+            unlinkToken = "second-token",
+        )
+
+        waitFor { activeCount() == 2 }
+        assertEquals(2, activeCount())
+    }
+
+    @Test
     fun openingAppClearsPendingNotifications() {
         // e.g. left in the tray by the FCM SDK while the app was in the background, or by older app versions
         NotificationManagerCompat.from(context).apply {

@@ -182,6 +182,50 @@ namespace Repos
             CleanupDeviceIfUnused(link.DeviceId);
         }
 
+        public void DeleteDeviceLink(long userId, long deviceId, long? userDeviceId)
+        {
+            var user = _dbContext.Users
+                .FromSqlInterpolated($@"SELECT * FROM ""Users"" WHERE ""Id"" = {userId} FOR UPDATE")
+                .AsTracking()
+                .ToList()
+                .SingleOrDefault();
+            if (user == null)
+            {
+                return;
+            }
+
+            _dbContext.Entry(user).Collection(x => x.UserDevices).Load();
+
+            var link = userDeviceId.HasValue
+                ? user.UserDevices.FirstOrDefault(x => x.Id == userDeviceId.Value && x.DeviceId == deviceId)
+                : user.UserDevices.FirstOrDefault(x => x.DeviceId == deviceId);
+            if (userDeviceId.HasValue && link == null)
+            {
+                return;
+            }
+
+            if (link == null && user.DeviceId != deviceId)
+            {
+                return;
+            }
+
+            if (link != null)
+            {
+                _dbContext.UserDevices.Remove(link);
+            }
+
+            if (user.DeviceId == deviceId)
+            {
+                user.DeviceId = user.UserDevices
+                    .Where(x => link == null || x.Id != link.Id)
+                    .OrderByDescending(x => x.CreationTime)
+                    .Select(x => (long?)x.DeviceId)
+                    .FirstOrDefault();
+            }
+
+            _dbContext.SaveChanges();
+        }
+
         public void AddInvitation(UserInvitationDb userInvitationDb)
         {
             _dbContext.RemoveRange(_dbContext.Invitations.Where(x => x.UserId == userInvitationDb.UserId));
@@ -344,6 +388,8 @@ namespace Repos
         IReadOnlyList<DeviceDb> GetAccountDevices(Guid accountGuid, string thumbprint);
 
         void DeleteDevice(Guid accountGuid, string thumbprint, string deviceId, string currentDeviceId);
+
+        void DeleteDeviceLink(long userId, long deviceId, long? userDeviceId);
 
         void AddInvitation(UserInvitationDb userInvitationDb);
 

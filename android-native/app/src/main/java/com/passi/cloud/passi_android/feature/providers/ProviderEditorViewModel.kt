@@ -33,6 +33,7 @@ data class ProviderEditorUiState(
     val deleteAccount: String = ApiPaths.defaultPaths().deleteAccount,
     val listDevices: String = ApiPaths.defaultPaths().listDevices,
     val deleteDevice: String = ApiPaths.defaultPaths().deleteDevice,
+    val unlinkDevice: String = ApiPaths.defaultPaths().unlinkDevice,
 )
 
 class ProviderEditorViewModel(
@@ -78,6 +79,7 @@ class ProviderEditorViewModel(
                         deleteAccount = state.deleteAccount,
                         listDevices = state.listDevices,
                         deleteDevice = state.deleteDevice,
+                        unlinkDevice = state.unlinkDevice,
                     )
                 )
             )
@@ -118,4 +120,5 @@ private fun Provider.toEditorState(): ProviderEditorUiState = ProviderEditorUiSt
     deleteAccount = apiPaths.deleteAccount,
     listDevices = apiPaths.listDevices,
     deleteDevice = apiPaths.deleteDevice,
+    unlinkDevice = apiPaths.unlinkDevice,
 )

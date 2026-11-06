@@ -93,6 +93,7 @@
     <string name="provider_delete_account">Удаление учётной записи</string>
     <string name="provider_list_devices">Список устройств</string>
     <string name="provider_delete_device">Удаление устройства</string>
+    <string name="provider_unlink_device">Отвязать устройство</string>
     <string name="provider_is_default_label">По умолчанию:</string>
     <string name="provider_signup_path">Путь регистрации:</string>
     <string name="provider_authorize_path">Авторизация:</string>

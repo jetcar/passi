@@ -12,6 +12,7 @@ import com.passi.cloud.passi_android.data.crypto.BouncyCastleCertificateGenerato
 import com.passi.cloud.passi_android.data.local.PassiPreferences
 import com.passi.cloud.passi_android.data.local.PendingEnrollmentStore
 import com.passi.cloud.passi_android.data.notifications.BackendNotificationTokenRegistrationService
+import com.passi.cloud.passi_android.data.notifications.BackendDeviceUnlinkService
 import com.passi.cloud.passi_android.data.notifications.NotificationOpenStore
 import com.passi.cloud.passi_android.data.remote.PassiApiClient
 import com.passi.cloud.passi_android.data.repository.BackendEnrollmentService
@@ -26,6 +27,7 @@ import com.passi.cloud.passi_android.domain.biometric.BiometricCertificateServic
 import com.passi.cloud.passi_android.domain.certificate.CertificateRotationService
 import com.passi.cloud.passi_android.domain.enrollment.CertificateGenerator
 import com.passi.cloud.passi_android.domain.notifications.NotificationTokenRegistrationService
+import com.passi.cloud.passi_android.domain.notifications.DeviceUnlinkService
 import com.passi.cloud.passi_android.domain.repository.AccountsRepository
 import com.passi.cloud.passi_android.domain.repository.ProvidersRepository
 import com.passi.cloud.passi_android.domain.service.EnrollmentService
@@ -50,6 +52,7 @@ interface PassiAppContainer {
     val biometricCertificateService: BiometricCertificateService
     val notificationOpenStore: NotificationOpenStore
     val notificationTokenRegistrationService: NotificationTokenRegistrationService
+    val deviceUnlinkService: DeviceUnlinkService
     val appUpdateChecker: AppUpdateChecker
 }
 
@@ -143,6 +146,13 @@ class DefaultPassiAppContainer(
             apiClient = apiClient,
             providersRepository = providersRepository,
             deviceIdProvider = { preferences.getOrCreateDeviceId() },
+        )
+    }
+
+    override val deviceUnlinkService: DeviceUnlinkService by lazy {
+        BackendDeviceUnlinkService(
+            apiClient = apiClient,
+            providersRepository = providersRepository,
         )
     }
 

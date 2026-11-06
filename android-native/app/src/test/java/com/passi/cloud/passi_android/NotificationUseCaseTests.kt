@@ -3,6 +3,7 @@ package com.passi.cloud.passi_android
 import com.google.common.truth.Truth.assertThat
 import com.google.gson.Gson
 import com.passi.cloud.passi_android.data.notifications.BackendNotificationTokenRegistrationService
+import com.passi.cloud.passi_android.data.notifications.BackendDeviceUnlinkService
 import com.passi.cloud.passi_android.data.notifications.NotificationOpenStore
 import com.passi.cloud.passi_android.data.remote.PassiApiClient
 import com.passi.cloud.passi_android.domain.model.ApiPaths
@@ -97,5 +98,56 @@ class NotificationUseCaseTests : CoroutineViewModelTest() {
         } finally {
             server.shutdown()
         }
+    }
+
+    @Test
+    fun deviceUnlinkPostsCapabilityOnlyToItsKnownProviderAndRedactsLogs() = runViewModelTest {
+        val server = MockWebServer()
+        val unlinkToken = "secret-unlink-capability"
+        server.enqueue(MockResponse().setResponseCode(200).setBody("{\"UnlinkToken\":\"$unlinkToken\"}"))
+        server.start()
+
+        try {
+            val baseUrl = server.url("/").toString().trimEnd('/')
+            val providersRepository = inMemoryProvidersRepository().apply {
+                saveProvider(
+                    Provider(
+                        id = UUID.fromString("a4cf8b51-fbb6-4ca2-a28b-d23dfac4f58d"),
+                        name = "local",
+                        baseUrl = baseUrl,
+                        isDefault = false,
+                        apiPaths = ApiPaths.defaultPaths(),
+                    )
+                )
+            }
+            val logs = mutableListOf<String>()
+            val service = BackendDeviceUnlinkService(
+                apiClient = PassiApiClient(Gson(), logs::add),
+                providersRepository = providersRepository,
+            )
+            val result = service.unlinkDevice(baseUrl, unlinkToken)
+            val request = server.takeRequest()
+
+            assertThat(result.isSuccess).isTrue()
+            assertThat(request.path).isEqualTo("/api/Auth/UnlinkDevice")
+            assertThat(request.body.readUtf8()).contains(unlinkToken)
+            assertThat(logs.none { it.contains(unlinkToken) }).isTrue()
+            assertThat(logs.any { it.contains("<redacted>") }).isTrue()
+        } finally {
+            server.shutdown()
+        }
+    }
+
+    @Test
+    fun deviceUnlinkRejectsUnknownNotificationProvider() = runViewModelTest {
+        val service = BackendDeviceUnlinkService(
+            apiClient = PassiApiClient(Gson()),
+            providersRepository = inMemoryProvidersRepository(),
+        )
+
+        val result = service.unlinkDevice("https://attacker.example", "unlink-token")
+
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()?.message).isEqualTo("Unknown notification provider")
     }
 }

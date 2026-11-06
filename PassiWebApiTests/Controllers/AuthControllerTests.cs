@@ -10,11 +10,13 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using WebApiDto.Auth;
 using WebApiDto.Auth.Dto;
 using WebApiDto.SignUp;
 using Repos;
 using WebApiDto;
+using passi_webapi.DeviceSecurity;
 
 namespace PassiWebApiTests.Controllers
 {
@@ -207,6 +209,120 @@ namespace PassiWebApiTests.Controllers
             }));
 
             Assert.That(exception?.Message, Is.EqualTo("Current device cannot be removed"));
+        }
+
+        [Test]
+        public void UnlinkDeviceTokenRemovesOnlyItsLinkAndCannotBeReplayed()
+        {
+            var signupController = ServiceProvider.GetService<SignUpController>();
+            var authController = ServiceProvider.GetService<AuthController>();
+            var unlinkService = ServiceProvider.GetRequiredService<IDeviceUnlinkService>();
+            var userRepository = ServiceProvider.GetRequiredService<IUserRepository>();
+            var email = Guid.NewGuid() + "@passi.cloud";
+            var accountGuid = Guid.NewGuid();
+            var removedDeviceId = Guid.NewGuid().ToString();
+            var remainingDeviceId = Guid.NewGuid().ToString();
+            var certificate = ConfirmAccountOnDevice(signupController, email, accountGuid, removedDeviceId);
+            ConfirmAccountOnDevice(signupController, email, accountGuid, remainingDeviceId);
+            var user = userRepository.GetUser(email);
+            var removedLink = user.UserDevices.Single(x => x.Device.DeviceId == removedDeviceId);
+            var token = unlinkService.Issue(user.Id, removedLink.DeviceId, removedLink.Id);
+
+            var tampered = authController.UnlinkDevice(new UnlinkDeviceDto { UnlinkToken = token + "00" });
+            Assert.That(tampered, Is.InstanceOf<BadRequestObjectResult>());
+            Assert.That(userRepository.GetAccountDevices(accountGuid, certificate.Thumbprint), Has.Count.EqualTo(2));
+
+            var removed = authController.UnlinkDevice(new UnlinkDeviceDto { UnlinkToken = token });
+            Assert.That(removed, Is.InstanceOf<OkResult>());
+            var remainingDevices = userRepository.GetAccountDevices(accountGuid, certificate.Thumbprint);
+            Assert.That(remainingDevices, Has.Count.EqualTo(1));
+            Assert.That(remainingDevices.Single().DeviceId, Is.EqualTo(remainingDeviceId));
+
+            var replay = authController.UnlinkDevice(new UnlinkDeviceDto { UnlinkToken = token });
+            Assert.That(replay, Is.InstanceOf<BadRequestObjectResult>());
+        }
+
+        [Test]
+        public async Task ConcurrentUnlinkTokensKeepLegacyDevicePointerConsistent()
+        {
+            var signupController = ServiceProvider.GetRequiredService<SignUpController>();
+            var userRepository = ServiceProvider.GetRequiredService<IUserRepository>();
+            var unlinkService = ServiceProvider.GetRequiredService<IDeviceUnlinkService>();
+            var email = Guid.NewGuid() + "@passi.cloud";
+            var accountGuid = Guid.NewGuid();
+            ConfirmAccountOnDevice(signupController, email, accountGuid, Guid.NewGuid().ToString());
+            ConfirmAccountOnDevice(signupController, email, accountGuid, Guid.NewGuid().ToString());
+            var user = userRepository.GetUser(email);
+            var tokens = user.UserDevices
+                .Select(x => unlinkService.Issue(user.Id, x.DeviceId, x.Id))
+                .ToArray();
+
+            var results = await Task.WhenAll(tokens.Select(token => Task.Run(() =>
+            {
+                using var scope = ServiceProvider.CreateScope();
+                return scope.ServiceProvider.GetRequiredService<IDeviceUnlinkService>().TryUnlink(token);
+            })));
+
+            Assert.That(results, Is.All.True);
+            using var assertionScope = ServiceProvider.CreateScope();
+            var updatedUser = assertionScope.ServiceProvider.GetRequiredService<IUserRepository>().GetUser(email);
+            Assert.That(updatedUser.UserDevices, Is.Empty);
+            Assert.That(updatedUser.DeviceId, Is.Null);
+        }
+
+        [Test]
+        public void FailedDatabaseWriteRestoresUnlinkCapabilityForRetry()
+        {
+            var signupController = ServiceProvider.GetRequiredService<SignUpController>();
+            var email = Guid.NewGuid() + "@passi.cloud";
+            var accountGuid = Guid.NewGuid();
+            var deviceId = Guid.NewGuid().ToString();
+            var certificate = ConfirmAccountOnDevice(signupController, email, accountGuid, deviceId);
+            string token;
+            IDeviceUnlinkService disposedService;
+
+            using (var failingScope = ServiceProvider.CreateScope())
+            {
+                var repository = failingScope.ServiceProvider.GetRequiredService<IUserRepository>();
+                disposedService = failingScope.ServiceProvider.GetRequiredService<IDeviceUnlinkService>();
+                var user = repository.GetUser(email);
+                var link = user.UserDevices.Single();
+                token = disposedService.Issue(user.Id, link.DeviceId, link.Id);
+            }
+
+            Assert.Catch(() => disposedService.TryUnlink(token));
+
+            using var retryScope = ServiceProvider.CreateScope();
+            var retryService = retryScope.ServiceProvider.GetRequiredService<IDeviceUnlinkService>();
+            var retryRepository = retryScope.ServiceProvider.GetRequiredService<IUserRepository>();
+            Assert.That(retryService.TryUnlink(token), Is.True);
+            Assert.That(retryRepository.GetAccountDevices(accountGuid, certificate.Thumbprint), Is.Empty);
+        }
+
+        [Test]
+        public void StaleGrantCannotDeleteRecreatedUserDeviceLink()
+        {
+            var signupController = ServiceProvider.GetRequiredService<SignUpController>();
+            var userRepository = ServiceProvider.GetRequiredService<IUserRepository>();
+            var unlinkService = ServiceProvider.GetRequiredService<IDeviceUnlinkService>();
+            var email = Guid.NewGuid() + "@passi.cloud";
+            var accountGuid = Guid.NewGuid();
+            var deviceId = Guid.NewGuid().ToString();
+            ConfirmAccountOnDevice(signupController, email, accountGuid, deviceId);
+            var user = userRepository.GetUser(email);
+            var originalLink = user.UserDevices.Single();
+            var firstToken = unlinkService.Issue(user.Id, originalLink.DeviceId, originalLink.Id);
+            var staleToken = unlinkService.Issue(user.Id, originalLink.DeviceId, originalLink.Id);
+
+            Assert.That(unlinkService.TryUnlink(firstToken), Is.True);
+            ConfirmAccountOnDevice(signupController, email, accountGuid, deviceId);
+            var recreatedLink = userRepository.GetUser(email).UserDevices.Single();
+            Assert.That(recreatedLink.Id, Is.Not.EqualTo(originalLink.Id));
+
+            Assert.That(unlinkService.TryUnlink(staleToken), Is.True);
+            var afterStaleGrant = userRepository.GetUser(email);
+            Assert.That(afterStaleGrant.UserDevices.Select(x => x.Id), Is.EqualTo(new[] { recreatedLink.Id }));
+            Assert.That(afterStaleGrant.DeviceId, Is.EqualTo(recreatedLink.DeviceId));
         }
 
         [Test]

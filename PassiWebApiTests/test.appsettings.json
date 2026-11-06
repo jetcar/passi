@@ -21,6 +21,7 @@
     "Timeout": "2",
     "DbSslMode": "Allow",
     "PassiUrl": "http://192.168.0.208:5004/passiapi",
+    "NotificationApiBaseUrl": "https://passi.cloud/passiapi",
     "IdentityUrl": "https://192.168.0.208/identity",
     "PassiClientId": "PassiClient",
     "PassiSecret": "secret1",

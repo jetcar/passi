@@ -95,6 +95,7 @@ fun ProviderEditorRoute(
             ProviderField(stringResource(R.string.provider_delete_account), uiState.deleteAccount) { value -> viewModel.update { it.copy(deleteAccount = value) } }
             ProviderField(stringResource(R.string.provider_list_devices), uiState.listDevices) { value -> viewModel.update { it.copy(listDevices = value) } }
             ProviderField(stringResource(R.string.provider_delete_device), uiState.deleteDevice) { value -> viewModel.update { it.copy(deleteDevice = value) } }
+            ProviderField(stringResource(R.string.provider_unlink_device), uiState.unlinkDevice) { value -> viewModel.update { it.copy(unlinkDevice = value) } }
 
             Button(
                 onClick = { viewModel.update { it.copy(isDefault = !it.isDefault) } },

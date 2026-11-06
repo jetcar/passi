@@ -14,6 +14,7 @@ data class ApiPaths(
     val deleteAccount: String,
     val listDevices: String,
     val deleteDevice: String,
+    val unlinkDevice: String,
 ) {
     companion object {
         fun defaultPaths(): ApiPaths = ApiPaths(
@@ -30,6 +31,7 @@ data class ApiPaths(
             deleteAccount = "/api/Auth/Delete",
             listDevices = "/api/Auth/Devices",
             deleteDevice = "/api/Auth/DeleteDevice",
+            unlinkDevice = "/api/Auth/UnlinkDevice",
         )
     }
 }

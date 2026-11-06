@@ -19,6 +19,7 @@ using NotificationsService;
 using RedisClient;
 using WebApiDto.Auth.Dto;
 using passi_webapi.Middleware;
+using passi_webapi.DeviceSecurity;
 
 namespace passi_webapi
 {
@@ -82,6 +83,7 @@ namespace passi_webapi
             services.AddScoped<PassiDbContext>();
             services.AddScoped<CurrentContext>();
             services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IDeviceUnlinkService, DeviceUnlinkService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<ISessionsRepository, SessionsRepository>();
             services.AddScoped<ICertificateRepository, CertificateRepository>();

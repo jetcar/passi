@@ -93,6 +93,7 @@
     <string name="provider_delete_account">Konto löschen</string>
     <string name="provider_list_devices">Geräte auflisten</string>
     <string name="provider_delete_device">Gerät löschen</string>
+    <string name="provider_unlink_device">Gerät entknüpfen</string>
     <string name="provider_is_default_label">Standard:</string>
     <string name="provider_signup_path">Registrierungspfad:</string>
     <string name="provider_authorize_path">Autorisierung:</string>

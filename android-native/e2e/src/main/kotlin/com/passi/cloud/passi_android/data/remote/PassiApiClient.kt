@@ -42,7 +42,7 @@ class PassiApiClient(
             val url = URL(baseUrl.trimEnd('/') + path)
             val requestBody = if (payload != null) gson.toJson(payload) else null
             println("[API] --> $method ${url}")
-            if (requestBody != null) println("[API]     body: $requestBody")
+            if (requestBody != null) println("[API]     body: ${requestBody.redactSecretsForLog()}")
 
             val connection = (url.openConnection() as HttpURLConnection).apply {
                 requestMethod = method
@@ -65,7 +65,7 @@ class PassiApiClient(
                 val statusCode = connection.responseCode
                 val body = readResponseBody(connection, statusCode)
                 println("[API] <-- $statusCode $method ${url}")
-                if (body.isNotEmpty()) println("[API]     body: $body")
+                if (body.isNotEmpty()) println("[API]     body: ${body.redactSecretsForLog()}")
                 ApiResult(
                     isSuccessful = statusCode in 200..299,
                     statusCode = statusCode,
@@ -97,4 +97,9 @@ class PassiApiClient(
 
         return stream.bufferedReader().use(BufferedReader::readText)
     }
+
+    private fun String.redactSecretsForLog(): String = replace(
+        Regex("(\\\"UnlinkToken\\\"\\s*:\\s*\\\")[^\\\"]*(\\\")", RegexOption.IGNORE_CASE),
+        "$1<redacted>$2",
+    )
 }

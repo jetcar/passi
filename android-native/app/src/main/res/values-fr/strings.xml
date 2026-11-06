@@ -93,6 +93,7 @@
     <string name="provider_delete_account">Supprimer le compte</string>
     <string name="provider_list_devices">Lister les appareils</string>
     <string name="provider_delete_device">Supprimer l’appareil</string>
+    <string name="provider_unlink_device">Dissocier l’appareil</string>
     <string name="provider_is_default_label">Par défaut :</string>
     <string name="provider_signup_path">Chemin d’inscription :</string>
     <string name="provider_authorize_path">Autorisation :</string>

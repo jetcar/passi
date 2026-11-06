@@ -93,6 +93,7 @@
     <string name="provider_delete_account">Kustuta konto</string>
     <string name="provider_list_devices">Seadmete loend</string>
     <string name="provider_delete_device">Kustuta seade</string>
+    <string name="provider_unlink_device">Eemalda seadme seos</string>
     <string name="provider_is_default_label">Vaikimisi:</string>
     <string name="provider_signup_path">Registreerimise tee:</string>
     <string name="provider_authorize_path">Autoriseerimine:</string>

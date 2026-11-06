@@ -191,6 +191,11 @@ class E2EFlowTests {
         }
 
         private fun buildLocalPassiApiImage() {
+            if (System.getenv("PASSI_E2E_USE_CACHED_IMAGE").equals("true", ignoreCase = true)) {
+                println("[E2E] Reusing cached PassiApi image $passiApiImage")
+                return
+            }
+
             val repoRoot = System.getProperty("passi.repo.root")
                 ?: throw IllegalStateException("Missing passi.repo.root system property")
 
@@ -339,6 +344,10 @@ class E2EFlowTests {
         val sessionId: String,
     )
 
+    private data class UnlinkDeviceRequest(
+        val unlinkToken: String,
+    )
+
     private data class RegisteredAccount(
         val accountGuid: String,
         val certificate: GeneratedCertificate,
@@ -350,6 +359,12 @@ class E2EFlowTests {
         val sessionId: String,
         val accountGuid: String,
         val randomString: String,
+    )
+
+    private data class NotificationSnapshot(
+        val accountGuid: String,
+        val deviceId: String,
+        val unlinkToken: String,
     )
 
     private fun waitForEmailCode(targetEmail: String, timeoutSeconds: Int = 30): String {
@@ -384,7 +399,7 @@ class E2EFlowTests {
                         ?.takeUnless { it.isJsonNull }
                         ?.asString
                         .orEmpty()
-                    val subjectMatch = Regex("""Passi confirmation code: (\d+)""").find(subject)
+                    val subjectMatch = Regex("""Passi (?:confirmation code:|code) (\d+)""").find(subject)
                     if (subjectMatch != null) {
                         return subjectMatch.groupValues[1]
                     }
@@ -611,6 +626,63 @@ class E2EFlowTests {
         println("[TEST] sameEmailOnAnotherDevice_keepsFirstDeviceAccountSynced DONE")
     }
 
+    @Test
+    fun reinstalledAppCanUnlinkDeviceFromMissingAccountNotification() = runBlocking {
+        val email = "reinstall-${UUID.randomUUID()}@example.com"
+        val originalDeviceId = UUID.randomUUID().toString()
+        val reinstalledDeviceId = UUID.randomUUID().toString()
+        val notificationToken = "reinstall-token-${UUID.randomUUID()}"
+        val enrollmentService = BackendEnrollmentService(apiClient)
+
+        val registration = registerAndFinalizeAccount(
+            enrollmentService = enrollmentService,
+            email = email,
+            deviceId = originalDeviceId,
+            pin = "1234",
+        )
+        updateDeviceToken(originalDeviceId, notificationToken)
+
+        // Reinstall clears local accounts and generates a new installation id. Firebase may
+        // return the same token, so the server moves that token while retaining the old link.
+        val localAccountGuids = emptySet<String>()
+        updateDeviceToken(reinstalledDeviceId, notificationToken)
+        assertThat(syncAccountGuids(reinstalledDeviceId, listOf(registration.accountGuid)))
+            .contains(registration.accountGuid)
+
+        clearMailhog()
+        startLoginSession(email)
+        val notification = waitForNotificationSnapshot()
+
+        assertThat(localAccountGuids).doesNotContain(notification.accountGuid)
+        assertThat(notification.accountGuid).isEqualTo(registration.accountGuid)
+        assertThat(notification.deviceId).isEqualTo(reinstalledDeviceId)
+        assertThat(notification.unlinkToken).isNotEmpty()
+
+        val tamperedResponse = unlinkDevice(notification.unlinkToken + "-tampered")
+        assertThat(tamperedResponse.isSuccessful).isFalse()
+
+        val unlinkResponse = unlinkDevice(notification.unlinkToken)
+        assertThat(unlinkResponse.isSuccessful).isTrue()
+        assertThat(syncAccountGuids(reinstalledDeviceId, listOf(registration.accountGuid))).isEmpty()
+
+        val replayResponse = unlinkDevice(notification.unlinkToken)
+        assertThat(replayResponse.isSuccessful).isFalse()
+
+        val loginAfterUnlink = apiClient.postJson(
+            baseUrl = provider.baseUrl,
+            path = "/api/Auth/Start",
+            payload = StartLoginRequest(
+                username = email,
+                clientId = "e2e-client",
+                randomString = UUID.randomUUID().toString().replace("-", ""),
+                checkColor = 1,
+                returnUrl = "https://example.test/callback",
+            ),
+        )
+        assertThat(loginAfterUnlink.isSuccessful).isFalse()
+        assertThat(loginAfterUnlink.body).contains("No registered devices")
+    }
+
     private suspend fun registerAndFinalizeAccount(
         enrollmentService: BackendEnrollmentService,
         email: String,
@@ -680,6 +752,12 @@ class E2EFlowTests {
         println("[TEST] updateDeviceToken($deviceId): status=${response.statusCode}")
         assertThat(response.isSuccessful).isTrue()
     }
+
+    private suspend fun unlinkDevice(unlinkToken: String) = apiClient.postJson(
+        baseUrl = provider.baseUrl,
+        path = "/api/Auth/UnlinkDevice",
+        payload = UnlinkDeviceRequest(unlinkToken = unlinkToken),
+    )
 
     private suspend fun startLoginSession(email: String): String {
         val response = apiClient.postJson(
@@ -781,6 +859,61 @@ class E2EFlowTests {
         }
         throw AssertionError("Expected at least $expectedCount notification emails within ${timeoutSeconds}s. Mailhog=$lastResponse")
     }
+
+    private fun waitForNotificationSnapshot(timeoutSeconds: Int = 30): NotificationSnapshot {
+        val apiUrl = "http://localhost:$mailhogHttpPort/api/v2/messages"
+        val deadline = System.currentTimeMillis() + timeoutSeconds * 1000L
+        var lastPayload = ""
+        while (System.currentTimeMillis() < deadline) {
+            val json = (URL(apiUrl).openConnection() as HttpURLConnection)
+                .inputStream.use { InputStreamReader(it).readText() }
+
+            val items = runCatching {
+                JsonParser.parseString(json).asJsonObject.getAsJsonArray("items")
+            }.getOrNull()
+            if (items != null) {
+                for (itemElement in items) {
+                    val content = itemElement.asJsonObject.getAsJsonObject("Content") ?: continue
+                    val encodedBody = content.get("Body")?.takeUnless { it.isJsonNull }?.asString.orEmpty()
+                    val body = decodeQuotedPrintable(encodedBody)
+                    val payloadJson = Regex("""(?m)^body=(\{.*})$""")
+                        .find(body)
+                        ?.groupValues
+                        ?.get(1)
+                        ?: continue
+                    val payload = runCatching { JsonParser.parseString(payloadJson).asJsonObject }.getOrNull()
+                        ?: continue
+                    lastPayload = payload.toString()
+                    val accountGuid = payload.readString("accountGuid", "AccountGuid") ?: continue
+                    val deviceId = payload.readString("deviceId", "DeviceId") ?: continue
+                    val unlinkToken = payload.readString("unlinkToken", "UnlinkToken") ?: continue
+                    return NotificationSnapshot(
+                        accountGuid = accountGuid,
+                        deviceId = deviceId,
+                        unlinkToken = unlinkToken,
+                    )
+                }
+            }
+
+            Thread.sleep(500)
+        }
+        throw AssertionError(
+            "Notification unlink payload not received within ${timeoutSeconds}s. " +
+                "Last payload=${lastPayload.redactSecretsForLog()}"
+        )
+    }
+
+    private fun decodeQuotedPrintable(value: String): String {
+        val unfolded = value.replace("=\r\n", "").replace("=\n", "")
+        return Regex("""=([0-9A-Fa-f]{2})""").replace(unfolded) { match ->
+            match.groupValues[1].toInt(16).toChar().toString()
+        }
+    }
+
+    private fun String.redactSecretsForLog(): String = replace(
+        Regex("(\\\"UnlinkToken\\\"\\s*:\\s*\\\")[^\\\"]*(\\\")", RegexOption.IGNORE_CASE),
+        "$1<redacted>$2",
+    )
 
     private fun com.google.gson.JsonObject.readString(vararg keys: String): String? {
         for (key in keys) {

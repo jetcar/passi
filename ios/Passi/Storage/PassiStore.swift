@@ -152,7 +152,7 @@ final class PassiStore: ObservableObject {
         }
     }
 
-    func poll() async {
+    func poll(surfaceErrors: Bool = false) async {
         guard !isBusy, !accounts.isEmpty else { return }
         isBusy = true
         defer { isBusy = false }
@@ -163,7 +163,7 @@ final class PassiStore: ObservableObject {
                 providers: providers
             )
         } catch {
-            errorMessage = error.localizedDescription
+            if surfaceErrors { errorMessage = error.localizedDescription }
         }
     }
 

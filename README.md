@@ -1,6 +1,6 @@
 # Passi
 
-Passwordless OAuth2 / OpenID Connect two-factor authentication: a .NET backend plus a native Android app.
+Passwordless OAuth2 / OpenID Connect two-factor authentication: a .NET backend plus native Android and iPhone apps.
 Instead of a password, the user approves each login on their phone by picking the matching color and signing
 the challenge with a device certificate, which can be protected by a PIN or fingerprint.
 
@@ -32,6 +32,7 @@ the challenge with a device certificate, which can be protected by a PIN or fing
 | `Services/`, `Repos/`, `Models/`, `WebApiDto/`, `RedisClient/`, `ConfigurationManager/`, `NotificationsService/`, `GoogleTracer/` | Shared libraries |
 | `*Tests/` | .NET test projects |
 | `android-native/` | Native Android app (Kotlin, Jetpack Compose) and its e2e tests. See [android-native/README.md](android-native/README.md) |
+| `ios/` | Native iPhone app (SwiftUI) and unsigned IPA build. See [ios/README.md](ios/README.md) |
 | `mailler/` | Mail server backend (`mailler-backend` image) |
 | `configs/` | HAProxy, identity and environment configuration |
 | `scripts/` | Container entrypoint and Let's Encrypt certificate scripts |
@@ -89,6 +90,7 @@ claude mcp add --transport http passi-news https://passi.cloud/mcp --client-id <
 | --- | --- | --- |
 | `build-and-push-with-build-number-version.yml` | Push to `main` (except Android, `.github` and Markdown changes) | Builds and pushes backend images, then deploys to the server with `run.sh` |
 | `google-play-release.yml` | Manual | Builds a signed AAB and uploads it to a Google Play track |
+| `ios-ipa.yml` | Manual or iOS changes | Tests the iPhone app and uploads an unsigned IPA for Sideloadly |
 | `monthly-dependency-release.yml` | 1st of each month, or manual | Updates NuGet, npm and Gradle dependencies, runs every test suite, then deploys and creates a Play production draft. If anything fails, it opens a PR instead |
 | `codeql.yml` | Push/PR to `main`, weekly | CodeQL analysis |
 

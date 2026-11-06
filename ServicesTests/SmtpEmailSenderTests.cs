@@ -1,7 +1,13 @@
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Mail;
+using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using ConfigurationManager;
 using Microsoft.Extensions.Configuration;
@@ -32,15 +38,68 @@ public class SmtpEmailSenderTests
         return appSetting;
     }
 
-    [Test]
-    public void SendDeletingEmailUsesEmailFromNotSmtpUsernameAsTheFromAddress()
+    private static AppSetting CreateIsolatedAppSetting(int smtpPort, int timeoutMilliseconds = 200)
     {
-        var sender = new SmtpEmailSender(CreateAppSetting());
+        var configuration = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string>
+        {
+            ["AppSetting:DoNotSendMail"] = "false",
+            ["AppSetting:smtpHost"] = "127.0.0.1",
+            ["AppSetting:smtpPort"] = smtpPort.ToString(),
+            ["AppSetting:smtpPassword"] = "x",
+            ["AppSetting:SmtpDisableSsl"] = "true",
+            ["AppSetting:emailFrom"] = "admin@passi.cloud",
+            ["AppSetting:smtpUsername"] = "-",
+            ["AppSetting:smtpTimeoutMilliseconds"] = timeoutMilliseconds.ToString(),
+            ["AppSetting:smtpRetryDelayMilliseconds"] = "0"
+        }).Build();
 
-        Assert.DoesNotThrowAsync(() => sender.SendDeletingEmailAsync("ignored@example.com", "123456"),
-            "SendDeletingEmailAsync builds its MailMessage's From address from 'smtpUsername', which in " +
-            "production is not a valid email address ('-'); it should use 'emailFrom' like " +
-            "SendInvitationEmailAsync does");
+        return new AppSetting(configuration) { PrefferAppsettingFile = true };
+    }
+
+    [Test]
+    public async Task SendFailureIsPropagatedAndEmailFromIsUsed()
+    {
+        var sender = new SmtpEmailSender(CreateIsolatedAppSetting(GetUnusedPort()));
+
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            sender.SendDeletingEmailAsync("someone@example.com", "123456"));
+
+        Assert.That(exception.InnerException, Is.Not.TypeOf<FormatException>());
+    }
+
+    [Test]
+    public void SenderDoesNotShareSmtpClientBetweenConcurrentSends()
+    {
+        var smtpClientFields = typeof(SmtpEmailSender)
+            .GetFields(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+            .Where(field => typeof(SmtpClient).IsAssignableFrom(field.FieldType));
+
+        Assert.That(smtpClientFields, Is.Empty);
+    }
+
+    [Test]
+    public async Task AsyncSendHonorsConfiguredTimeout()
+    {
+        using var listener = new TcpListener(IPAddress.Loopback, 0);
+        listener.Start();
+        var port = ((IPEndPoint)listener.LocalEndpoint).Port;
+        using var stopServer = new CancellationTokenSource();
+        var acceptedClients = new List<TcpClient>();
+        var serverTask = AcceptConnectionsAsync(listener, acceptedClients, stopServer.Token);
+        var sender = new SmtpEmailSender(CreateIsolatedAppSetting(port, 100));
+        var stopwatch = Stopwatch.StartNew();
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            sender.SendInvitationEmailAsync("someone@example.com", "123456"));
+
+        stopwatch.Stop();
+        stopServer.Cancel();
+        listener.Stop();
+        await serverTask;
+        foreach (var client in acceptedClients)
+            client.Dispose();
+
+        Assert.That(stopwatch.Elapsed, Is.LessThan(TimeSpan.FromSeconds(5)));
     }
 
     // DoNotSendMail=true with testMail set but smtpHost left as "-" (the appsettings.json
@@ -90,5 +149,32 @@ public class SmtpEmailSenderTests
             Assert.That(message.Body, Does.Contain(">123456</p>"));
             Assert.That(plainText, Does.Contain("confirmation code is: 123456"));
         });
+    }
+
+    private static int GetUnusedPort()
+    {
+        var listener = new TcpListener(IPAddress.Loopback, 0);
+        listener.Start();
+        var port = ((IPEndPoint)listener.LocalEndpoint).Port;
+        listener.Stop();
+        return port;
+    }
+
+    private static async Task AcceptConnectionsAsync(
+        TcpListener listener,
+        ICollection<TcpClient> acceptedClients,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            while (!cancellationToken.IsCancellationRequested)
+                acceptedClients.Add(await listener.AcceptTcpClientAsync(cancellationToken));
+        }
+        catch (OperationCanceledException)
+        {
+        }
+        catch (SocketException) when (cancellationToken.IsCancellationRequested)
+        {
+        }
     }
 }

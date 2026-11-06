@@ -43,6 +43,7 @@ namespace passi_webapi
             var secret = Environment.GetEnvironmentVariable("PassiSecret") ?? Configuration.GetValue<string>("AppSetting:PassiSecret");
             var projectId = Environment.GetEnvironmentVariable("projectId") ?? Configuration.GetValue<string>("AppSetting:projectId");
             var isTest = Convert.ToBoolean(Environment.GetEnvironmentVariable("IsTest") ?? Configuration.GetValue<string>("AppSetting:IsTest"));
+            var emailProvider = Environment.GetEnvironmentVariable("EmailProvider") ?? Configuration.GetValue<string>("AppSetting:EmailProvider");
 
             if (!isTest)
             {
@@ -54,13 +55,18 @@ namespace passi_webapi
             services.AddSingleton<IMyRestClient, MyRestClient>();
 
             services.AddSingleton<IRedisService, RedisService>();
-            if (isTest)
+            if (isTest || string.Equals(emailProvider, "Smtp", StringComparison.OrdinalIgnoreCase))
             {
                 services.AddSingleton<IEmailSender, SmtpEmailSender>();
             }
-            else
+            else if (emailProvider == null ||
+                     string.Equals(emailProvider, "SendGrid", StringComparison.OrdinalIgnoreCase))
             {
                 services.AddSingleton<IEmailSender, SendgridEmailSender>();
+            }
+            else
+            {
+                throw new InvalidOperationException($"Unsupported email provider '{emailProvider}'.");
             }
             services.AddSingleton<IRandomGenerator, RandomGenerator>();
             services.AddSingleton<ICertValidator, CertValidator>();

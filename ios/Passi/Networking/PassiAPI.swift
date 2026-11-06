@@ -75,7 +75,7 @@ actor PassiAPI {
                 method: "POST",
                 body: request
             )
-            if data.isEmpty || String(data: data, encoding: .utf8) == "null" {
+            if Self.isNoActiveSessionResponse(data) {
                 continue
             }
             return try Self.decodeNotification(data)
@@ -145,6 +145,13 @@ actor PassiAPI {
             accountID: accountID,
             confirmationNumber: dto.confirmationNumber
         )
+    }
+
+    private static func isNoActiveSessionResponse(_ data: Data) -> Bool {
+        if data.isEmpty { return true }
+        guard let value = try? JSONSerialization.jsonObject(with: data) else { return false }
+        if value is NSNull { return true }
+        return (value as? [String: Any])?.isEmpty == true
     }
 
     private static func parseDate(_ value: String) -> Date? {

@@ -44,7 +44,7 @@ final class CoreTests: XCTestCase {
         XCTAssertEqual(numbers.filter { $0 == 42 }.count, 1)
     }
 
-    func testPollingRequestsActiveSessionFromServer() async throws {
+    func testPollingTreatsEmptyServerObjectAsNoActiveSession() async throws {
         PollingURLProtocol.reset()
         let configuration = URLSessionConfiguration.ephemeral
         configuration.protocolClasses = [PollingURLProtocol.self]
@@ -103,7 +103,7 @@ private final class PollingURLProtocol: URLProtocol {
             return
         }
         Self.lock.withLock { Self.recordedPaths.append(url.path) }
-        let body = url.path.hasSuffix("SyncAccounts") ? Data("[]".utf8) : Data("null".utf8)
+        let body = url.path.hasSuffix("SyncAccounts") ? Data("[]".utf8) : Data("{}".utf8)
         let response = HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: nil)!
         client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
         client?.urlProtocol(self, didLoad: body)

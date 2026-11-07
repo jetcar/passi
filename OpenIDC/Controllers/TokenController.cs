@@ -65,13 +65,14 @@ namespace OpenIDC.Controllers
             }
 
             _logger.LogInformation("Token request received - GrantType: {GrantType}, ClientId: {ClientId}, Code: {Code}",
-                request.GrantType, request.ClientId, request.Code?.Substring(0, Math.Min(8, request.Code?.Length ?? 0)) + "...");
+                LogValue.Safe(request.GrantType), LogValue.Safe(request.ClientId),
+                LogValue.Safe(request.Code?.Substring(0, Math.Min(8, request.Code?.Length ?? 0)) + "..."));
 
             var normalizedGrantType = request.GrantType?.Trim();
             if (string.IsNullOrEmpty(normalizedGrantType) ||
                 (normalizedGrantType != "authorization_code" && normalizedGrantType != "refresh_token"))
             {
-                _logger.LogWarning("Unsupported grant type: {GrantType}", request.GrantType);
+                _logger.LogWarning("Unsupported grant type: {GrantType}", LogValue.Safe(request.GrantType));
                 return BadRequest(new { error = "unsupported_grant_type" });
             }
 
@@ -84,23 +85,23 @@ namespace OpenIDC.Controllers
                 return await HandleRefreshToken(request);
             }
 
-            _logger.LogWarning("Unsupported grant type: {GrantType}", request.GrantType);
+            _logger.LogWarning("Unsupported grant type: {GrantType}", LogValue.Safe(request.GrantType));
             return BadRequest(new { error = "unsupported_grant_type" });
         }
 
         private async Task<IActionResult> HandleAuthorizationCode(TokenRequest request)
         {
-            _logger.LogInformation("Handling authorization code exchange for client: {ClientId}", request.ClientId);
+            _logger.LogInformation("Handling authorization code exchange for client: {ClientId}", LogValue.Safe(request.ClientId));
 
             // Validate client exists
             var client = await _clientStore.GetClientAsync(request.ClientId);
             if (client == null)
             {
-                _logger.LogWarning("Client not found: {ClientId}", request.ClientId);
+                _logger.LogWarning("Client not found: {ClientId}", LogValue.Safe(request.ClientId));
                 return Unauthorized(new { error = "invalid_client" });
             }
 
-            _logger.LogDebug("Client validated successfully: {ClientId}", request.ClientId);
+            _logger.LogDebug("Client validated successfully: {ClientId}", LogValue.Safe(request.ClientId));
 
             // Consume the authorization code first (atomically, so a replayed/concurrent request for the
             // same code can never also get a non-null result) to check if PKCE was used
@@ -108,7 +109,7 @@ namespace OpenIDC.Controllers
             if (authCode == null || authCode.ExpiresAt < DateTime.UtcNow)
             {
                 _logger.LogWarning("Invalid or expired authorization code. Code: {Code}, Expired: {Expired}",
-                    request.Code?.Substring(0, Math.Min(8, request.Code?.Length ?? 0)) + "...",
+                    LogValue.Safe(request.Code?.Substring(0, Math.Min(8, request.Code?.Length ?? 0)) + "..."),
                     authCode?.ExpiresAt < DateTime.UtcNow);
                 return BadRequest(new { error = "invalid_grant", error_description = "Invalid or expired authorization code" });
             }
@@ -121,7 +122,7 @@ namespace OpenIDC.Controllers
             // Confidential clients (user-registered websites) must always authenticate with their secret
             if (client.RequireClientSecret && !hasClientSecret)
             {
-                _logger.LogWarning("Client secret required but not provided for client: {ClientId}", request.ClientId);
+                _logger.LogWarning("Client secret required but not provided for client: {ClientId}", LogValue.Safe(request.ClientId));
                 return Unauthorized(new { error = "invalid_client" });
             }
 
@@ -137,7 +138,7 @@ namespace OpenIDC.Controllers
             {
                 if (!await _clientStore.ValidateClientAsync(request.ClientId, request.ClientSecret))
                 {
-                    _logger.LogWarning("Client secret validation failed for client: {ClientId}", request.ClientId);
+                    _logger.LogWarning("Client secret validation failed for client: {ClientId}", LogValue.Safe(request.ClientId));
                     return Unauthorized(new { error = "invalid_client" });
                 }
                 _logger.LogDebug("Client authenticated with secret successfully");
@@ -146,18 +147,18 @@ namespace OpenIDC.Controllers
             // Validate client ID matches
             if (authCode.ClientId != request.ClientId)
             {
-                _logger.LogWarning("Client ID mismatch. Expected: {Expected}, Got: {Got}", authCode.ClientId, request.ClientId);
+                _logger.LogWarning("Client ID mismatch. Expected: {Expected}, Got: {Got}", LogValue.Safe(authCode.ClientId), LogValue.Safe(request.ClientId));
                 return BadRequest(new { error = "invalid_grant", error_description = "Client ID mismatch" });
             }
 
             // Validate redirect URI
             if (authCode.RedirectUri != request.RedirectUri)
             {
-                _logger.LogWarning("Redirect URI mismatch. Expected: {Expected}, Got: {Got}", authCode.RedirectUri, request.RedirectUri);
+                _logger.LogWarning("Redirect URI mismatch. Expected: {Expected}, Got: {Got}", LogValue.Safe(authCode.RedirectUri), LogValue.Safe(request.RedirectUri));
                 return BadRequest(new { error = "invalid_grant", error_description = "Redirect URI mismatch" });
             }
 
-            _logger.LogDebug("Authorization code validations passed. Subject: {Subject}", authCode.Subject);
+            _logger.LogDebug("Authorization code validations passed. Subject: {Subject}", LogValue.Safe(authCode.Subject));
 
             // Validate PKCE if it was used during authorization
             if (hasPkce)
@@ -178,7 +179,7 @@ namespace OpenIDC.Controllers
             }
 
             // Generate tokens
-            _logger.LogInformation("Generating tokens for subject: {Subject}, client: {ClientId}", authCode.Subject, authCode.ClientId);
+            _logger.LogInformation("Generating tokens for subject: {Subject}, client: {ClientId}", LogValue.Safe(authCode.Subject), LogValue.Safe(authCode.ClientId));
             var accessToken = _tokenService.GenerateAccessToken(authCode.Subject, authCode.ClientId, authCode.Scopes, authCode.Claims);
             var idToken = _tokenService.GenerateIdToken(authCode.Subject, authCode.ClientId, authCode.Scopes, authCode.Claims, authCode.Nonce);
 
@@ -191,7 +192,7 @@ namespace OpenIDC.Controllers
                 Claims = authCode.Claims
             });
 
-            _logger.LogInformation("Token exchange successful for subject: {Subject}", authCode.Subject);
+            _logger.LogInformation("Token exchange successful for subject: {Subject}", LogValue.Safe(authCode.Subject));
 
             return Ok(new
             {
@@ -220,20 +221,20 @@ namespace OpenIDC.Controllers
             if (refreshToken == null)
             {
                 // Usually a token that was already rotated, or one lost from Redis (e.g. a restart before it was persisted).
-                _logger.LogWarning("Refresh token not found for client: {ClientId}", request.ClientId);
+                _logger.LogWarning("Refresh token not found for client: {ClientId}", LogValue.Safe(request.ClientId));
                 return BadRequest(new { error = "invalid_grant", error_description = "Invalid or expired refresh token" });
             }
             if (refreshToken.ExpiresAt < DateTime.UtcNow)
             {
                 _logger.LogWarning("Refresh token expired at {ExpiresAt:o} for client: {ClientId}, subject: {Subject}",
-                    refreshToken.ExpiresAt, request.ClientId, refreshToken.Subject);
+                    refreshToken.ExpiresAt, LogValue.Safe(request.ClientId), LogValue.Safe(refreshToken.Subject));
                 return BadRequest(new { error = "invalid_grant", error_description = "Invalid or expired refresh token" });
             }
 
             // Validate client ID matches
             if (refreshToken.ClientId != request.ClientId)
             {
-                _logger.LogWarning("Refresh token client ID mismatch. Expected: {Expected}, Got: {Got}", refreshToken.ClientId, request.ClientId);
+                _logger.LogWarning("Refresh token client ID mismatch. Expected: {Expected}, Got: {Got}", LogValue.Safe(refreshToken.ClientId), LogValue.Safe(request.ClientId));
                 return BadRequest(new { error = "invalid_grant", error_description = "Client ID mismatch" });
             }
 

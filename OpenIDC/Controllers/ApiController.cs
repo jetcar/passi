@@ -168,7 +168,7 @@ public class ApiController : ControllerBase
         var result = await _myRestClient.ExecuteAsync(request);
         if (result.IsSuccessful)
         {
-            _logger.LogDebug("response:" + result.Content);
+            _logger.LogDebug("Login start response received: {StatusCode}", result.StatusCode);
             var loginResponceDto = JsonConvert.DeserializeObject<LoginResponceDto>(result.Content);
             if (loginResponceDto == null || loginResponceDto.SessionId == Guid.Empty)
             {
@@ -207,7 +207,7 @@ public class ApiController : ControllerBase
             });
         }
 
-        _logger.LogDebug("response:" + result.Content);
+        _logger.LogDebug("Login start response received: {StatusCode}", result.StatusCode);
         if (result.Content != null)
         {
             return BadRequest(new ApiResponseDto() { errors = GetApiErrorMessage(result.Content) });
@@ -296,17 +296,17 @@ public class ApiController : ControllerBase
         string loginHint,
         string codeChallenge,
         string codeChallengeMethod) => new()
-    {
-        ClientId = clientId,
-        RedirectUri = redirectUri,
-        ResponseType = responseType,
-        Scope = scope,
-        State = state,
-        Nonce = nonce,
-        LoginHint = loginHint,
-        CodeChallenge = codeChallenge,
-        CodeChallengeMethod = codeChallengeMethod,
-    };
+        {
+            ClientId = clientId,
+            RedirectUri = redirectUri,
+            ResponseType = responseType,
+            Scope = scope,
+            State = state,
+            Nonce = nonce,
+            LoginHint = loginHint,
+            CodeChallenge = codeChallenge,
+            CodeChallengeMethod = codeChallengeMethod,
+        };
 
     private bool IsSameOriginRequest()
     {
@@ -391,7 +391,7 @@ public class ApiController : ControllerBase
         string state,
         int statusCode = StatusCodes.Status400BadRequest)
     {
-        _logger.LogWarning("Authorization request rejected: {Error}. {Description}", error, description);
+        _logger.LogWarning("Authorization request rejected: {Error}. {Description}", LogValue.Safe(error), LogValue.Safe(description));
         var payload = new
         {
             error,
@@ -455,7 +455,7 @@ public class ApiController : ControllerBase
         [FromQuery] string code_challenge_method)
     {
         _logger.LogInformation("Check endpoint called - SessionId: {SessionId}, ClientId: {ClientId}, RedirectUri: {RedirectUri}",
-            sessionId, client_id, redirect_uri);
+            LogValue.Safe(sessionId), LogValue.Safe(client_id), LogValue.Safe(redirect_uri));
 
         if (HasRepeatedAuthorizationParameter())
             return AuthorizationError("invalid_request", "Authorization parameters must not be repeated.", null, state);
@@ -464,7 +464,7 @@ public class ApiController : ControllerBase
         var client = await _clientStore.GetClientAsync(client_id);
         if (client == null)
         {
-            _logger.LogWarning("Client not found: {ClientId}", client_id);
+            _logger.LogWarning("Client not found: {ClientId}", LogValue.Safe(client_id));
             return BadRequest(new ApiResponseDto() { errors = "Invalid client_id" });
         }
 
@@ -472,7 +472,8 @@ public class ApiController : ControllerBase
         if (!RedirectUriHelper.IsAllowed(redirect_uri, client))
         {
             _logger.LogWarning("Invalid redirect_uri: {RedirectUri} for client: {ClientId}. Registered URIs: {RegisteredUris}",
-                redirect_uri, client_id, string.Join(", ", client.RedirectUris ?? new List<string>()));
+                LogValue.Safe(redirect_uri), LogValue.Safe(client_id),
+                LogValue.Safe(string.Join(", ", client.RedirectUris ?? new List<string>())));
             return BadRequest(new ApiResponseDto() { errors = "Invalid redirect_uri - must exactly match registered URI including protocol (http/https)" });
         }
 
@@ -523,7 +524,7 @@ public class ApiController : ControllerBase
                     var cert = JsonConvert.DeserializeObject<CertificateDto>(result2.Content);
                     if (cert?.PublicCert == null)
                     {
-                        _logger.LogWarning("Certificate lookup returned no certificate for user: {Username}", checkResponceDto.Username);
+                        _logger.LogWarning("Certificate lookup returned no certificate for user: {Username}", LogValue.Safe(checkResponceDto.Username));
                         return BadRequest(new ApiResponseDto() { errors = "Invalid Certificate" });
                     }
 
@@ -531,7 +532,7 @@ public class ApiController : ControllerBase
                     if (publicCertificate.NotAfter < DateTime.UtcNow ||
                         publicCertificate.NotBefore > DateTime.UtcNow)
                     {
-                        _logger.LogWarning("Certificate is not currently valid for user: {Username}", checkResponceDto.Username);
+                        _logger.LogWarning("Certificate is not currently valid for user: {Username}", LogValue.Safe(checkResponceDto.Username));
                         return BadRequest(new ApiResponseDto() { errors = "Invalid Certificate" });
                     }
 
@@ -541,8 +542,8 @@ public class ApiController : ControllerBase
                             Method.Get);
                     var requestCurrentSessionResult = await _myRestClient.ExecuteAsync(requestCurrentSessionReq);
 
-                    _logger.LogDebug("Current session request - Success: {Success}, Content: {Content}",
-                        requestCurrentSessionResult.IsSuccessful, requestCurrentSessionResult.Content);
+                    _logger.LogDebug("Current session request - Success: {Success}, StatusCode: {StatusCode}",
+                        requestCurrentSessionResult.IsSuccessful, requestCurrentSessionResult.StatusCode);
 
                     if (requestCurrentSessionResult.IsSuccessful)
                     {
@@ -556,7 +557,7 @@ public class ApiController : ControllerBase
                                       CertHelper.VerifyData(session.RandomString, session.SignedHash, cert.PublicCert);
 
                         _logger.LogDebug("Signature validation result: {IsValid}, Username: {Username}",
-                            isValid, checkResponceDto.Username);
+                            isValid, LogValue.Safe(checkResponceDto.Username));
 
                         if (isValid)
                         {
@@ -609,7 +610,7 @@ public class ApiController : ControllerBase
                             var code = await _authCodeStore.CreateAuthorizationCodeAsync(authCode);
 
                             _logger.LogInformation("Authorization code created: {Code}, redirecting to: {RedirectUri}",
-                                code.Substring(0, Math.Min(8, code.Length)) + "...", redirect_uri);
+                                LogValue.Safe(code.Substring(0, Math.Min(8, code.Length)) + "..."), LogValue.Safe(redirect_uri));
 
                             // Return authorization code to redirect
                             var redirectUrl = RedirectUriHelper.BuildAuthorizationResponse(redirect_uri, code, state);

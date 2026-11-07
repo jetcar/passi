@@ -1,4 +1,4 @@
-FROM node:23 as vueWeb
+FROM node:24 AS vueWeb
 COPY . /src
 WORKDIR /src/WebApp/vue-project
 RUN npm install

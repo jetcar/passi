@@ -1,4 +1,4 @@
-﻿<script>
+<script>
 
     const API_URL = `/openidc/api/login`
     const API_CHECK_URL = `/openidc/api/check`
@@ -31,6 +31,8 @@
                 authorizationChecking: true,
                 autoLoginPending: Boolean(loginHint),
                 loginToken: null,
+                consent: null,
+                consentAccepted: false,
             }
         },
 
@@ -125,6 +127,9 @@
                             this.errorMessage = this.$t('login.errors.invalidToken')
                             return
                         }
+                        this.consent = result.consent_required ? result : null
+                        this.consentAccepted = false
+                        if (this.consent) this.autoLoginPending = false
                         this.loginToken = result.login_token
                         this.authorizationReady = true
                         if (this.autoLoginPending) {
@@ -224,6 +229,7 @@
                     await this.validateAuthorizationRequest(true)
                     return
                 }
+                if (this.consent && !this.consentAccepted) return
                 this.LoginInput.Username = this.LoginInput.Username.trim()
                 if (!this.LoginInput.Username) {
                     this.errorMessage = this.$t('login.errors.usernameRequired')
@@ -307,6 +313,14 @@
                     </div>
 
                     <form class="auth-form" @submit.prevent="handleLoginClick">
+                        <section v-if="consent" class="auth-consent" :aria-label="$t('login.consent.title')">
+                            <p>{{ $t('login.consent.description') }}</p>
+                            <p>{{ $t('login.consent.name') }}: <bdi>{{ consent.client_name }}</bdi></p>
+                            <p>{{ $t('login.consent.redirect') }}: <bdi>{{ consent.redirect_uri }}</bdi></p>
+                            <p v-if="consent.resource">{{ $t('login.consent.resource') }}: <bdi>{{ consent.resource }}</bdi></p>
+                            <p>{{ $t('login.consent.scopes') }}: {{ consent.scopes.join(', ') }}</p>
+                            <label><input type="checkbox" v-model="consentAccepted"> {{ $t('login.consent.approve') }}</label>
+                        </section>
                         <label for="username">{{ $t('login.username') }}</label>
                         <input
                             id="username"
@@ -319,7 +333,7 @@
                             :disabled="loading || authorizationChecking || !authorizationReady"
                             autofocus
                         >
-                        <button class="auth-primary-button" type="submit" :disabled="loading || authorizationChecking || !authorizationReady">
+                        <button class="auth-primary-button" type="submit" :disabled="loading || authorizationChecking || !authorizationReady || (consent && !consentAccepted)">
                             <span class="auth-spinner" aria-hidden="true" v-if="loading || authorizationChecking"></span>
                             {{ authorizationChecking ? $t('login.validating') : loading ? $t('login.starting') : $t('login.continue') }}
                         </button>
@@ -418,7 +432,7 @@
                     <div class="challenge-number" v-if="LoginResponse.checkNumber">
                         {{ LoginResponse.checkNumber }}
                     </div>
-                    <div class="challenge-number challenge-number-loading" v-else>••</div>
+                    <div class="challenge-number challenge-number-loading" v-else>вЂўвЂў</div>
                     <p class="challenge-status">{{ $t('login.challenge.waitingApproval') }}</p>
                     <div class="challenge-fallback">
                         <span>{{ $t('login.challenge.olderApp', { color: LoginResponse.checkColor }) }}</span>
@@ -433,3 +447,10 @@
         </div>
     </main>
 </template>
+
+<style scoped>
+.auth-consent { overflow-wrap: anywhere; padding: 1rem; border: 1px solid #8d87a6; border-radius: .5rem; }
+.auth-consent p { margin: 0 0 .6rem; }
+.auth-consent label { display: flex; align-items: flex-start; gap: .5rem; }
+.auth-consent input[type="checkbox"] { width: 1.1rem; height: 1.1rem; min-height: 0; padding: 0; flex-shrink: 0; }
+</style>

@@ -12,7 +12,7 @@ namespace OpenIDC.Services
 {
     public interface ITokenService
     {
-        string GenerateAccessToken(string subject, string clientId, List<string> scopes, Dictionary<string, string> claims);
+        string GenerateAccessToken(string subject, string clientId, List<string> scopes, Dictionary<string, string> claims, string resource = null);
         string GenerateIdToken(string subject, string clientId, List<string> scopes, Dictionary<string, string> claims, string nonce);
         ClaimsPrincipal ValidateToken(string token);
         ClaimsPrincipal ValidateIdToken(string token, string expectedClientId);
@@ -35,7 +35,7 @@ namespace OpenIDC.Services
             _issuer = $"{appSetting["IdentityUrlBase"]}/openidc";
         }
 
-        public string GenerateAccessToken(string subject, string clientId, List<string> scopes, Dictionary<string, string> claims)
+        public string GenerateAccessToken(string subject, string clientId, List<string> scopes, Dictionary<string, string> claims, string resource = null)
         {
             var tokenClaims = new List<Claim>
             {
@@ -47,6 +47,8 @@ namespace OpenIDC.Services
 
             foreach (var claim in claims)
             {
+                if (claim.Key == "email" && !scopes.Contains("email")) continue;
+                if (new[] { "iss", "aud", "sub", "client_id", "scope", "exp", "iat", "nbf", "jti" }.Contains(claim.Key)) continue;
                 tokenClaims.Add(new Claim(claim.Key, claim.Value));
             }
 
@@ -55,7 +57,8 @@ namespace OpenIDC.Services
                 Subject = new ClaimsIdentity(tokenClaims),
                 Expires = DateTime.UtcNow.AddMinutes(_accessTokenLifetimeMinutes),
                 Issuer = _issuer,
-                Audience = clientId,
+                Audience = resource ?? clientId,
+                IssuedAt = DateTime.UtcNow,
                 SigningCredentials = _signingCredentials
             };
 

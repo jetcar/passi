@@ -121,6 +121,33 @@ return { current, ttl }";
             return acquired;
         }
 
+        // Atomic capacity enforcement across all server replicas. Expiring values are cleaned by Redis;
+        // the bounded index is pruned on admission and expires with its last member when idle.
+        public bool TryAddBounded<T>(string bucket, string key, T item, int capacity, TimeSpan lifetime)
+        {
+            if (capacity <= 0 || lifetime <= TimeSpan.Zero) throw new ArgumentOutOfRangeException(nameof(capacity));
+            const string script = @"
+local time = redis.call('TIME')
+local now = tonumber(time[1]) * 1000 + math.floor(tonumber(time[2]) / 1000)
+redis.call('ZREMRANGEBYSCORE', KEYS[1], '-inf', now)
+if redis.call('ZCARD', KEYS[1]) >= tonumber(ARGV[1]) then return 0 end
+if not redis.call('SET', KEYS[2], ARGV[3], 'PX', ARGV[2], 'NX') then return 0 end
+redis.call('ZADD', KEYS[1], now + tonumber(ARGV[2]), KEYS[2])
+local last = redis.call('ZREVRANGE', KEYS[1], 0, 0, 'WITHSCORES')
+redis.call('PEXPIREAT', KEYS[1], last[2])
+return 1";
+            using var redis = _redisManager.GetClient();
+            return redis.ExecLuaAsInt(script,
+                new[] { bucket, typeof(T).FullName + "." + key },
+                new[] { capacity.ToString(CultureInfo.InvariantCulture),
+                    ((long)Math.Ceiling(lifetime.TotalMilliseconds)).ToString(CultureInfo.InvariantCulture),
+                    EncodeStoredString(item) }) == 1;
+        }
+
+        // Match Add's existing ServiceStack Set<string> wire format for ordinary Get<T> readers.
+        public static string EncodeStoredString<T>(T item) =>
+            ServiceStack.Text.JsonSerializer.SerializeToString(JsonConvert.SerializeObject(item));
+
         /// <summary>
         /// Add stores through IRedisClient.Set&lt;string&gt;, which ServiceStack JSON-encodes into a quoted
         /// string literal. Get&lt;string&gt; undoes that, but a GET queued in a transaction hands back the raw
@@ -146,5 +173,8 @@ return { current, ttl }";
         {
             throw new NotSupportedException("This Redis service does not support rate limiting.");
         }
+
+        bool TryAddBounded<T>(string bucket, string key, T item, int capacity, TimeSpan lifetime) =>
+            throw new NotSupportedException("This Redis service does not support bounded storage.");
     }
 }

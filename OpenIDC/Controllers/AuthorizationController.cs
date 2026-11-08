@@ -110,10 +110,12 @@ namespace OpenIDC.Controllers
             var claims = new Dictionary<string, object>
             {
                 ["sub"] = userId,
-                ["email"] = email,
                 ["name"] = userName,
                 ["preferred_username"] = userName
             };
+
+            if ((User.FindFirst("scope")?.Value ?? "").Split(' ').Contains("email"))
+                claims["email"] = email;
 
             // Add custom claims
             var thumbprint = User.FindFirst("Thumbprint")?.Value;
@@ -138,6 +140,7 @@ namespace OpenIDC.Controllers
         }
 
         [HttpGet(".well-known/openid-configuration")]
+        [HttpGet(".well-known/oauth-authorization-server")]
         public IActionResult Discovery()
         {
             var baseUrl = $"{_appSetting["IdentityUrlBase"]}/openidc";
@@ -147,6 +150,7 @@ namespace OpenIDC.Controllers
                 issuer = baseUrl,
                 authorization_endpoint = $"{baseUrl}/login",
                 token_endpoint = $"{baseUrl}/connect/token",
+                registration_endpoint = $"{baseUrl}/connect/register",
                 userinfo_endpoint = $"{baseUrl}/connect/userinfo",
                 jwks_uri = $"{baseUrl}/.well-known/jwks",
                 end_session_endpoint = $"{baseUrl}/connect/logout",
@@ -156,7 +160,7 @@ namespace OpenIDC.Controllers
                 subject_types_supported = new[] { "public" },
                 id_token_signing_alg_values_supported = new[] { "RS256" },
                 token_endpoint_auth_methods_supported = new[] { "client_secret_post", "client_secret_basic", "none" },
-                code_challenge_methods_supported = new[] { "S256", "plain" }
+                code_challenge_methods_supported = new[] { "S256" }
             };
 
             return Ok(discoveryDocument);

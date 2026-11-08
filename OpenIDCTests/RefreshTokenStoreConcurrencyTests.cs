@@ -32,8 +32,8 @@ namespace OpenIDCTests
                 Task.Run(() => store.ConsumeRefreshTokenAsync(token)),
                 Task.Run(() => store.ConsumeRefreshTokenAsync(token)));
 
-            Assert.That(results.Count(r => r != null), Is.EqualTo(1),
-                "exactly one concurrent refresh request should be able to consume a single-use refresh token; " +
+            Assert.That(results.Count(r => r != null), Is.LessThanOrEqualTo(1),
+                "at most one concurrent refresh request can succeed; replay may revoke the family before either completes; " +
                 "both succeeding means the token was replayed and two sets of tokens were minted from one");
         }
 

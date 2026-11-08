@@ -157,7 +157,7 @@ namespace OpenIDCTests
 
         private class StubTokenService : ITokenService
         {
-            public string GenerateAccessToken(string subject, string clientId, List<string> scopes, Dictionary<string, string> claims) => "access";
+            public string GenerateAccessToken(string subject, string clientId, List<string> scopes, Dictionary<string, string> claims, string resource = null) => "access";
             public string GenerateIdToken(string subject, string clientId, List<string> scopes, Dictionary<string, string> claims, string nonce) => "id";
             public System.Security.Claims.ClaimsPrincipal ValidateToken(string token) => null;
             public System.Security.Claims.ClaimsPrincipal ValidateIdToken(string token, string expectedClientId) => null;

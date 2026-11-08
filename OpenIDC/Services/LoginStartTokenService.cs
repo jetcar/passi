@@ -20,6 +20,7 @@ namespace OpenIDC.Services
     public sealed class LoginStartTokenRequest
     {
         public string ClientId { get; init; }
+        public string Resource { get; init; }
         public string RedirectUri { get; init; }
         public string ResponseType { get; init; }
         public string Scope { get; init; }
@@ -192,6 +193,8 @@ namespace OpenIDC.Services
             Append(canonical, request.LoginHint);
             Append(canonical, request.CodeChallenge);
             Append(canonical, request.CodeChallengeMethod);
+            // Preserve hashes of in-flight legacy requests without a resource during rollout.
+            if (request.Resource != null) Append(canonical, request.Resource);
             return Hash(canonical.ToString());
         }
 

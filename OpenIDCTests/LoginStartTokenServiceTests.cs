@@ -106,8 +106,9 @@ namespace OpenIDCTests
 
         private static LoginStartTokenRequest Request(
             string redirectUri = "https://site/cb",
-            string loginHint = "alice@passi.cloud") => new()
+            string loginHint = "alice@passi.cloud", string resource = null) => new()
         {
+            Resource = resource,
             ClientId = "SampleApp",
             RedirectUri = redirectUri,
             ResponseType = "code",
@@ -118,6 +119,24 @@ namespace OpenIDCTests
             CodeChallenge = "challenge",
             CodeChallengeMethod = "S256",
         };
+
+        [Test]
+        public void ResourceIsBoundToBothLoginStartAndApprovedSession()
+        {
+            var service = new LoginStartTokenService(new InMemoryRedisService(), TimeSpan.FromMinutes(5));
+            var context = ContextWithCookie("browser");
+            var original = Request(resource: ResourcePolicy.Finance);
+            var token = service.Issue(context, original);
+            service.BindSession(context, "session", original);
+            foreach (var changed in new[] { Request(), Request(resource: "https://other.example/mcp") })
+            {
+                Assert.That(service.TryConsume(context, token, changed), Is.False);
+                Assert.That(service.IsSessionBound(context, "session", changed), Is.False);
+                Assert.That(service.TryConsumeSession(context, "session", changed), Is.False);
+            }
+            Assert.That(service.TryConsume(context, token, original), Is.True);
+            Assert.That(service.TryConsumeSession(context, "session", original), Is.True);
+        }
 
         private static DefaultHttpContext ContextWithCookie(string value)
         {

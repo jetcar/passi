@@ -73,12 +73,14 @@ namespace OpenIDC.Services
             _redis.TryAcquireFixedWindow(
                 Key("token-ip", ClientIp(context)), _tokenPermitLimit, _window, out retryAfter);
 
-        private string ClientIp(HttpContext context)
+        private string ClientIp(HttpContext context) => ClientIp(context, _isTrustedProxy);
+
+        internal static string ClientIp(HttpContext context, Func<IPAddress, bool> isTrustedProxy)
         {
             var remoteIp = context?.Connection.RemoteIpAddress;
             if (remoteIp == null)
                 throw new InvalidOperationException("The client IP address is unavailable.");
-            if (!_isTrustedProxy(remoteIp))
+            if (!isTrustedProxy(remoteIp))
                 return NormalizeIp(remoteIp);
 
             var forwarded = context.Request.Headers["X-Forwarded-For"].ToString();
@@ -87,7 +89,7 @@ namespace OpenIDC.Services
                 StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
             for (var index = addresses.Length - 1; index >= 0; index--)
             {
-                if (IPAddress.TryParse(addresses[index], out var forwardedIp) && !_isTrustedProxy(forwardedIp))
+                if (IPAddress.TryParse(addresses[index], out var forwardedIp) && !isTrustedProxy(forwardedIp))
                     return NormalizeIp(forwardedIp);
             }
 
@@ -111,7 +113,7 @@ namespace OpenIDC.Services
                 ? parsed
                 : fallback;
 
-        private sealed class TrustedProxyResolver
+        internal sealed class TrustedProxyResolver
         {
             private static readonly TimeSpan RefreshInterval = TimeSpan.FromMinutes(1);
             private readonly string[] _hosts;

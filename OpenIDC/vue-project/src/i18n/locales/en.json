@@ -40,6 +40,15 @@
     "googlePlayAlt": "Get it on Google Play"
   },
   "login": {
+    "consent": {
+      "title": "Application access",
+      "description": "This application is requesting access to your Passi account.",
+      "name": "Unverified application name",
+      "redirect": "Redirect",
+      "resource": "Resource",
+      "scopes": "Permissions",
+      "approve": "I approve this application and these permissions."
+    },
     "homeAria": "Passi home",
     "welcomeTitle": "Welcome back",
     "welcomeSubtitle": "Enter your Passi username to continue securely.",

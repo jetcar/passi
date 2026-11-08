@@ -78,7 +78,7 @@ namespace OpenIDCTests
 
         private class FakeTokenService : ITokenService
         {
-            public string GenerateAccessToken(string subject, string clientId, List<string> scopes, Dictionary<string, string> claims) => "access-token";
+            public string GenerateAccessToken(string subject, string clientId, List<string> scopes, Dictionary<string, string> claims, string resource = null) => "access-token";
             public string GenerateIdToken(string subject, string clientId, List<string> scopes, Dictionary<string, string> claims, string nonce) => "id-token";
             public System.Security.Claims.ClaimsPrincipal ValidateToken(string token) => null;
             public System.Security.Claims.ClaimsPrincipal ValidateIdToken(string token, string expectedClientId) => null;

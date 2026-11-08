@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using OpenIDC.Models;
 
 namespace OpenIDC.Helpers
@@ -12,6 +13,9 @@ namespace OpenIDC.Helpers
         /// </summary>
         public static bool IsAllowed(string redirectUri, OidcClient client)
         {
+            if (client?.IsDynamic == true)
+                return client.RedirectUris?.Contains(redirectUri, StringComparer.Ordinal) == true;
+
             if (string.IsNullOrEmpty(redirectUri) || client?.RedirectUris == null || !Uri.TryCreate(redirectUri, UriKind.Absolute, out var requested))
                 return false;
 

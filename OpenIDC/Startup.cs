@@ -51,6 +51,7 @@ public class Startup
         services.AddSingleton<IRegisteredClientRepository, RegisteredClientRepository>();
         services.AddScoped<IRegisteredClientService, RegisteredClientService>();
         services.AddSingleton<IClientStore, ClientStore>();
+        services.AddSingleton<DynamicClientRegistration>();
         services.AddSingleton<IAuthorizationCodeStore, AuthorizationCodeStore>();
         services.AddSingleton<IRefreshTokenStore, RefreshTokenStore>();
         services.AddSingleton<ILoginRateLimiter, LoginRateLimiter>();

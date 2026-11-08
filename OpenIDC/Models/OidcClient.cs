@@ -23,5 +23,7 @@ namespace OpenIDC.Models
 
         /// <summary>Public client (no secret): relies on PKCE; refresh does not require a secret.</summary>
         public bool IsPublicClient { get; set; }
+        public bool IsDynamic { get; set; }
+        public DateTime? ExpiresAt { get; set; }
     }
 }

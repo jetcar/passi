@@ -35,6 +35,12 @@ namespace OpenIDC.Services
             if (string.IsNullOrEmpty(clientId))
                 return null;
 
+            if (clientId.StartsWith(DynamicClientRegistration.ClientIdPrefix, StringComparison.Ordinal))
+            {
+                var dynamicClient = _redisService.Get<OidcClient>(DynamicClientRegistration.KeyPrefix + clientId);
+                return dynamicClient?.ExpiresAt > DateTime.UtcNow ? dynamicClient : null;
+            }
+
             var client = _redisService.Get<OidcClient>($"{ClientPrefix}{clientId}");
             if (client != null || _registeredClients == null)
                 return client;

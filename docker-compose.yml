@@ -40,7 +40,9 @@ services:
       - ../redis_data/:/data
   haproxy:
     container_name: haproxy
-    image: haproxy:3.2.26-trixie
+    build:
+      context: .
+      dockerfile: Dockerfile.haproxy
     volumes:
       - ../passi_cert:/usr/local/etc/haproxy/cert
       - ./configs/haproxy:/usr/local/etc/haproxy

@@ -202,6 +202,18 @@ public class OAuthHttpTests
         }
     }
 
+    [TestCase(true)]
+    [TestCase(false)]
+    public async Task OmittedScopeUsesRegistrationDefaultsButEmptyScopeDoesNot(bool omitted)
+    {
+        _http.DefaultRequestHeaders.Add("Sec-Fetch-Site", "same-origin");
+        var url = AuthorizationUrl(await Register()).Replace("&scope=email", omitted ? "" : "&scope=");
+        var response = await _http.GetAsync(url);
+        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+        var scopes = (await response.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("scopes").EnumerateArray().Select(x => x.GetString()).ToArray();
+        Assert.That(scopes, Is.EquivalentTo(omitted ? new[] { "openid", "profile", "email" } : Array.Empty<string>()));
+    }
+
     private sealed class ProtocolRedis : IRedisService
     {
         private readonly ConcurrentDictionary<string, object> _values = new();

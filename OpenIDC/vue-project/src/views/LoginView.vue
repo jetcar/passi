@@ -313,13 +313,13 @@
                     </div>
 
                     <form class="auth-form" @submit.prevent="handleLoginClick">
-                        <section v-if="consent" class="auth-consent" aria-label="Application access">
-                            <p>This application is requesting access to your Passi account.</p>
-                            <p>Unverified application name: <bdi>{{ consent.client_name }}</bdi></p>
-                            <p>Redirect: <bdi>{{ consent.redirect_uri }}</bdi></p>
-                            <p v-if="consent.resource">Resource: <bdi>{{ consent.resource }}</bdi></p>
-                            <p>Permissions: {{ consent.scopes.join(', ') }}</p>
-                            <label><input type="checkbox" v-model="consentAccepted"> I approve this application and these permissions.</label>
+                        <section v-if="consent" class="auth-consent" :aria-label="$t('login.consent.title')">
+                            <p>{{ $t('login.consent.description') }}</p>
+                            <p>{{ $t('login.consent.name') }}: <bdi>{{ consent.client_name }}</bdi></p>
+                            <p>{{ $t('login.consent.redirect') }}: <bdi>{{ consent.redirect_uri }}</bdi></p>
+                            <p v-if="consent.resource">{{ $t('login.consent.resource') }}: <bdi>{{ consent.resource }}</bdi></p>
+                            <p>{{ $t('login.consent.scopes') }}: {{ consent.scopes.join(', ') }}</p>
+                            <label><input type="checkbox" v-model="consentAccepted"> {{ $t('login.consent.approve') }}</label>
                         </section>
                         <label for="username">{{ $t('login.username') }}</label>
                         <input
@@ -432,7 +432,7 @@
                     <div class="challenge-number" v-if="LoginResponse.checkNumber">
                         {{ LoginResponse.checkNumber }}
                     </div>
-                    <div class="challenge-number challenge-number-loading" v-else>••</div>
+                    <div class="challenge-number challenge-number-loading" v-else>вЂўвЂў</div>
                     <p class="challenge-status">{{ $t('login.challenge.waitingApproval') }}</p>
                     <div class="challenge-fallback">
                         <span>{{ $t('login.challenge.olderApp', { color: LoginResponse.checkColor }) }}</span>
@@ -447,3 +447,10 @@
         </div>
     </main>
 </template>
+
+<style scoped>
+.auth-consent { overflow-wrap: anywhere; padding: 1rem; border: 1px solid #8d87a6; border-radius: .5rem; }
+.auth-consent p { margin: 0 0 .6rem; }
+.auth-consent label { display: flex; align-items: flex-start; gap: .5rem; }
+.auth-consent input[type="checkbox"] { width: 1.1rem; height: 1.1rem; min-height: 0; padding: 0; flex-shrink: 0; }
+</style>

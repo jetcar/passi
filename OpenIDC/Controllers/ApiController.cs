@@ -351,6 +351,7 @@ public class ApiController : ControllerBase
     private async Task<string> EffectiveScope(string clientId, string scope)
     {
         if (scope != null) return scope;
+        if (HttpContext != null && Request.Query.ContainsKey("scope")) return "";
         var client = await _clientStore.GetClientAsync(clientId);
         return client?.IsDynamic == true ? string.Join(" ", client.AllowedScopes) : scope;
     }
@@ -481,8 +482,7 @@ public class ApiController : ControllerBase
         [FromQuery] string resource = null)
     {
         scope = await EffectiveScope(client_id, scope);
-        _logger.LogInformation("Check endpoint called - SessionId: {SessionId}, ClientId: {ClientId}, RedirectUri: {RedirectUri}",
-            LogValue.Safe(sessionId), LogValue.Safe(client_id), LogValue.Safe(redirect_uri));
+        _logger.LogInformation("Check endpoint called for client: {ClientId}", LogValue.Safe(client_id));
 
         if (HasRepeatedAuthorizationParameter())
             return AuthorizationError("invalid_request", "Authorization parameters must not be repeated.", null, state);
@@ -498,9 +498,7 @@ public class ApiController : ControllerBase
         // Validate redirect_uri against registered URIs (exact match including protocol)
         if (!RedirectUriHelper.IsAllowed(redirect_uri, client))
         {
-            _logger.LogWarning("Invalid redirect_uri: {RedirectUri} for client: {ClientId}. Registered URIs: {RegisteredUris}",
-                LogValue.Safe(redirect_uri), LogValue.Safe(client_id),
-                LogValue.Safe(string.Join(", ", client.RedirectUris ?? new List<string>())));
+            _logger.LogWarning("Invalid redirect_uri for client: {ClientId}", LogValue.Safe(client_id));
             return BadRequest(new ApiResponseDto() { errors = "Invalid redirect_uri - must exactly match registered URI including protocol (http/https)" });
         }
 

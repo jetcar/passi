@@ -71,7 +71,7 @@ public class Startup
             var cert = X509Certificate2.CreateFromPemFile(certPath, keyPath);
             var securityKey = new X509SecurityKey(cert)
             {
-                KeyId = cert.GetCertHashString(HashAlgorithmName.SHA256)
+                KeyId = "default-key-" + DateTime.UtcNow.ToString("yyyyMMdd")
             };
             signingCredentials = new SigningCredentials(securityKey, SecurityAlgorithms.RsaSha256);
             log.Info("Loaded signing credentials from X.509 certificate");

@@ -166,4 +166,22 @@ public class DynamicRegistrationRedisTests
         await Task.Delay(200);
         Assert.That(_redis.TryAcquireFixedWindow(key, 1, TimeSpan.FromMilliseconds(100), out _), Is.True);
     }
+
+    [Test]
+    public async Task ConcurrentRealRedisRefreshReplayInvalidatesSuccessors()
+    {
+        var store = new RefreshTokenStore(_redis);
+        var token = await store.CreateRefreshTokenAsync(new RefreshToken
+        { ClientId = "mcp_test", Subject = "alice", Resource = ResourcePolicy.Finance });
+        var results = await Task.WhenAll(
+            Task.Run(() => store.ConsumeRefreshTokenAsync(token)),
+            Task.Run(() => store.ConsumeRefreshTokenAsync(token)));
+        Assert.That(results.Count(x => x != null), Is.LessThanOrEqualTo(1));
+        foreach (var grant in results.Where(x => x != null))
+        {
+            Assert.That(grant.Resource, Is.EqualTo(ResourcePolicy.Finance));
+            var successor = await store.CreateRefreshTokenAsync(grant);
+            Assert.That(await store.ConsumeRefreshTokenAsync(successor), Is.Null);
+        }
+    }
 }

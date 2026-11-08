@@ -49,6 +49,7 @@ namespace OpenIDC.Controllers
                     if (form.Any(x => x.Value.Count != 1)) return BadRequest(new { error = "invalid_request" });
                     if (form.ContainsKey("resource") && string.IsNullOrWhiteSpace(form["resource"]))
                         return BadRequest(new { error = "invalid_target" });
+                    if (request != null && form.ContainsKey("scope")) request.Scope = form["scope"].ToString();
                 }
             }
             if (request == null || string.IsNullOrWhiteSpace(request.ClientId) &&
@@ -176,7 +177,7 @@ namespace OpenIDC.Controllers
             // Validate redirect URI
             if (authCode.RedirectUri != request.RedirectUri)
             {
-                _logger.LogWarning("Redirect URI mismatch. Expected: {Expected}, Got: {Got}", LogValue.Safe(authCode.RedirectUri), LogValue.Safe(request.RedirectUri));
+                _logger.LogWarning("Redirect URI mismatch");
                 return BadRequest(new { error = "invalid_grant", error_description = "Redirect URI mismatch" });
             }
 

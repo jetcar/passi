@@ -10,6 +10,23 @@ namespace OpenIDCTests
     public class ClientStoreTests
     {
         [Test]
+        public async System.Threading.Tasks.Task ExistingConfiguredClientWithMcpPrefixStillResolves()
+        {
+            var store = new ClientStore(new FakeRedisService());
+            await store.CreateClientAsync(new OidcClient { ClientId = "mcp_existing", IsPublicClient = true });
+            Assert.That((await store.GetClientAsync("mcp_existing")).IsPublicClient, Is.True);
+        }
+
+        [Test]
+        public async System.Threading.Tasks.Task ExpiredDynamicClientIsRejectedEvenBeforeRedisCleanup()
+        {
+            var redis = new FakeRedisService();
+            redis.Add(DynamicClientRegistration.KeyPrefix + "mcp_expired", new OidcClient
+            { ClientId = "mcp_expired", IsDynamic = true, ExpiresAt = DateTime.UtcNow.AddSeconds(-1) });
+            Assert.That(await new ClientStore(redis).GetClientAsync("mcp_expired"), Is.Null);
+        }
+
+        [Test]
         public async System.Threading.Tasks.Task ValidateClientAsyncReturnsTrueForCorrectSecret()
         {
             var redis = new FakeRedisService();

@@ -7,6 +7,9 @@ namespace OpenIDC.Models
     {
         public string Token { get; set; }
         public string ClientId { get; set; }
+        public string Resource { get; set; }
+        public string FamilyId { get; set; }
+        public DateTime? ClientExpiresAt { get; set; }
         public string Subject { get; set; }
         public List<string> Scopes { get; set; } = new List<string>();
         public DateTime ExpiresAt { get; set; }

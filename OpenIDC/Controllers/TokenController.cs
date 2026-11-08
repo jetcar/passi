@@ -1,5 +1,7 @@
 using System;
 using System.Threading.Tasks;
+using System.Linq;
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using OpenIDC.Models;
@@ -16,25 +18,44 @@ namespace OpenIDC.Controllers
         private readonly ITokenService _tokenService;
         private readonly IRefreshTokenStore _refreshTokenStore;
         private readonly ILogger<TokenController> _logger;
+        private readonly ResourcePolicy _resources;
 
         public TokenController(
             IClientStore clientStore,
             IAuthorizationCodeStore authCodeStore,
             ITokenService tokenService,
             IRefreshTokenStore refreshTokenStore,
-            ILogger<TokenController> logger)
+            ILogger<TokenController> logger, ResourcePolicy resources = null)
         {
             _clientStore = clientStore;
             _authCodeStore = authCodeStore;
             _tokenService = tokenService;
             _refreshTokenStore = refreshTokenStore;
             _logger = logger;
+            _resources = resources ?? new ResourcePolicy();
         }
 
         [HttpPost("connect/token")]
         [Consumes("application/x-www-form-urlencoded")]
         public async Task<IActionResult> Token([FromForm] TokenRequest request)
         {
+            if (HttpContext != null)
+            {
+                Response.Headers.CacheControl = "no-store";
+                Response.Headers.Pragma = "no-cache";
+                if (Request.HasFormContentType)
+                {
+                    var form = await Request.ReadFormAsync();
+                    if (form.Any(x => x.Value.Count != 1)) return BadRequest(new { error = "invalid_request" });
+                    if (form.ContainsKey("resource") && string.IsNullOrWhiteSpace(form["resource"]))
+                        return BadRequest(new { error = "invalid_target" });
+                }
+            }
+            if (request == null || string.IsNullOrWhiteSpace(request.ClientId) &&
+                string.IsNullOrEmpty(HttpContext?.Request.Headers["Authorization"]))
+                return BadRequest(new { error = "invalid_request" });
+            if (!_resources.IsAllowed(request.Resource))
+                return BadRequest(new { error = "invalid_target" });
             // Extract client credentials from Basic Auth header if not in form
             if (string.IsNullOrEmpty(request.ClientId) || string.IsNullOrEmpty(request.ClientSecret))
             {
@@ -64,9 +85,7 @@ namespace OpenIDC.Controllers
                 }
             }
 
-            _logger.LogInformation("Token request received - GrantType: {GrantType}, ClientId: {ClientId}, Code: {Code}",
-                LogValue.Safe(request.GrantType), LogValue.Safe(request.ClientId),
-                LogValue.Safe(request.Code?.Substring(0, Math.Min(8, request.Code?.Length ?? 0)) + "..."));
+            _logger.LogInformation("Token request received");
 
             var normalizedGrantType = request.GrantType?.Trim();
             if (string.IsNullOrEmpty(normalizedGrantType) ||
@@ -108,16 +127,19 @@ namespace OpenIDC.Controllers
             var authCode = await _authCodeStore.ConsumeAuthorizationCodeAsync(request.Code);
             if (authCode == null || authCode.ExpiresAt < DateTime.UtcNow)
             {
-                _logger.LogWarning("Invalid or expired authorization code. Code: {Code}, Expired: {Expired}",
-                    LogValue.Safe(request.Code?.Substring(0, Math.Min(8, request.Code?.Length ?? 0)) + "..."),
-                    authCode?.ExpiresAt < DateTime.UtcNow);
+                _logger.LogWarning("Invalid or expired authorization code");
                 return BadRequest(new { error = "invalid_grant", error_description = "Invalid or expired authorization code" });
             }
 
             // Determine authentication method
             bool hasPkce = !string.IsNullOrEmpty(authCode.CodeChallenge);
             bool hasClientSecret = !string.IsNullOrEmpty(request.ClientSecret);
-            bool clientHasSecretConfigured = !string.IsNullOrEmpty(client.ClientSecret);
+            if (!_resources.Matches(authCode.Resource, request.Resource))
+                return BadRequest(new { error = "invalid_target" });
+            if ((client.RequiresPkce || client.IsPublicClient || client.IsDynamic || authCode.Resource != null) && !hasPkce)
+                return BadRequest(new { error = "invalid_grant", error_description = "PKCE S256 is required" });
+            if (client.IsDynamic && (hasClientSecret || Request.Headers.ContainsKey("Authorization")))
+                return Unauthorized(new { error = "invalid_client" });
 
             // Confidential clients (user-registered websites) must always authenticate with their secret
             if (client.RequireClientSecret && !hasClientSecret)
@@ -180,13 +202,16 @@ namespace OpenIDC.Controllers
 
             // Generate tokens
             _logger.LogInformation("Generating tokens for subject: {Subject}, client: {ClientId}", LogValue.Safe(authCode.Subject), LogValue.Safe(authCode.ClientId));
-            var accessToken = _tokenService.GenerateAccessToken(authCode.Subject, authCode.ClientId, authCode.Scopes, authCode.Claims);
-            var idToken = _tokenService.GenerateIdToken(authCode.Subject, authCode.ClientId, authCode.Scopes, authCode.Claims, authCode.Nonce);
+            var accessToken = _tokenService.GenerateAccessToken(authCode.Subject, authCode.ClientId, authCode.Scopes, authCode.Claims, authCode.Resource);
+            var idToken = authCode.Scopes.Contains("openid")
+                ? _tokenService.GenerateIdToken(authCode.Subject, authCode.ClientId, authCode.Scopes, authCode.Claims, authCode.Nonce) : null;
 
             // Generate refresh token
             var refreshToken = await _refreshTokenStore.CreateRefreshTokenAsync(new RefreshToken
             {
                 ClientId = authCode.ClientId,
+                Resource = authCode.Resource,
+                ClientExpiresAt = client.ExpiresAt,
                 Subject = authCode.Subject,
                 Scopes = authCode.Scopes,
                 Claims = authCode.Claims
@@ -194,20 +219,16 @@ namespace OpenIDC.Controllers
 
             _logger.LogInformation("Token exchange successful for subject: {Subject}", LogValue.Safe(authCode.Subject));
 
-            return Ok(new
-            {
-                access_token = accessToken,
-                token_type = "Bearer",
-                expires_in = 3600,
-                id_token = idToken,
-                refresh_token = refreshToken
-            });
+            return TokenResponse(accessToken, idToken, refreshToken, authCode.Scopes);
         }
 
         private async Task<IActionResult> HandleRefreshToken(TokenRequest request)
         {
             // Validate client (public clients have no secret; the refresh token itself is the credential)
             var refreshClient = await _clientStore.GetClientAsync(request.ClientId);
+            if (refreshClient == null || (refreshClient.IsDynamic &&
+                (!string.IsNullOrEmpty(request.ClientSecret) || Request.Headers.ContainsKey("Authorization"))))
+                return Unauthorized(new { error = "invalid_client" });
             var isPublicWithoutSecret = refreshClient != null && refreshClient.IsPublicClient && string.IsNullOrEmpty(request.ClientSecret);
             if (!isPublicWithoutSecret && !await _clientStore.ValidateClientAsync(request.ClientId, request.ClientSecret))
             {
@@ -238,31 +259,49 @@ namespace OpenIDC.Controllers
                 return BadRequest(new { error = "invalid_grant", error_description = "Client ID mismatch" });
             }
 
+            if (!_resources.Matches(refreshToken.Resource, request.Resource))
+                return BadRequest(new { error = "invalid_target" });
+            if (request.Scope != null && !request.Scope.Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                .ToHashSet(StringComparer.Ordinal).SetEquals(refreshToken.Scopes))
+                return BadRequest(new { error = "invalid_scope" });
+
             // Generate new tokens
-            var accessToken = _tokenService.GenerateAccessToken(refreshToken.Subject, refreshToken.ClientId, refreshToken.Scopes, refreshToken.Claims);
-            var idToken = _tokenService.GenerateIdToken(refreshToken.Subject, refreshToken.ClientId, refreshToken.Scopes, refreshToken.Claims, null);
+            var accessToken = _tokenService.GenerateAccessToken(refreshToken.Subject, refreshToken.ClientId, refreshToken.Scopes, refreshToken.Claims, refreshToken.Resource);
+            var idToken = refreshToken.Scopes.Contains("openid")
+                ? _tokenService.GenerateIdToken(refreshToken.Subject, refreshToken.ClientId, refreshToken.Scopes, refreshToken.Claims, null) : null;
 
             var newRefreshToken = await _refreshTokenStore.CreateRefreshTokenAsync(new RefreshToken
             {
                 ClientId = refreshToken.ClientId,
+                FamilyId = refreshToken.FamilyId,
+                Resource = refreshToken.Resource,
+                ClientExpiresAt = refreshToken.ClientExpiresAt ?? refreshClient.ExpiresAt,
                 Subject = refreshToken.Subject,
                 Scopes = refreshToken.Scopes,
                 Claims = refreshToken.Claims
             });
 
-            return Ok(new
+            return TokenResponse(accessToken, idToken, newRefreshToken, refreshToken.Scopes);
+        }
+        private IActionResult TokenResponse(string access, string id, string refresh, List<string> scopes)
+        {
+            var response = new Dictionary<string, object>
             {
-                access_token = accessToken,
-                token_type = "Bearer",
-                expires_in = 3600,
-                id_token = idToken,
-                refresh_token = newRefreshToken
-            });
+                ["access_token"] = access, ["token_type"] = "Bearer", ["expires_in"] = 3600,
+                ["refresh_token"] = refresh, ["scope"] = string.Join(" ", scopes),
+            };
+            if (id != null) response["id_token"] = id;
+            return Ok(response);
         }
     }
 
     public class TokenRequest
     {
+        [FromForm(Name = "resource")]
+        public string Resource { get; set; }
+        [FromForm(Name = "scope")]
+        public string Scope { get; set; }
+
         [FromForm(Name = "grant_type")]
         public string GrantType { get; set; }
 

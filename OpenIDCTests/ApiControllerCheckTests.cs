@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -37,6 +37,7 @@ namespace OpenIDCTests
             {
                 ClientId = ClientId,
                 RedirectUris = new List<string> { RedirectUri },
+                AllowedScopes = new() { "openid", "email", "profile" },
             });
             var controller = new ApiController(
                 new FixedRandom(),
@@ -82,6 +83,7 @@ namespace OpenIDCTests
             {
                 ClientId = ClientId,
                 RedirectUris = new List<string> { RedirectUri },
+                AllowedScopes = new() { "openid", "email", "profile" },
             });
             var authCodes = new CountingAuthCodeStore();
             var controller = new ApiController(
@@ -151,7 +153,7 @@ namespace OpenIDCTests
             var signed = Sign("5551234567", rsa);
 
             var result = await RunCheck(cert, new SessionMinDto { SignedHash = signed, RandomString = "5551234567" }, nonce: null,
-                state: "abc", codeChallenge: "challenge");
+                state: "abc", codeChallenge: new string('a', 43));
 
             var ok = (OkObjectResult)result;
             var redirect = (string)ok.Value.GetType().GetProperty("redirect_url").GetValue(ok.Value);
@@ -191,12 +193,13 @@ namespace OpenIDCTests
             {
                 ClientId = ClientId,
                 RedirectUris = new List<string> { RedirectUri },
+                AllowedScopes = new() { "openid", "email", "profile" },
             });
 
             var controller = new ApiController(new FixedRandom(), rest, appSetting, NullLogger<ApiController>.Instance, clientStore, new FakeAuthCodeStore(), new AllowAllLoginRateLimiter(), new AllowAllLoginStartTokenService());
 
             var result = await controller.Check(sessionId: "session", nonce: "nonce", client_id: ClientId, redirect_uri: RedirectUri,
-                login_hint: null, response_type: "code", scope: null, state: null, code_challenge: null, code_challenge_method: null);
+                login_hint: null, response_type: "code", scope: "openid profile email", state: null, code_challenge: null, code_challenge_method: null);
 
             Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
         }
@@ -224,12 +227,13 @@ namespace OpenIDCTests
             {
                 ClientId = ClientId,
                 RedirectUris = new List<string> { RedirectUri },
+                AllowedScopes = new() { "openid", "email", "profile" },
             });
 
             var controller = new ApiController(new FixedRandom(), rest, appSetting, NullLogger<ApiController>.Instance, clientStore, new FakeAuthCodeStore(), new AllowAllLoginRateLimiter(), new AllowAllLoginStartTokenService());
 
             var result = await controller.Check(sessionId: "session", nonce: "nonce", client_id: ClientId, redirect_uri: RedirectUri,
-                login_hint: null, response_type: "code", scope: null, state: null, code_challenge: null, code_challenge_method: null);
+                login_hint: null, response_type: "code", scope: "openid profile email", state: null, code_challenge: null, code_challenge_method: null);
 
             var badRequest = (BadRequestObjectResult)result;
             Assert.That(((ApiResponseDto)badRequest.Value).errors, Is.EqualTo("Invalid Certificate"));
@@ -314,12 +318,13 @@ namespace OpenIDCTests
             {
                 ClientId = ClientId,
                 RedirectUris = new List<string> { RedirectUri },
+                AllowedScopes = new() { "openid", "email", "profile" },
             });
 
             var controller = new ApiController(new FixedRandom(), rest, appSetting, NullLogger<ApiController>.Instance, clientStore, new FakeAuthCodeStore(), new AllowAllLoginRateLimiter(), new AllowAllLoginStartTokenService());
 
             return await controller.Check(sessionId: "session", nonce: nonce, client_id: ClientId, redirect_uri: RedirectUri,
-                login_hint: null, response_type: "code", scope: null, state: state, code_challenge: codeChallenge, code_challenge_method: codeChallenge == null ? null : "S256");
+                login_hint: null, response_type: "code", scope: "openid profile email", state: state, code_challenge: codeChallenge, code_challenge_method: codeChallenge == null ? null : "S256");
         }
 
         private static RestResponse MakeJsonResponse<T>(T value)

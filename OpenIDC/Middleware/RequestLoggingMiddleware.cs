@@ -20,7 +20,7 @@ namespace OpenIDC.Middleware
             var stopwatch = Stopwatch.StartNew();
             var request = context.Request;
 
-            _logger.Info($"Incoming {request.Method} {request.Path}{request.QueryString} from {context.Connection.RemoteIpAddress}");
+            _logger.Info($"Incoming {request.Method} {request.Path} from {context.Connection.RemoteIpAddress}");
 
             try
             {
@@ -29,7 +29,7 @@ namespace OpenIDC.Middleware
             finally
             {
                 stopwatch.Stop();
-                _logger.Info($"Completed {request.Method} {request.Path}{request.QueryString} - Status: {context.Response.StatusCode} - Duration: {stopwatch.ElapsedMilliseconds}ms");
+                _logger.Info($"Completed {request.Method} {request.Path} - Status: {context.Response.StatusCode} - Duration: {stopwatch.ElapsedMilliseconds}ms");
             }
         }
     }

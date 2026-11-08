@@ -1,4 +1,4 @@
-﻿<script>
+<script>
 
     const API_URL = `/openidc/api/login`
     const API_CHECK_URL = `/openidc/api/check`
@@ -31,6 +31,8 @@
                 authorizationChecking: true,
                 autoLoginPending: Boolean(loginHint),
                 loginToken: null,
+                consent: null,
+                consentAccepted: false,
             }
         },
 
@@ -125,6 +127,9 @@
                             this.errorMessage = this.$t('login.errors.invalidToken')
                             return
                         }
+                        this.consent = result.consent_required ? result : null
+                        this.consentAccepted = false
+                        if (this.consent) this.autoLoginPending = false
                         this.loginToken = result.login_token
                         this.authorizationReady = true
                         if (this.autoLoginPending) {
@@ -224,6 +229,7 @@
                     await this.validateAuthorizationRequest(true)
                     return
                 }
+                if (this.consent && !this.consentAccepted) return
                 this.LoginInput.Username = this.LoginInput.Username.trim()
                 if (!this.LoginInput.Username) {
                     this.errorMessage = this.$t('login.errors.usernameRequired')
@@ -307,6 +313,14 @@
                     </div>
 
                     <form class="auth-form" @submit.prevent="handleLoginClick">
+                        <section v-if="consent" class="auth-consent" aria-label="Application access">
+                            <p>This application is requesting access to your Passi account.</p>
+                            <p>Unverified application name: <bdi>{{ consent.client_name }}</bdi></p>
+                            <p>Redirect: <bdi>{{ consent.redirect_uri }}</bdi></p>
+                            <p v-if="consent.resource">Resource: <bdi>{{ consent.resource }}</bdi></p>
+                            <p>Permissions: {{ consent.scopes.join(', ') }}</p>
+                            <label><input type="checkbox" v-model="consentAccepted"> I approve this application and these permissions.</label>
+                        </section>
                         <label for="username">{{ $t('login.username') }}</label>
                         <input
                             id="username"
@@ -319,7 +333,7 @@
                             :disabled="loading || authorizationChecking || !authorizationReady"
                             autofocus
                         >
-                        <button class="auth-primary-button" type="submit" :disabled="loading || authorizationChecking || !authorizationReady">
+                        <button class="auth-primary-button" type="submit" :disabled="loading || authorizationChecking || !authorizationReady || (consent && !consentAccepted)">
                             <span class="auth-spinner" aria-hidden="true" v-if="loading || authorizationChecking"></span>
                             {{ authorizationChecking ? $t('login.validating') : loading ? $t('login.starting') : $t('login.continue') }}
                         </button>

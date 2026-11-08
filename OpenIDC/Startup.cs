@@ -52,6 +52,7 @@ public class Startup
         services.AddScoped<IRegisteredClientService, RegisteredClientService>();
         services.AddSingleton<IClientStore, ClientStore>();
         services.AddSingleton<DynamicClientRegistration>();
+        services.AddSingleton<ResourcePolicy>();
         services.AddSingleton<IAuthorizationCodeStore, AuthorizationCodeStore>();
         services.AddSingleton<IRefreshTokenStore, RefreshTokenStore>();
         services.AddSingleton<ILoginRateLimiter, LoginRateLimiter>();
@@ -70,7 +71,7 @@ public class Startup
             var cert = X509Certificate2.CreateFromPemFile(certPath, keyPath);
             var securityKey = new X509SecurityKey(cert)
             {
-                KeyId = "default-key-" + DateTime.UtcNow.ToString("yyyyMMdd")
+                KeyId = cert.GetCertHashString(HashAlgorithmName.SHA256)
             };
             signingCredentials = new SigningCredentials(securityKey, SecurityAlgorithms.RsaSha256);
             log.Info("Loaded signing credentials from X.509 certificate");
@@ -143,8 +144,25 @@ public class Startup
             ForwardedHeaders = ForwardedHeaders.XForwardedProto
         });
 
+        // RFC 8414 inserts the well-known component before the issuer path. Support direct
+        // hosting as well as HAProxy's existing discovery rewrite, without changing the issuer.
+        app.Use(async (context, next) =>
+        {
+            if (context.Request.Path == "/.well-known/oauth-authorization-server/openidc" ||
+                context.Request.Path == "/.well-known/openid-configuration/openidc")
+                context.Request.Path = "/openidc/.well-known/openid-configuration";
+            await next();
+        });
+
         app.Map(new PathString("/openidc"), (appBuilder) =>
         {
+            appBuilder.Use(async (context, next) =>
+            {
+                context.Response.Headers["Content-Security-Policy"] = "frame-ancestors 'none'";
+                context.Response.Headers["X-Frame-Options"] = "DENY";
+                context.Response.Headers["Referrer-Policy"] = "no-referrer";
+                await next();
+            });
             appBuilder.UseCurrentTracerPerRequest();
 
             appBuilder.UseMiddleware<RequestLoggingMiddleware>();

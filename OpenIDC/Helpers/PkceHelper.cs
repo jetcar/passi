@@ -1,6 +1,7 @@
 using System;
 using System.Security.Cryptography;
 using System.Text;
+using System.Linq;
 
 namespace OpenIDC.Helpers
 {
@@ -8,7 +9,8 @@ namespace OpenIDC.Helpers
     {
         public static bool ValidateCodeChallenge(string codeVerifier, string codeChallenge, string codeChallengeMethod)
         {
-            if (string.IsNullOrEmpty(codeVerifier) || string.IsNullOrEmpty(codeChallenge))
+            if (codeVerifier == null || codeVerifier.Length is < 43 or > 128 ||
+                codeVerifier.Any(c => !IsUnreserved(c)) || !IsS256Challenge(codeChallenge, codeChallengeMethod))
             {
                 return false;
             }
@@ -20,13 +22,15 @@ namespace OpenIDC.Helpers
                 var computedChallenge = Base64UrlEncode(hash);
                 return FixedTimeEquals(computedChallenge, codeChallenge);
             }
-            else if (codeChallengeMethod == "plain")
-            {
-                return FixedTimeEquals(codeVerifier, codeChallenge);
-            }
 
             return false;
         }
+
+        public static bool IsS256Challenge(string value, string method) =>
+            method == "S256" && value?.Length == 43 && value.All(c =>
+                char.IsAsciiLetterOrDigit(c) || c == '-' || c == '_');
+
+        private static bool IsUnreserved(char c) => char.IsAsciiLetterOrDigit(c) || c is '-' or '.' or '_' or '~';
 
         private static string Base64UrlEncode(byte[] input)
         {

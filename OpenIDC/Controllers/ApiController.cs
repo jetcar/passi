@@ -1,4 +1,4 @@
-﻿using ConfigurationManager;
+using ConfigurationManager;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -38,6 +38,7 @@ public class ApiController : ControllerBase
     private readonly IAuthorizationCodeStore _authCodeStore;
     private readonly ILoginRateLimiter _loginRateLimiter;
     private readonly ILoginStartTokenService _loginStartTokenService;
+    private readonly ResourcePolicy _resources;
 
     public ApiController(
         IRandomGenerator randomGenerator,
@@ -47,7 +48,8 @@ public class ApiController : ControllerBase
         IClientStore clientStore,
         IAuthorizationCodeStore authCodeStore,
         ILoginRateLimiter loginRateLimiter,
-        ILoginStartTokenService loginStartTokenService)
+        ILoginStartTokenService loginStartTokenService,
+        ResourcePolicy resources = null)
     {
         _randomGenerator = randomGenerator;
         _myRestClient = myRestClient;
@@ -57,6 +59,7 @@ public class ApiController : ControllerBase
         _authCodeStore = authCodeStore;
         _loginRateLimiter = loginRateLimiter;
         _loginStartTokenService = loginStartTokenService;
+        _resources = resources ?? new ResourcePolicy();
     }
 
 
@@ -86,18 +89,20 @@ public class ApiController : ControllerBase
         [FromQuery] string state,
         [FromQuery] string code_challenge,
         [FromQuery] string code_challenge_method,
-        [FromHeader(Name = "X-Passi-Login-Token")] string loginToken)
+        [FromHeader(Name = "X-Passi-Login-Token")] string loginToken,
+        [FromQuery] string resource = null)
     {
+        scope = await EffectiveScope(client_id, scope);
         if (HasRepeatedAuthorizationParameter())
             return AuthorizationError("invalid_request", "Authorization parameters must not be repeated.", null, state);
 
         var authorizationError = await ValidateAuthorizationRequest(
-            client_id, redirect_uri, response_type, scope, state, code_challenge, code_challenge_method);
+            client_id, redirect_uri, response_type, scope, state, code_challenge, code_challenge_method, resource);
         if (authorizationError != null)
             return authorizationError;
 
         var loginTokenRequest = LoginTokenRequest(
-            client_id, redirect_uri, response_type, scope, state, nonce, login_hint, code_challenge, code_challenge_method);
+            client_id, redirect_uri, response_type, scope, state, nonce, login_hint, code_challenge, code_challenge_method, resource);
 
         try
         {
@@ -227,8 +232,10 @@ public class ApiController : ControllerBase
         [FromQuery] string nonce,
         [FromQuery] string login_hint,
         [FromQuery] string code_challenge,
-        [FromQuery] string code_challenge_method)
+        [FromQuery] string code_challenge_method,
+        [FromQuery] string resource = null)
     {
+        scope = await EffectiveScope(client_id, scope);
         Response.Headers.CacheControl = "no-store";
         Response.Headers.Pragma = "no-cache";
 
@@ -239,7 +246,7 @@ public class ApiController : ControllerBase
             return AuthorizationError("invalid_request", "Authorization parameters must not be repeated.", null, state);
 
         var authorizationError = await ValidateAuthorizationRequest(
-            client_id, redirect_uri, response_type, scope, state, code_challenge, code_challenge_method);
+            client_id, redirect_uri, response_type, scope, state, code_challenge, code_challenge_method, resource);
         if (authorizationError != null)
             return authorizationError;
 
@@ -271,8 +278,12 @@ public class ApiController : ControllerBase
         try
         {
             var loginToken = _loginStartTokenService.Issue(HttpContext, LoginTokenRequest(
-                client_id, redirect_uri, response_type, scope, state, nonce, login_hint, code_challenge, code_challenge_method));
-            return Ok(new { valid = true, login_token = loginToken });
+                client_id, redirect_uri, response_type, scope, state, nonce, login_hint, code_challenge, code_challenge_method, resource));
+            var client = await _clientStore.GetClientAsync(client_id);
+            return Ok(new { valid = true, login_token = loginToken,
+                consent_required = client.IsDynamic || resource != null,
+                client_name = client.DisplayName, redirect_uri, resource,
+                scopes = scope?.Split(' ', StringSplitOptions.RemoveEmptyEntries) ?? [] });
         }
         catch (Exception exception)
         {
@@ -295,7 +306,8 @@ public class ApiController : ControllerBase
         string nonce,
         string loginHint,
         string codeChallenge,
-        string codeChallengeMethod) => new()
+        string codeChallengeMethod,
+        string resource) => new()
         {
             ClientId = clientId,
             RedirectUri = redirectUri,
@@ -306,6 +318,7 @@ public class ApiController : ControllerBase
             LoginHint = loginHint,
             CodeChallenge = codeChallenge,
             CodeChallengeMethod = codeChallengeMethod,
+            Resource = resource,
         };
 
     private bool IsSameOriginRequest()
@@ -330,9 +343,16 @@ public class ApiController : ControllerBase
         string[] names =
         [
             "client_id", "redirect_uri", "response_type", "scope", "state", "nonce", "login_hint",
-            "code_challenge", "code_challenge_method"
+            "code_challenge", "code_challenge_method", "resource"
         ];
         return names.Any(name => Request.Query[name].Count > 1);
+    }
+
+    private async Task<string> EffectiveScope(string clientId, string scope)
+    {
+        if (scope != null) return scope;
+        var client = await _clientStore.GetClientAsync(clientId);
+        return client?.IsDynamic == true ? string.Join(" ", client.AllowedScopes) : scope;
     }
 
     private async Task<IActionResult> ValidateAuthorizationRequest(
@@ -342,7 +362,8 @@ public class ApiController : ControllerBase
         string scope,
         string state,
         string codeChallenge,
-        string codeChallengeMethod)
+        string codeChallengeMethod,
+        string resource)
     {
         if (string.IsNullOrWhiteSpace(clientId))
             return AuthorizationError("invalid_request", "client_id is required", null, state);
@@ -361,7 +382,8 @@ public class ApiController : ControllerBase
             return AuthorizationError("unsupported_response_type", "response_type must be code", redirectUri, state);
 
         var requestedScopes = scope?.Split(' ', StringSplitOptions.RemoveEmptyEntries) ?? [];
-        if (requestedScopes.Length == 0 || !requestedScopes.Contains("openid", StringComparer.Ordinal))
+        if (!client.IsDynamic && resource == null &&
+            (requestedScopes.Length == 0 || !requestedScopes.Contains("openid", StringComparer.Ordinal)))
             return AuthorizationError("invalid_scope", "scope must include openid", redirectUri, state);
 
         var allowedScopes = client.AllowedScopes ?? [];
@@ -370,16 +392,19 @@ public class ApiController : ControllerBase
         if (unsupportedScope != null)
             return AuthorizationError("invalid_scope", $"Unsupported scope: {unsupportedScope}", redirectUri, state);
 
-        if (client.RequiresPkce && string.IsNullOrWhiteSpace(codeChallenge))
+        if (!_resources.IsAllowed(resource) ||
+            (HttpContext != null && Request.Query.ContainsKey("resource") && string.IsNullOrWhiteSpace(resource)))
+            return AuthorizationError("invalid_target", "Unknown resource", redirectUri, state);
+
+        if ((client.RequiresPkce || client.IsPublicClient || client.IsDynamic || resource != null) && string.IsNullOrWhiteSpace(codeChallenge))
             return AuthorizationError("invalid_request", "PKCE code_challenge is required", redirectUri, state);
 
         if (string.IsNullOrWhiteSpace(codeChallenge) && !string.IsNullOrWhiteSpace(codeChallengeMethod))
             return AuthorizationError("invalid_request", "code_challenge_method requires code_challenge", redirectUri, state);
 
         if (!string.IsNullOrWhiteSpace(codeChallenge) &&
-            !string.IsNullOrWhiteSpace(codeChallengeMethod) &&
-            codeChallengeMethod != "S256" && codeChallengeMethod != "plain")
-            return AuthorizationError("invalid_request", "Unsupported code_challenge_method", redirectUri, state);
+            !PkceHelper.IsS256Challenge(codeChallenge, codeChallengeMethod))
+            return AuthorizationError("invalid_request", "A valid PKCE S256 code_challenge and method are required", redirectUri, state);
 
         return null;
     }
@@ -452,8 +477,10 @@ public class ApiController : ControllerBase
         [FromQuery] string scope,
         [FromQuery] string state,
         [FromQuery] string code_challenge,
-        [FromQuery] string code_challenge_method)
+        [FromQuery] string code_challenge_method,
+        [FromQuery] string resource = null)
     {
+        scope = await EffectiveScope(client_id, scope);
         _logger.LogInformation("Check endpoint called - SessionId: {SessionId}, ClientId: {ClientId}, RedirectUri: {RedirectUri}",
             LogValue.Safe(sessionId), LogValue.Safe(client_id), LogValue.Safe(redirect_uri));
 
@@ -477,8 +504,12 @@ public class ApiController : ControllerBase
             return BadRequest(new ApiResponseDto() { errors = "Invalid redirect_uri - must exactly match registered URI including protocol (http/https)" });
         }
 
+        var authorizationError = await ValidateAuthorizationRequest(
+            client_id, redirect_uri, response_type, scope, state, code_challenge, code_challenge_method, resource);
+        if (authorizationError != null) return authorizationError;
+
         var loginTokenRequest = LoginTokenRequest(
-            client_id, redirect_uri, response_type, scope, state, nonce, login_hint, code_challenge, code_challenge_method);
+            client_id, redirect_uri, response_type, scope, state, nonce, login_hint, code_challenge, code_challenge_method, resource);
         try
         {
             if (!_loginStartTokenService.IsSessionBound(HttpContext, sessionId, loginTokenRequest))
@@ -584,9 +615,7 @@ public class ApiController : ControllerBase
                             }
 
                             // Create authorization code using new OIDC services
-                            List<string> scopes = !string.IsNullOrEmpty(scope)
-                                ? [.. scope.Split(' ')]
-                                : ["openid", "profile", "email"];
+                            List<string> scopes = scope?.Split(' ', StringSplitOptions.RemoveEmptyEntries).Distinct().ToList() ?? [];
 
                             var authCode = new AuthorizationCode
                             {
@@ -595,7 +624,8 @@ public class ApiController : ControllerBase
                                 RedirectUri = redirect_uri,
                                 Scopes = scopes,
                                 CodeChallenge = code_challenge,
-                                CodeChallengeMethod = code_challenge_method ?? "S256",
+                                CodeChallengeMethod = code_challenge_method,
+                                Resource = resource,
                                 Nonce = nonce,
                                 Claims = new Dictionary<string, string>
                                 {
@@ -609,8 +639,7 @@ public class ApiController : ControllerBase
 
                             var code = await _authCodeStore.CreateAuthorizationCodeAsync(authCode);
 
-                            _logger.LogInformation("Authorization code created: {Code}, redirecting to: {RedirectUri}",
-                                LogValue.Safe(code.Substring(0, Math.Min(8, code.Length)) + "..."), LogValue.Safe(redirect_uri));
+                            _logger.LogInformation("Authorization code created");
 
                             // Return authorization code to redirect
                             var redirectUrl = RedirectUriHelper.BuildAuthorizationResponse(redirect_uri, code, state);

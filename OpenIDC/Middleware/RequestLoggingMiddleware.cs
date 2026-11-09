@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Http;
 using NLog;
+using OpenIDC.Helpers;
 using System.Diagnostics;
 using System.Threading.Tasks;
 
@@ -20,7 +21,9 @@ namespace OpenIDC.Middleware
             var stopwatch = Stopwatch.StartNew();
             var request = context.Request;
 
-            _logger.Info($"Incoming {request.Method} {request.Path} from {context.Connection.RemoteIpAddress}");
+            var method = LogValue.Safe(request.Method);
+            var path = LogValue.Safe(request.Path.Value);
+            _logger.Info($"Incoming {method} {path} from {context.Connection.RemoteIpAddress}");
 
             try
             {
@@ -29,7 +32,7 @@ namespace OpenIDC.Middleware
             finally
             {
                 stopwatch.Stop();
-                _logger.Info($"Completed {request.Method} {request.Path} - Status: {context.Response.StatusCode} - Duration: {stopwatch.ElapsedMilliseconds}ms");
+                _logger.Info($"Completed {method} {path} - Status: {context.Response.StatusCode} - Duration: {stopwatch.ElapsedMilliseconds}ms");
             }
         }
     }

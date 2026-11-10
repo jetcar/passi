@@ -127,8 +127,10 @@ The backend sends a push notification when a login approval is required.
 Expected behavior:
 - Register the device notification token with configured providers.
 - Receive the push notification.
-- Open the app when the notification arrives.
-- Trigger an immediate session sync so the pending session can be loaded.
+- Open the app automatically only when the screen is already awake and unlocked and Android permits background opening.
+- While locked or asleep, keep the request in a notification without opening the app or waking the screen.
+- Tapping the notification requires unlocking before the challenge is visible.
+- Trigger an immediate session sync when the app opens so the pending session can be loaded.
 
 ### 14. Open A Pending Authentication Session
 

@@ -1,6 +1,5 @@
 package com.passi.cloud.passi_android.notifications
 
-import android.content.Intent
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.google.gson.Gson
@@ -61,12 +60,12 @@ class PassiFirebaseMessagingService : FirebaseMessagingService() {
             return
         }
 
-        openApplication()
         PassiNotifications.showLoginNotification(
             context = this,
             title = title,
             contentText = payload?.ReturnHost ?: getString(R.string.notification_login_body),
         )
+        LoginRequestLauncher.openIfUnlocked(this)
     }
 
     override fun onNewToken(token: String) {
@@ -75,15 +74,5 @@ class PassiFirebaseMessagingService : FirebaseMessagingService() {
         serviceScope.launch {
             container.notificationTokenRegistrationService.registerToken(token)
         }
-    }
-
-    // Android lets this through only if the user allowed "Display over other apps" (see OverlayPermissionPrompt);
-    // otherwise it is silently blocked and the notification's full-screen intent / tap opens the app instead.
-    private fun openApplication() {
-        val intent = Intent(this, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-            putExtra(MainActivity.EXTRA_OPEN_PENDING_SESSION, true)
-        }
-        startActivity(intent)
     }
 }

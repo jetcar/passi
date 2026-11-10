@@ -2,51 +2,44 @@ package com.passi.cloud.passi_android.notifications
 
 import android.app.Activity
 import android.app.AlertDialog
-import android.app.NotificationManager
+import android.app.KeyguardManager
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
+import android.os.PowerManager
 import android.provider.Settings
+import android.util.Log
+import com.passi.cloud.passi_android.MainActivity
 import com.passi.cloud.passi_android.R
 
-/** Android 14+ may deny full-screen intents; then the user has to allow them in system settings. Ask once. */
-object FullScreenIntentPrompt {
-    private const val ANDROID_14 = 34
-    private const val PREFS = "passi_ui"
-    private const val KEY_ASKED = "full_screen_intent_asked"
+/** A push may bring Passi forward only while the user is already using an unlocked phone. */
+object LoginRequestLauncher {
+    fun shouldOpen(isInteractive: Boolean, isKeyguardLocked: Boolean, isDeviceLocked: Boolean): Boolean =
+        isInteractive && !isKeyguardLocked && !isDeviceLocked
 
-    fun shouldPrompt(sdkInt: Int, canUseFullScreenIntent: Boolean, alreadyAsked: Boolean): Boolean =
-        sdkInt >= ANDROID_14 && !canUseFullScreenIntent && !alreadyAsked
+    fun openIfUnlocked(context: Context) {
+        val power = context.getSystemService(PowerManager::class.java) ?: return
+        val keyguard = context.getSystemService(KeyguardManager::class.java) ?: return
+        if (!shouldOpen(power.isInteractive, keyguard.isKeyguardLocked, keyguard.isDeviceLocked)) return
 
-    fun maybePrompt(activity: Activity) {
-        if (Build.VERSION.SDK_INT < ANDROID_14) return
-        val prefs = activity.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-        val canUse = activity.getSystemService(NotificationManager::class.java).canUseFullScreenIntent()
-        if (!shouldPrompt(Build.VERSION.SDK_INT, canUse, prefs.getBoolean(KEY_ASKED, false))) return
-
-        prefs.edit().putBoolean(KEY_ASKED, true).apply()
-        AlertDialog.Builder(activity)
-            .setTitle(activity.getString(R.string.permission_full_screen_title))
-            .setMessage(activity.getString(R.string.permission_full_screen_message))
-            .setPositiveButton(activity.getString(R.string.open_settings)) { _, _ ->
-                activity.startActivity(
-                    Intent(Settings.ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT, Uri.parse("package:${activity.packageName}")),
-                )
-            }
-            .setNegativeButton(activity.getString(R.string.not_now), null)
-            .show()
-    }
-
-    fun resetAsked(context: Context) {
-        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().remove(KEY_ASKED).commit()
+        val intent = Intent(context, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+            putExtra(MainActivity.EXTRA_OPEN_PENDING_SESSION, true)
+        }
+        // Background launches require Android's permission (e.g. Display over other apps).
+        // The notification is already posted and remains available if Android blocks the launch.
+        try {
+            context.startActivity(intent)
+        } catch (error: SecurityException) {
+            Log.w("LoginRequestLauncher", "Automatic opening was blocked; use the login notification", error)
+        }
     }
 }
 
 /**
  * Android blocks a background app from starting its own activity, so a login push can only open Passi while
- * the phone is unlocked if the user allowed "Display over other apps". The full-screen intent only covers the
- * locked/screen-off case. Ask once.
+ * the phone is unlocked if the user allowed "Display over other apps". Locked or sleeping phones receive
+ * a notification to tap after unlocking. Ask once.
  */
 object OverlayPermissionPrompt {
     private const val PREFS = "passi_ui"

@@ -154,7 +154,7 @@ namespace OpenIDC.Controllers
                 userinfo_endpoint = $"{baseUrl}/connect/userinfo",
                 jwks_uri = $"{baseUrl}/.well-known/jwks",
                 end_session_endpoint = $"{baseUrl}/connect/logout",
-                scopes_supported = new[] { "openid", "profile", "email", "roles" },
+                scopes_supported = new[] { "openid", "profile", "email" },
                 response_types_supported = new[] { "code" },
                 grant_types_supported = new[] { "authorization_code", "refresh_token" },
                 subject_types_supported = new[] { "public" },

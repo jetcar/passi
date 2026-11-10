@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using NUnit.Framework;
 using OpenIDC.Controllers;
+using OpenIDC.Services;
 
 namespace OpenIDCTests
 {
@@ -37,6 +38,17 @@ namespace OpenIDCTests
             var methods = Discovery().GetProperty("code_challenge_methods_supported").EnumerateArray().Select(e => e.GetString());
 
             Assert.That(methods, Does.Contain("S256"));
+        }
+
+        [Test]
+        public void AdvertisedScopesAreAcceptedForDynamicClients()
+        {
+            var scopes = Discovery().GetProperty("scopes_supported").EnumerateArray().Select(e => e.GetString()).ToArray();
+            var request = DynamicRegistrationTests.Request();
+            request.Scope = string.Join(" ", scopes);
+
+            Assert.That(scopes, Is.EqualTo(new[] { "openid", "profile", "email" }));
+            Assert.That(DynamicClientRegistration.Validate(request), Is.Null);
         }
     }
 }

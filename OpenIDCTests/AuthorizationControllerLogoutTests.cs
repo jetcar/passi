@@ -26,9 +26,26 @@ namespace OpenIDCTests
         [TestCase("https://evil.example/phish")]
         [TestCase("//evil.example/phish")]
         [TestCase("/\\evil.example/phish")]
+        [TestCase("/\t/evil.example/phish")]
+        [TestCase("/\t\\evil.example/phish")]
+        [TestCase("/account\r\n/loggedout")]
         public void IsLocalUrlReturnsFalseForExternalOrEmptyUrls(string url)
         {
             Assert.That(AuthorizationController.IsLocalUrl(url), Is.False);
+        }
+
+        [TestCase("/%09/evil.example/phish")]
+        [TestCase("/%09%5Cevil.example/phish")]
+        [TestCase("/account%0D%0A/loggedout")]
+        public async Task LogoutPostRejectsControlCharactersInLocalRedirect(string redirectUri)
+        {
+            var controller = BuildController(new FakeClientStore(null),
+                "post_logout_redirect_uri=" + redirectUri);
+
+            var result = await controller.LogoutPost();
+
+            Assert.That(result, Is.InstanceOf<LocalRedirectResult>());
+            Assert.That(((LocalRedirectResult)result).Url, Is.EqualTo("/"));
         }
 
         [Test]
@@ -38,8 +55,8 @@ namespace OpenIDCTests
 
             var result = await controller.LogoutPost();
 
-            Assert.That(result, Is.InstanceOf<RedirectResult>());
-            var redirect = (RedirectResult)result;
+            Assert.That(result, Is.InstanceOf<LocalRedirectResult>());
+            var redirect = (LocalRedirectResult)result;
             Assert.That(redirect.Url, Is.EqualTo("/goodbye"));
         }
 
@@ -74,8 +91,8 @@ namespace OpenIDCTests
 
             var result = await controller.LogoutPost();
 
-            Assert.That(result, Is.InstanceOf<RedirectResult>());
-            var redirect = (RedirectResult)result;
+            Assert.That(result, Is.InstanceOf<LocalRedirectResult>());
+            var redirect = (LocalRedirectResult)result;
             Assert.That(redirect.Url, Is.EqualTo("/"));
         }
 
@@ -87,8 +104,8 @@ namespace OpenIDCTests
 
             var result = await controller.LogoutPost();
 
-            Assert.That(result, Is.InstanceOf<RedirectResult>());
-            var redirect = (RedirectResult)result;
+            Assert.That(result, Is.InstanceOf<LocalRedirectResult>());
+            var redirect = (LocalRedirectResult)result;
             Assert.That(redirect.Url, Is.EqualTo("/"));
         }
 

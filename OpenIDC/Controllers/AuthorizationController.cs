@@ -4,6 +4,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using OpenIDC.Services;
 using ConfigurationManager;
@@ -46,52 +47,23 @@ namespace OpenIDC.Controllers
             var postLogoutRedirectUri = Request.Query["post_logout_redirect_uri"].ToString();
             var clientId = Request.Query["client_id"].ToString();
 
-            if (!string.IsNullOrEmpty(postLogoutRedirectUri) &&
-                await IsAllowedPostLogoutRedirectUriAsync(clientId, postLogoutRedirectUri))
+            if (IsLocalUrl(postLogoutRedirectUri))
             {
-                return Redirect(postLogoutRedirectUri);
+                return LocalRedirect(postLogoutRedirectUri);
             }
 
-            return Redirect("/");
+            if (!string.IsNullOrEmpty(clientId) && !string.IsNullOrEmpty(postLogoutRedirectUri))
+            {
+                var client = await _clientStore.FindByClientIdAsync(clientId);
+                var registeredRedirectUri = client?.RedirectUris?.FirstOrDefault(uri => uri == postLogoutRedirectUri);
+                if (registeredRedirectUri != null)
+                    return Redirect(registeredRedirectUri);
+            }
+
+            return LocalRedirect("/");
         }
 
-        // Only redirect to a same-site relative URL, or a URI registered as a redirect
-        // URI for the client that requested the logout, to prevent an open redirect.
-        private async Task<bool> IsAllowedPostLogoutRedirectUriAsync(string clientId, string redirectUri)
-        {
-            if (IsLocalUrl(redirectUri))
-            {
-                return true;
-            }
-
-            if (string.IsNullOrEmpty(clientId))
-            {
-                return false;
-            }
-
-            var client = await _clientStore.FindByClientIdAsync(clientId);
-            return client?.RedirectUris != null && client.RedirectUris.Contains(redirectUri);
-        }
-
-        public static bool IsLocalUrl(string url)
-        {
-            if (string.IsNullOrEmpty(url))
-            {
-                return false;
-            }
-
-            if (url[0] == '/')
-            {
-                // Allow "/" or "/foo" but not "//evil.com" or "/\evil.com",
-                // which browsers treat as protocol-relative URLs.
-                if (url.Length == 1 || (url[1] != '/' && url[1] != '\\'))
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
+        public static bool IsLocalUrl(string url) => RedirectHttpResult.IsLocalUrl(url);
 
         [HttpGet("connect/userinfo")]
         [HttpPost("connect/userinfo")]  // OIDC spec allows both GET and POST

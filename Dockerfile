@@ -21,8 +21,11 @@ COPY . .
 COPY --from=vueWeb /src/WebApp/wwwroot ./WebApp/wwwroot
 COPY --from=vueWeb /src/OpenIDC/wwwroot ./OpenIDC/wwwroot
 
-RUN dotnet restore passi.sln
-RUN dotnet publish passi.sln -c Release /p:UseAppHost=false
+# Publish only the services consumed by the runtime images. Publishing the solution
+# also restores and ships test-only tools (including Coverlet and its bundled dependencies).
+RUN dotnet publish WebApp/WebApp.csproj -c Release /p:UseAppHost=false \
+    && dotnet publish passiwebapi/passiwebapi.csproj -c Release /p:UseAppHost=false \
+    && dotnet publish OpenIDC/OpenIDC.csproj -c Release /p:UseAppHost=false
 
 
 ENTRYPOINT ["sleep", "3600"]

@@ -47,6 +47,16 @@ Requirements: JDK 17, Android SDK (compileSdk 37, minSdk 28, targetSdk 36). The 
 full flow on a connected device through `adb`, against a local backend in Docker.
 
 Release builds use R8 minification and resource shrinking (`app/proguard-rules.pro`).
+Keep AGP's optimized resource shrinking and strict keep-rule defaults enabled. The explicit Gson and
+Bouncy Castle keep rules preserve stored account field names and reflective crypto provider loading.
+
+`MainActivity` uses `WindowCompat.enableEdgeToEdge`; the app background fills the window while the navigation
+content consumes safe drawing insets for system bars, display cutouts, and the keyboard. System icons follow
+Passi's light theme. `EdgeToEdgeTest` checks real control bounds in portrait, landscape, and with the keyboard;
+run it with both gesture and three-button navigation, including a display cutout.
+
+Reference: [Android window insets](https://developer.android.com/develop/ui/compose/system/insets-ui) and
+[R8 optimization](https://developer.android.com/topic/performance/app-optimization/enable-app-optimization).
 
 ## Release
 

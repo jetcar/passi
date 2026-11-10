@@ -11,6 +11,7 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.view.WindowCompat
 import androidx.appcompat.app.AppCompatActivity
 import com.passi.cloud.passi_android.ui.PassiApp
 import com.passi.cloud.passi_android.notifications.OverlayPermissionPrompt
@@ -19,6 +20,12 @@ import com.passi.cloud.passi_android.notifications.PassiNotifications
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        WindowCompat.enableEdgeToEdge(window)
+        // Passi currently uses a light Compose theme, regardless of the system theme.
+        WindowCompat.getInsetsController(window, window.decorView).apply {
+            isAppearanceLightStatusBars = true
+            isAppearanceLightNavigationBars = true
+        }
         ensureNotificationChannel(this)
         requestNotificationPermissionIfNeeded()
         OverlayPermissionPrompt.maybePrompt(this)

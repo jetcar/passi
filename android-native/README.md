@@ -10,7 +10,7 @@ See [USE_CASES.md](USE_CASES.md) for the end-user use cases.
 - Account enrollment: terms, email, confirmation code, optional PIN, self-signed certificate generation
 - Multiple accounts, each tied to a configurable provider (backend endpoint); provider CRUD
 - Session approval: foreground and pending-session polling, color challenge, signing with PIN or biometrics
-- Firebase push notifications that open the app and trigger an immediate session sync
+- Firebase push notifications that open the app only while the screen is awake and unlocked; otherwise tap the notification and unlock to review
 - Account detail, linked devices, verified remote account deletion
 - Certificate rotation for PIN, non-PIN and biometric accounts
 - Biometric certificate material stored in EncryptedSharedPreferences

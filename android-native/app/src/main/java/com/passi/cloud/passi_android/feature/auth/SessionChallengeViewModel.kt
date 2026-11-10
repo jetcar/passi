@@ -29,7 +29,7 @@ data class SessionChallengeUiState(
     val colorError: UiText? = null,
     val isButtonEnabled: Boolean = false,
     val isLoading: Boolean = false,
-    /** Correct answer given on a locked phone: the UI must ask Android to unlock before approval continues. */
+    /** If the phone locks during approval, the UI must wait for unlocking before continuing. */
     val unlockRequired: Boolean = false,
 )
 
@@ -136,7 +136,7 @@ class SessionChallengeViewModel(
             }
         }
 
-        // The challenge may be shown over the lock screen; approving must still require unlocking the phone.
+        // The phone may lock after the challenge opens; approval must still require an unlocked phone.
         if (isDeviceLocked()) {
             continueAfterUnlock = proceed
             _uiState.value = _uiState.value.copy(unlockRequired = true)

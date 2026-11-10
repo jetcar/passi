@@ -13,7 +13,6 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.appcompat.app.AppCompatActivity
 import com.passi.cloud.passi_android.ui.PassiApp
-import com.passi.cloud.passi_android.notifications.FullScreenIntentPrompt
 import com.passi.cloud.passi_android.notifications.OverlayPermissionPrompt
 import com.passi.cloud.passi_android.notifications.PassiNotifications
 
@@ -22,10 +21,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         ensureNotificationChannel(this)
         requestNotificationPermissionIfNeeded()
-        // One permission dialog per launch; the full-screen-intent one follows on a later start if still needed.
-        if (!OverlayPermissionPrompt.maybePrompt(this)) {
-            FullScreenIntentPrompt.maybePrompt(this)
-        }
+        OverlayPermissionPrompt.maybePrompt(this)
         handleIntent(intent)
         setContent {
             PassiApp()
@@ -46,10 +42,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun handleIntent(intent: Intent?) {
         val fromLoginNotification = intent?.getBooleanExtra(EXTRA_OPEN_PENDING_SESSION, false) == true
-        // Show the login challenge over the lock screen (and wake it) only when opened for a login request;
-        // approving still requires unlocking (see UnlockGate in SessionChallengeRoute).
-        setShowWhenLocked(fromLoginNotification)
-        setTurnScreenOn(fromLoginNotification)
+        // Notification taps use Android's normal unlock flow before the challenge is visible.
         if (fromLoginNotification) {
             (application as PassiApplication).container.notificationOpenStore.requestOpen()
         }

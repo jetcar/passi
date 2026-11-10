@@ -19,12 +19,14 @@ import androidx.test.runner.lifecycle.Stage
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until
-import com.passi.cloud.passi_android.notifications.FullScreenIntentPrompt
+import com.passi.cloud.passi_android.notifications.LoginRequestLauncher
 import com.passi.cloud.passi_android.notifications.OverlayPermissionPrompt
 import com.passi.cloud.passi_android.notifications.PassiNotifications
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -121,9 +123,9 @@ class LoginNotificationTest {
     }
 
     @Test
-    fun appDeclaresFullScreenIntentPermission() {
+    fun appDoesNotRequestFullScreenIntentPermission() {
         val info = context.packageManager.getPackageInfo(context.packageName, PackageManager.GET_PERMISSIONS)
-        assertTrue(info.requestedPermissions.orEmpty().contains(Manifest.permission.USE_FULL_SCREEN_INTENT))
+        assertFalse(info.requestedPermissions.orEmpty().contains(Manifest.permission.USE_FULL_SCREEN_INTENT))
     }
 
     @Test
@@ -133,14 +135,16 @@ class LoginNotificationTest {
     }
 
     @Test
-    fun loginNotificationShowsOnLockScreenWithFullScreenIntent() {
+    fun loginNotificationHasATapActionWithoutAFullScreenIntent() {
         PassiNotifications.showLoginNotification(context, "Passi login", "passi.cloud")
         waitFor { activeCount() == 1 }
 
         val posted = manager.activeNotifications.single()
         assertEquals(MainActivity.NOTIFICATION_CHANNEL_ID, posted.notification.channelId)
         assertEquals(Notification.VISIBILITY_PUBLIC, posted.notification.visibility)
-        assertNotNull(posted.notification.fullScreenIntent)
+        assertNotNull(posted.notification.contentIntent)
+        assertNull(posted.notification.fullScreenIntent)
+        assertEquals(Notification.CATEGORY_STATUS, posted.notification.category)
     }
 
     @Test
@@ -151,20 +155,49 @@ class LoginNotificationTest {
     }
 
     @Test
-    fun loginPushOpensChallengeOverLockedScreen() {
+    fun loginPushStaysInNotificationsWhilePhoneIsLocked() {
         val keyguard = context.getSystemService(KeyguardManager::class.java)
         val power = context.getSystemService(PowerManager::class.java)
-        shell("appops set ${context.packageName} USE_FULL_SCREEN_INTENT allow")
+        val device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
+        shell("appops set ${context.packageName} SYSTEM_ALERT_WINDOW allow")
+        device.pressHome()
         shell("locksettings set-pin 1111")
         try {
             shell("input keyevent KEYCODE_SLEEP")
-            waitFor { !power.isInteractive }
+            waitFor { !power.isInteractive && keyguard.isDeviceLocked }
+            assertTrue(keyguard.isDeviceLocked)
 
             PassiNotifications.showLoginNotification(context, "Passi login", "passi.cloud")
+            LoginRequestLauncher.openIfUnlocked(context)
+            waitFor { activeCount() == 1 }
+            SystemClock.sleep(1_000)
 
-            waitFor(timeoutMs = 15_000) { resumedActivity() is MainActivity }
-            assertTrue("Passi should be shown above the lock screen", resumedActivity() is MainActivity)
-            assertTrue("phone must still be locked (approving requires unlock)", keyguard.isKeyguardLocked)
+            assertEquals(1, activeCount())
+            assertFalse("Passi must not open above the lock screen", resumedActivity() is MainActivity)
+            assertFalse("Passi must not wake the screen", power.isInteractive)
+
+            shell("input keyevent KEYCODE_WAKEUP")
+            assertTrue(keyguard.isKeyguardLocked)
+            LoginRequestLauncher.openIfUnlocked(context)
+            SystemClock.sleep(1_000)
+            assertFalse("An awake locked phone must not open Passi", resumedActivity() is MainActivity)
+            assertEquals(1, activeCount())
+
+            // The notification's activity must remain behind keyguard until the user unlocks.
+            device.openNotification()
+            val notification = device.wait(Until.findObject(By.text("Passi login")), 5_000)
+            assertNotNull("Login notification should be available on the lock screen", notification)
+            notification.click()
+            SystemClock.sleep(1_000)
+            assertTrue(keyguard.isDeviceLocked)
+            assertFalse("Challenge must not be visible before unlock", device.currentPackageName == context.packageName)
+
+            // Complete the real unlock flow; clearing credentials cancels the pending notification action.
+            shell("input text 1111")
+            shell("input keyevent KEYCODE_ENTER")
+            waitFor { !keyguard.isDeviceLocked && resumedActivity() is MainActivity }
+            assertFalse("Phone should be unlocked", keyguard.isDeviceLocked)
+            assertTrue("Notification tap must open Passi after unlock", resumedActivity() is MainActivity)
         } finally {
             shell("locksettings clear --old 1111")
             shell("input keyevent KEYCODE_WAKEUP")
@@ -173,24 +206,18 @@ class LoginNotificationTest {
     }
 
     @Test
-    fun appAsksOnceToAllowFullScreenNotificationsWhenDenied() {
-        if (Build.VERSION.SDK_INT < 34) return
+    fun loginPushOpensAppWhenPhoneIsAwakeAndUnlocked() {
         val device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
-        FullScreenIntentPrompt.resetAsked(context)
-        shell("appops set ${context.packageName} USE_FULL_SCREEN_INTENT deny")
-        // Otherwise the overlay prompt takes this launch's single permission dialog.
         shell("appops set ${context.packageName} SYSTEM_ALERT_WINDOW allow")
-        try {
-            ActivityScenario.launch(MainActivity::class.java).use {
-                assertNotNull("prompt should appear", device.wait(Until.findObject(By.textContains("full-screen")), 5_000))
-                device.findObject(By.text("Not now"))?.click()
-            }
-            ActivityScenario.launch(MainActivity::class.java).use {
-                assertTrue("asked only once", device.wait(Until.gone(By.textContains("full-screen")), 3_000))
-            }
-        } finally {
-            shell("appops set ${context.packageName} USE_FULL_SCREEN_INTENT allow")
-        }
+        shell("input keyevent KEYCODE_WAKEUP")
+        shell("wm dismiss-keyguard")
+        device.pressHome()
+
+        PassiNotifications.showLoginNotification(context, "Passi login", "passi.cloud")
+        LoginRequestLauncher.openIfUnlocked(context)
+
+        waitFor { resumedActivity() is MainActivity }
+        assertTrue("An unlocked phone should open Passi automatically", resumedActivity() is MainActivity)
     }
 
     @Test

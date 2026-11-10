@@ -48,9 +48,8 @@ object PassiNotifications {
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)
-            .setFullScreenIntent(pendingIntent, true)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-            .setCategory(NotificationCompat.CATEGORY_CALL)
+            .setCategory(NotificationCompat.CATEGORY_STATUS)
 
         NotificationManagerCompat.from(context).notify(LOGIN_NOTIFICATION_ID, builder.build())
     }

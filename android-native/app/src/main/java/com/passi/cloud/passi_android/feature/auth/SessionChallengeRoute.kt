@@ -70,7 +70,7 @@ fun SessionChallengeRoute(
     val biometricCancelledMessage = stringResource(R.string.biometric_authentication_cancelled)
     val noPendingSessionMessage = stringResource(R.string.error_no_pending_session)
 
-    // Shown over the lock screen: ask Android to unlock (PIN/fingerprint) before the approval continues.
+    // If the phone locks during approval, wait for Android to unlock before continuing.
     LaunchedEffect(uiState.unlockRequired) {
         val activity = context as? Activity
         if (!uiState.unlockRequired) return@LaunchedEffect

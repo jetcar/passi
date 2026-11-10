@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
 
-type Action = { href: string; labelKey: string; icon: string; className: string }
+type Action = { href: string; labelKey: string; icon: string; className: string; route?: boolean }
 type Product = {
   key: string
   icon: string
@@ -15,6 +15,13 @@ type Product = {
 }
 
 const products: Product[] = [
+  {
+    key: 'finance', icon: 'bi-wallet2', iconClass: 'bg-finance', badgeKey: 'personalFinance', badgeClass: 'bg-success', featureClass: 'text-success',
+    actions: [
+      { href: '/products/finance', labelKey: 'products.items.finance.learnMore', icon: 'bi-info-circle', className: 'btn-success', route: true },
+      { href: 'https://finance.passi.cloud/', labelKey: 'products.items.finance.open', icon: 'bi-box-arrow-up-right', className: 'btn-outline-secondary' },
+    ],
+  },
   {
     key: 'passi', icon: 'bi-fingerprint', iconClass: '', badgeKey: 'openSource', badgeClass: 'bg-success', featureClass: 'text-success',
     actions: [
@@ -101,9 +108,14 @@ onMounted(() => {
                   </ul>
                 </div>
                 <div class="product-actions">
-                  <a v-for="action in product.actions" :key="action.href" :href="action.href" target="_blank" class="btn" :class="action.className">
-                    <i class="bi me-2" :class="action.icon"></i>{{ $t(action.labelKey) }}
-                  </a>
+                  <template v-for="action in product.actions" :key="action.href">
+                    <router-link v-if="action.route" :to="action.href" class="btn" :class="action.className">
+                      <i class="bi me-2" :class="action.icon"></i>{{ $t(action.labelKey) }}
+                    </router-link>
+                    <a v-else :href="action.href" target="_blank" rel="noopener noreferrer" class="btn" :class="action.className">
+                      <i class="bi me-2" :class="action.icon"></i>{{ $t(action.labelKey) }}
+                    </a>
+                  </template>
                 </div>
                 <div class="product-tech-stack mt-4">
                   <small class="text-muted">{{ $t(`products.items.${product.key}.tech`) }}</small>
@@ -151,6 +163,7 @@ onMounted(() => {
 .product-header { padding: 2rem; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); position: relative; }
 .product-icon { width: 80px; height: 80px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 20px; display: flex; align-items: center; justify-content: center; margin-bottom: 1rem; box-shadow: 0 5px 15px rgba(102,126,234,.3); }
 .product-icon.bg-info { background: linear-gradient(135deg, #0dcaf0 0%, #0a7ea3 100%); }
+.product-icon.bg-finance { background: linear-gradient(135deg, #20c997 0%, #198754 100%); }
 .product-icon.bg-streamdek { background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); }
 .product-icon i { font-size: 2.5rem; color: white; }
 .product-title { font-size: 1.75rem; font-weight: bold; margin-bottom: .5rem; color: #2d3748; }

@@ -93,6 +93,11 @@ onMounted(() => {
                                             <i class="bi bi-chat-dots me-2"></i>CharP2P
                                         </a>
                                     </li>
+                                    <li>
+                                        <router-link to="/products/finance" class="dropdown-item">
+                                            <i class="bi bi-wallet2 me-2"></i>Passi Finance
+                                        </router-link>
+                                    </li>
                                 </ul>
                             </li>
                             <li class="nav-item" v-if="isLoggedIn">
@@ -112,6 +117,11 @@ onMounted(() => {
                                 <router-link to="/about" class="nav-link">
                                     <i class="bi bi-info-circle me-1"></i>{{ $t('navigation.about') }}
                                 </router-link>
+                            </li>
+                            <li class="nav-item">
+                                <a href="https://finance.passi.cloud/" class="nav-link" target="_blank" rel="noopener noreferrer">
+                                    <i class="bi bi-wallet2 me-1"></i>Finance
+                                </a>
                             </li>
                             <li class="nav-item">
                                 <a :href="webmailUrl" class="nav-link" target="_blank" rel="noopener noreferrer">
@@ -183,6 +193,7 @@ onMounted(() => {
                             <li class="mb-2"><a href="https://github.com/jetcar/tallinn-crashes" target="_blank" class="text-light text-decoration-none hover-link">{{ $t('products.items.crashes.title') }}</a></li>
                             <li class="mb-2"><a href="https://github.com/jetcar/deksirip" target="_blank" class="text-light text-decoration-none hover-link">{{ $t('products.items.economy.title') }}</a></li>
                             <li class="mb-2"><a href="https://github.com/jetcar/charp2p" target="_blank" class="text-light text-decoration-none hover-link">CharP2P</a></li>
+                            <li class="mb-2"><router-link to="/products/finance" class="text-light text-decoration-none hover-link">Passi Finance</router-link></li>
                         </ul>
                     </div>
                     <div class="col-md-3 mb-4">

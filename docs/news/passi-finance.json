@@ -1,0 +1,6 @@
+{
+  "title": "Introducing Passi Finance: accounts, spending and budgets in one place",
+  "slug": "introducing-passi-finance",
+  "summary": "Passi Finance brings bank transactions, spending categories and monthly budgets into one view, with Passi sign-in and an optional demo to explore the service.",
+  "bodyMarkdown": "[Passi Finance](https://finance.passi.cloud/) brings personal expense analysis to the Passi family. Review your accounts and transactions, organize spending into categories, and follow your monthly budgets.\n\n## A clearer view of your spending\n\n- Connect Swedbank through Enable Banking with your consent and choose which accounts to monitor.\n- Review monthly spending and account activity.\n- Organize transactions into categories and split a purchase across several categories.\n- Set monthly category budgets and see what remains or is over budget.\n- Use the interface in English, Estonian or Russian.\n\n## Try the demo\n\nOpen [finance.passi.cloud](https://finance.passi.cloud/) and choose Demo to explore a temporary sandbox. Demo data is not saved permanently. Personal account access uses Passi sign-in and is restricted.\n\nBank data is accessed only with your consent. The service does not sell personal data, use it for advertising or initiate payments. See the [privacy notice](https://finance.passi.cloud/privacy) for details."
+}

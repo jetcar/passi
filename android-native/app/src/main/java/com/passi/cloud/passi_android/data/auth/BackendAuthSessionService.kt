@@ -66,7 +66,9 @@ class BackendAuthSessionService(
                     // Do not auto-deactivate on missing sync entries because cross-device registrations
                     // can temporarily or permanently hide an account in this response.
                     if (existsOnServer && account.isConfirmed && account.inactive) {
-                        accountsRepository.updateAccount(account.copy(inactive = false))
+                        accountsRepository.getAccount(account.id)?.let { latest ->
+                            accountsRepository.updateAccount(latest.copy(inactive = false))
+                        }
                     }
                 }
             }
@@ -103,7 +105,8 @@ class BackendAuthSessionService(
         val account = accountsRepository.getAccount(session.accountId)
             ?: return Result.failure(IllegalStateException("Account not found"))
         val signedHash = signer.sign(account, pin, session.randomString)
-            .getOrElse { return Result.failure(IllegalStateException("Invalid Pin")) }
+            .getOrElse { return Result.failure(IllegalStateException(
+                if (account.keyAlias != null) "Device authorization failed. Retry or recover the account." else "Invalid Pin")) }
         return authorizeWithSignature(session, account, signedHash)
     }
 

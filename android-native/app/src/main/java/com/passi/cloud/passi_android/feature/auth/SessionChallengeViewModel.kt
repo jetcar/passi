@@ -130,6 +130,7 @@ class SessionChallengeViewModel(
 
         val proceed = {
             when {
+                account.keyAlias != null -> authorizeWithoutPin(onAuthorized)
                 account.pinLength > 0 -> onRequirePin()
                 account.hasFingerprint -> onRequireBiometric()
                 else -> authorizeWithoutPin(onAuthorized)

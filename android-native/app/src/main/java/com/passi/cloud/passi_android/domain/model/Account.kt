@@ -18,7 +18,31 @@ data class Account(
     val publicCertBinary: String? = null,
     val pinLength: Int = 0,
     val hasFingerprint: Boolean = false,
+    val keyAlias: String? = null,
+    val keySecurityLevel: String? = null,
+    val pendingKey: PendingDeviceKey? = null,
+    val legacyCleanupPending: Boolean = false,
+    val cleanupKeyAlias: String? = null,
+    val retiredKeyAliases: List<String>? = null,
+    val cleanupAccountIds: List<String>? = null,
 ) {
     val isActive: Boolean
         get() = !inactive
+
+    val requiresCertificateUpdate: Boolean
+        get() = isActive && isConfirmed && keyAlias == null && privateCertBinary != null
+}
+
+/** Public-only durable checkpoint. Dates are strings so persistence needs no Instant adapter. */
+data class PendingDeviceKey(
+    val keyAlias: String,
+    val keySecurityLevel: String,
+    val publicCertBinary: String,
+    val thumbprint: String,
+    val validFrom: String,
+    val validTo: String,
+    // Null is an older checkpoint whose submission outcome is unknown; never discard it.
+    val submitted: Boolean? = null,
+) {
+    val mayHaveBeenSubmitted: Boolean get() = submitted != false
 }

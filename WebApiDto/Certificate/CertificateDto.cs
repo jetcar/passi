@@ -15,5 +15,13 @@ namespace WebApiDto.Certificate
 
         [Required]
         public string DeviceId { get; set; }
+
+        // Opt-in device key migration. This changes the signed payload; legacy enrollment
+        // continues to sign PublicCert alone and never retires an existing device's key.
+        public bool RetireParent { get; set; }
+
+        public string SigningPayload() => RetireParent
+            ? $"Passi:RetireParent:v2\n{ParentCertThumbprint}\n{DeviceId}\n{PublicCert}"
+            : PublicCert;
     }
 }

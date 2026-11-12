@@ -4,6 +4,7 @@ import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.passi.cloud.passi_android.R
+import com.passi.cloud.passi_android.domain.enrollment.DeviceKeyRecoveryRequiredException
 
 sealed interface UiText {
     data class Resource(
@@ -22,8 +23,10 @@ fun UiText?.asString(): String = when (this) {
 }
 
 fun Throwable.toUiText(@StringRes fallback: Int): UiText {
+    if (this is DeviceKeyRecoveryRequiredException) return UiText.Resource(R.string.device_key_recovery_required)
     val resource = when (message) {
         "Account not found" -> R.string.account_not_found
+        "Account storage failed", "Device storage failed" -> R.string.error_account_storage_retry
         "Provider not found" -> R.string.provider_not_found
         "Invalid Pin", "Invalid PIN" -> R.string.error_invalid_pin
         "Invalid old pin", "Invalid old PIN" -> R.string.error_invalid_old_pin

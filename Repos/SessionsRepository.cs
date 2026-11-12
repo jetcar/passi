@@ -116,7 +116,7 @@ namespace Repos
 
         public SimpleSessionDb GetAuthorizedSession(Guid sessionId, string thunbprint, string username)
         {
-            var certificate = _dbContext.Certificates.Include(x => x.User).FirstOrDefault(x => x.Thumbprint == thunbprint && x.User.EmailHash.ToLower() == username.ToLower());
+            var certificate = _dbContext.Certificates.Include(x => x.User).FirstOrDefault(x => !x.IsRetired && x.Thumbprint == thunbprint && x.User.EmailHash.ToLower() == username.ToLower());
             if (certificate == null)
                 return null;
             return _dbContext.Sessions.FirstOrDefault(x => x.Guid == sessionId && x.UserId == certificate.User.Id);
@@ -124,7 +124,7 @@ namespace Repos
 
         public CertificateDb GetCertificate(string username, string thumbprint)
         {
-            return _dbContext.Certificates.FirstOrDefault(x => x.Thumbprint == thumbprint && x.User.EmailHash.ToLower() == username.ToLower());
+            return _dbContext.Certificates.FirstOrDefault(x => !x.IsRetired && x.Thumbprint == thumbprint && x.User.EmailHash.ToLower() == username.ToLower());
         }
     }
 

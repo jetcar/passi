@@ -12,7 +12,7 @@ import java.util.UUID
 @OptIn(ExperimentalCoroutinesApi::class)
 class CertificateUseCaseTests : CoroutineViewModelTest() {
     @Test
-    fun updateCertificateRequiresBiometricConfirmationForBiometricOnlyAccount() = runViewModelTest {
+    fun updateCertificateDoesNotUseStandaloneBiometricApproval() = runViewModelTest {
         val accountsRepository = inMemoryAccountsRepository().also {
             it.updateAccount(it.getAccounts().first().copy(isConfirmed = true, pinLength = 0, hasFingerprint = true))
         }
@@ -26,7 +26,8 @@ class CertificateUseCaseTests : CoroutineViewModelTest() {
         advanceUntilIdle()
         viewModel.rotate {}
 
-        assertThat(viewModel.uiState.value.responseError).isEqualTo(UiText.Resource(R.string.error_biometric_required_for_rotation))
+        advanceUntilIdle()
+        assertThat(viewModel.uiState.value.responseError).isNull()
     }
 
     @Test
@@ -49,7 +50,7 @@ class CertificateUseCaseTests : CoroutineViewModelTest() {
     }
 
     @Test
-    fun updateCertificateRotatesAndRefreshesBiometricMaterial() = runViewModelTest {
+    fun updateCertificateRequiresOldPinAndNeverCreatesBiometricCopy() = runViewModelTest {
         val accountsRepository = inMemoryAccountsRepository().also {
             it.updateAccount(it.getAccounts().first().copy(isConfirmed = true, pinLength = 4, hasFingerprint = true))
         }
@@ -65,14 +66,16 @@ class CertificateUseCaseTests : CoroutineViewModelTest() {
 
         advanceUntilIdle()
         viewModel.confirmBiometricForCurrentCertificate()
+        viewModel.onOldPinChanged("1234")
         viewModel.onNewPinChanged("5678")
         viewModel.onConfirmPinChanged("5678")
         viewModel.rotate { done = true }
         advanceUntilIdle()
 
         assertThat(done).isTrue()
-        assertThat(rotationService.lastUsedBiometric).isTrue()
-        assertThat(rotationService.lastNewPin).isEqualTo("5678")
-        assertThat(biometricService.lastEnablePin).isEqualTo("5678")
+        assertThat(rotationService.lastUsedBiometric).isFalse()
+        assertThat(rotationService.lastNewPin).isNull()
+        assertThat(rotationService.lastOldPin).isEqualTo("1234")
+        assertThat(biometricService.lastEnablePin).isNull()
     }
 }

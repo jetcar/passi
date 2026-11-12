@@ -20,6 +20,7 @@ import com.passi.cloud.passi_android.notifications.PassiNotifications
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        (application as PassiApplication).container.deviceKeyAuthorization.attach(this)
         WindowCompat.enableEdgeToEdge(window)
         // Passi currently uses a light Compose theme, regardless of the system theme.
         WindowCompat.getInsetsController(window, window.decorView).apply {
@@ -33,6 +34,11 @@ class MainActivity : AppCompatActivity() {
         setContent {
             PassiApp()
         }
+    }
+
+    override fun onDestroy() {
+        (application as PassiApplication).container.deviceKeyAuthorization.detach(this)
+        super.onDestroy()
     }
 
     override fun onResume() {

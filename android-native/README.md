@@ -7,14 +7,17 @@ See [USE_CASES.md](USE_CASES.md) for the end-user use cases.
 
 ## Features
 
-- Account enrollment: terms, email, confirmation code, optional PIN, self-signed certificate generation
+- Account enrollment: terms, email, confirmation code, hardware-held RSA key (Android 11+ and secure screen lock)
 - Multiple accounts, each tied to a configurable provider (backend endpoint); provider CRUD
-- Session approval: foreground and pending-session polling, color challenge, signing with PIN or biometrics
+- Session approval: foreground and pending-session polling, color challenge, per-operation signing with strong biometrics or device credential; legacy accounts retain PIN access until migration
 - Firebase push notifications that open the app only while the screen is awake and unlocked; otherwise tap the notification and unlock to review
 - Account detail, linked devices, verified remote account deletion
-- Certificate rotation for PIN, non-PIN and biometric accounts
-- Biometric certificate material stored in EncryptedSharedPreferences
+- Resumable certificate rotation and migration from legacy PKCS#12 accounts
+- Persistent account-list security notice with a direct Update certificate action until every active legacy account is migrated
+- New keys are non-exportable; migration deletes legacy PKCS#12 and biometric copies after confirmed server acceptance
 - In-app banner when a newer version is available on Google Play
+
+See [device-key ADR](../docs/decisions/0004-device-held-authentication-keys.md) and [validation matrix](../docs/device-key-validation.md) before release. Deploy the retirement-aware backend first.
 
 ## Project structure
 

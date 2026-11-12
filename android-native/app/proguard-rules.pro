@@ -20,3 +20,7 @@
 # Keep line numbers so Play Console can retrace crash stack traces with the uploaded mapping file.
 -keepattributes SourceFile,LineNumberTable
 -renamesourcefileattribute SourceFile
+
+-keep class com.passi.cloud.passi_android.domain.model.PendingDeviceKey { *; }
+
+-keep class com.passi.cloud.passi_android.data.certificate.CertificateUpdateResponseDto { *; }

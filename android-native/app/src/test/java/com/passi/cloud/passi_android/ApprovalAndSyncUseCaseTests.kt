@@ -20,7 +20,7 @@ class ApprovalAndSyncUseCaseTests : CoroutineViewModelTest() {
         val selectedAccountStore = SelectedAccountStore()
         val pendingEnrollmentStore = PendingEnrollmentStore()
         val accountsRepository = inMemoryAccountsRepository()
-        val confirmedAccount = accountsRepository.getAccounts().first().copy(isConfirmed = true)
+        val confirmedAccount = accountsRepository.getAccounts().first().copy(isConfirmed = true, keyAlias = "passi.account.test")
         accountsRepository.updateAccount(confirmedAccount)
         val viewModel = AccountsViewModel(
             accountsRepository = accountsRepository,
@@ -37,6 +37,64 @@ class ApprovalAndSyncUseCaseTests : CoroutineViewModelTest() {
 
         assertThat(opened).isTrue()
         assertThat(selectedAccountStore.read()).isEqualTo(confirmedAccount.id)
+    }
+
+    @Test
+    fun certificateUpdateNoticeSelectsLegacyAccountAndOpensMigration() = runViewModelTest {
+        val selectedAccountStore = SelectedAccountStore()
+        val accountsRepository = inMemoryAccountsRepository()
+        val legacyAccount = accountsRepository.getAccounts().first().copy(
+            isConfirmed = true,
+            keyAlias = null,
+            privateCertBinary = "legacy-pkcs12",
+        )
+        accountsRepository.updateAccount(legacyAccount)
+        val viewModel = AccountsViewModel(
+            accountsRepository = accountsRepository,
+            providersRepository = inMemoryProvidersRepository(),
+            authSessionService = FakeAuthSessionService(),
+            pendingSessionStore = PendingSessionStore(),
+            pendingEnrollmentStore = PendingEnrollmentStore(),
+            selectedAccountStore = selectedAccountStore,
+            accountManagementService = FakeAccountManagementService(),
+        )
+        advanceUntilIdle()
+        var opened = false
+
+        assertThat(viewModel.uiState.value.accountsRequiringCertificateUpdate).containsExactly(legacyAccount)
+        viewModel.updateCertificate(legacyAccount) { opened = true }
+
+        assertThat(opened).isTrue()
+        assertThat(selectedAccountStore.read()).isEqualTo(legacyAccount.id)
+    }
+
+    @Test
+    fun deviceHeldCertificateDoesNotShowUpdateNotice() = runViewModelTest {
+        val accountsRepository = inMemoryAccountsRepository()
+        val deviceHeldAccount = accountsRepository.getAccounts().first().copy(
+            isConfirmed = true,
+            keyAlias = "passi.account.device-held",
+            privateCertBinary = null,
+        )
+        accountsRepository.updateAccount(deviceHeldAccount)
+        val selectedAccountStore = SelectedAccountStore()
+        val viewModel = AccountsViewModel(
+            accountsRepository = accountsRepository,
+            providersRepository = inMemoryProvidersRepository(),
+            authSessionService = FakeAuthSessionService(),
+            pendingSessionStore = PendingSessionStore(),
+            pendingEnrollmentStore = PendingEnrollmentStore(),
+            selectedAccountStore = selectedAccountStore,
+            accountManagementService = FakeAccountManagementService(),
+        )
+        advanceUntilIdle()
+        var opened = false
+
+        assertThat(viewModel.uiState.value.accountsRequiringCertificateUpdate).isEmpty()
+        viewModel.updateCertificate(deviceHeldAccount) { opened = true }
+
+        assertThat(opened).isFalse()
+        assertThat(selectedAccountStore.read()).isNull()
     }
 
     @Test

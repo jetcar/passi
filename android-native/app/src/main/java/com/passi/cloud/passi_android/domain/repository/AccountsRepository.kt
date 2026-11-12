@@ -18,6 +18,21 @@ interface AccountsRepository {
 
     suspend fun deleteAccount(accountId: UUID)
 
+    suspend fun discardUnsubmittedPendingKey(accountId: UUID, expectedAlias: String) {
+        val current = getAccount(accountId) ?: error("Account not found")
+        val pending = current.pendingKey ?: return
+        check(pending.keyAlias == expectedAlias && !pending.mayHaveBeenSubmitted) { "Submitted keys require account recovery" }
+        updateAccount(current.copy(pendingKey = null,
+            retiredKeyAliases = (current.retiredKeyAliases.orEmpty() + pending.keyAlias).distinct()))
+    }
+
+    suspend fun replaceAccount(previousId: UUID, account: Account) {
+        if (previousId == account.id) updateAccount(account) else {
+            savePendingAccount(account)
+            deleteAccount(previousId)
+        }
+    }
+
     suspend fun syncAccounts(): Result<Unit>
 
     suspend fun pollPendingSession(): Result<NotificationSession?>

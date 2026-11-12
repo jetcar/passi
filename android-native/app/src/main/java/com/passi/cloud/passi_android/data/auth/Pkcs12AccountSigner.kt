@@ -9,8 +9,9 @@ import java.security.Signature
 import java.util.Base64
 
 class Pkcs12AccountSigner : AccountSigner {
-    override fun sign(account: Account, pin: String?, message: String): Result<String> {
+    override suspend fun sign(account: Account, pin: String?, message: String): Result<String> {
         return runCatching {
+            check(account.keyAlias == null) { "Device keys require platform authorization" }
             val privateCertBinary = account.privateCertBinary ?: error("Missing private certificate")
             val salt = account.salt ?: error("Missing certificate salt")
             val password = salt + (pin ?: "")

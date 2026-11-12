@@ -132,7 +132,7 @@ class NotificationUseCaseTests : CoroutineViewModelTest() {
             assertThat(request.path).isEqualTo("/api/Auth/UnlinkDevice")
             assertThat(request.body.readUtf8()).contains(unlinkToken)
             assertThat(logs.none { it.contains(unlinkToken) }).isTrue()
-            assertThat(logs.any { it.contains("<redacted>") }).isTrue()
+            assertThat(logs.none { it.contains("body=") || it.contains("payload=") }).isTrue()
         } finally {
             server.shutdown()
         }

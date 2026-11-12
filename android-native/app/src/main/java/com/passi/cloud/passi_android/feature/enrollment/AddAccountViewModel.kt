@@ -1,5 +1,6 @@
 package com.passi.cloud.passi_android.feature.enrollment
 
+import android.os.Build
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -8,6 +9,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.passi.cloud.passi_android.data.local.PendingEnrollmentStore
 import com.passi.cloud.passi_android.domain.model.Account
 import com.passi.cloud.passi_android.domain.model.Provider
+import com.passi.cloud.passi_android.domain.enrollment.supportsDeviceKeys
 import com.passi.cloud.passi_android.domain.repository.AccountsRepository
 import com.passi.cloud.passi_android.domain.repository.ProvidersRepository
 import com.passi.cloud.passi_android.domain.service.EnrollmentService
@@ -29,6 +31,7 @@ data class AddAccountUiState(
     val emailError: UiText? = null,
     val responseError: UiText? = null,
     val isSubmitting: Boolean = false,
+    val deviceKeySupported: Boolean = true,
 )
 
 class AddAccountViewModel(
@@ -37,8 +40,9 @@ class AddAccountViewModel(
     private val enrollmentService: EnrollmentService,
     private val pendingEnrollmentStore: PendingEnrollmentStore,
     private val deviceIdProvider: () -> String,
+    private val deviceKeySupported: Boolean = true,
 ) : ViewModel() {
-    private val _uiState = MutableStateFlow(AddAccountUiState())
+    private val _uiState = MutableStateFlow(AddAccountUiState(deviceKeySupported = deviceKeySupported))
     val uiState: StateFlow<AddAccountUiState> = _uiState.asStateFlow()
 
     init {
@@ -60,6 +64,10 @@ class AddAccountViewModel(
     }
 
     fun submit(onSuccess: () -> Unit) {
+        if (!deviceKeySupported) {
+            _uiState.value = _uiState.value.copy(responseError = UiText.Resource(R.string.device_key_android_version_required))
+            return
+        }
         val email = _uiState.value.email.trim()
         if (!EMAIL_REGEX.matches(email)) {
             _uiState.value = _uiState.value.copy(emailError = UiText.Resource(R.string.error_invalid_email))
@@ -107,6 +115,7 @@ class AddAccountViewModel(
             enrollmentService: EnrollmentService,
             pendingEnrollmentStore: PendingEnrollmentStore,
             deviceIdProvider: () -> String,
+            deviceKeySupported: Boolean = supportsDeviceKeys(Build.VERSION.SDK_INT),
         ): ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 AddAccountViewModel(
@@ -115,6 +124,7 @@ class AddAccountViewModel(
                     enrollmentService = enrollmentService,
                     pendingEnrollmentStore = pendingEnrollmentStore,
                     deviceIdProvider = deviceIdProvider,
+                    deviceKeySupported = deviceKeySupported,
                 )
             }
         }

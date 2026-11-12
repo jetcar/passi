@@ -53,6 +53,9 @@
     <string name="certificate_valid_to">Сертификат действителен до:</string>
     <string name="identity_provider">Поставщик удостоверений:</string>
     <string name="update_certificate">Обновить сертификат</string>
+    <string name="certificate_update_required_title">Требуется обновление безопасности</string>
+    <string name="certificate_update_required_message">%1$d аккаунт(а/ов) всё ещё используют старый сертификат. Обновите его, чтобы защитить подпись с помощью безопасного оборудования и блокировки экрана устройства.</string>
+    <string name="certificate_update_required_badge">Требуется обновить сертификат</string>
     <string name="current_pin">Текущий PIN-код</string>
     <string name="adding_fingerprint">Добавление отпечатка…</string>
     <string name="add_fingerprint">Добавить отпечаток</string>
@@ -151,4 +154,13 @@
     <string name="error_token_update">Не удалось обновить токен</string>
     <string name="error_unexpected">Непредвиденная ошибка. Повторите попытку</string>
     <string name="error_confirmation_code_missing">Отсутствует код подтверждения</string>
+    <string name="device_key_explanation">Passi uses a key held on this device. Approve each signature with strong biometrics or your device screen lock. A Passi PIN cannot unlock this key. Android 11 or later is required.</string>
+    <string name="device_key_create">Create device key</string>
+    <string name="device_key_authorize_title">Authorize Passi signing</string>
+    <string name="device_key_authorize_subtitle">Use biometrics or your device screen lock</string>
+    <string name="device_key_unavailable">A hardware-protected key could not be created. Android 11 or later and a secure device screen lock are required.</string>
+    <string name="device_key_migrate">This account still uses a legacy key. Choose Update certificate to protect it with this device. Enter the old Passi PIN once; future approvals use your device screen lock or strong biometrics.</string>
+    <string name="device_key_android_version_required">Для добавления учётных записей и обновления сертификатов требуется Android 11 или новее.</string>
+    <string name="device_key_recovery_required">The pending device key is unavailable and may already be registered. Recover this account through email enrollment. Your pending registration has been preserved.</string>
+    <string name="error_account_storage_retry">Account storage failed. Retry to finish enrollment.</string>
 </resources>

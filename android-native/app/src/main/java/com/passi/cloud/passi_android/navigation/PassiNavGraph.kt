@@ -79,6 +79,9 @@ fun PassiNavGraph() {
                 onResumeEnrollment = {
                     navController.navigate(PassiDestination.ConfirmCode.javaClass.simpleName)
                 },
+                onUpdateCertificate = {
+                    navController.navigate(PassiDestination.UpdateCertificate.javaClass.simpleName)
+                },
                 externalErrorMessage = externalErrorMessage,
                 onExternalErrorShown = {
                     backStackEntry.savedStateHandle.remove<String>(AccountsErrorKey)

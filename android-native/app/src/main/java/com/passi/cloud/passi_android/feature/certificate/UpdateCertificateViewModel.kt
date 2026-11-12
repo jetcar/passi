@@ -1,5 +1,6 @@
 package com.passi.cloud.passi_android.feature.certificate
 
+import android.os.Build
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -9,6 +10,7 @@ import com.passi.cloud.passi_android.data.selection.SelectedAccountStore
 import com.passi.cloud.passi_android.domain.biometric.BiometricCertificateService
 import com.passi.cloud.passi_android.domain.certificate.CertificateRotationService
 import com.passi.cloud.passi_android.domain.model.Account
+import com.passi.cloud.passi_android.domain.enrollment.supportsDeviceKeys
 import com.passi.cloud.passi_android.domain.repository.AccountsRepository
 import com.passi.cloud.passi_android.R
 import com.passi.cloud.passi_android.localization.UiText
@@ -29,6 +31,7 @@ data class UpdateCertificateUiState(
     val confirmPinError: UiText? = null,
     val responseError: UiText? = null,
     val isSubmitting: Boolean = false,
+    val deviceKeySupported: Boolean = true,
 )
 
 class UpdateCertificateViewModel(
@@ -36,8 +39,9 @@ class UpdateCertificateViewModel(
     private val accountsRepository: AccountsRepository,
     private val certificateRotationService: CertificateRotationService,
     private val biometricCertificateService: BiometricCertificateService,
+    private val deviceKeySupported: Boolean = true,
 ) : ViewModel() {
-    private val _uiState = MutableStateFlow(UpdateCertificateUiState())
+    private val _uiState = MutableStateFlow(UpdateCertificateUiState(deviceKeySupported = deviceKeySupported))
     val uiState: StateFlow<UpdateCertificateUiState> = _uiState.asStateFlow()
 
     init {
@@ -73,56 +77,30 @@ class UpdateCertificateViewModel(
     }
 
     fun rotate(onDone: () -> Unit) {
+        if (!deviceKeySupported) {
+            _uiState.value = _uiState.value.copy(responseError = UiText.Resource(R.string.device_key_android_version_required))
+            return
+        }
         val account = _uiState.value.account ?: return
 
-        if (account.hasFingerprint && !_uiState.value.useBiometricForCurrentCertificate && account.pinLength == 0) {
-            _uiState.value = _uiState.value.copy(
-                responseError = UiText.Resource(R.string.error_biometric_required_for_rotation),
-            )
-            return
-        }
-
-        if (account.pinLength > 0 && !_uiState.value.useBiometricForCurrentCertificate && _uiState.value.oldPin.length < 4) {
+        if (_uiState.value.isSubmitting) return
+        if (account.keyAlias == null && account.pinLength > 0 && _uiState.value.oldPin.length < account.pinLength) {
             _uiState.value = _uiState.value.copy(oldPinError = UiText.Resource(R.string.error_invalid_old_pin))
             return
-        }
-
-        val wantsPin = _uiState.value.newPin.isNotEmpty() || _uiState.value.confirmPin.isNotEmpty()
-        if (wantsPin) {
-            if (_uiState.value.newPin.length < 4) {
-                _uiState.value = _uiState.value.copy(
-                    newPinError = UiText.Resource(R.string.error_pin_length, listOf(4)),
-                )
-                return
-            }
-            if (_uiState.value.newPin != _uiState.value.confirmPin) {
-                _uiState.value = _uiState.value.copy(
-                    confirmPinError = UiText.Resource(R.string.error_pin_mismatch),
-                )
-                return
-            }
         }
 
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isSubmitting = true, responseError = null)
             certificateRotationService.rotateCertificate(
                 account = account,
-                oldPin = if (account.pinLength > 0 && !_uiState.value.useBiometricForCurrentCertificate) _uiState.value.oldPin else null,
-                newPin = if (wantsPin) _uiState.value.newPin else null,
-                useBiometric = _uiState.value.useBiometricForCurrentCertificate,
+                oldPin = if (account.keyAlias == null) _uiState.value.oldPin else null,
+                newPin = null,
+                useBiometric = false,
             ).onSuccess { updatedAccount ->
-                val accountWithBiometric = if (updatedAccount.hasFingerprint) {
-                    biometricCertificateService.enableBiometric(
-                        account = updatedAccount,
-                        pin = if (wantsPin) _uiState.value.newPin else null,
-                    ).getOrDefault(updatedAccount)
-                } else {
-                    updatedAccount
-                }
-                accountsRepository.updateAccount(accountWithBiometric)
                 _uiState.value = _uiState.value.copy(
                     isSubmitting = false,
-                    account = accountWithBiometric,
+                    account = updatedAccount,
+                    oldPin = "",
                     useBiometricForCurrentCertificate = false,
                 )
                 onDone()
@@ -145,6 +123,7 @@ class UpdateCertificateViewModel(
             accountsRepository: AccountsRepository,
             certificateRotationService: CertificateRotationService,
             biometricCertificateService: BiometricCertificateService,
+            deviceKeySupported: Boolean = supportsDeviceKeys(Build.VERSION.SDK_INT),
         ): ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 UpdateCertificateViewModel(
@@ -152,6 +131,7 @@ class UpdateCertificateViewModel(
                     accountsRepository = accountsRepository,
                     certificateRotationService = certificateRotationService,
                     biometricCertificateService = biometricCertificateService,
+                    deviceKeySupported = deviceKeySupported,
                 )
             }
         }

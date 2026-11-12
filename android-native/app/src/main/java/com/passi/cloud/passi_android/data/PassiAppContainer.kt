@@ -8,7 +8,9 @@ import com.passi.cloud.passi_android.data.auth.Pkcs12AccountSigner
 import com.passi.cloud.passi_android.data.account.BackendAccountManagementService
 import com.passi.cloud.passi_android.data.biometric.LocalBiometricCertificateService
 import com.passi.cloud.passi_android.data.certificate.BackendCertificateRotationService
-import com.passi.cloud.passi_android.data.crypto.BouncyCastleCertificateGenerator
+import com.passi.cloud.passi_android.data.crypto.AndroidKeystoreCertificateGenerator
+import com.passi.cloud.passi_android.data.auth.KeystoreAccountSigner
+import com.passi.cloud.passi_android.ui.DeviceKeyAuthorization
 import com.passi.cloud.passi_android.data.local.PassiPreferences
 import com.passi.cloud.passi_android.data.local.PendingEnrollmentStore
 import com.passi.cloud.passi_android.data.notifications.BackendNotificationTokenRegistrationService
@@ -43,6 +45,7 @@ interface PassiAppContainer {
     val apiClient: PassiApiClient
     val certificateGenerator: CertificateGenerator
     val authSessionService: AuthSessionService
+    val deviceKeyAuthorization: DeviceKeyAuthorization
     val accountSigner: AccountSigner
     val pendingSessionStore: PendingSessionStore
     val selectedAccountStore: SelectedAccountStore
@@ -68,11 +71,18 @@ class DefaultPassiAppContainer(
     }
 
     override val certificateGenerator: CertificateGenerator by lazy {
-        BouncyCastleCertificateGenerator()
+        AndroidKeystoreCertificateGenerator(context)
     }
 
+    override val deviceKeyAuthorization = DeviceKeyAuthorization()
     override val accountSigner: AccountSigner by lazy {
-        Pkcs12AccountSigner()
+        val deviceSigner = KeystoreAccountSigner(deviceKeyAuthorization)
+        val legacySigner = Pkcs12AccountSigner()
+        object : AccountSigner {
+            override suspend fun sign(account: com.passi.cloud.passi_android.domain.model.Account, pin: String?, message: String): Result<String> =
+                if (account.keyAlias != null) deviceSigner.sign(account, null, message)
+                else legacySigner.sign(account, pin, message)
+        }
     }
 
     override val pendingSessionStore: PendingSessionStore by lazy {
@@ -96,7 +106,7 @@ class DefaultPassiAppContainer(
     }
 
     override val biometricCertificateService: BiometricCertificateService by lazy {
-        LocalBiometricCertificateService(preferences)
+        LocalBiometricCertificateService(preferences, accountSigner)
     }
 
     override val providersRepository: ProvidersRepository by lazy {
@@ -104,7 +114,7 @@ class DefaultPassiAppContainer(
     }
 
     override val accountsRepository: AccountsRepository by lazy {
-        PersistentAccountsRepository(preferences)
+        PersistentAccountsRepository(preferences, AndroidKeystoreCertificateGenerator::delete)
     }
 
     override val enrollmentService: EnrollmentService by lazy {
@@ -137,7 +147,7 @@ class DefaultPassiAppContainer(
             providersRepository = providersRepository,
             certificateGenerator = certificateGenerator,
             accountSigner = accountSigner,
-            biometricCertificateService = biometricCertificateService,
+            accountsRepository = accountsRepository,
         )
     }
 

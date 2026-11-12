@@ -71,9 +71,9 @@ Expected behavior:
 The user finalizes account registration on the device.
 
 Expected behavior:
-- Optionally choose a PIN for local certificate protection.
-- Generate a self-signed client certificate.
-- Protect the exported PKCS#12 using the generated salt and optional PIN.
+- Require Android 11+, hardware Keystore and a secure device screen lock.
+- Generate a non-exportable RSA signing key and public certificate.
+- Checkpoint only public metadata and the alias; never export a private key.
 - Send the public certificate to the backend.
 - Mark the account as confirmed.
 
@@ -91,7 +91,7 @@ The user inspects the details of a confirmed account.
 
 Expected behavior:
 - Show email, provider name, certificate thumbprint, validity range, confirmation state, and biometric status.
-- Offer actions such as certificate update, biometric enablement, and remote delete.
+- Offer device-key migration/certificate update, device management, and deletion.
 
 ### 10. Delete An Account Remotely And Locally
 
@@ -100,7 +100,7 @@ The user removes an enrolled account.
 Expected behavior:
 - Call the backend delete endpoint with the account identifier and certificate thumbprint.
 - Remove the local account record after successful backend deletion.
-- Remove any stored biometric certificate material for that account.
+- Remove current, pending and unfinished-cleanup key aliases and legacy biometric material.
 
 ### 11. Manually Sync Account State
 
@@ -141,18 +141,19 @@ Expected behavior:
 - Show requester information and return host.
 - Show a three-color challenge that includes the expected confirmation color.
 
-### 15. Approve A Session With No PIN
+### 15. Approve A Session With A Device-Held Key
 
-The user has a confirmed account without PIN protection.
+The user has a new or migrated account protected by the device screen lock.
 
 Expected behavior:
 - Choose the correct confirmation color.
-- Sign the backend random string using the stored certificate.
+- Authorize the initialized signing operation using strong biometrics or device credential.
+- Sign the backend random string with the device-held key; cancellation produces no signature.
 - Send the signed hash and certificate thumbprint to the authorize endpoint.
 
-### 16. Approve A Session With PIN
+### 16. Legacy Account Approval With Passi PIN
 
-The user has a confirmed account protected by a PIN.
+An unmigrated account retains its existing exportable PIN-protected credential. This compatibility mode remains vulnerable to offline guessing of copied PKCS#12 data. New accounts cannot select it.
 
 Expected behavior:
 - Choose the correct confirmation color.
@@ -160,9 +161,9 @@ Expected behavior:
 - Sign the backend random string with the PIN-protected certificate.
 - Send the authorization response to the backend.
 
-### 17. Approve A Session With Biometric
+### 17. Legacy Biometric Approval
 
-The user has biometric approval enabled for an account.
+An unmigrated account may retain a previously enabled biometric copy. New accounts never create one; migrate to bind approval cryptographically to signing.
 
 Expected behavior:
 - Choose the correct confirmation color.
@@ -179,45 +180,23 @@ Expected behavior:
 - Clear the local pending-session state.
 - Return to the main app screen.
 
-### 19. Enable Biometric Approval For An Account
+### 19. Migrate A Legacy Account
 
-The user opts into biometric approval on a device that supports enrolled biometrics.
+The account list shows a persistent security notice and marks every active confirmed account that still contains a legacy PKCS#12 credential. The notice cannot be dismissed; its Update certificate action selects the first affected account and opens migration. After that account succeeds, the notice advances to the next affected account and disappears only when none remain.
 
-Expected behavior:
-- Confirm a biometric prompt.
-- If the account uses a PIN, ask for the current PIN to access the existing certificate.
-- Re-export certificate material for biometric-backed local use.
-- Mark the account as biometric-enabled.
+Enter the old Passi PIN (if set). The app creates and validates a device-held replacement, persists a fixed public checkpoint, and asks the server to accept it and retire the legacy certificate. Only an exact public-certificate acknowledgment permits local replacement and deletion of old PKCS#12/biometric copies.
 
-### 20. Rotate A Certificate Without Changing Security Mode
+### 20. Rotate A Device-Held Certificate
 
-The user updates the certificate associated with an account while keeping the same basic local security mode.
+Generate a replacement with the same policy. Authorize retirement using the existing key through an initialized Signature CryptoObject. Keep the existing key and fixed pending metadata until server acceptance; clean old aliases afterward.
 
-Expected behavior:
-- Generate a new self-signed certificate.
-- Sign the new public certificate with the currently enrolled certificate.
-- Send the certificate-update request to the backend.
-- Store the updated certificate and metadata locally.
+### 21. Resume Interrupted Rotation
 
-### 21. Rotate A Certificate And Set A New PIN
+Reopen Update certificate and retry. Reuse the same replacement, including after a lost response or failed local commit. Never discard the old credential before confirmed acceptance. Missing or invalidated pending keys fail closed; recover through email enrollment if device authorization can no longer be restored.
 
-The user changes the certificate and changes local PIN protection at the same time.
+### 22. Recover Device Access
 
-Expected behavior:
-- Validate the old PIN when required.
-- Validate the new PIN and confirmation.
-- Generate a new certificate protected by the new PIN.
-- Update the backend and local certificate state.
-
-### 22. Rotate A Certificate Using Biometric For The Current Certificate
-
-The user has biometric approval enabled and wants to use biometric confirmation instead of the old PIN during certificate rotation.
-
-Expected behavior:
-- Confirm a biometric prompt for the currently enrolled certificate.
-- Generate the replacement certificate.
-- Sign the new public certificate using the biometric-backed certificate copy.
-- Update backend and local state.
+Use the platform device credential when biometrics are unavailable. Adding/removing biometrics preserves the key under this policy. Screen-lock removal/reset or losing the device requires existing email enrollment/recovery. A custom Passi PIN cannot recover a device-held key.
 
 ### 23. Register In Mailler By Username And Confirm In Passi By Scanning A QR Code
 

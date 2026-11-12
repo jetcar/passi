@@ -52,16 +52,12 @@ class PassiApiClient(
             val url = URL(baseUrl.trimEnd('/') + path)
             val requestId = System.nanoTime().toString()
             val startedAtMs = System.currentTimeMillis()
-            val payloadJson = payload?.let {
-                runCatching { gson.toJson(it) }
-                    .getOrElse { error -> "<payload serialization failed: ${error.message}>" }
-            }
-            log("[$requestId] -> $method ${url}")
-            if (payloadJson != null) {
-                log("[$requestId] payload=${payloadJson.redactSecretsForLog().truncateForLog()}")
-            }
+            val payloadJson = payload?.let(gson::toJson)
+            // Bodies, queries and exception messages may contain authentication secrets.
+            log("[$requestId] -> $method")
 
             val connection = (url.openConnection() as HttpURLConnection).apply {
+                instanceFollowRedirects = false
                 requestMethod = method
                 connectTimeout = 30_000
                 readTimeout = 30_000
@@ -82,7 +78,7 @@ class PassiApiClient(
                 val statusCode = connection.responseCode
                 val body = readResponseBody(connection, statusCode)
                 val durationMs = System.currentTimeMillis() - startedAtMs
-                log("[$requestId] <- $statusCode (${durationMs}ms) body=${body.redactSecretsForLog().truncateForLog()}")
+                log("[$requestId] <- $statusCode (${durationMs}ms) ")
                 ApiResult(
                     isSuccessful = statusCode in 200..299,
                     statusCode = statusCode,
@@ -94,7 +90,7 @@ class PassiApiClient(
                 }
                 val durationMs = System.currentTimeMillis() - startedAtMs
                 val mappedMessage = mapNetworkErrorMessage(error)
-                log("[$requestId] !! ${error.javaClass.simpleName} after ${durationMs}ms: ${error.message.orEmpty()}")
+                log("[$requestId] !! ${error.javaClass.simpleName} after ${durationMs}ms")
                 ApiResult(
                     isSuccessful = false,
                     statusCode = 0,
@@ -153,15 +149,4 @@ class PassiApiClient(
         }
     }
 
-    private fun String.truncateForLog(limit: Int = 2_000): String {
-        if (length <= limit) {
-            return this
-        }
-        return take(limit) + "..."
-    }
-
-    private fun String.redactSecretsForLog(): String = replace(
-        Regex("(\\\"UnlinkToken\\\"\\s*:\\s*\\\")[^\\\"]*(\\\")", RegexOption.IGNORE_CASE),
-        "$1<redacted>$2",
-    )
 }

@@ -53,6 +53,7 @@
     <string name="certificate_valid_to">Sertifikaat kehtib kuni:</string>
     <string name="identity_provider">Identiteedipakkuja:</string>
     <string name="update_certificate">Uuenda sertifikaati</string>
+    <string name="certificate_updated_successfully">Sertifikaat on edukalt uuendatud</string>
     <string name="certificate_update_required_title">Vajalik on turvavärskendus</string>
     <string name="certificate_update_required_message">%1$d kontot kasutab endiselt vana sertifikaati. Uuenda see nüüd, et allkirjastamist kaitseksid selle seadme turvaline riistvara ja ekraanilukk.</string>
     <string name="certificate_update_required_badge">Sertifikaat vajab uuendamist</string>

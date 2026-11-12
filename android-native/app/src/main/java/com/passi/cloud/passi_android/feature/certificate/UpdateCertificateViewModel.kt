@@ -31,6 +31,7 @@ data class UpdateCertificateUiState(
     val confirmPinError: UiText? = null,
     val responseError: UiText? = null,
     val isSubmitting: Boolean = false,
+    val isComplete: Boolean = false,
     val deviceKeySupported: Boolean = true,
 )
 
@@ -76,7 +77,7 @@ class UpdateCertificateViewModel(
         )
     }
 
-    fun rotate(onDone: () -> Unit) {
+    fun rotate() {
         if (!deviceKeySupported) {
             _uiState.value = _uiState.value.copy(responseError = UiText.Resource(R.string.device_key_android_version_required))
             return
@@ -90,7 +91,11 @@ class UpdateCertificateViewModel(
         }
 
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isSubmitting = true, responseError = null)
+            _uiState.value = _uiState.value.copy(
+                isSubmitting = true,
+                isComplete = false,
+                responseError = null,
+            )
             certificateRotationService.rotateCertificate(
                 account = account,
                 oldPin = if (account.keyAlias == null) _uiState.value.oldPin else null,
@@ -102,12 +107,13 @@ class UpdateCertificateViewModel(
                     account = updatedAccount,
                     oldPin = "",
                     useBiometricForCurrentCertificate = false,
+                    isComplete = true,
                 )
-                onDone()
             }.onFailure { error ->
                 val isInvalidOldPin = error.message == "Invalid old pin" || error.message == "Invalid old PIN"
                 _uiState.value = _uiState.value.copy(
                     isSubmitting = false,
+                    isComplete = false,
                     responseError = if (isInvalidOldPin) null else error.toUiText(R.string.error_network),
                     oldPinError = if (isInvalidOldPin) UiText.Resource(R.string.error_invalid_old_pin) else null,
                 )

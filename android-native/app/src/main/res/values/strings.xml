@@ -58,6 +58,7 @@
     <string name="certificate_valid_to">Certificate valid to:</string>
     <string name="identity_provider">Identity provider:</string>
     <string name="update_certificate">Update certificate</string>
+    <string name="certificate_updated_successfully">Certificate updated successfully</string>
     <string name="certificate_update_required_title">Security update required</string>
     <string name="certificate_update_required_message">%1$d account(s) still use an older certificate. Update now to protect signing with this device’s secure hardware and screen lock.</string>
     <string name="certificate_update_required_badge">Certificate update required</string>

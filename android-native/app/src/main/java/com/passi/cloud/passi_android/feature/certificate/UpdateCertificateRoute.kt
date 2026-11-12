@@ -10,11 +10,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -67,7 +69,8 @@ fun UpdateCertificateRoute(
         onNewPinChanged = viewModel::onNewPinChanged,
         onConfirmPinChanged = viewModel::onConfirmPinChanged,
         onLaunchBiometric = launchBiometricPrompt,
-        onRotate = { viewModel.rotate(onBack) },
+        onRotate = viewModel::rotate,
+        onDone = onBack,
         onCancel = onBack,
     )
 }
@@ -80,6 +83,7 @@ internal fun UpdateCertificateScreen(
     onConfirmPinChanged: (String) -> Unit,
     onLaunchBiometric: () -> Unit,
     onRotate: () -> Unit,
+    onDone: () -> Unit,
     onCancel: () -> Unit,
 ) {
     val account = uiState.account
@@ -98,6 +102,15 @@ internal fun UpdateCertificateScreen(
         Text(stringResource(R.string.device_key_explanation))
         uiState.responseError?.let { Text(it.asString()) }
         uiState.oldPinError?.let { Text(it.asString()) }
+        if (uiState.isComplete) {
+            Text(
+                text = stringResource(R.string.certificate_updated_successfully),
+                color = Color(0xFF2E7D32),
+                fontWeight = FontWeight.Bold,
+            )
+            Button(onClick = onDone) { Text(stringResource(R.string.done)) }
+            return@Column
+        }
         if (account?.keyAlias == null && (account?.pinLength ?: 0) > 0) {
             androidx.compose.material3.OutlinedTextField(
                 value = uiState.oldPin, onValueChange = onOldPinChanged,
@@ -109,7 +122,14 @@ internal fun UpdateCertificateScreen(
             )
         }
         Button(onClick = onRotate, enabled = account != null && !uiState.isSubmitting) {
-            Text(stringResource(R.string.update_certificate))
+            if (uiState.isSubmitting) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(20.dp),
+                    strokeWidth = 2.dp,
+                )
+            } else {
+                Text(stringResource(R.string.update_certificate))
+            }
         }
         TextButton(onClick = onCancel, enabled = !uiState.isSubmitting) { Text(stringResource(R.string.cancel)) }
     }

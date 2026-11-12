@@ -53,6 +53,7 @@
     <string name="certificate_valid_to">Certificat valide jusqu’au :</string>
     <string name="identity_provider">Fournisseur d’identité :</string>
     <string name="update_certificate">Mettre à jour le certificat</string>
+    <string name="certificate_updated_successfully">Certificat mis à jour avec succès</string>
     <string name="certificate_update_required_title">Mise à jour de sécurité requise</string>
     <string name="certificate_update_required_message">%1$d compte(s) utilisent encore un ancien certificat. Mettez-le à jour pour protéger la signature avec le matériel sécurisé et le verrouillage d’écran de cet appareil.</string>
     <string name="certificate_update_required_badge">Mise à jour du certificat requise</string>

@@ -24,10 +24,11 @@ class CertificateUseCaseTests : CoroutineViewModelTest() {
         )
 
         advanceUntilIdle()
-        viewModel.rotate {}
+        viewModel.rotate()
 
         advanceUntilIdle()
         assertThat(viewModel.uiState.value.responseError).isNull()
+        assertThat(viewModel.uiState.value.isComplete).isTrue()
     }
 
     @Test
@@ -44,7 +45,7 @@ class CertificateUseCaseTests : CoroutineViewModelTest() {
 
         advanceUntilIdle()
         viewModel.onOldPinChanged("12")
-        viewModel.rotate {}
+        viewModel.rotate()
 
         assertThat(viewModel.uiState.value.oldPinError).isEqualTo(UiText.Resource(R.string.error_invalid_old_pin))
     }
@@ -62,17 +63,15 @@ class CertificateUseCaseTests : CoroutineViewModelTest() {
             certificateRotationService = rotationService,
             biometricCertificateService = biometricService,
         )
-        var done = false
-
         advanceUntilIdle()
         viewModel.confirmBiometricForCurrentCertificate()
         viewModel.onOldPinChanged("1234")
         viewModel.onNewPinChanged("5678")
         viewModel.onConfirmPinChanged("5678")
-        viewModel.rotate { done = true }
+        viewModel.rotate()
         advanceUntilIdle()
 
-        assertThat(done).isTrue()
+        assertThat(viewModel.uiState.value.isComplete).isTrue()
         assertThat(rotationService.lastUsedBiometric).isFalse()
         assertThat(rotationService.lastNewPin).isNull()
         assertThat(rotationService.lastOldPin).isEqualTo("1234")

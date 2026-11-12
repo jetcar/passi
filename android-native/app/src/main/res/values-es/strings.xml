@@ -53,6 +53,7 @@
     <string name="certificate_valid_to">Certificado válido hasta:</string>
     <string name="identity_provider">Proveedor de identidad:</string>
     <string name="update_certificate">Actualizar certificado</string>
+    <string name="certificate_updated_successfully">Certificado actualizado correctamente</string>
     <string name="certificate_update_required_title">Actualización de seguridad necesaria</string>
     <string name="certificate_update_required_message">%1$d cuenta(s) todavía usan un certificado anterior. Actualízalo ahora para proteger la firma con el hardware seguro y el bloqueo de pantalla de este dispositivo.</string>
     <string name="certificate_update_required_badge">Es necesario actualizar el certificado</string>

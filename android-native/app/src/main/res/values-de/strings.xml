@@ -53,6 +53,7 @@
     <string name="certificate_valid_to">Zertifikat gültig bis:</string>
     <string name="identity_provider">Identitätsanbieter:</string>
     <string name="update_certificate">Zertifikat aktualisieren</string>
+    <string name="certificate_updated_successfully">Zertifikat erfolgreich aktualisiert</string>
     <string name="certificate_update_required_title">Sicherheitsupdate erforderlich</string>
     <string name="certificate_update_required_message">%1$d Konto/Konten verwenden noch ein älteres Zertifikat. Aktualisieren Sie es jetzt, damit Signaturen durch die sichere Hardware und die Displaysperre dieses Geräts geschützt werden.</string>
     <string name="certificate_update_required_badge">Zertifikat muss aktualisiert werden</string>

@@ -53,6 +53,7 @@
     <string name="certificate_valid_to">Сертификат действителен до:</string>
     <string name="identity_provider">Поставщик удостоверений:</string>
     <string name="update_certificate">Обновить сертификат</string>
+    <string name="certificate_updated_successfully">Сертификат успешно обновлён</string>
     <string name="certificate_update_required_title">Требуется обновление безопасности</string>
     <string name="certificate_update_required_message">%1$d аккаунт(а/ов) всё ещё используют старый сертификат. Обновите его, чтобы защитить подпись с помощью безопасного оборудования и блокировки экрана устройства.</string>
     <string name="certificate_update_required_badge">Требуется обновить сертификат</string>

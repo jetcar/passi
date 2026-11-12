@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.passi.cloud.passi_android.domain.enrollment.CertificateGenerator
 import com.passi.cloud.passi_android.domain.enrollment.GeneratedCertificate
 import com.passi.cloud.passi_android.domain.enrollment.checkpoint
+import com.passi.cloud.passi_android.domain.enrollment.DeviceKeyProtection
 import com.passi.cloud.passi_android.domain.model.Provider
 import com.passi.cloud.passi_android.domain.service.EnrollmentService
 import com.passi.cloud.passi_android.domain.service.PendingEnrollment
@@ -18,12 +19,43 @@ import java.util.UUID
 @OptIn(ExperimentalCoroutinesApi::class)
 class EnrollmentPendingKeyRecoveryTests : CoroutineViewModelTest() {
     @Test
+    fun existingPendingKeyLocksItsProtectionChoice() = runViewModelTest {
+        val pending = samplePendingEnrollment(confirmationCode = "123456")
+        val repository = inMemoryAccountsRepository()
+        val account = requireNotNull(repository.getAccount(UUID.fromString(pending.accountId)))
+        repository.updateAccount(account.copy(
+            pendingKey = sampleGeneratedCertificate()
+                .copy(keyProtection = DeviceKeyProtection.DEVICE_CREDENTIAL)
+                .checkpoint()
+                .copy(submitted = true),
+        ))
+        val viewModel = FinishEnrollmentViewModel(
+            pendingEnrollmentStore().apply { save(pending) },
+            repository,
+            inMemoryProvidersRepository(),
+            FakeEnrollmentService(),
+            CountingGenerator(),
+            { "device" },
+        )
+
+        advanceUntilIdle()
+
+        assertThat(viewModel.uiState.value.keyProtection)
+            .isEqualTo(DeviceKeyProtection.DEVICE_CREDENTIAL)
+        assertThat(viewModel.uiState.value.isProtectionLocked).isTrue()
+        viewModel.onKeyProtectionSelected(DeviceKeyProtection.BIOMETRIC)
+        assertThat(viewModel.uiState.value.keyProtection)
+            .isEqualTo(DeviceKeyProtection.DEVICE_CREDENTIAL)
+    }
+
+    @Test
     fun missingConfirmationCodeStopsBeforeCreatingOrSubmittingKey() = runViewModelTest {
         val pending = samplePendingEnrollment()
         val repository = inMemoryAccountsRepository()
         val generator = CountingGenerator()
         val viewModel = FinishEnrollmentViewModel(pendingEnrollmentStore().apply { save(pending) }, repository,
             inMemoryProvidersRepository(), FakeEnrollmentService(), generator, { "device" })
+        viewModel.onKeyProtectionSelected(DeviceKeyProtection.DEVICE_CREDENTIAL)
         viewModel.submit {}
         advanceUntilIdle()
         assertThat(viewModel.uiState.value.responseError).isEqualTo(UiText.Resource(R.string.error_confirmation_code_missing))
@@ -90,6 +122,7 @@ class EnrollmentPendingKeyRecoveryTests : CoroutineViewModelTest() {
                 Result.failure(IllegalStateException("Lost response"))
         }
         val viewModel = FinishEnrollmentViewModel(store, repository, inMemoryProvidersRepository(), service, generator, { "device" })
+        viewModel.onKeyProtectionSelected(DeviceKeyProtection.BIOMETRIC)
         viewModel.submit {}
         advanceUntilIdle()
         viewModel.submit {}
@@ -115,6 +148,7 @@ class EnrollmentPendingKeyRecoveryTests : CoroutineViewModelTest() {
                 Result.success(account.id)
         }
         val viewModel = FinishEnrollmentViewModel(store, repository, inMemoryProvidersRepository(), service, generator, { "device" })
+        viewModel.onKeyProtectionSelected(DeviceKeyProtection.DEVICE_CREDENTIAL)
         viewModel.submit {}
         advanceUntilIdle()
         assertThat(viewModel.uiState.value.responseError).isEqualTo(UiText.Resource(R.string.device_key_recovery_required))
@@ -133,6 +167,7 @@ class EnrollmentPendingKeyRecoveryTests : CoroutineViewModelTest() {
         repository.updateAccount(account.copy(pendingKey = oldCheckpoint))
         val generator = CountingGenerator().apply { invalidAlias = oldCheckpoint.keyAlias }
         val viewModel = FinishEnrollmentViewModel(store, repository, inMemoryProvidersRepository(), FakeEnrollmentService(), generator, { "device" })
+        viewModel.onKeyProtectionSelected(DeviceKeyProtection.BIOMETRIC)
         viewModel.submit {}
         advanceUntilIdle()
         assertThat(generator.generated).isEqualTo(1)
@@ -150,9 +185,16 @@ class EnrollmentPendingKeyRecoveryTests : CoroutineViewModelTest() {
     private class CountingGenerator : CertificateGenerator {
         var generated = 0
         var invalidAlias: String? = null
-        override fun generate(email: String, pin: String?): GeneratedCertificate {
+        override fun generate(
+            email: String,
+            protection: com.passi.cloud.passi_android.domain.enrollment.DeviceKeyProtection,
+        ): GeneratedCertificate {
             generated++
-            return sampleGeneratedCertificate().copy(keyAlias = "replacement-$generated", publicCertBinary = "public-$generated")
+            return sampleGeneratedCertificate().copy(
+                keyAlias = "replacement-$generated",
+                publicCertBinary = "public-$generated",
+                keyProtection = protection,
+            )
         }
         override fun validate(certificate: GeneratedCertificate) {
             check(certificate.keyAlias != invalidAlias) { "Invalidated key" }

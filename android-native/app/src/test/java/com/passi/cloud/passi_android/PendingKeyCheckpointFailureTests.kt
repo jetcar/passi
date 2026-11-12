@@ -21,7 +21,11 @@ class PendingKeyCheckpointFailureTests {
         val generator = DisposableGenerator()
         val failure = runCatching { preparePendingDeviceKey(account, repository, generator) }.exceptionOrNull()
         assertThat(failure).isSameInstanceAs(repository.failure)
-        assertThat(generator.disposed).containsExactly(sampleGeneratedCertificate())
+        assertThat(generator.disposed).containsExactly(
+            sampleGeneratedCertificate().copy(
+                keyProtection = com.passi.cloud.passi_android.domain.enrollment.DeviceKeyProtection.BIOMETRIC_OR_DEVICE_CREDENTIAL,
+            ),
+        )
         assertThat(repository.getAccounts().single().pendingKey).isNull()
     }
 
@@ -69,7 +73,10 @@ class PendingKeyCheckpointFailureTests {
     private class DisposableGenerator : CertificateGenerator {
         val disposed = mutableListOf<GeneratedCertificate>()
         var disposalFailure: Throwable? = null
-        override fun generate(email: String, pin: String?): GeneratedCertificate = sampleGeneratedCertificate()
+        override fun generate(
+            email: String,
+            protection: com.passi.cloud.passi_android.domain.enrollment.DeviceKeyProtection,
+        ): GeneratedCertificate = sampleGeneratedCertificate().copy(keyProtection = protection)
         override fun validate(certificate: GeneratedCertificate) = Unit
         override fun dispose(certificate: GeneratedCertificate) {
             disposed += certificate

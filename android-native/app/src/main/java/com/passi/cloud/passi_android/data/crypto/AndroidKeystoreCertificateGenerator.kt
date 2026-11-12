@@ -9,6 +9,7 @@ import android.security.keystore.KeyProperties
 import androidx.annotation.RequiresApi
 import com.passi.cloud.passi_android.domain.enrollment.CertificateGenerator
 import com.passi.cloud.passi_android.domain.enrollment.GeneratedCertificate
+import com.passi.cloud.passi_android.domain.enrollment.DeviceKeyProtection
 import org.bouncycastle.asn1.x500.X500NameBuilder
 import org.bouncycastle.asn1.x500.style.BCStyle
 import java.math.BigInteger
@@ -47,7 +48,7 @@ class AndroidKeystoreCertificateGenerator(context: Context) : CertificateGenerat
         val keyStore = store()
         val key = keyStore.getKey(alias, null) as? PrivateKey
             ?: throw GeneralSecurityException("Pending device signing key is missing; recover the account")
-        requireSecureSigningKey(key)
+        requireSecureSigningKey(key, expectedProtection = certificate.keyProtection)
         val stored = keyStore.getCertificate(alias) as? X509Certificate
             ?: throw GeneralSecurityException("Pending device certificate is missing")
         val publicBytes = stored.encoded
@@ -65,8 +66,7 @@ class AndroidKeystoreCertificateGenerator(context: Context) : CertificateGenerat
         Signature.getInstance("SHA512withRSA").initSign(key)
     }
 
-    override fun generate(email: String, pin: String?): GeneratedCertificate {
-        require(pin.isNullOrEmpty()) { "An application PIN cannot protect a device-held signing key" }
+    override fun generate(email: String, protection: DeviceKeyProtection): GeneratedCertificate {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
             error("Device-held signing requires Android 11 or later and a device screen lock")
         }
@@ -74,13 +74,18 @@ class AndroidKeystoreCertificateGenerator(context: Context) : CertificateGenerat
         val strongBoxAvailable = context.packageManager.hasSystemFeature(PackageManager.FEATURE_STRONGBOX_KEYSTORE)
         return generateWithHardwareFallback(
             strongBoxAvailable = strongBoxAvailable,
-            generate = { strongBox -> generate(alias, email, strongBox) },
+            generate = { strongBox -> generate(alias, email, protection, strongBox) },
             cleanup = { delete(alias) },
         )
     }
 
     @RequiresApi(Build.VERSION_CODES.R)
-    private fun generate(alias: String, email: String, strongBox: Boolean): GeneratedCertificate {
+    private fun generate(
+        alias: String,
+        email: String,
+        protection: DeviceKeyProtection,
+        strongBox: Boolean,
+    ): GeneratedCertificate {
         val validFrom = Instant.now().minus(1, ChronoUnit.DAYS)
         val validTo = Instant.now().plus(365, ChronoUnit.DAYS)
         val subject = X500Principal(X500NameBuilder(BCStyle.INSTANCE)
@@ -90,10 +95,10 @@ class AndroidKeystoreCertificateGenerator(context: Context) : CertificateGenerat
             .setDigests(KeyProperties.DIGEST_SHA512)
             .setSignaturePaddings(KeyProperties.SIGNATURE_PADDING_RSA_PKCS1)
             .setUserAuthenticationRequired(true)
-            .setUserAuthenticationParameters(0, AUTHENTICATORS)
-            // Credential fallback deliberately preserves keys across biometric enrollment changes.
-            // Screen-lock removal/reset still invalidates the key; recovery re-enrolls a fresh key.
-            .setInvalidatedByBiometricEnrollment(false)
+            .setUserAuthenticationParameters(0, protection.authenticators())
+            // Biometric-only keys are invalidated when enrollment changes. Device credential keys
+            // remain bound to the phone screen lock and survive biometric enrollment changes.
+            .setInvalidatedByBiometricEnrollment(protection == DeviceKeyProtection.BIOMETRIC)
             .setIsStrongBoxBacked(strongBox)
             .setCertificateSubject(subject)
             .setCertificateSerialNumber(BigInteger(1, ByteArray(16).also { SecureRandom().nextBytes(it) }))
@@ -103,7 +108,7 @@ class AndroidKeystoreCertificateGenerator(context: Context) : CertificateGenerat
         val generator = KeyPairGenerator.getInstance(KeyProperties.KEY_ALGORITHM_RSA, KEYSTORE)
         generator.initialize(spec)
         val pair = generator.generateKeyPair()
-        val securityLevel = requireSecureSigningKey(pair.private, strongBox)
+        val securityLevel = requireSecureSigningKey(pair.private, strongBox, protection)
         val certificate = store().getCertificate(alias) as X509Certificate
         // An auth-per-use key cannot self-sign during creation. Android's placeholder X.509
         // certificate is a public-key container; Passi validates dates/CN and challenge signatures.
@@ -119,6 +124,7 @@ class AndroidKeystoreCertificateGenerator(context: Context) : CertificateGenerat
             validTo = certificate.notAfter.toInstant(),
             keyAlias = alias,
             keySecurityLevel = securityLevel,
+            keyProtection = protection,
         )
     }
 
@@ -135,7 +141,11 @@ class AndroidKeystoreCertificateGenerator(context: Context) : CertificateGenerat
         internal fun store(): KeyStore = KeyStore.getInstance(KEYSTORE).apply { load(null) }
 
         @Suppress("DEPRECATION")
-        internal fun requireSecureSigningKey(key: PrivateKey, requestedStrongBox: Boolean = false): String {
+        internal fun requireSecureSigningKey(
+            key: PrivateKey,
+            requestedStrongBox: Boolean = false,
+            expectedProtection: DeviceKeyProtection? = null,
+        ): String {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) error("Android 11 or later is required")
             val info = KeyFactory.getInstance(key.algorithm, KEYSTORE).getKeySpec(key, KeyInfo::class.java)
             // https://developer.android.com/reference/android/security/keystore/KeyInfo
@@ -155,13 +165,23 @@ class AndroidKeystoreCertificateGenerator(context: Context) : CertificateGenerat
                 info.signaturePaddings.toSet() != setOf(KeyProperties.SIGNATURE_PADDING_RSA_PKCS1) ||
                 !info.isUserAuthenticationRequired ||
                 !info.isUserAuthenticationRequirementEnforcedBySecureHardware ||
-                info.userAuthenticationType != AUTHENTICATORS ||
-                info.userAuthenticationValidityDurationSeconds != -1
+                info.userAuthenticationType != (expectedProtection ?: DeviceKeyProtection.BIOMETRIC_OR_DEVICE_CREDENTIAL).authenticators() ||
+                !isPerUseAuthenticationDuration(info.userAuthenticationValidityDurationSeconds)
             ) throw GeneralSecurityException("Signing key does not satisfy device authorization policy")
             return level
         }
+
+        private fun DeviceKeyProtection.authenticators(): Int = when (this) {
+            DeviceKeyProtection.BIOMETRIC -> KeyProperties.AUTH_BIOMETRIC_STRONG
+            DeviceKeyProtection.DEVICE_CREDENTIAL -> KeyProperties.AUTH_DEVICE_CREDENTIAL
+            DeviceKeyProtection.BIOMETRIC_OR_DEVICE_CREDENTIAL -> AUTHENTICATORS
+        }
     }
 }
+
+/** Android 11+ configures auth-per-use with timeout 0; some KeyInfo implementations report 0,
+ * while others retain the legacy -1 sentinel documented by getUserAuthenticationValidityDurationSeconds. */
+internal fun isPerUseAuthenticationDuration(seconds: Int): Boolean = seconds == 0 || seconds == -1
 
 /** Every failed attempt cleans its alias; only supported provider failures permit a TEE retry. */
 internal fun <T> generateWithHardwareFallback(

@@ -1,5 +1,6 @@
 package com.passi.cloud.passi_android.domain.model
 
+import com.passi.cloud.passi_android.domain.enrollment.DeviceKeyProtection
 import java.time.Instant
 import java.util.UUID
 
@@ -20,6 +21,7 @@ data class Account(
     val hasFingerprint: Boolean = false,
     val keyAlias: String? = null,
     val keySecurityLevel: String? = null,
+    val keyProtection: DeviceKeyProtection? = null,
     val pendingKey: PendingDeviceKey? = null,
     val legacyCleanupPending: Boolean = false,
     val cleanupKeyAlias: String? = null,
@@ -41,6 +43,7 @@ data class PendingDeviceKey(
     val thumbprint: String,
     val validFrom: String,
     val validTo: String,
+    val keyProtection: DeviceKeyProtection? = null,
     // Null is an older checkpoint whose submission outcome is unknown; never discard it.
     val submitted: Boolean? = null,
 ) {

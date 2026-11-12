@@ -69,7 +69,7 @@ class LegacyAndroidCapabilityTests : CoroutineViewModelTest() {
             repository, service, FakeBiometricCertificateService(), deviceKeySupported = false)
         advanceUntilIdle()
         model.onOldPinChanged("1234")
-        model.rotate { error("Unsupported migration must not finish") }
+        model.rotate()
         advanceUntilIdle()
         assertThat(service.lastOldPin).isNull()
         assertThat(service.lastUsedBiometric).isNull()

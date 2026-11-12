@@ -10,13 +10,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.biometric.BiometricManager
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -38,6 +41,7 @@ import com.passi.cloud.passi_android.R
 import com.passi.cloud.passi_android.ui.NumberPad
 import com.passi.cloud.passi_android.ui.rememberBiometricPromptLauncher
 import com.passi.cloud.passi_android.localization.asString
+import com.passi.cloud.passi_android.ui.DeviceKeyProtectionChoice
 
 @Composable
 fun UpdateCertificateRoute(
@@ -54,6 +58,7 @@ fun UpdateCertificateRoute(
     )
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val account = uiState.account
+    val biometricManager = BiometricManager.from(LocalContext.current)
     val launchBiometricPrompt = rememberBiometricPromptLauncher(
         title = stringResource(R.string.biometric_update_certificate_title),
         subtitle = stringResource(R.string.biometric_update_certificate_subtitle),
@@ -67,7 +72,15 @@ fun UpdateCertificateRoute(
         onNewPinChanged = viewModel::onNewPinChanged,
         onConfirmPinChanged = viewModel::onConfirmPinChanged,
         onLaunchBiometric = launchBiometricPrompt,
-        onRotate = { viewModel.rotate(onBack) },
+        onRotate = viewModel::rotate,
+        biometricAvailable = biometricManager.canAuthenticate(
+            BiometricManager.Authenticators.BIOMETRIC_STRONG,
+        ) == BiometricManager.BIOMETRIC_SUCCESS,
+        deviceCredentialAvailable = biometricManager.canAuthenticate(
+            BiometricManager.Authenticators.DEVICE_CREDENTIAL,
+        ) == BiometricManager.BIOMETRIC_SUCCESS,
+        onKeyProtectionSelected = viewModel::onKeyProtectionSelected,
+        onDone = onBack,
         onCancel = onBack,
     )
 }
@@ -80,7 +93,11 @@ internal fun UpdateCertificateScreen(
     onConfirmPinChanged: (String) -> Unit,
     onLaunchBiometric: () -> Unit,
     onRotate: () -> Unit,
+    onDone: () -> Unit,
     onCancel: () -> Unit,
+    biometricAvailable: Boolean = true,
+    deviceCredentialAvailable: Boolean = true,
+    onKeyProtectionSelected: (com.passi.cloud.passi_android.domain.enrollment.DeviceKeyProtection) -> Unit = {},
 ) {
     val account = uiState.account
     Column(modifier = Modifier.fillMaxSize().padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
@@ -98,6 +115,15 @@ internal fun UpdateCertificateScreen(
         Text(stringResource(R.string.device_key_explanation))
         uiState.responseError?.let { Text(it.asString()) }
         uiState.oldPinError?.let { Text(it.asString()) }
+        if (uiState.isComplete) {
+            Text(
+                text = stringResource(R.string.certificate_updated_successfully),
+                color = Color(0xFF2E7D32),
+                fontWeight = FontWeight.Bold,
+            )
+            Button(onClick = onDone) { Text(stringResource(R.string.done)) }
+            return@Column
+        }
         if (account?.keyAlias == null && (account?.pinLength ?: 0) > 0) {
             androidx.compose.material3.OutlinedTextField(
                 value = uiState.oldPin, onValueChange = onOldPinChanged,
@@ -108,8 +134,25 @@ internal fun UpdateCertificateScreen(
                 enabled = !uiState.isSubmitting,
             )
         }
-        Button(onClick = onRotate, enabled = account != null && !uiState.isSubmitting) {
-            Text(stringResource(R.string.update_certificate))
+        DeviceKeyProtectionChoice(
+            selected = uiState.keyProtection,
+            biometricAvailable = biometricAvailable,
+            deviceCredentialAvailable = deviceCredentialAvailable,
+            enabled = !uiState.isSubmitting && !uiState.isProtectionLocked,
+            onSelected = onKeyProtectionSelected,
+        )
+        Button(
+            onClick = onRotate,
+            enabled = account != null && !uiState.isSubmitting && uiState.keyProtection != null,
+        ) {
+            if (uiState.isSubmitting) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(20.dp),
+                    strokeWidth = 2.dp,
+                )
+            } else {
+                Text(stringResource(R.string.update_certificate))
+            }
         }
         TextButton(onClick = onCancel, enabled = !uiState.isSubmitting) { Text(stringResource(R.string.cancel)) }
     }

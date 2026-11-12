@@ -11,6 +11,7 @@ import com.passi.cloud.passi_android.domain.enrollment.checkpoint
 import com.passi.cloud.passi_android.domain.enrollment.certificate
 import com.passi.cloud.passi_android.domain.enrollment.preparePendingDeviceKey
 import com.passi.cloud.passi_android.domain.enrollment.DeviceKeyRecoveryRequiredException
+import com.passi.cloud.passi_android.domain.enrollment.DeviceKeyProtection
 import kotlinx.coroutines.CancellationException
 import com.passi.cloud.passi_android.domain.repository.AccountsRepository
 import com.passi.cloud.passi_android.domain.repository.ProvidersRepository
@@ -33,6 +34,8 @@ data class FinishEnrollmentUiState(
     val responseError: UiText? = null,
     val isMissingContext: Boolean = false,
     val isSubmitting: Boolean = false,
+    val keyProtection: DeviceKeyProtection? = null,
+    val isProtectionLocked: Boolean = false,
 )
 
 class FinishEnrollmentViewModel(
@@ -55,6 +58,19 @@ class FinishEnrollmentViewModel(
             )
         } else {
             FinishEnrollmentUiState(email = pending.email)
+        }
+        if (pending != null) {
+            viewModelScope.launch {
+                val account = accountsRepository.getAccount(UUID.fromString(pending.accountId))
+                val pendingKey = account?.pendingKey
+                if (pendingKey != null) {
+                    _uiState.value = _uiState.value.copy(
+                        keyProtection = pendingKey.keyProtection
+                            ?: DeviceKeyProtection.BIOMETRIC_OR_DEVICE_CREDENTIAL,
+                        isProtectionLocked = true,
+                    )
+                }
+            }
         }
     }
 
@@ -80,6 +96,11 @@ class FinishEnrollmentViewModel(
 
     fun submit(onDone: () -> Unit) = finalizeEnrollment(pinLength = 0, onDone = onDone)
 
+    fun onKeyProtectionSelected(protection: DeviceKeyProtection) {
+        if (_uiState.value.isProtectionLocked) return
+        _uiState.value = _uiState.value.copy(keyProtection = protection, responseError = null)
+    }
+
     private fun finalizeEnrollment(pinLength: Int, onDone: () -> Unit) {
         val pending = pendingEnrollmentStore.read()
         if (pending == null) {
@@ -93,6 +114,13 @@ class FinishEnrollmentViewModel(
         if (_uiState.value.isSubmitting) return
         if (pending.confirmationCode.isNullOrBlank()) {
             _uiState.value = _uiState.value.copy(responseError = UiText.Resource(R.string.error_confirmation_code_missing))
+            return
+        }
+        val protection = _uiState.value.keyProtection
+        if (protection == null) {
+            _uiState.value = _uiState.value.copy(
+                responseError = UiText.Resource(R.string.device_key_select_protection),
+            )
             return
         }
         viewModelScope.launch {
@@ -116,13 +144,34 @@ class FinishEnrollmentViewModel(
             }
 
             val generatedCertificate = try {
-                account = preparePendingDeviceKey(account, accountsRepository, certificateGenerator)
-                requireNotNull(account.pendingKey).certificate()
+                account = preparePendingDeviceKey(
+                    account,
+                    accountsRepository,
+                    certificateGenerator,
+                    protection,
+                )
+                val pendingKey = requireNotNull(account.pendingKey)
+                _uiState.value = _uiState.value.copy(
+                    keyProtection = pendingKey.keyProtection
+                        ?: DeviceKeyProtection.BIOMETRIC_OR_DEVICE_CREDENTIAL,
+                    isProtectionLocked = true,
+                )
+                pendingKey.certificate()
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (error: Exception) {
+                val refreshedAccount = try {
+                    accountsRepository.getAccount(UUID.fromString(pending.accountId))
+                } catch (_: Exception) {
+                    null
+                }
+                val pendingKey = refreshedAccount?.pendingKey
                 _uiState.value = _uiState.value.copy(
                     isSubmitting = false,
+                    keyProtection = pendingKey?.keyProtection
+                        ?: if (pendingKey != null) DeviceKeyProtection.BIOMETRIC_OR_DEVICE_CREDENTIAL
+                        else _uiState.value.keyProtection,
+                    isProtectionLocked = pendingKey != null,
                     responseError = if (error is DeviceKeyRecoveryRequiredException) UiText.Resource(R.string.device_key_recovery_required)
                         else UiText.Resource(R.string.device_key_unavailable),
                 )
@@ -154,6 +203,7 @@ class FinishEnrollmentViewModel(
                     pinLength = 0,
                     keyAlias = generatedCertificate.keyAlias,
                     keySecurityLevel = generatedCertificate.keySecurityLevel,
+                    keyProtection = generatedCertificate.keyProtection,
                     pendingKey = null,
                     hasFingerprint = false,
                     salt = generatedCertificate.salt,

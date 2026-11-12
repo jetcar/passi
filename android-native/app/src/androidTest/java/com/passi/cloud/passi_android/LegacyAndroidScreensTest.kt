@@ -61,7 +61,7 @@ class LegacyAndroidScreensTest {
         compose.setContent {
             MaterialTheme {
                 UpdateCertificateScreen(UpdateCertificateUiState(account = account, deviceKeySupported = false),
-                    {}, {}, {}, {}, onRotate = { error("Unsupported migration") }, onCancel = {})
+                    {}, {}, {}, {}, onRotate = { error("Unsupported migration") }, onDone = {}, onCancel = {})
             }
         }
         compose.onNodeWithText(context.getString(R.string.device_key_android_version_required)).assertExists()

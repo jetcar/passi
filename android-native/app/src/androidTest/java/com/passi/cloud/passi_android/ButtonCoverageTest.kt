@@ -126,8 +126,7 @@ class ButtonCoverageTest {
     }
 
     @Test
-    fun finishEnrollmentButtonsHandlePinEntryClearAndSkip() {
-        var skipped = 0
+    fun finishEnrollmentOffersBiometricsAndPhonePin() {
         var submitted = 0
 
         composeRule.setPassiContent {
@@ -137,19 +136,17 @@ class ButtonCoverageTest {
                 uiState = state,
                 onPinChanged = { state = state.copy(pin = it.take(12)) },
                 onPinConfirmationChanged = { state = state.copy(pinConfirmation = it.take(12)) },
-                onSkip = { skipped++ },
+                onSkip = {},
                 onSubmit = { submitted++ },
+                onKeyProtectionSelected = { state = state.copy(keyProtection = it) },
             )
         }
 
-        composeRule.onNodeWithText("1").performClick()
-        composeRule.onNodeWithText("→").performClick()
-        composeRule.onNodeWithText("2").performClick()
-        composeRule.onAllNodesWithText("X")[1].performClick()
-        composeRule.onNodeWithText("Skip").performClick()
+        composeRule.onNodeWithText("Biometrics").performClick()
+        composeRule.onNodeWithText("Biometrics ✓").assertExists()
+        composeRule.onNodeWithText("Create device key").performClick()
 
-        assert(skipped == 1)
-        assert(submitted == 0)
+        assert(submitted == 1)
     }
 
     @Test
@@ -236,16 +233,16 @@ class ButtonCoverageTest {
     }
 
     @Test
-    fun updateCertificateButtonsTriggerBiometricRotateClearAndCancel() {
-        var biometric = 0
+    fun updateCertificateShowsSuccessBeforeLeaving() {
         var rotated = 0
         var cancelled = 0
+        var done = 0
 
         composeRule.setPassiContent {
             var state by remember {
                 mutableStateOf(
                     UpdateCertificateUiState(
-                        account = sampleAccount(pinLength = 4, hasFingerprint = true),
+                        account = sampleAccount(),
                     )
                 )
             }
@@ -255,24 +252,27 @@ class ButtonCoverageTest {
                 onOldPinChanged = { state = state.copy(oldPin = it) },
                 onNewPinChanged = { state = state.copy(newPin = it) },
                 onConfirmPinChanged = { state = state.copy(confirmPin = it) },
-                onLaunchBiometric = { biometric++ },
-                onRotate = { rotated++ },
+                onLaunchBiometric = {},
+                onRotate = {
+                    rotated++
+                    state = state.copy(isComplete = true)
+                },
+                onDone = { done++ },
                 onCancel = { cancelled++ },
+                onKeyProtectionSelected = { state = state.copy(keyProtection = it) },
             )
         }
 
-        composeRule.onNodeWithText("Use biometric for current certificate").performClick()
-        composeRule.onNodeWithText("1").performClick()
-        composeRule.onNodeWithText("→").performClick()
-        composeRule.onNodeWithText("2").performClick()
-        composeRule.onNodeWithText("→").performClick()
-        composeRule.onNodeWithText("3").performClick()
-        composeRule.onAllNodesWithText("X")[2].performClick()
         composeRule.onNodeWithText("Cancel").performClick()
+        composeRule.onNodeWithText("Phone PIN / screen lock").performClick()
+        composeRule.onNodeWithText("Phone PIN / screen lock ✓").assertExists()
+        composeRule.onNodeWithText("Update certificate").performClick()
+        composeRule.onNodeWithText("Certificate updated successfully").assertExists()
+        composeRule.onNodeWithText("Done").performClick()
 
-        assert(biometric == 1)
-        assert(rotated == 0)
+        assert(rotated == 1)
         assert(cancelled == 1)
+        assert(done == 1)
     }
 
     @Test

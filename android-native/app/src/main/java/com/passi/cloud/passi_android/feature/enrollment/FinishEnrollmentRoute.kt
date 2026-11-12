@@ -16,6 +16,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.biometric.BiometricManager
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -36,6 +37,7 @@ import com.passi.cloud.passi_android.PassiApplication
 import com.passi.cloud.passi_android.R
 import com.passi.cloud.passi_android.ui.NumberPad
 import com.passi.cloud.passi_android.localization.asString
+import com.passi.cloud.passi_android.ui.DeviceKeyProtectionChoice
 
 @Composable
 fun FinishEnrollmentRoute(
@@ -54,8 +56,16 @@ fun FinishEnrollmentRoute(
         )
     )
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val biometricManager = BiometricManager.from(LocalContext.current)
     FinishEnrollmentScreen(
         uiState = uiState,
+        biometricAvailable = biometricManager.canAuthenticate(
+            BiometricManager.Authenticators.BIOMETRIC_STRONG,
+        ) == BiometricManager.BIOMETRIC_SUCCESS,
+        deviceCredentialAvailable = biometricManager.canAuthenticate(
+            BiometricManager.Authenticators.DEVICE_CREDENTIAL,
+        ) == BiometricManager.BIOMETRIC_SUCCESS,
+        onKeyProtectionSelected = viewModel::onKeyProtectionSelected,
         onPinChanged = viewModel::onPinChanged,
         onPinConfirmationChanged = viewModel::onPinConfirmationChanged,
         onSkip = { viewModel.skip(onDone) },
@@ -70,6 +80,9 @@ internal fun FinishEnrollmentScreen(
     onPinConfirmationChanged: (String) -> Unit,
     onSkip: () -> Unit,
     onSubmit: () -> Unit,
+    biometricAvailable: Boolean = true,
+    deviceCredentialAvailable: Boolean = true,
+    onKeyProtectionSelected: (com.passi.cloud.passi_android.domain.enrollment.DeviceKeyProtection) -> Unit = {},
 ) {
     Column(
         modifier = Modifier.fillMaxSize().padding(24.dp),
@@ -77,8 +90,18 @@ internal fun FinishEnrollmentScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(stringResource(R.string.device_key_explanation))
+        DeviceKeyProtectionChoice(
+            selected = uiState.keyProtection,
+            biometricAvailable = biometricAvailable,
+            deviceCredentialAvailable = deviceCredentialAvailable,
+            enabled = !uiState.isSubmitting && !uiState.isProtectionLocked,
+            onSelected = onKeyProtectionSelected,
+        )
         uiState.responseError?.let { Text(it.asString()) }
-        Button(onClick = onSubmit, enabled = !uiState.isSubmitting && !uiState.isMissingContext) {
+        Button(
+            onClick = onSubmit,
+            enabled = !uiState.isSubmitting && !uiState.isMissingContext && uiState.keyProtection != null,
+        ) {
             Text(stringResource(R.string.device_key_create))
         }
     }

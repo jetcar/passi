@@ -45,6 +45,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.passi.cloud.passi_android.PassiApplication
 import com.passi.cloud.passi_android.R
 import com.passi.cloud.passi_android.domain.enrollment.supportsDeviceKeys
+import com.passi.cloud.passi_android.domain.enrollment.DeviceKeyProtection
 import com.passi.cloud.passi_android.ui.IPhoneConfirmationSheet
 import com.passi.cloud.passi_android.ui.rememberBiometricPromptLauncher
 import com.passi.cloud.passi_android.localization.asString
@@ -149,6 +150,15 @@ internal fun AccountDetailScreen(
                 DetailLabelValue(label = stringResource(R.string.certificate_thumbprint), value = account.thumbprint.orEmpty())
                 DetailLabelValue(label = stringResource(R.string.certificate_valid_from), value = account.validFrom.toString())
                 DetailLabelValue(label = stringResource(R.string.certificate_valid_to), value = account.validTo.toString())
+                DetailLabelValue(
+                    label = stringResource(R.string.certificate_protection),
+                    value = stringResource(when {
+                        account.keyAlias == null -> R.string.certificate_protection_legacy
+                        account.keyProtection == DeviceKeyProtection.BIOMETRIC -> R.string.device_key_biometric
+                        account.keyProtection == DeviceKeyProtection.DEVICE_CREDENTIAL -> R.string.device_key_phone_pin
+                        else -> R.string.certificate_protection_biometric_or_phone_pin
+                    }),
+                )
                 DetailLabelValue(label = stringResource(R.string.identity_provider), value = uiState.provider?.name.orEmpty())
 
                 ActionButton(

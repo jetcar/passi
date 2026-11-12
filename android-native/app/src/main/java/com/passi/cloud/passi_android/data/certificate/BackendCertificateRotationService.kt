@@ -8,6 +8,7 @@ import com.passi.cloud.passi_android.domain.enrollment.CertificateGenerator
 import com.passi.cloud.passi_android.domain.enrollment.checkpoint
 import com.passi.cloud.passi_android.domain.enrollment.certificate
 import com.passi.cloud.passi_android.domain.enrollment.preparePendingDeviceKey
+import com.passi.cloud.passi_android.domain.enrollment.DeviceKeyProtection
 import com.passi.cloud.passi_android.domain.model.Account
 import com.passi.cloud.passi_android.domain.repository.AccountsRepository
 import com.passi.cloud.passi_android.domain.repository.ProvidersRepository
@@ -47,7 +48,20 @@ class BackendCertificateRotationService(
             if (current.thumbprint != account.thumbprint) return@withLock Result.success(current)
             val provider = providersRepository.getProvider(current.providerId) ?: error("Provider not found")
             val parent = requireNotNull(current.thumbprint) { "Current certificate thumbprint is missing" }
-            current = preparePendingDeviceKey(current, accountsRepository, certificateGenerator) {
+            val requestedProtection = if (useBiometric) {
+                DeviceKeyProtection.BIOMETRIC
+            } else {
+                DeviceKeyProtection.DEVICE_CREDENTIAL
+            }
+            val protection = current.pendingKey?.let {
+                it.keyProtection ?: DeviceKeyProtection.BIOMETRIC_OR_DEVICE_CREDENTIAL
+            } ?: requestedProtection
+            current = preparePendingDeviceKey(
+                current,
+                accountsRepository,
+                certificateGenerator,
+                protection,
+            ) {
                 // Validate the legacy PIN before creating a replacement. This signature is discarded.
                 if (current.keyAlias == null) {
                     accountSigner.sign(current, oldPin, "Passi:UnlockForMigration:v1")
@@ -68,6 +82,7 @@ class BackendCertificateRotationService(
             }
             val updated = current.copy(
                 keyAlias = pending.keyAlias, keySecurityLevel = pending.keySecurityLevel,
+                keyProtection = pending.keyProtection,
                 publicCertBinary = pending.publicCertBinary, thumbprint = pending.thumbprint,
                 validFrom = Instant.parse(pending.validFrom), validTo = Instant.parse(pending.validTo),
                 salt = null, privateCertBinary = null, pinLength = 0, hasFingerprint = false,

@@ -8,6 +8,7 @@ import com.passi.cloud.passi_android.domain.model.PendingDeviceKey
 import com.passi.cloud.passi_android.domain.model.Account
 import com.passi.cloud.passi_android.domain.model.ApiPaths
 import com.passi.cloud.passi_android.domain.model.Provider
+import com.passi.cloud.passi_android.domain.enrollment.DeviceKeyProtection
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import java.time.Instant
@@ -161,6 +162,7 @@ private data class StoredAccount(
     val hasFingerprint: Boolean,
     val keyAlias: String? = null,
     val keySecurityLevel: String? = null,
+    val keyProtection: DeviceKeyProtection? = null,
     val pendingKey: PendingDeviceKey? = null,
     val legacyCleanupPending: Boolean = false,
     val cleanupKeyAlias: String? = null,
@@ -184,6 +186,7 @@ private data class StoredAccount(
         hasFingerprint = hasFingerprint,
         keyAlias = keyAlias,
         keySecurityLevel = keySecurityLevel,
+        keyProtection = keyProtection,
         pendingKey = pendingKey,
         legacyCleanupPending = legacyCleanupPending,
         cleanupKeyAlias = cleanupKeyAlias,
@@ -209,6 +212,7 @@ private data class StoredAccount(
             hasFingerprint = account.hasFingerprint,
             keyAlias = account.keyAlias,
             keySecurityLevel = account.keySecurityLevel,
+            keyProtection = account.keyProtection,
             pendingKey = account.pendingKey,
             legacyCleanupPending = account.legacyCleanupPending,
             cleanupKeyAlias = account.cleanupKeyAlias,

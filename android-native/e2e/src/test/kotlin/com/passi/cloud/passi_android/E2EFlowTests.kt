@@ -5,12 +5,17 @@ import com.google.gson.FieldNamingPolicy
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonParser
 import com.passi.cloud.passi_android.data.crypto.BouncyCastleCertificateGenerator
+import com.passi.cloud.passi_android.data.remote.ApiResult
 import com.passi.cloud.passi_android.data.remote.PassiApiClient
 import com.passi.cloud.passi_android.data.repository.BackendEnrollmentService
 import com.passi.cloud.passi_android.domain.enrollment.GeneratedCertificate
 import com.passi.cloud.passi_android.domain.model.ApiPaths
 import com.passi.cloud.passi_android.domain.model.Provider
 import kotlinx.coroutines.runBlocking
+import org.bouncycastle.asn1.x500.X500Name
+import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter
+import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder
+import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder
 import org.junit.AfterClass
 import org.junit.Before
 import org.junit.BeforeClass
@@ -20,11 +25,17 @@ import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.ServerSocket
 import java.net.URL
+import java.math.BigInteger
+import java.security.KeyPairGenerator
 import java.security.KeyStore
+import java.security.MessageDigest
 import java.security.PrivateKey
 import java.security.Signature
 import java.time.Duration
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 import java.util.Base64
+import java.util.Date
 import java.util.UUID
 
 class E2EFlowTests {
@@ -344,6 +355,14 @@ class E2EFlowTests {
         val sessionId: String,
     )
 
+    private data class CertificateUpdateRequest(
+        val publicCert: String,
+        val parentCertThumbprint: String,
+        val parentCertHashSignature: String,
+        val deviceId: String,
+        val retireParent: Boolean = true,
+    )
+
     private data class UnlinkDeviceRequest(
         val unlinkToken: String,
     )
@@ -354,6 +373,11 @@ class E2EFlowTests {
     ) {
         val thumbprint: String get() = certificate.thumbprint
     }
+
+    private data class DeviceHeldTestKey(
+        val certificate: GeneratedCertificate,
+        val privateKey: PrivateKey,
+    )
 
     private data class ActiveSessionSnapshot(
         val sessionId: String,
@@ -434,13 +458,12 @@ class E2EFlowTests {
     }
 
     @Test
-    fun fullRegistrationFlow() = runBlocking {
+    fun newDeviceHeldRegistrationFlow() = runBlocking {
         val email = "test-${UUID.randomUUID()}@example.com"
         val deviceId = UUID.randomUUID().toString()
-        val pin = "1234"
         val enrollmentService = BackendEnrollmentService(apiClient)
 
-        println("[TEST] fullRegistrationFlow: email=$email deviceId=$deviceId")
+        println("[TEST] newDeviceHeldRegistrationFlow: email=$email deviceId=$deviceId")
 
         println("[TEST] Step 1: beginSignup")
         val beginResult = enrollmentService.beginSignup(email, provider, deviceId)
@@ -464,7 +487,10 @@ class E2EFlowTests {
 
         println("[TEST] Step 4: finalizeSignup")
         val confirmedPending = pending.copy(confirmationCode = code)
-        val cert = BouncyCastleCertificateGenerator().generate(email, pin)
+        val deviceKey = generateDeviceHeldCertificate(email)
+        val cert = deviceKey.certificate
+        assertThat(cert.salt).isNull()
+        assertThat(cert.privateCertBinary).isNull()
         val finalizeResult = enrollmentService.finalizeSignup(
             pendingEnrollment = confirmedPending,
             provider = provider,
@@ -473,7 +499,57 @@ class E2EFlowTests {
         )
         println("[TEST] finalizeSignup result: isSuccess=${finalizeResult.isSuccess} error=${finalizeResult.exceptionOrNull()?.message}")
         assertThat(finalizeResult.isSuccess).isTrue()
-        println("[TEST] fullRegistrationFlow DONE")
+
+        val sessionId = startLoginSession(email)
+        val activeSession = waitForActiveSession(deviceId, sessionId)
+        assertThat(authorizeSessionWithPrivateKey(activeSession, deviceKey.privateKey, cert.thumbprint).isSuccessful).isTrue()
+        assertThat(checkLoginSessionStatus(sessionId)).isEqualTo(200)
+        println("[TEST] newDeviceHeldRegistrationFlow DONE")
+    }
+
+    @Test
+    fun legacyCertificateUpdateRetiresOldCertificateAndUsesReplacement() = runBlocking {
+        val email = "migration-${UUID.randomUUID()}@example.com"
+        val deviceId = UUID.randomUUID().toString()
+        val pin = "1234"
+        val enrollmentService = BackendEnrollmentService(apiClient)
+        val legacy = registerAndFinalizeAccount(enrollmentService, email, deviceId, pin)
+        val replacement = generateDeviceHeldCertificate(email)
+        val oldPrivateKey = readLegacyPrivateKey(legacy.certificate, pin)
+        val retirementPayload = "Passi:RetireParent:v2\n${legacy.thumbprint}\n$deviceId\n${replacement.certificate.publicCertBinary}"
+        val request = CertificateUpdateRequest(
+            publicCert = replacement.certificate.publicCertBinary,
+            parentCertThumbprint = legacy.thumbprint,
+            parentCertHashSignature = sign(oldPrivateKey, retirementPayload),
+            deviceId = deviceId,
+        )
+
+        val update = apiClient.postJson(provider.baseUrl, provider.apiPaths.updateCertificate, request)
+        assertThat(update.isSuccessful).isTrue()
+        assertThat(JsonParser.parseString(update.body).asJsonObject.readString("PublicCert", "publicCert"))
+            .isEqualTo(replacement.certificate.publicCertBinary)
+
+        val retry = apiClient.postJson(provider.baseUrl, provider.apiPaths.updateCertificate, request)
+        assertThat(retry.isSuccessful).isTrue()
+        assertThat(JsonParser.parseString(retry.body).asJsonObject.readString("PublicCert", "publicCert"))
+            .isEqualTo(replacement.certificate.publicCertBinary)
+
+        val sessionId = startLoginSession(email)
+        val activeSession = waitForActiveSession(deviceId, sessionId)
+        val retiredAuthorization = authorizeSessionWithPrivateKey(activeSession, oldPrivateKey, legacy.thumbprint)
+        assertThat(retiredAuthorization.statusCode).isEqualTo(400)
+        assertThat(retiredAuthorization.body).contains("Invalid signature")
+        val stillPending = checkLoginSession(activeSession.sessionId)
+        assertThat(stillPending.statusCode).isEqualTo(400)
+        assertThat(stillPending.body).contains("Waiting for response")
+
+        val replacementAuthorization = authorizeSessionWithPrivateKey(
+            activeSession,
+            replacement.privateKey,
+            replacement.certificate.thumbprint,
+        )
+        assertThat(replacementAuthorization.isSuccessful).isTrue()
+        assertThat(checkLoginSessionStatus(sessionId)).isEqualTo(200)
     }
 
     @Test
@@ -805,10 +881,15 @@ class E2EFlowTests {
 
     private suspend fun authorizeSession(session: ActiveSessionSnapshot, registration: RegisteredAccount, pin: String) {
         val cert = registration.certificate
-        val password = (cert.salt + pin).toCharArray()
-        val keyStore = KeyStore.getInstance("PKCS12")
-        ByteArrayInputStream(Base64.getDecoder().decode(cert.privateCertBinary)).use { keyStore.load(it, password) }
-        val privateKey = keyStore.getKey(keyStore.aliases().nextElement(), password) as PrivateKey
+        val privateKey = readLegacyPrivateKey(cert, pin)
+        assertThat(authorizeSessionWithPrivateKey(session, privateKey, registration.thumbprint).isSuccessful).isTrue()
+    }
+
+    private suspend fun authorizeSessionWithPrivateKey(
+        session: ActiveSessionSnapshot,
+        privateKey: PrivateKey,
+        thumbprint: String,
+    ): ApiResult {
         val signature = Signature.getInstance("SHA512withRSA")
         signature.initSign(privateKey)
         signature.update(session.randomString.toByteArray(Charsets.UTF_8))
@@ -818,15 +899,64 @@ class E2EFlowTests {
             path = provider.apiPaths.authorize,
             payload = AuthorizeRequest(
                 signedHash = signedHash,
-                publicCertThumbprint = registration.thumbprint,
+                publicCertThumbprint = thumbprint,
                 sessionId = session.sessionId,
             ),
         )
         println("[TEST] authorizeSession: status=${response.statusCode} body=${response.body}")
-        assertThat(response.isSuccessful).isTrue()
+        return response
     }
 
-    private fun checkLoginSessionStatus(sessionId: String): Int {
+    private fun readLegacyPrivateKey(certificate: GeneratedCertificate, pin: String): PrivateKey {
+        val salt = requireNotNull(certificate.salt)
+        val privateCertBinary = requireNotNull(certificate.privateCertBinary)
+        val password = (salt + pin).toCharArray()
+        val keyStore = KeyStore.getInstance("PKCS12")
+        ByteArrayInputStream(Base64.getDecoder().decode(privateCertBinary)).use { keyStore.load(it, password) }
+        return keyStore.getKey(keyStore.aliases().nextElement(), password) as PrivateKey
+    }
+
+    private fun sign(privateKey: PrivateKey, message: String): String {
+        val signature = Signature.getInstance("SHA512withRSA")
+        signature.initSign(privateKey)
+        signature.update(message.toByteArray(Charsets.UTF_8))
+        return Base64.getEncoder().encodeToString(signature.sign())
+    }
+
+    private fun generateDeviceHeldCertificate(email: String): DeviceHeldTestKey {
+        val keyPair = KeyPairGenerator.getInstance("RSA").apply { initialize(2048) }.generateKeyPair()
+        val validFrom = Instant.now().minus(1, ChronoUnit.DAYS)
+        val validTo = Instant.now().plus(365, ChronoUnit.DAYS)
+        val subject = X500Name("CN=${email.replace("@", "")}")
+        val certificate = JcaX509CertificateConverter().getCertificate(
+            JcaX509v3CertificateBuilder(
+                subject,
+                BigInteger.valueOf(System.nanoTime()),
+                Date.from(validFrom),
+                Date.from(validTo),
+                subject,
+                keyPair.public,
+            ).build(JcaContentSignerBuilder("SHA256withRSA").build(keyPair.private))
+        )
+        val publicBytes = certificate.encoded
+        return DeviceHeldTestKey(
+            certificate = GeneratedCertificate(
+                salt = null,
+                privateCertBinary = null,
+                publicCertBinary = Base64.getEncoder().encodeToString(publicBytes),
+                thumbprint = MessageDigest.getInstance("SHA-1")
+                    .digest(publicBytes)
+                    .joinToString("") { byte -> "%02X".format(byte) },
+                validFrom = certificate.notBefore.toInstant(),
+                validTo = certificate.notAfter.toInstant(),
+            ),
+            privateKey = keyPair.private,
+        )
+    }
+
+    private fun checkLoginSessionStatus(sessionId: String): Int = checkLoginSession(sessionId).statusCode
+
+    private fun checkLoginSession(sessionId: String): LoginCheckResult {
         val url = URL("${provider.baseUrl}/api/Auth/check?sessionId=$sessionId")
         val connection = (url.openConnection() as HttpURLConnection).apply {
             requestMethod = "GET"
@@ -834,11 +964,21 @@ class E2EFlowTests {
             readTimeout = 15_000
         }
         return try {
-            connection.responseCode
+            val statusCode = connection.responseCode
+            val stream = if (statusCode in 200..299) connection.inputStream else connection.errorStream
+            LoginCheckResult(
+                statusCode = statusCode,
+                body = stream?.bufferedReader()?.use { it.readText() }.orEmpty(),
+            )
         } finally {
             connection.disconnect()
         }
     }
+
+    private data class LoginCheckResult(
+        val statusCode: Int,
+        val body: String,
+    )
 
     private fun waitForNotificationEmails(expectedCount: Int, timeoutSeconds: Int = 30) {
         val apiUrl = "http://localhost:$mailhogHttpPort/api/v2/messages"

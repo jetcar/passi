@@ -98,9 +98,9 @@ class EnrollmentUseCaseTests : CoroutineViewModelTest() {
     }
 
     @Test
-    fun finishEnrollmentRejectsShortPin() = runViewModelTest {
+    fun finishEnrollmentIgnoresCustomPinAndStoresOnlyDeviceKey() = runViewModelTest {
         val viewModel = FinishEnrollmentViewModel(
-            pendingEnrollmentStore = pendingEnrollmentStore().apply { save(samplePendingEnrollment()) },
+            pendingEnrollmentStore = pendingEnrollmentStore().apply { save(samplePendingEnrollment(confirmationCode = "123456")) },
             accountsRepository = inMemoryAccountsRepository(),
             providersRepository = inMemoryProvidersRepository(),
             enrollmentService = FakeEnrollmentService(),
@@ -112,12 +112,14 @@ class EnrollmentUseCaseTests : CoroutineViewModelTest() {
         viewModel.onPinConfirmationChanged("123")
         viewModel.submit {}
 
-        assertThat(viewModel.uiState.value.pinError).isEqualTo(UiText.Resource(R.string.error_pin_length, listOf(4)))
+        advanceUntilIdle()
+        assertThat(viewModel.uiState.value.pinError).isNull()
+        assertThat(viewModel.uiState.value.responseError).isNull()
     }
 
     @Test
     fun finishEnrollmentStoresCertificateAndClearsPendingContext() = runViewModelTest {
-        val enrollmentStore = pendingEnrollmentStore().apply { save(samplePendingEnrollment()) }
+        val enrollmentStore = pendingEnrollmentStore().apply { save(samplePendingEnrollment(confirmationCode = "123456")) }
         val accountsRepository = inMemoryAccountsRepository()
         val viewModel = FinishEnrollmentViewModel(
             pendingEnrollmentStore = enrollmentStore,
@@ -138,13 +140,16 @@ class EnrollmentUseCaseTests : CoroutineViewModelTest() {
         assertThat(completed).isTrue()
         assertThat(enrollmentStore.read()).isNull()
         assertThat(updatedAccount.deviceId).isEqualTo("device-finished")
-        assertThat(updatedAccount.pinLength).isEqualTo(4)
+        assertThat(updatedAccount.pinLength).isEqualTo(0)
+        assertThat(updatedAccount.privateCertBinary).isNull()
+        assertThat(updatedAccount.salt).isNull()
+        assertThat(updatedAccount.keyAlias).isEqualTo("passi.account.test")
         assertThat(updatedAccount.thumbprint).isEqualTo("thumbprint-123")
     }
 
     @Test
     fun finishEnrollmentReconcilesAccountToCanonicalGuidFromServer() = runViewModelTest {
-        val enrollmentStore = pendingEnrollmentStore().apply { save(samplePendingEnrollment()) }
+        val enrollmentStore = pendingEnrollmentStore().apply { save(samplePendingEnrollment(confirmationCode = "123456")) }
         val accountsRepository = inMemoryAccountsRepository()
         val localId = UUID.fromString(samplePendingEnrollment().accountId)
         val canonicalId = UUID.randomUUID()

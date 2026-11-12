@@ -1,5 +1,6 @@
 package com.passi.cloud.passi_android.feature.account
 
+import android.os.Build
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -43,6 +44,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.passi.cloud.passi_android.PassiApplication
 import com.passi.cloud.passi_android.R
+import com.passi.cloud.passi_android.domain.enrollment.supportsDeviceKeys
 import com.passi.cloud.passi_android.ui.IPhoneConfirmationSheet
 import com.passi.cloud.passi_android.ui.rememberBiometricPromptLauncher
 import com.passi.cloud.passi_android.localization.asString
@@ -103,6 +105,7 @@ internal fun AccountDetailScreen(
     onShowDeleteConfirmation: () -> Unit,
     onDeleteConfirmed: () -> Unit,
     onDismissDeleteConfirmation: () -> Unit,
+    deviceKeySupported: Boolean = supportsDeviceKeys(Build.VERSION.SDK_INT),
 ) {
     Column(
         modifier = Modifier
@@ -151,39 +154,14 @@ internal fun AccountDetailScreen(
                 ActionButton(
                     text = stringResource(R.string.update_certificate),
                     onClick = onUpdateCertificate,
+                    enabled = deviceKeySupported,
                 )
 
-                if (!account.hasFingerprint) {
-                    if (account.pinLength > 0) {
-                        OutlinedTextField(
-                            value = uiState.biometricPin,
-                            onValueChange = onBiometricPinChanged,
-                            label = { Text(stringResource(R.string.current_pin)) },
-                            isError = uiState.biometricPinError != null,
-                            visualTransformation = PasswordVisualTransformation(),
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 8.dp),
-                        )
-                        if (uiState.biometricPinError != null) {
-                            Text(
-                                text = uiState.biometricPinError.asString(),
-                                modifier = Modifier.padding(horizontal = 20.dp),
-                                color = MaterialTheme.colorScheme.error,
-                            )
-                        }
-                    }
-
-                    ActionButton(
-                        text = stringResource(
-                            if (uiState.isEnablingBiometric) R.string.adding_fingerprint else R.string.add_fingerprint,
-                        ),
-                        onClick = onLaunchBiometric,
-                        enabled = !uiState.isEnablingBiometric,
-                        showProgress = uiState.isEnablingBiometric,
-                    )
-                }
+                Text(stringResource(when {
+                    !deviceKeySupported -> R.string.device_key_android_version_required
+                    account.keyAlias == null -> R.string.device_key_migrate
+                    else -> R.string.device_key_explanation
+                }))
 
                 ActionButton(
                     text = stringResource(R.string.manage_devices),

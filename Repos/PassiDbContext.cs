@@ -7,6 +7,8 @@ using log4net;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using GoogleTracer;
 using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 
@@ -75,6 +77,31 @@ namespace Repos
             return base.SaveChanges();
         }
 
+        public override int SaveChanges(bool acceptAllChangesOnSuccess)
+        {
+            RejectPrivateCertificateWrites();
+            return base.SaveChanges(acceptAllChangesOnSuccess);
+        }
+
+        public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
+        {
+            RejectPrivateCertificateWrites();
+            return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+        }
+
+        private void RejectPrivateCertificateWrites()
+        {
+            // Retain the legacy column for deployed databases, but refuse all new writes of
+            // private key material. Existing rows are left untouched for an explicit data audit.
+            ChangeTracker.DetectChanges();
+            foreach (var certificate in ChangeTracker.Entries<CertificateDb>())
+            {
+                if ((certificate.State == EntityState.Added || certificate.Property(x => x.PrivateCert).IsModified)
+                    && certificate.Entity.PrivateCert != null)
+                    throw new InvalidOperationException("Private certificate storage is not supported");
+            }
+        }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (string.IsNullOrEmpty(_connectionString))
@@ -101,8 +128,7 @@ namespace Repos
 
                 entity.HasIndex(e => e.ModifiedById, "IX_Certificates_ModifiedById");
 
-                entity.HasIndex(e => e.ParentCertId, "IX_Certificates_ParentCertId")
-                    .IsUnique();
+                entity.HasIndex(e => e.ParentCertId, "IX_Certificates_ParentCertId");
 
                 entity.HasIndex(e => e.UserId, "IX_Certificates_UserId");
 
@@ -126,8 +152,8 @@ namespace Repos
                     .OnDelete(DeleteBehavior.Restrict);
 
                 entity.HasOne(d => d.ParentCert)
-                    .WithOne(p => p.InverseParentCert)
-                    .HasForeignKey<CertificateDb>(d => d.ParentCertId)
+                    .WithMany(p => p.ChildCertificates)
+                    .HasForeignKey(d => d.ParentCertId)
                     .OnDelete(DeleteBehavior.Restrict);
 
                 entity.HasOne(d => d.User)

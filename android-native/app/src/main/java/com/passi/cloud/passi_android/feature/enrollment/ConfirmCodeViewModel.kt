@@ -45,7 +45,7 @@ class ConfirmCodeViewModel(
                 responseError = UiText.Resource(R.string.error_no_pending_signup),
             )
         } else {
-            ConfirmCodeUiState(email = pending.email)
+            ConfirmCodeUiState(email = pending.email, code = pending.confirmationCode.orEmpty())
         }
     }
 
@@ -62,7 +62,8 @@ class ConfirmCodeViewModel(
             )
             return
         }
-        if (_uiState.value.code.length != requiredCodeLength) {
+        val confirmationCode = _uiState.value.code
+        if (confirmationCode.length != requiredCodeLength) {
             _uiState.value = _uiState.value.copy(
                 responseError = UiText.Resource(R.string.error_confirmation_code_length),
             )
@@ -79,10 +80,13 @@ class ConfirmCodeViewModel(
                 return@launch
             }
             _uiState.value = _uiState.value.copy(isSubmitting = true, responseError = null)
-            val result = enrollmentService.confirmSignupCode(
+            // An interrupted finalization may already have consumed the email code. The final
+            // endpoint validates the re-entered code against this exact checkpoint/certificate.
+            val checkpoint = accountsRepository.getAccount(UUID.fromString(pending.accountId))?.pendingKey
+            val result = if (checkpoint != null) Result.success(Unit) else enrollmentService.confirmSignupCode(
                 accountId = pending.accountId,
                 email = pending.email,
-                code = _uiState.value.code,
+                code = confirmationCode,
                 provider = provider,
             )
             result.onSuccess {
@@ -90,7 +94,7 @@ class ConfirmCodeViewModel(
                 if (account != null) {
                     accountsRepository.updateAccount(account.copy(isConfirmed = true))
                 }
-                pendingEnrollmentStore.save(pending.copy(confirmationCode = _uiState.value.code))
+                pendingEnrollmentStore.save(pending.copy(confirmationCode = confirmationCode))
                 _uiState.value = _uiState.value.copy(isSubmitting = false)
                 onSuccess()
             }.onFailure { error ->

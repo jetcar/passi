@@ -1,5 +1,4 @@
 ﻿using ConfigurationManager;
-using Newtonsoft.Json;
 using RestSharp;
 using log4net;
 using System;
@@ -40,7 +39,8 @@ public class MyRestClient : IMyRestClient
         var currentTraceId = _tracer.GetCurrentTraceId() ?? Guid.NewGuid().ToString();
         request.AddHeader("custom_trace_id", currentTraceId);
         request.Timeout = TimeSpan.FromSeconds(DefaultTimeoutSeconds);
-        _logger.Debug($"{_client.Options.BaseUrl} {request.Resource}: {JsonConvert.SerializeObject(request.Parameters)}");
+        // Parameters and query strings can contain challenges, signatures, or bearer tokens.
+        _logger.Debug($"Backend request method: {request.Method}");
         return _client.ExecuteWithRetryAsync(request);
     }
 }

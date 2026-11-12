@@ -1,6 +1,7 @@
 ﻿using Models;
 
 using System;
+using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using GoogleTracer;
 using WebApiDto.Certificate;
@@ -21,7 +22,7 @@ namespace Services
 
             if (publicCert == null)
                 throw new BadRequestException("Certificate is missing");
-            if (publicCert.NotAfter < DateTime.UtcNow || publicCert.NotBefore >= DateTime.UtcNow)
+            if (publicCert.NotAfter.ToUniversalTime() < DateTime.UtcNow || publicCert.NotBefore.ToUniversalTime() >= DateTime.UtcNow)
                 throw new BadRequestException("Certificate is expired");
             var nameInfo = publicCert.GetNameInfo(X509NameType.SimpleName, true);
             if (nameInfo != email.Replace("@", ""))
@@ -38,9 +39,9 @@ namespace Services
 
             if (newPublicCert == null)
                 throw new BadRequestException("Certificate is missing");
-            if (newPublicCert.NotAfter < DateTime.UtcNow)
+            if (newPublicCert.NotAfter.ToUniversalTime() < DateTime.UtcNow)
                 throw new BadRequestException("Certificate is expired");
-            if (newPublicCert.NotBefore > DateTime.UtcNow)
+            if (newPublicCert.NotBefore.ToUniversalTime() > DateTime.UtcNow)
                 throw new BadRequestException("Certificate is not started");
             if (newPublicCert.GetNameInfo(X509NameType.SimpleName, true) !=
                 oldpublicCert.GetNameInfo(X509NameType.SimpleName, true).Replace("@", ""))
@@ -49,7 +50,13 @@ namespace Services
 
         public void ValidateCertificateChain(CertificateUpdateDto newCertificate, CertificateDb oldCertificate)
         {
-            var verify = CertHelper.VerifyData(newCertificate.PublicCert, newCertificate.ParentCertHashSignature,
+            // The unchanged signature primitive consumes ASCII and this envelope uses newlines.
+            // Reject ambiguous encodings rather than let different device identifiers sign alike.
+            if (newCertificate.RetireParent &&
+                (string.IsNullOrWhiteSpace(newCertificate.DeviceId) ||
+                 newCertificate.DeviceId.Any(c => c < ' ' || c > '~')))
+                throw new BadRequestException("Invalid retirement device identifier");
+            var verify = CertHelper.VerifyData(newCertificate.SigningPayload(), newCertificate.ParentCertHashSignature,
                 oldCertificate.PublicCert);
 
             if (!verify)

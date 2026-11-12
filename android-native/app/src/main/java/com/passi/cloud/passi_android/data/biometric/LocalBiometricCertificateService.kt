@@ -13,44 +13,13 @@ import java.util.UUID
 
 class LocalBiometricCertificateService(
     private val preferences: PassiPreferences,
+    private val accountSigner: com.passi.cloud.passi_android.domain.auth.AccountSigner,
 ) : BiometricCertificateService {
-    override suspend fun enableBiometric(account: Account, pin: String?): Result<Account> {
-        return runCatching {
-            val sourcePassword = certificatePassword(account, pin)
-            val keyStore = loadPkcs12(
-                privateCertBinary = account.privateCertBinary ?: error("Missing private certificate"),
-                password = sourcePassword,
-            )
-            val alias = firstAlias(keyStore)
-            val certificate = keyStore.getCertificate(alias) ?: error("Certificate not found")
-            val privateKey = keyStore.getKey(alias, sourcePassword.toCharArray()) as? PrivateKey
-                ?: error("Private key not found")
+    override suspend fun enableBiometric(account: Account, pin: String?): Result<Account> =
+        Result.failure(IllegalStateException("Update the certificate to enable device-protected signing"))
 
-            val biometricPassword = UUID.randomUUID().toString()
-            val biometricKeyStore = KeyStore.getInstance("PKCS12")
-            biometricKeyStore.load(null, null)
-            biometricKeyStore.setKeyEntry(alias, privateKey, biometricPassword.toCharArray(), arrayOf(certificate))
-
-            val exportBuffer = java.io.ByteArrayOutputStream()
-            exportBuffer.use { output ->
-                biometricKeyStore.store(output, biometricPassword.toCharArray())
-            }
-
-            preferences.writeBiometricMaterial(
-                accountId = account.id,
-                material = StoredBiometricMaterial(
-                    privateCertBinary = Base64.getEncoder().encodeToString(exportBuffer.toByteArray()),
-                    password = biometricPassword,
-                ),
-            )
-
-            account.copy(hasFingerprint = true)
-        }.recoverCatching { error ->
-            throw IllegalStateException(if (account.pinLength > 0) "Invalid Pin" else (error.message ?: "Biometric setup failed"))
-        }
-    }
-
-    override fun sign(account: Account, message: String): Result<String> {
+    override suspend fun sign(account: Account, message: String): Result<String> {
+        if (account.keyAlias != null) return accountSigner.sign(account, null, message)
         return runCatching {
             val material = preferences.readBiometricMaterial(account.id)
                 ?: error("Biometric certificate not found")

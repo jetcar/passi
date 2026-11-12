@@ -83,160 +83,34 @@ internal fun UpdateCertificateScreen(
     onCancel: () -> Unit,
 ) {
     val account = uiState.account
-
-    val firstField = if (account != null && account.pinLength > 0 && !uiState.useBiometricForCurrentCertificate) "old" else "new"
-    var activeField by remember { mutableStateOf(firstField) }
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFFFAFAFA))
-            .verticalScroll(rememberScrollState())
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        if (uiState.responseError != null) {
+    Column(modifier = Modifier.fillMaxSize().padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+        if (!uiState.deviceKeySupported) {
+            Text(stringResource(R.string.device_key_android_version_required))
+            TextButton(onClick = onCancel) { Text(stringResource(R.string.cancel)) }
+            return@Column
+        }
+        account?.let {
             Text(
-                text = uiState.responseError.asString(),
-                color = Color.Black,
-                textAlign = TextAlign.Center,
+                text = "${stringResource(R.string.email)}: ${it.email}",
+                fontWeight = FontWeight.Bold,
             )
-            Spacer(modifier = Modifier.height(8.dp))
         }
-
-        if (account != null && account.pinLength > 0 && !uiState.useBiometricForCurrentCertificate) {
-            if (uiState.oldPinError != null) {
-                Text(uiState.oldPinError.asString(), color = Color.Black, textAlign = TextAlign.Center)
-            }
-            Text(stringResource(R.string.old_pin), color = Color.Black, textAlign = TextAlign.Center)
-            CertPinFieldRow(
-                maskedValue = "●".repeat(uiState.oldPin.length),
-                hasError = uiState.oldPinError != null,
-                isActive = activeField == "old",
-                onClear = { onOldPinChanged("") },
-                onTap = { activeField = "old" },
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-        }
-
-        if (account?.hasFingerprint == true) {
-            Button(
-                onClick = onLaunchBiometric,
+        Text(stringResource(R.string.device_key_explanation))
+        uiState.responseError?.let { Text(it.asString()) }
+        uiState.oldPinError?.let { Text(it.asString()) }
+        if (account?.keyAlias == null && (account?.pinLength ?: 0) > 0) {
+            androidx.compose.material3.OutlinedTextField(
+                value = uiState.oldPin, onValueChange = onOldPinChanged,
+                label = { Text(stringResource(R.string.old_pin)) },
+                visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation(),
+                keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                    keyboardType = androidx.compose.ui.text.input.KeyboardType.NumberPassword),
                 enabled = !uiState.isSubmitting,
-                shape = RoundedCornerShape(100.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.White,
-                    contentColor = Color.Black,
-                ),
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Text(
-                    if (uiState.useBiometricForCurrentCertificate) {
-                    stringResource(R.string.biometric_current_certificate_confirmed)
-                    } else {
-                    stringResource(R.string.biometric_use_current_certificate)
-                    }
-                )
-            }
-            Spacer(modifier = Modifier.height(8.dp))
+            )
         }
-
-        if (uiState.newPinError != null) {
-                Text(uiState.newPinError.asString(), color = Color.Black, textAlign = TextAlign.Center)
+        Button(onClick = onRotate, enabled = account != null && !uiState.isSubmitting) {
+            Text(stringResource(R.string.update_certificate))
         }
-            Text(stringResource(R.string.pin), color = Color.Black, textAlign = TextAlign.Center)
-        CertPinFieldRow(
-            maskedValue = "●".repeat(uiState.newPin.length),
-            hasError = uiState.newPinError != null,
-            isActive = activeField == "new",
-            onClear = { onNewPinChanged("") },
-            onTap = { activeField = "new" },
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-
-        if (uiState.confirmPinError != null) {
-                Text(uiState.confirmPinError.asString(), color = Color.Black, textAlign = TextAlign.Center)
-        }
-            Text(stringResource(R.string.pin_confirmation), color = Color.Black, textAlign = TextAlign.Center)
-        CertPinFieldRow(
-            maskedValue = "●".repeat(uiState.confirmPin.length),
-            hasError = uiState.confirmPinError != null,
-            isActive = activeField == "confirm",
-            onClear = { onConfirmPinChanged("") },
-            onTap = { activeField = "confirm" },
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-
-        NumberPad(onKey = { key ->
-            when (key) {
-                "del" -> when (activeField) {
-                    "old" -> onOldPinChanged(uiState.oldPin.dropLast(1))
-                    "new" -> onNewPinChanged(uiState.newPin.dropLast(1))
-                    else -> onConfirmPinChanged(uiState.confirmPin.dropLast(1))
-                }
-                "confirm" -> when (activeField) {
-                    "old" -> activeField = "new"
-                    "new" -> activeField = "confirm"
-                    else -> if (!uiState.isSubmitting) onRotate()
-                }
-                else -> when (activeField) {
-                    "old" -> onOldPinChanged(uiState.oldPin + key)
-                    "new" -> onNewPinChanged(uiState.newPin + key)
-                    else -> onConfirmPinChanged(uiState.confirmPin + key)
-                }
-            }
-        })
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Button(
-            onClick = onCancel,
-            shape = RoundedCornerShape(100.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color.White,
-                contentColor = Color.Black,
-            ),
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-                Text(stringResource(R.string.cancel))
-        }
+        TextButton(onClick = onCancel, enabled = !uiState.isSubmitting) { Text(stringResource(R.string.cancel)) }
     }
 }
-
-@Composable
-private fun CertPinFieldRow(
-    maskedValue: String,
-    hasError: Boolean,
-    isActive: Boolean,
-    onClear: () -> Unit,
-    onTap: () -> Unit,
-) {
-    val bgColor = if (hasError) Color.Red else Color(0xFF7FFFD4)
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onTap)
-            .then(if (isActive) Modifier.border(2.dp, Color.Black) else Modifier)
-            .background(bgColor)
-            .padding(horizontal = 8.dp, vertical = 4.dp),
-    ) {
-        Text(
-            text = maskedValue.ifEmpty { " " },
-            color = Color.Black,
-            fontWeight = FontWeight.Bold,
-            fontSize = 15.sp,
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(end = 36.dp)
-                .align(Alignment.Center),
-        )
-        TextButton(
-            onClick = onClear,
-            modifier = Modifier.align(Alignment.CenterEnd),
-        ) {
-            Text(stringResource(R.string.clear), color = Color.Black)
-        }
-    }
-}
-

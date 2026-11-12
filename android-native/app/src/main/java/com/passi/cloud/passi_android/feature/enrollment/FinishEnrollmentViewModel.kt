@@ -7,6 +7,11 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.passi.cloud.passi_android.data.local.PendingEnrollmentStore
 import com.passi.cloud.passi_android.domain.enrollment.CertificateGenerator
+import com.passi.cloud.passi_android.domain.enrollment.checkpoint
+import com.passi.cloud.passi_android.domain.enrollment.certificate
+import com.passi.cloud.passi_android.domain.enrollment.preparePendingDeviceKey
+import com.passi.cloud.passi_android.domain.enrollment.DeviceKeyRecoveryRequiredException
+import kotlinx.coroutines.CancellationException
 import com.passi.cloud.passi_android.domain.repository.AccountsRepository
 import com.passi.cloud.passi_android.domain.repository.ProvidersRepository
 import com.passi.cloud.passi_android.domain.service.EnrollmentService
@@ -73,26 +78,7 @@ class FinishEnrollmentViewModel(
         finalizeEnrollment(pinLength = 0, onDone = onDone)
     }
 
-    fun submit(onDone: () -> Unit) {
-        val pin = _uiState.value.pin
-        val pinConfirmation = _uiState.value.pinConfirmation
-
-        if (pin.length < MIN_PIN_LENGTH) {
-            _uiState.value = _uiState.value.copy(
-                pinError = UiText.Resource(R.string.error_pin_length, listOf(MIN_PIN_LENGTH)),
-            )
-            return
-        }
-
-        if (pin != pinConfirmation) {
-            _uiState.value = _uiState.value.copy(
-                pinConfirmationError = UiText.Resource(R.string.error_pin_mismatch),
-            )
-            return
-        }
-
-        finalizeEnrollment(pinLength = pin.length, onDone = onDone)
-    }
+    fun submit(onDone: () -> Unit) = finalizeEnrollment(pinLength = 0, onDone = onDone)
 
     private fun finalizeEnrollment(pinLength: Int, onDone: () -> Unit) {
         val pending = pendingEnrollmentStore.read()
@@ -104,9 +90,14 @@ class FinishEnrollmentViewModel(
             return
         }
 
+        if (_uiState.value.isSubmitting) return
+        if (pending.confirmationCode.isNullOrBlank()) {
+            _uiState.value = _uiState.value.copy(responseError = UiText.Resource(R.string.error_confirmation_code_missing))
+            return
+        }
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isSubmitting = true, responseError = null)
-            val account = accountsRepository.getAccount(UUID.fromString(pending.accountId))
+            var account = accountsRepository.getAccount(UUID.fromString(pending.accountId))
             if (account == null) {
                 _uiState.value = _uiState.value.copy(
                     isSubmitting = false,
@@ -124,18 +115,31 @@ class FinishEnrollmentViewModel(
                 return@launch
             }
 
-            val pin = if (pinLength == 0) null else _uiState.value.pin
-            val generatedCertificate = runCatching {
-                certificateGenerator.generate(account.email, pin)
-            }.getOrElse { error ->
+            val generatedCertificate = try {
+                account = preparePendingDeviceKey(account, accountsRepository, certificateGenerator)
+                requireNotNull(account.pendingKey).certificate()
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (error: Exception) {
                 _uiState.value = _uiState.value.copy(
                     isSubmitting = false,
-                    responseError = UiText.Resource(R.string.error_certificate_generation),
+                    responseError = if (error is DeviceKeyRecoveryRequiredException) UiText.Resource(R.string.device_key_recovery_required)
+                        else UiText.Resource(R.string.device_key_unavailable),
                 )
                 return@launch
             }
 
             val deviceId = deviceIdProvider()
+            try {
+                account = account.copy(pendingKey = requireNotNull(account.pendingKey).copy(submitted = true))
+                accountsRepository.updateAccount(account)
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                _uiState.value = _uiState.value.copy(isSubmitting = false,
+                    responseError = UiText.Resource(R.string.error_account_storage_retry))
+                return@launch
+            }
             val finalizeResult = enrollmentService.finalizeSignup(
                 pendingEnrollment = pending,
                 provider = provider,
@@ -147,7 +151,11 @@ class FinishEnrollmentViewModel(
                 val finalizedAccount = account.copy(
                     id = canonicalAccountId,
                     deviceId = deviceId,
-                    pinLength = pinLength,
+                    pinLength = 0,
+                    keyAlias = generatedCertificate.keyAlias,
+                    keySecurityLevel = generatedCertificate.keySecurityLevel,
+                    pendingKey = null,
+                    hasFingerprint = false,
                     salt = generatedCertificate.salt,
                     privateCertBinary = generatedCertificate.privateCertBinary,
                     publicCertBinary = generatedCertificate.publicCertBinary,
@@ -155,15 +163,12 @@ class FinishEnrollmentViewModel(
                     validFrom = generatedCertificate.validFrom,
                     validTo = generatedCertificate.validTo,
                 )
-                if (canonicalAccountId == account.id) {
-                    accountsRepository.updateAccount(finalizedAccount)
-                } else {
-                    // The server keeps a canonical GUID for an already-existing account and ignores
-                    // the one this device generated. Move the local record onto the canonical GUID so
-                    // login push notifications (keyed on it) resolve to this account instead of
-                    // failing with "Account not found for this session".
-                    accountsRepository.deleteAccount(account.id)
-                    accountsRepository.savePendingAccount(finalizedAccount)
+                try {
+                    accountsRepository.replaceAccount(account.id, finalizedAccount)
+                } catch (_: Exception) {
+                    _uiState.value = _uiState.value.copy(isSubmitting = false,
+                        responseError = UiText.Resource(R.string.error_account_storage_retry))
+                    return@onSuccess
                 }
                 pendingEnrollmentStore.clear()
                 _uiState.value = _uiState.value.copy(isSubmitting = false)

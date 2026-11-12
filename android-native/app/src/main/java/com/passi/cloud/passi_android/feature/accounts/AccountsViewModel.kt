@@ -1,5 +1,6 @@
 package com.passi.cloud.passi_android.feature.accounts
 
+import android.os.Build
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,6 +13,7 @@ import com.passi.cloud.passi_android.domain.account.AccountManagementService
 import com.passi.cloud.passi_android.domain.auth.AuthSessionService
 import com.passi.cloud.passi_android.domain.model.Account
 import com.passi.cloud.passi_android.domain.model.Provider
+import com.passi.cloud.passi_android.domain.enrollment.supportsDeviceKeys
 import com.passi.cloud.passi_android.domain.repository.AccountsRepository
 import com.passi.cloud.passi_android.domain.repository.ProvidersRepository
 import java.util.UUID
@@ -38,7 +40,11 @@ data class AccountsUiState(
     val revealedDeleteAccountIds: Set<java.util.UUID> = emptySet(),
     val isDeletingAccountIds: Set<java.util.UUID> = emptySet(),
     val deleteError: UiText? = null,
-)
+    val deviceKeySupported: Boolean = true,
+) {
+    val accountsRequiringCertificateUpdate: List<Account>
+        get() = if (deviceKeySupported) accounts.filter(Account::requiresCertificateUpdate) else emptyList()
+}
 
 class AccountsViewModel(
     private val accountsRepository: AccountsRepository,
@@ -48,8 +54,9 @@ class AccountsViewModel(
     private val pendingEnrollmentStore: PendingEnrollmentStore,
     private val selectedAccountStore: SelectedAccountStore,
     private val accountManagementService: AccountManagementService,
+    private val deviceKeySupported: Boolean = true,
 ) : ViewModel() {
-    private val _uiState = MutableStateFlow(AccountsUiState())
+    private val _uiState = MutableStateFlow(AccountsUiState(deviceKeySupported = deviceKeySupported))
     private val syncMutex = Mutex()
     private var lastOpenedPendingSessionId: UUID? = null
 
@@ -145,7 +152,11 @@ class AccountsViewModel(
     }
 
     fun openAccount(account: Account, onOpenAccount: () -> Unit, onResumeEnrollment: () -> Unit) {
-        if (!account.isConfirmed) {
+        if (!account.isConfirmed || (account.keyAlias == null && account.privateCertBinary == null)) {
+            if (!deviceKeySupported) {
+                _uiState.value = _uiState.value.copy(syncError = UiText.Resource(R.string.device_key_android_version_required))
+                return
+            }
             pendingEnrollmentStore.save(
                 PendingEnrollment(
                     accountId = account.id.toString(),
@@ -158,6 +169,18 @@ class AccountsViewModel(
         }
         selectedAccountStore.save(account.id)
         onOpenAccount()
+    }
+
+    fun updateCertificate(account: Account, onUpdateCertificate: () -> Unit) {
+        if (!deviceKeySupported) {
+            _uiState.value = _uiState.value.copy(syncError = UiText.Resource(R.string.device_key_android_version_required))
+            return
+        }
+        if (!account.requiresCertificateUpdate) {
+            return
+        }
+        selectedAccountStore.save(account.id)
+        onUpdateCertificate()
     }
 
     fun toggleDeleteMode() {
@@ -212,6 +235,7 @@ class AccountsViewModel(
             pendingEnrollmentStore: PendingEnrollmentStore,
             selectedAccountStore: SelectedAccountStore,
             accountManagementService: AccountManagementService,
+            deviceKeySupported: Boolean = supportsDeviceKeys(Build.VERSION.SDK_INT),
         ): ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 AccountsViewModel(
@@ -222,6 +246,7 @@ class AccountsViewModel(
                     pendingEnrollmentStore = pendingEnrollmentStore,
                     selectedAccountStore = selectedAccountStore,
                     accountManagementService = accountManagementService,
+                    deviceKeySupported = deviceKeySupported,
                 )
             }
         }

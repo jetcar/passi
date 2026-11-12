@@ -72,7 +72,7 @@ namespace ServicesTests
             public CertificateDb GetUserCertificate(string username, string thumbprint) => null;
 
             public CertificateDb AddCertificate(string certificateThumbprint, string publicCert,
-                string parentCertThumbprint, string deviceId) =>
+                string parentCertThumbprint, string deviceId, bool retireParent = false, string retirementSignature = null) =>
                 new CertificateDb { Thumbprint = certificateThumbprint, PublicCert = publicCert };
 
             public CertificateDb GetCertificate(string parentCertThumbprint) => null;

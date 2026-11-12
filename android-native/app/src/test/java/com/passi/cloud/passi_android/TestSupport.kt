@@ -77,8 +77,10 @@ fun sampleSession(
 )
 
 fun sampleGeneratedCertificate(): GeneratedCertificate = GeneratedCertificate(
-    salt = "salt-123",
-    privateCertBinary = "private-cert",
+    salt = null,
+    privateCertBinary = null,
+    keyAlias = "passi.account.test",
+    keySecurityLevel = "TEE",
     publicCertBinary = "public-cert",
     thumbprint = "thumbprint-123",
     validFrom = Instant.parse("2026-01-01T00:00:00Z"),
@@ -122,6 +124,7 @@ class FakeEnrollmentService : EnrollmentService {
 }
 
 class FakeCertificateGenerator : CertificateGenerator {
+    override fun validate(certificate: GeneratedCertificate) = Unit
     var result: Result<GeneratedCertificate> = Result.success(sampleGeneratedCertificate())
 
     override fun generate(email: String, pin: String?): GeneratedCertificate = result.getOrThrow()
@@ -169,13 +172,13 @@ class FakeBiometricCertificateService : BiometricCertificateService {
         return enableResult ?: Result.success(account.copy(hasFingerprint = true))
     }
 
-    override fun sign(account: Account, message: String): Result<String> = signResult
+    override suspend fun sign(account: Account, message: String): Result<String> = signResult
 }
 
 class FakeAccountSigner : com.passi.cloud.passi_android.domain.auth.AccountSigner {
     var signResult: Result<String> = Result.success("fake-signed-hash")
 
-    override fun sign(
+    override suspend fun sign(
         account: com.passi.cloud.passi_android.domain.model.Account,
         pin: String?,
         message: String,

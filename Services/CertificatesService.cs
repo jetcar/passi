@@ -26,7 +26,8 @@ namespace Services
         {
             using var certificate = LoadCertificate(Convert.FromBase64String(newCertificate.PublicCert));
             return _certificateRepository.AddCertificate(certificate.Thumbprint, newCertificate.PublicCert,
-                newCertificate.ParentCertThumbprint, newCertificate.DeviceId);
+                newCertificate.ParentCertThumbprint, newCertificate.DeviceId, newCertificate.RetireParent,
+                newCertificate.RetireParent ? newCertificate.ParentCertHashSignature : null);
         }
     }
 

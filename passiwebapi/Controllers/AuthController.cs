@@ -67,7 +67,7 @@ namespace passi_webapi.Controllers
 
             var user = _userRepository.GetUser(startLoginDto.Username);
             var registeredDevices = GetRegisteredDevices(user);
-            if (!user.Certificates.Any() || !registeredDevices.Any())
+            if (!user.Certificates.Any(x => !x.IsRetired) || !registeredDevices.Any())
                 return BadRequest("No registered devices available for login approval");
 
             var sessionDb = _sessionsRepository.BeginSession(startLoginDto.Username, startLoginDto.ClientId,

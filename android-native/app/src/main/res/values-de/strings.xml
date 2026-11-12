@@ -53,6 +53,9 @@
     <string name="certificate_valid_to">Zertifikat gültig bis:</string>
     <string name="identity_provider">Identitätsanbieter:</string>
     <string name="update_certificate">Zertifikat aktualisieren</string>
+    <string name="certificate_update_required_title">Sicherheitsupdate erforderlich</string>
+    <string name="certificate_update_required_message">%1$d Konto/Konten verwenden noch ein älteres Zertifikat. Aktualisieren Sie es jetzt, damit Signaturen durch die sichere Hardware und die Displaysperre dieses Geräts geschützt werden.</string>
+    <string name="certificate_update_required_badge">Zertifikat muss aktualisiert werden</string>
     <string name="current_pin">Aktuelle PIN</string>
     <string name="adding_fingerprint">Fingerabdruck wird hinzugefügt…</string>
     <string name="add_fingerprint">Fingerabdruck hinzufügen</string>
@@ -151,4 +154,13 @@
     <string name="error_token_update">Token-Aktualisierung fehlgeschlagen</string>
     <string name="error_unexpected">Unerwarteter Fehler. Versuchen Sie es erneut</string>
     <string name="error_confirmation_code_missing">Bestätigungscode fehlt</string>
+    <string name="device_key_explanation">Passi uses a key held on this device. Approve each signature with strong biometrics or your device screen lock. A Passi PIN cannot unlock this key. Android 11 or later is required.</string>
+    <string name="device_key_create">Create device key</string>
+    <string name="device_key_authorize_title">Authorize Passi signing</string>
+    <string name="device_key_authorize_subtitle">Use biometrics or your device screen lock</string>
+    <string name="device_key_unavailable">A hardware-protected key could not be created. Android 11 or later and a secure device screen lock are required.</string>
+    <string name="device_key_migrate">This account still uses a legacy key. Choose Update certificate to protect it with this device. Enter the old Passi PIN once; future approvals use your device screen lock or strong biometrics.</string>
+    <string name="device_key_android_version_required">Zum Hinzufügen von Konten und Aktualisieren von Zertifikaten ist Android 11 oder höher erforderlich.</string>
+    <string name="device_key_recovery_required">The pending device key is unavailable and may already be registered. Recover this account through email enrollment. Your pending registration has been preserved.</string>
+    <string name="error_account_storage_retry">Account storage failed. Retry to finish enrollment.</string>
 </resources>

@@ -33,7 +33,9 @@ namespace passi_webapi.Controllers
         [HttpPost, Route("signup")]
         public IActionResult SignUp([FromBody] SignupDto signupDto)
         {
-            if (signupDto == null)
+            if (signupDto == null || string.IsNullOrWhiteSpace(signupDto.Email) ||
+                string.IsNullOrWhiteSpace(signupDto.DeviceId) ||
+                !signupDto.UserGuid.HasValue || signupDto.UserGuid == Guid.Empty)
                 return BadRequest("Invalid request");
 
             signupDto.Email = signupDto.Email.Trim();
@@ -78,6 +80,8 @@ namespace passi_webapi.Controllers
         [HttpPost, Route("Code")]
         public async Task<string> Code([FromBody] SignupDto signupDto)
         {
+            if (signupDto == null || string.IsNullOrWhiteSpace(signupDto.Email))
+                throw new BadRequestException("Invalid request");
             if (Convert.ToBoolean(_appSetting["DoNotSendMail"]))
             {
                 signupDto.Email = signupDto.Email.Trim();
@@ -92,6 +96,12 @@ namespace passi_webapi.Controllers
         [HttpPost, Route("confirm")]
         public IActionResult Confirm([FromBody] SignupConfirmationDto signupConfirmationDto)
         {
+            if (signupConfirmationDto == null || string.IsNullOrWhiteSpace(signupConfirmationDto.Email) ||
+                string.IsNullOrWhiteSpace(signupConfirmationDto.Code) ||
+                string.IsNullOrWhiteSpace(signupConfirmationDto.PublicCert) ||
+                string.IsNullOrWhiteSpace(signupConfirmationDto.DeviceId) ||
+                !Guid.TryParse(signupConfirmationDto.Guid, out var requestedGuid) || requestedGuid == Guid.Empty)
+                return BadRequest("Invalid request");
             signupConfirmationDto.Email = signupConfirmationDto.Email.Trim();
             var accountGuid = Guid.Empty;
             var strategy = _userRepository.GetExecutionStrategy();
@@ -99,6 +109,14 @@ namespace passi_webapi.Controllers
             {
                 using (var transaction = _userRepository.BeginTransaction())
                 {
+                    var accepted = _userRepository.GetConfirmedEnrollment(signupConfirmationDto.Email,
+                        signupConfirmationDto.Code, signupConfirmationDto.PublicCert, signupConfirmationDto.DeviceId);
+                    if (accepted.HasValue)
+                    {
+                        accountGuid = accepted.Value;
+                        transaction.Commit();
+                        return;
+                    }
                     if (!_userRepository.ValidateConfirmationCode(signupConfirmationDto.Email,
                             signupConfirmationDto.Code))
                     {
@@ -125,6 +143,9 @@ namespace passi_webapi.Controllers
         [HttpPost, Route("check")]
         public IActionResult Check([FromBody] SignupCheckDto confirmationDto)
         {
+            if (confirmationDto == null || string.IsNullOrWhiteSpace(confirmationDto.Username) ||
+                string.IsNullOrWhiteSpace(confirmationDto.Code))
+                return BadRequest("Invalid request");
             confirmationDto.Username = confirmationDto.Username.Trim();
             if (!_userRepository.ValidateConfirmationCode(confirmationDto.Username, confirmationDto.Code))
             {

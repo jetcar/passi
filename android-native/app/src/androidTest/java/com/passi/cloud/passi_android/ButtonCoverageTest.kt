@@ -439,6 +439,38 @@ class ButtonCoverageTest {
         assert(deleted == account.id)
     }
 
+    @Test
+    fun legacyCertificateNoticeOpensUpdateFlow() {
+        val legacyAccount = sampleAccount().copy(
+            keyAlias = null,
+            privateCertBinary = "legacy-pkcs12",
+        )
+        var selected: UUID? = null
+
+        composeRule.setPassiContent {
+            AccountsScreen(
+                uiState = AccountsUiState(
+                    providers = listOf(sampleProvider()),
+                    accounts = listOf(legacyAccount),
+                ),
+                versionLabel = "0.1.0",
+                onAddAccount = {},
+                onOpenProviders = {},
+                onToggleDeleteMode = {},
+                onSync = {},
+                onOpenAccount = {},
+                onUpdateCertificate = { selected = it.id },
+                onRevealDelete = {},
+                onDelete = {},
+            )
+        }
+
+        composeRule.onNodeWithTag("certificate-update-notice").assertExists()
+        composeRule.onNodeWithTag("certificate-update-action").performClick()
+
+        assert(selected == legacyAccount.id)
+    }
+
     private fun androidx.compose.ui.test.junit4.ComposeContentTestRule.setPassiContent(content: @androidx.compose.runtime.Composable () -> Unit) {
         setContent {
             MaterialTheme {

@@ -82,6 +82,11 @@ internal fun AddAccountScreen(
             .padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.Center,
     ) {
+        if (!uiState.deviceKeySupported) {
+            Text(stringResource(R.string.device_key_android_version_required))
+            PillButton(text = stringResource(R.string.cancel), onClick = onBack)
+            return@Column
+        }
         ExposedDropdownMenuBox(
             expanded = expanded,
             onExpandedChange = { expanded = !expanded },

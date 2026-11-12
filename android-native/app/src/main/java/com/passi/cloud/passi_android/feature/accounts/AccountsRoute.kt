@@ -68,6 +68,7 @@ fun AccountsRoute(
     onOpenAccount: () -> Unit,
     onOpenProviders: () -> Unit,
     onResumeEnrollment: () -> Unit,
+    onUpdateCertificate: () -> Unit,
     externalErrorMessage: String? = null,
     onExternalErrorShown: () -> Unit = {},
 ) {
@@ -128,6 +129,7 @@ fun AccountsRoute(
         onToggleDeleteMode = viewModel::toggleDeleteMode,
         onSync = { viewModel.sync(onOpenPendingSession) },
         onOpenAccount = { account -> viewModel.openAccount(account, onOpenAccount, onResumeEnrollment) },
+        onUpdateCertificate = { account -> viewModel.updateCertificate(account, onUpdateCertificate) },
         onRevealDelete = viewModel::toggleDeleteForAccount,
         onDelete = viewModel::deleteAccount,
         showUpdateBanner = appUpdateUiState.showBanner,
@@ -146,6 +148,7 @@ internal fun AccountsScreen(
     onToggleDeleteMode: () -> Unit,
     onSync: () -> Unit,
     onOpenAccount: (com.passi.cloud.passi_android.domain.model.Account) -> Unit,
+    onUpdateCertificate: (com.passi.cloud.passi_android.domain.model.Account) -> Unit = {},
     onRevealDelete: (java.util.UUID) -> Unit,
     onDelete: (com.passi.cloud.passi_android.domain.model.Account) -> Unit,
     showUpdateBanner: Boolean = false,
@@ -180,6 +183,24 @@ internal fun AccountsScreen(
             contentPadding = PaddingValues(vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
+            if (!uiState.deviceKeySupported) {
+                item(key = "unsupported-device-key-platform") {
+                    Text(
+                        stringResource(R.string.device_key_android_version_required),
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    )
+                }
+            }
+            val accountsRequiringUpdate = uiState.accountsRequiringCertificateUpdate
+            if (accountsRequiringUpdate.isNotEmpty()) {
+                item(key = "certificate-update-notice") {
+                    CertificateUpdateNotice(
+                        accountCount = accountsRequiringUpdate.size,
+                        onUpdate = { onUpdateCertificate(accountsRequiringUpdate.first()) },
+                    )
+                }
+            }
+
             items(uiState.accounts, key = { it.id }) { account ->
                 val providerName = uiState.providers.firstOrNull { it.id == account.providerId }?.name
                 val isDeleteRevealed = account.id in uiState.revealedDeleteAccountIds
@@ -190,6 +211,8 @@ internal fun AccountsScreen(
                     providerName = providerName,
                     inactive = account.inactive,
                     isConfirmed = account.isConfirmed,
+                    requiresCertificateUpdate = uiState.deviceKeySupported && account.requiresCertificateUpdate,
+                    canResumeEnrollment = uiState.deviceKeySupported,
                     deleteMode = uiState.isDeleteMode,
                     deleteRevealed = isDeleteRevealed,
                     isDeleting = isDeleting,
@@ -238,6 +261,7 @@ internal fun AccountsScreen(
             BottomActionIcon(
                 imageVector = Icons.Outlined.AddCircle,
                 label = stringResource(R.string.add),
+                enabled = uiState.deviceKeySupported,
                 onClick = onAddAccount,
             )
             BottomActionIcon(
@@ -283,6 +307,8 @@ private fun AccountRow(
     providerName: String?,
     inactive: Boolean,
     isConfirmed: Boolean,
+    requiresCertificateUpdate: Boolean,
+    canResumeEnrollment: Boolean,
     deleteMode: Boolean,
     deleteRevealed: Boolean,
     isDeleting: Boolean,
@@ -338,6 +364,13 @@ private fun AccountRow(
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.Bold,
                     )
+                } else if (requiresCertificateUpdate) {
+                    Text(
+                        text = stringResource(R.string.certificate_update_required_badge),
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Bold,
+                    )
                 } else if (!providerName.isNullOrBlank()) {
                     Text(
                         text = providerName,
@@ -355,10 +388,45 @@ private fun AccountRow(
                         Text(stringResource(R.string.delete))
                     }
                 }
-            } else if (!isConfirmed && !deleteMode) {
+            } else if (!isConfirmed && !deleteMode && canResumeEnrollment) {
                 Button(onClick = onOpen) {
                     Text(stringResource(R.string.enter_code))
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun CertificateUpdateNotice(
+    accountCount: Int,
+    onUpdate: () -> Unit,
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 12.dp, vertical = 4.dp)
+            .testTag("certificate-update-notice"),
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Text(
+                text = stringResource(R.string.certificate_update_required_title),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.error,
+            )
+            Text(
+                text = stringResource(R.string.certificate_update_required_message, accountCount),
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            Button(
+                onClick = onUpdate,
+                modifier = Modifier.testTag("certificate-update-action"),
+            ) {
+                Text(stringResource(R.string.update_certificate))
             }
         }
     }

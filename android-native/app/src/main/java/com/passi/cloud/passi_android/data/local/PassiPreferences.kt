@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.passi.cloud.passi_android.domain.model.PendingDeviceKey
 import com.passi.cloud.passi_android.domain.model.Account
 import com.passi.cloud.passi_android.domain.model.ApiPaths
 import com.passi.cloud.passi_android.domain.model.Provider
@@ -11,6 +12,8 @@ import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import java.time.Instant
 import java.util.UUID
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 private const val PREFERENCES_NAME = "passi_native"
 private const val SECURE_PREFERENCES_NAME = "passi_native_secure"
@@ -19,36 +22,42 @@ private const val PROVIDERS_KEY = "providers"
 private const val DEVICE_ID_KEY = "deviceId"
 private const val BIOMETRIC_CERT_PREFIX = "biometric_cert_"
 private const val BIOMETRIC_PASSWORD_PREFIX = "biometric_password_"
+// Shared by every wrapper for these preference files: migration must never resurrect deleted material.
+private val biometricStorageLock = Any()
 
-class PassiPreferences(
-    context: Context,
+class PassiPreferences internal constructor(
+    private val preferences: SharedPreferences,
+    private val securePreferencesFactory: () -> SharedPreferences,
     private val gson: Gson = Gson(),
-) {
-    private val preferences = context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
-    private val securePreferences: SharedPreferences by lazy {
-        val masterKey = MasterKey.Builder(context)
+) : AccountStorage {
+    constructor(context: Context, gson: Gson = Gson()) : this(
+        context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE),
+        {
+        val masterKey = MasterKey.Builder(context.applicationContext)
             .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
             .build()
 
         EncryptedSharedPreferences.create(
-            context,
+            context.applicationContext,
             SECURE_PREFERENCES_NAME,
             masterKey,
             EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
             EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM,
         )
-    }
+        }, gson,
+    )
+    private val securePreferences: SharedPreferences by lazy(securePreferencesFactory)
 
-    fun readAccounts(): List<Account> {
+    override fun readAccounts(): List<Account> {
         val json = preferences.getString(ACCOUNTS_KEY, null) ?: return emptyList()
         val type = object : TypeToken<List<StoredAccount>>() {}.type
         val stored = gson.fromJson<List<StoredAccount>>(json, type) ?: return emptyList()
         return stored.map { it.toDomain() }
     }
 
-    fun writeAccounts(accounts: List<Account>) {
+    override fun writeAccounts(accounts: List<Account>) {
         val json = gson.toJson(accounts.map { StoredAccount.fromDomain(it) })
-        preferences.edit().putString(ACCOUNTS_KEY, json).apply()
+        check(preferences.edit().putString(ACCOUNTS_KEY, json).commit()) { "Account storage failed" }
     }
 
     fun readProviders(): List<Provider> {
@@ -70,14 +79,26 @@ class PassiPreferences(
         }
 
         val newId = UUID.randomUUID().toString()
-        preferences.edit().putString(DEVICE_ID_KEY, newId).apply()
+        check(preferences.edit().putString(DEVICE_ID_KEY, newId).commit()) { "Device storage failed" }
         return newId
     }
 
-    fun readBiometricMaterial(accountId: UUID): StoredBiometricMaterial? {
+    suspend fun readBiometricMaterial(accountId: UUID): StoredBiometricMaterial? = withContext(Dispatchers.IO) {
+        synchronized(biometricStorageLock) { readBiometricMaterialLocked(accountId) }
+    }
+
+    private fun readBiometricMaterialLocked(accountId: UUID): StoredBiometricMaterial? {
         val securePrivateCertBinary = securePreferences.getString(BIOMETRIC_CERT_PREFIX + accountId, null)
         val securePassword = securePreferences.getString(BIOMETRIC_PASSWORD_PREFIX + accountId, null)
         if (!securePrivateCertBinary.isNullOrBlank() && !securePassword.isNullOrBlank()) {
+            // Retry plaintext deletion after a crash between the secure commit and deletion.
+            // A failed SharedPreferences.commit can still update its in-memory cache; recommit
+            // before trusting that cache as a durable replacement for any remaining plaintext.
+            if (preferences.contains(BIOMETRIC_CERT_PREFIX + accountId) || preferences.contains(BIOMETRIC_PASSWORD_PREFIX + accountId)) {
+                check(securePreferences.edit().putString(BIOMETRIC_CERT_PREFIX + accountId, securePrivateCertBinary)
+                    .putString(BIOMETRIC_PASSWORD_PREFIX + accountId, securePassword).commit()) { "Biometric migration failed" }
+            }
+            deletePlaintextBiometricMaterial(accountId)
             return StoredBiometricMaterial(
                 privateCertBinary = securePrivateCertBinary,
                 password = securePassword,
@@ -90,42 +111,32 @@ class PassiPreferences(
             return null
         }
 
-        val migrated = StoredBiometricMaterial(
-            privateCertBinary = privateCertBinary,
-            password = password,
-        )
-        writeBiometricMaterial(accountId, migrated)
-        preferences.edit()
-            .remove(BIOMETRIC_CERT_PREFIX + accountId)
-            .remove(BIOMETRIC_PASSWORD_PREFIX + accountId)
-            .apply()
-        return migrated
+        check(securePreferences.edit()
+            .putString(BIOMETRIC_CERT_PREFIX + accountId, privateCertBinary)
+            .putString(BIOMETRIC_PASSWORD_PREFIX + accountId, password)
+            .commit()) { "Biometric migration failed" }
+        deletePlaintextBiometricMaterial(accountId)
+        return StoredBiometricMaterial(privateCertBinary, password)
     }
 
-    fun writeBiometricMaterial(accountId: UUID, material: StoredBiometricMaterial) {
-        securePreferences.edit()
-            .putString(BIOMETRIC_CERT_PREFIX + accountId, material.privateCertBinary)
-            .putString(BIOMETRIC_PASSWORD_PREFIX + accountId, material.password)
-            .apply()
-
-        // Clean up any legacy plaintext copy after the secure write succeeds.
-        preferences.edit()
-            .remove(BIOMETRIC_CERT_PREFIX + accountId)
-            .remove(BIOMETRIC_PASSWORD_PREFIX + accountId)
-            .apply()
+    private fun deletePlaintextBiometricMaterial(accountId: UUID) {
+        if (!preferences.contains(BIOMETRIC_CERT_PREFIX + accountId) &&
+            !preferences.contains(BIOMETRIC_PASSWORD_PREFIX + accountId)) return
+        check(preferences.edit().remove(BIOMETRIC_CERT_PREFIX + accountId)
+            .remove(BIOMETRIC_PASSWORD_PREFIX + accountId).commit()) { "Biometric migration cleanup failed" }
     }
 
-    fun deleteBiometricMaterial(accountId: UUID) {
-        securePreferences.edit()
+    override fun deleteBiometricMaterial(accountId: UUID) = synchronized(biometricStorageLock) {
+        check(securePreferences.edit()
             .remove(BIOMETRIC_CERT_PREFIX + accountId)
             .remove(BIOMETRIC_PASSWORD_PREFIX + accountId)
-            .apply()
-
-        preferences.edit()
+            .commit()) { "Biometric cleanup failed" }
+        check(preferences.edit()
             .remove(BIOMETRIC_CERT_PREFIX + accountId)
             .remove(BIOMETRIC_PASSWORD_PREFIX + accountId)
-            .apply()
+            .commit()) { "Biometric cleanup failed" }
     }
+
 }
 
 data class StoredBiometricMaterial(
@@ -148,6 +159,13 @@ private data class StoredAccount(
     val publicCertBinary: String?,
     val pinLength: Int,
     val hasFingerprint: Boolean,
+    val keyAlias: String? = null,
+    val keySecurityLevel: String? = null,
+    val pendingKey: PendingDeviceKey? = null,
+    val legacyCleanupPending: Boolean = false,
+    val cleanupKeyAlias: String? = null,
+    val retiredKeyAliases: List<String>? = null,
+    val cleanupAccountIds: List<String>? = null,
 ) {
     fun toDomain(): Account = Account(
         id = UUID.fromString(id),
@@ -164,6 +182,13 @@ private data class StoredAccount(
         publicCertBinary = publicCertBinary,
         pinLength = pinLength,
         hasFingerprint = hasFingerprint,
+        keyAlias = keyAlias,
+        keySecurityLevel = keySecurityLevel,
+        pendingKey = pendingKey,
+        legacyCleanupPending = legacyCleanupPending,
+        cleanupKeyAlias = cleanupKeyAlias,
+        retiredKeyAliases = retiredKeyAliases,
+        cleanupAccountIds = cleanupAccountIds,
     )
 
     companion object {
@@ -182,6 +207,13 @@ private data class StoredAccount(
             publicCertBinary = account.publicCertBinary,
             pinLength = account.pinLength,
             hasFingerprint = account.hasFingerprint,
+            keyAlias = account.keyAlias,
+            keySecurityLevel = account.keySecurityLevel,
+            pendingKey = account.pendingKey,
+            legacyCleanupPending = account.legacyCleanupPending,
+            cleanupKeyAlias = account.cleanupKeyAlias,
+            retiredKeyAliases = account.retiredKeyAliases,
+            cleanupAccountIds = account.cleanupAccountIds,
         )
     }
 }

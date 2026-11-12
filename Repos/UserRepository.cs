@@ -42,6 +42,19 @@ namespace Repos
             return validateConfirmationCode != null && validateConfirmationCode.TryCount < 10;
         }
 
+        public Guid? GetConfirmedEnrollment(string email, string code, string publicCert, string deviceId)
+        {
+            // Called within the confirmation transaction, before checking/consuming its code.
+            // Serialize identical confirmations so a response lost after commit can be retried.
+            _dbContext.Database.ExecuteSqlRaw("SELECT pg_advisory_xact_lock(2, hashtext({0}))", email.ToLowerInvariant());
+            return _dbContext.Invitations.AsNoTracking()
+                .Where(x => x.User.EmailHash.ToLower() == email.ToLower() && x.Code == code &&
+                    x.IsConfirmed && x.Delete != true && x.TryCount < 10 &&
+                    x.User.Certificates.Any(c => !c.IsRetired && c.PublicCert == publicCert) &&
+                    x.User.UserDevices.Any(link => link.Device.DeviceId == deviceId))
+                .Select(x => (Guid?)x.User.Guid).FirstOrDefault();
+        }
+
         public Guid ConfirmInvitation(string email, string publicCert, string guid, string code, string deviceId)
         {
             var userInvitationDb = _dbContext.Invitations
@@ -237,7 +250,7 @@ namespace Repos
         public void DeleteAccount(Guid accountGuid, string thumbprint)
         {
             var exinstingUser = _dbContext.Users
-                .Where(x => x.Certificates.Any(a => a.Thumbprint == thumbprint) && x.Guid == accountGuid).AsNoTracking()
+                .Where(x => x.Certificates.Any(a => !a.IsRetired && a.Thumbprint == thumbprint) && x.Guid == accountGuid).AsNoTracking()
                 .FirstOrDefault();
             if (exinstingUser != null)
             {
@@ -332,7 +345,7 @@ namespace Repos
                 .Include(x => x.Certificates)
                 .Include(x => x.UserDevices)
                 .ThenInclude(x => x.Device)
-                .FirstOrDefault(x => x.Guid == accountGuid && x.Certificates.Any(a => a.Thumbprint == thumbprint));
+                .FirstOrDefault(x => x.Guid == accountGuid && x.Certificates.Any(a => !a.IsRetired && a.Thumbprint == thumbprint));
 
             if (user == null)
             {
@@ -376,6 +389,8 @@ namespace Repos
         UserDb AddUser(UserDb user);
 
         bool ValidateConfirmationCode(string email, string code);
+
+        Guid? GetConfirmedEnrollment(string email, string code, string publicCert, string deviceId);
 
         Guid ConfirmInvitation(string email, string publicCert, string guid, string code, string deviceId);
 

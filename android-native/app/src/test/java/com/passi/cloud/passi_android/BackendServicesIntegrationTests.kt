@@ -559,7 +559,7 @@ class BackendServicesIntegrationTests : CoroutineViewModelTest() {
 
     @Test
     fun certificateRotationPostsNewPublicCertToUpdateEndpoint() = runViewModelTest {
-        server.enqueue(MockResponse().setResponseCode(200))
+        server.enqueue(MockResponse().setResponseCode(200).setBody("{\"PublicCert\":\"public-cert\"}"))
 
         val cert = BouncyCastleCertificateGenerator().generate("user@example.com", "1234")
         val providersRepository = providersRepositoryWithTestServer()
@@ -568,10 +568,10 @@ class BackendServicesIntegrationTests : CoroutineViewModelTest() {
         val result = BackendCertificateRotationService(
             apiClient = apiClient,
             providersRepository = providersRepository,
-            certificateGenerator = BouncyCastleCertificateGenerator(),
+            certificateGenerator = FakeCertificateGenerator(),
             accountSigner = Pkcs12AccountSigner(),
-            biometricCertificateService = FakeBiometricCertificateService(),
-        ).rotateCertificate(account, oldPin = "1234", newPin = "5678", useBiometric = false)
+            accountsRepository = inMemoryAccountsRepository().apply { savePendingAccount(account) },
+        ).rotateCertificate(account, oldPin = "1234", newPin = null, useBiometric = false)
 
         val request = server.takeRequest()
         val body = request.body.readUtf8()
@@ -584,7 +584,7 @@ class BackendServicesIntegrationTests : CoroutineViewModelTest() {
 
     @Test
     fun certificateRotationUpdatesAccountWithNewCertificateData() = runViewModelTest {
-        server.enqueue(MockResponse().setResponseCode(200))
+        server.enqueue(MockResponse().setResponseCode(200).setBody("{\"PublicCert\":\"public-cert\"}"))
 
         val cert = BouncyCastleCertificateGenerator().generate("user@example.com", "1234")
         val providersRepository = providersRepositoryWithTestServer()
@@ -593,14 +593,16 @@ class BackendServicesIntegrationTests : CoroutineViewModelTest() {
         val result = BackendCertificateRotationService(
             apiClient = apiClient,
             providersRepository = providersRepository,
-            certificateGenerator = BouncyCastleCertificateGenerator(),
+            certificateGenerator = FakeCertificateGenerator(),
             accountSigner = Pkcs12AccountSigner(),
-            biometricCertificateService = FakeBiometricCertificateService(),
-        ).rotateCertificate(account, oldPin = "1234", newPin = "5678", useBiometric = false)
+            accountsRepository = inMemoryAccountsRepository().apply { savePendingAccount(account) },
+        ).rotateCertificate(account, oldPin = "1234", newPin = null, useBiometric = false)
 
         val updatedAccount = result.getOrThrow()
         assertThat(updatedAccount.thumbprint).isNotEqualTo(cert.thumbprint)
-        assertThat(updatedAccount.pinLength).isEqualTo(4)
+        assertThat(updatedAccount.pinLength).isEqualTo(0)
+        assertThat(updatedAccount.privateCertBinary).isNull()
+        assertThat(updatedAccount.keyAlias).isNotNull()
     }
 
     @Test
@@ -612,13 +614,13 @@ class BackendServicesIntegrationTests : CoroutineViewModelTest() {
         val result = BackendCertificateRotationService(
             apiClient = apiClient,
             providersRepository = providersRepository,
-            certificateGenerator = BouncyCastleCertificateGenerator(),
+            certificateGenerator = FakeCertificateGenerator(),
             accountSigner = Pkcs12AccountSigner(),
-            biometricCertificateService = FakeBiometricCertificateService(),
-        ).rotateCertificate(account, oldPin = "wrong", newPin = "5678", useBiometric = false)
+            accountsRepository = inMemoryAccountsRepository().apply { savePendingAccount(account) },
+        ).rotateCertificate(account, oldPin = "wrong", newPin = null, useBiometric = false)
 
         assertThat(result.isFailure).isTrue()
-        assertThat(result.exceptionOrNull()?.message).isEqualTo("Invalid old pin")
+        assertThat(server.requestCount).isEqualTo(0)
     }
 
     @Test
@@ -632,13 +634,13 @@ class BackendServicesIntegrationTests : CoroutineViewModelTest() {
         val result = BackendCertificateRotationService(
             apiClient = apiClient,
             providersRepository = providersRepository,
-            certificateGenerator = BouncyCastleCertificateGenerator(),
+            certificateGenerator = FakeCertificateGenerator(),
             accountSigner = Pkcs12AccountSigner(),
-            biometricCertificateService = FakeBiometricCertificateService(),
-        ).rotateCertificate(account, oldPin = "1234", newPin = "5678", useBiometric = false)
+            accountsRepository = inMemoryAccountsRepository().apply { savePendingAccount(account) },
+        ).rotateCertificate(account, oldPin = "1234", newPin = null, useBiometric = false)
 
         assertThat(result.isFailure).isTrue()
-        assertThat(result.exceptionOrNull()?.message).contains("Network error")
+        assertThat(result.exceptionOrNull()?.message).contains("not confirmed")
     }
 
     // ── Helpers ─────────────────────────────────────────────────────────────────

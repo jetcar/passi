@@ -71,124 +71,15 @@ internal fun FinishEnrollmentScreen(
     onSkip: () -> Unit,
     onSubmit: () -> Unit,
 ) {
-    var activeField by remember { mutableStateOf("pin") }
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFFFAFAFA)),
-        contentAlignment = Alignment.Center,
+    Column(
+        modifier = Modifier.fillMaxSize().padding(24.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            if (uiState.responseError != null) {
-                Text(
-                    text = uiState.responseError.asString(),
-                    color = Color.Black,
-                    textAlign = TextAlign.Center,
-                )
-            }
-
-            Text(stringResource(R.string.secure_account_by_pin), color = Color.Black)
-
-            if (uiState.pinError != null) {
-                Text(uiState.pinError.asString(), color = Color.Black, textAlign = TextAlign.Center)
-            }
-            Text(stringResource(R.string.pin), color = Color.Black, textAlign = TextAlign.Center)
-            PinFieldRow(
-                maskedValue = "●".repeat(uiState.pin.length),
-                hasError = uiState.pinError != null,
-                isActive = activeField == "pin",
-                onClear = { onPinChanged("") },
-                onTap = { activeField = "pin" },
-            )
-
-            if (uiState.pinConfirmationError != null) {
-                Text(uiState.pinConfirmationError.asString(), color = Color.Black, textAlign = TextAlign.Center)
-            }
-            Text(stringResource(R.string.pin_confirmation), color = Color.Black, textAlign = TextAlign.Center)
-            PinFieldRow(
-                maskedValue = "●".repeat(uiState.pinConfirmation.length),
-                hasError = uiState.pinConfirmationError != null,
-                isActive = activeField == "pinConfirmation",
-                onClear = { onPinConfirmationChanged("") },
-                onTap = { activeField = "pinConfirmation" },
-            )
-
-            NumberPad(onKey = { key ->
-                when (key) {
-                    "del" -> {
-                        if (activeField == "pin") onPinChanged(uiState.pin.dropLast(1))
-                        else onPinConfirmationChanged(uiState.pinConfirmation.dropLast(1))
-                    }
-                    "confirm" -> {
-                        if (activeField == "pin") activeField = "pinConfirmation"
-                        else if (!uiState.isSubmitting && !uiState.isMissingContext) onSubmit()
-                    }
-                    else -> {
-                        if (activeField == "pin") onPinChanged(uiState.pin + key)
-                        else onPinConfirmationChanged(uiState.pinConfirmation + key)
-                    }
-                }
-            })
-
-            Spacer(modifier = Modifier.height(4.dp))
-
-            Button(
-                onClick = onSkip,
-                enabled = !uiState.isSubmitting && !uiState.isMissingContext,
-                shape = RoundedCornerShape(100.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.White,
-                    contentColor = Color.Black,
-                ),
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Text(stringResource(R.string.skip))
-            }
+        Text(stringResource(R.string.device_key_explanation))
+        uiState.responseError?.let { Text(it.asString()) }
+        Button(onClick = onSubmit, enabled = !uiState.isSubmitting && !uiState.isMissingContext) {
+            Text(stringResource(R.string.device_key_create))
         }
     }
 }
-
-@Composable
-private fun PinFieldRow(
-    maskedValue: String,
-    hasError: Boolean,
-    isActive: Boolean,
-    onClear: () -> Unit,
-    onTap: () -> Unit,
-) {
-    val bgColor = if (hasError) Color.Red else Color(0xFF7FFFD4)
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onTap)
-            .then(if (isActive) Modifier.border(2.dp, Color.Black) else Modifier)
-            .background(bgColor)
-            .padding(horizontal = 8.dp, vertical = 4.dp),
-    ) {
-        Text(
-            text = maskedValue.ifEmpty { " " },
-            color = Color.Black,
-            fontWeight = FontWeight.Bold,
-            fontSize = 15.sp,
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(end = 36.dp)
-                .align(Alignment.Center),
-        )
-        TextButton(
-            onClick = onClear,
-            modifier = Modifier.align(Alignment.CenterEnd),
-        ) {
-            Text(stringResource(R.string.clear), color = Color.Black)
-        }
-    }
-}
-

@@ -11,6 +11,7 @@ import com.passi.cloud.passi_android.domain.biometric.BiometricCertificateServic
 import com.passi.cloud.passi_android.domain.certificate.CertificateRotationService
 import com.passi.cloud.passi_android.domain.enrollment.CertificateGenerator
 import com.passi.cloud.passi_android.domain.enrollment.GeneratedCertificate
+import com.passi.cloud.passi_android.domain.enrollment.DeviceKeyProtection
 import com.passi.cloud.passi_android.domain.model.Account
 import com.passi.cloud.passi_android.domain.model.ConfirmationColor
 import com.passi.cloud.passi_android.domain.model.ManagedDevice
@@ -127,7 +128,8 @@ class FakeCertificateGenerator : CertificateGenerator {
     override fun validate(certificate: GeneratedCertificate) = Unit
     var result: Result<GeneratedCertificate> = Result.success(sampleGeneratedCertificate())
 
-    override fun generate(email: String, pin: String?): GeneratedCertificate = result.getOrThrow()
+    override fun generate(email: String, protection: DeviceKeyProtection): GeneratedCertificate =
+        result.getOrThrow().copy(keyProtection = protection)
 }
 
 class FakeAuthSessionService : AuthSessionService {

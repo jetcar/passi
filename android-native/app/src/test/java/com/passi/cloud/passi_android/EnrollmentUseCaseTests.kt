@@ -5,6 +5,7 @@ import com.passi.cloud.passi_android.localization.UiText
 import com.passi.cloud.passi_android.feature.enrollment.AddAccountViewModel
 import com.passi.cloud.passi_android.feature.enrollment.ConfirmCodeViewModel
 import com.passi.cloud.passi_android.feature.enrollment.FinishEnrollmentViewModel
+import com.passi.cloud.passi_android.domain.enrollment.DeviceKeyProtection
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
 import org.junit.Test
@@ -110,6 +111,7 @@ class EnrollmentUseCaseTests : CoroutineViewModelTest() {
 
         viewModel.onPinChanged("123")
         viewModel.onPinConfirmationChanged("123")
+        viewModel.onKeyProtectionSelected(DeviceKeyProtection.BIOMETRIC)
         viewModel.submit {}
 
         advanceUntilIdle()
@@ -133,6 +135,7 @@ class EnrollmentUseCaseTests : CoroutineViewModelTest() {
 
         viewModel.onPinChanged("1234")
         viewModel.onPinConfirmationChanged("1234")
+        viewModel.onKeyProtectionSelected(DeviceKeyProtection.DEVICE_CREDENTIAL)
         viewModel.submit { completed = true }
         advanceUntilIdle()
 
@@ -144,6 +147,7 @@ class EnrollmentUseCaseTests : CoroutineViewModelTest() {
         assertThat(updatedAccount.privateCertBinary).isNull()
         assertThat(updatedAccount.salt).isNull()
         assertThat(updatedAccount.keyAlias).isEqualTo("passi.account.test")
+        assertThat(updatedAccount.keyProtection).isEqualTo(DeviceKeyProtection.DEVICE_CREDENTIAL)
         assertThat(updatedAccount.thumbprint).isEqualTo("thumbprint-123")
     }
 
@@ -167,6 +171,7 @@ class EnrollmentUseCaseTests : CoroutineViewModelTest() {
 
         viewModel.onPinChanged("1234")
         viewModel.onPinConfirmationChanged("1234")
+        viewModel.onKeyProtectionSelected(DeviceKeyProtection.BIOMETRIC)
         viewModel.submit {}
         advanceUntilIdle()
 

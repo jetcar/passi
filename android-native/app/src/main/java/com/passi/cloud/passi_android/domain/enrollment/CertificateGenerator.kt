@@ -1,7 +1,7 @@
 package com.passi.cloud.passi_android.domain.enrollment
 
 interface CertificateGenerator {
-    fun generate(email: String, pin: String?): GeneratedCertificate
+    fun generate(email: String, protection: DeviceKeyProtection): GeneratedCertificate
 
     /** Fail closed unless the provider can reopen this exact usable private key. */
     fun validate(certificate: GeneratedCertificate) { error("Device key validation is unavailable") }

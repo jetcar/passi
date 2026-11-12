@@ -8,6 +8,12 @@ import java.security.GeneralSecurityException
 import java.security.ProviderException
 
 class HardwareKeyGenerationTest {
+    @Test fun acceptsBothPlatformRepresentationsOfPerUseAuthentication() {
+        assertTrue(isPerUseAuthenticationDuration(0))
+        assertTrue(isPerUseAuthenticationDuration(-1))
+        assertEquals(false, isPerUseAuthenticationDuration(30))
+    }
+
     @Test fun expectedStrongBoxFailuresCleanBeforeTeeFallback() {
         for (failure in listOf(GeneralSecurityException(), ProviderException())) {
             val events = mutableListOf<String>()

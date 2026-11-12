@@ -126,8 +126,7 @@ class ButtonCoverageTest {
     }
 
     @Test
-    fun finishEnrollmentButtonsHandlePinEntryClearAndSkip() {
-        var skipped = 0
+    fun finishEnrollmentOffersBiometricsAndPhonePin() {
         var submitted = 0
 
         composeRule.setPassiContent {
@@ -137,19 +136,17 @@ class ButtonCoverageTest {
                 uiState = state,
                 onPinChanged = { state = state.copy(pin = it.take(12)) },
                 onPinConfirmationChanged = { state = state.copy(pinConfirmation = it.take(12)) },
-                onSkip = { skipped++ },
+                onSkip = {},
                 onSubmit = { submitted++ },
+                onKeyProtectionSelected = { state = state.copy(keyProtection = it) },
             )
         }
 
-        composeRule.onNodeWithText("1").performClick()
-        composeRule.onNodeWithText("→").performClick()
-        composeRule.onNodeWithText("2").performClick()
-        composeRule.onAllNodesWithText("X")[1].performClick()
-        composeRule.onNodeWithText("Skip").performClick()
+        composeRule.onNodeWithText("Biometrics").performClick()
+        composeRule.onNodeWithText("Biometrics ✓").assertExists()
+        composeRule.onNodeWithText("Create device key").performClick()
 
-        assert(skipped == 1)
-        assert(submitted == 0)
+        assert(submitted == 1)
     }
 
     @Test
@@ -262,10 +259,13 @@ class ButtonCoverageTest {
                 },
                 onDone = { done++ },
                 onCancel = { cancelled++ },
+                onKeyProtectionSelected = { state = state.copy(keyProtection = it) },
             )
         }
 
         composeRule.onNodeWithText("Cancel").performClick()
+        composeRule.onNodeWithText("Phone PIN / screen lock").performClick()
+        composeRule.onNodeWithText("Phone PIN / screen lock ✓").assertExists()
         composeRule.onNodeWithText("Update certificate").performClick()
         composeRule.onNodeWithText("Certificate updated successfully").assertExists()
         composeRule.onNodeWithText("Done").performClick()

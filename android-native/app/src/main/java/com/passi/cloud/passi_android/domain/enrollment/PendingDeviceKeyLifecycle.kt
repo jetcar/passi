@@ -16,6 +16,7 @@ suspend fun preparePendingDeviceKey(
     account: Account,
     repository: AccountsRepository,
     generator: CertificateGenerator,
+    protection: DeviceKeyProtection = DeviceKeyProtection.BIOMETRIC_OR_DEVICE_CREDENTIAL,
     beforeGeneration: suspend () -> Unit = {},
 ): Account {
     var current = account
@@ -32,7 +33,7 @@ suspend fun preparePendingDeviceKey(
         }
     }
     beforeGeneration()
-    val pending = generator.generate(current.email, null).checkpoint()
+    val pending = generator.generate(current.email, protection).checkpoint()
     current = current.copy(pendingKey = pending)
     try {
         repository.updateAccount(current)

@@ -1,6 +1,7 @@
 package com.passi.cloud.passi_android.data.auth
 
 import com.passi.cloud.passi_android.domain.model.Account
+import com.passi.cloud.passi_android.domain.enrollment.DeviceKeyProtection
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -17,12 +18,13 @@ class KeystoreAccountSignerTest {
         id = UUID.randomUUID(), providerId = null, email = "test@example.com", deviceId = "test",
         isConfirmed = true, validFrom = Instant.EPOCH, validTo = Instant.MAX,
         keyAlias = "passi.account.test",
+        keyProtection = DeviceKeyProtection.BIOMETRIC,
     )
 
     @Test fun deniedAuthorizationNeverUpdatesOrSigns() = runTest {
         for (reason in listOf("cancelled", "failed", "invalidated", "unavailable")) {
             val signature = RecordingSignature()
-            val signer = KeystoreAccountSigner(SignatureAuthorization { error(reason) }) { signature }
+            val signer = KeystoreAccountSigner(SignatureAuthorization { _, _ -> error(reason) }) { signature }
             assertTrue(signer.sign(account, null, "challenge").isFailure)
             assertEquals(0, signature.updates)
             assertEquals(0, signature.signs)
@@ -32,7 +34,7 @@ class KeystoreAccountSignerTest {
     @Test fun unrelatedAuthorizedOperationCannotSign() = runTest {
         val expected = RecordingSignature()
         val unrelated = RecordingSignature()
-        val signer = KeystoreAccountSigner(SignatureAuthorization { unrelated }) { expected }
+        val signer = KeystoreAccountSigner(SignatureAuthorization { _, _ -> unrelated }) { expected }
         assertTrue(signer.sign(account, null, "challenge").isFailure)
         assertEquals(0, expected.signs)
         assertEquals(0, unrelated.signs)
@@ -40,7 +42,7 @@ class KeystoreAccountSignerTest {
 
     @Test fun coroutineCancellationNeverSignsAndIsPropagated() = runTest {
         val signature = RecordingSignature()
-        val signer = KeystoreAccountSigner(SignatureAuthorization { throw CancellationException() }) { signature }
+        val signer = KeystoreAccountSigner(SignatureAuthorization { _, _ -> throw CancellationException() }) { signature }
         var cancelled = false
         try { signer.sign(account, null, "challenge") } catch (_: CancellationException) { cancelled = true }
         assertTrue(cancelled)
@@ -50,10 +52,11 @@ class KeystoreAccountSignerTest {
     @Test fun successSignsOnlyTheAuthorizedOperationOnce() = runTest {
         val signature = RecordingSignature()
         var authorizations = 0
-        val signer = KeystoreAccountSigner(SignatureAuthorization {
-            assertTrue(it === signature)
+        val signer = KeystoreAccountSigner(SignatureAuthorization { operation, protection ->
+            assertTrue(operation === signature)
+            assertEquals(DeviceKeyProtection.BIOMETRIC, protection)
             authorizations++
-            it
+            operation
         }) { signature }
         assertTrue(signer.sign(account, "ignored-legacy-pin", "challenge").isSuccess)
         assertEquals(1, authorizations)

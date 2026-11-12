@@ -11,6 +11,7 @@ import com.passi.cloud.passi_android.domain.biometric.BiometricCertificateServic
 import com.passi.cloud.passi_android.domain.certificate.CertificateRotationService
 import com.passi.cloud.passi_android.domain.model.Account
 import com.passi.cloud.passi_android.domain.enrollment.supportsDeviceKeys
+import com.passi.cloud.passi_android.domain.enrollment.DeviceKeyProtection
 import com.passi.cloud.passi_android.domain.repository.AccountsRepository
 import com.passi.cloud.passi_android.R
 import com.passi.cloud.passi_android.localization.UiText
@@ -33,6 +34,8 @@ data class UpdateCertificateUiState(
     val isSubmitting: Boolean = false,
     val isComplete: Boolean = false,
     val deviceKeySupported: Boolean = true,
+    val keyProtection: DeviceKeyProtection? = null,
+    val isProtectionLocked: Boolean = false,
 )
 
 class UpdateCertificateViewModel(
@@ -49,7 +52,14 @@ class UpdateCertificateViewModel(
         viewModelScope.launch {
             val accountId = selectedAccountStore.read()
             val account = accountId?.let { accountsRepository.getAccount(it) }
-            _uiState.value = _uiState.value.copy(account = account)
+            val pendingKey = account?.pendingKey
+            _uiState.value = _uiState.value.copy(
+                account = account,
+                keyProtection = pendingKey?.keyProtection
+                    ?: if (pendingKey != null) DeviceKeyProtection.BIOMETRIC_OR_DEVICE_CREDENTIAL
+                    else _uiState.value.keyProtection,
+                isProtectionLocked = pendingKey != null,
+            )
         }
     }
 
@@ -77,6 +87,11 @@ class UpdateCertificateViewModel(
         )
     }
 
+    fun onKeyProtectionSelected(protection: DeviceKeyProtection) {
+        if (_uiState.value.isProtectionLocked) return
+        _uiState.value = _uiState.value.copy(keyProtection = protection, responseError = null)
+    }
+
     fun rotate() {
         if (!deviceKeySupported) {
             _uiState.value = _uiState.value.copy(responseError = UiText.Resource(R.string.device_key_android_version_required))
@@ -85,6 +100,13 @@ class UpdateCertificateViewModel(
         val account = _uiState.value.account ?: return
 
         if (_uiState.value.isSubmitting) return
+        val protection = _uiState.value.keyProtection
+        if (protection == null) {
+            _uiState.value = _uiState.value.copy(
+                responseError = UiText.Resource(R.string.device_key_select_protection),
+            )
+            return
+        }
         if (account.keyAlias == null && account.pinLength > 0 && _uiState.value.oldPin.length < account.pinLength) {
             _uiState.value = _uiState.value.copy(oldPinError = UiText.Resource(R.string.error_invalid_old_pin))
             return
@@ -100,7 +122,7 @@ class UpdateCertificateViewModel(
                 account = account,
                 oldPin = if (account.keyAlias == null) _uiState.value.oldPin else null,
                 newPin = null,
-                useBiometric = false,
+                useBiometric = protection == DeviceKeyProtection.BIOMETRIC,
             ).onSuccess { updatedAccount ->
                 _uiState.value = _uiState.value.copy(
                     isSubmitting = false,
@@ -111,9 +133,20 @@ class UpdateCertificateViewModel(
                 )
             }.onFailure { error ->
                 val isInvalidOldPin = error.message == "Invalid old pin" || error.message == "Invalid old PIN"
+                val refreshedAccount = try {
+                    accountsRepository.getAccount(account.id) ?: account
+                } catch (_: Exception) {
+                    account
+                }
+                val pendingKey = refreshedAccount.pendingKey
                 _uiState.value = _uiState.value.copy(
                     isSubmitting = false,
                     isComplete = false,
+                    account = refreshedAccount,
+                    keyProtection = pendingKey?.keyProtection
+                        ?: if (pendingKey != null) DeviceKeyProtection.BIOMETRIC_OR_DEVICE_CREDENTIAL
+                        else _uiState.value.keyProtection,
+                    isProtectionLocked = pendingKey != null,
                     responseError = if (isInvalidOldPin) null else error.toUiText(R.string.error_network),
                     oldPinError = if (isInvalidOldPin) UiText.Resource(R.string.error_invalid_old_pin) else null,
                 )

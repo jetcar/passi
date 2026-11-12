@@ -7,6 +7,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import com.passi.cloud.passi_android.R
 import com.passi.cloud.passi_android.data.auth.SignatureAuthorization
+import com.passi.cloud.passi_android.domain.enrollment.DeviceKeyProtection
 import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -42,13 +43,20 @@ class DeviceKeyAuthorization : SignatureAuthorization {
         }
     }
 
-    override suspend fun authorize(signature: Signature): Signature = withContext(Dispatchers.Main.immediate) {
+    override suspend fun authorize(
+        signature: Signature,
+        protection: DeviceKeyProtection,
+    ): Signature = withContext(Dispatchers.Main.immediate) {
         check(Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) { "Device authorization requires Android 11 or later" }
         check(pending == null) { "Another device authorization is already in progress" }
         val host = activity.get()?.takeUnless { it.isFinishing || it.isDestroyed }
             ?: error("Open Passi to authorize use of the device signing key")
-        val authenticators = BiometricManager.Authenticators.BIOMETRIC_STRONG or
-            BiometricManager.Authenticators.DEVICE_CREDENTIAL
+        val authenticators = when (protection) {
+            DeviceKeyProtection.BIOMETRIC -> BiometricManager.Authenticators.BIOMETRIC_STRONG
+            DeviceKeyProtection.DEVICE_CREDENTIAL -> BiometricManager.Authenticators.DEVICE_CREDENTIAL
+            DeviceKeyProtection.BIOMETRIC_OR_DEVICE_CREDENTIAL ->
+                BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.DEVICE_CREDENTIAL
+        }
         check(BiometricManager.from(host).canAuthenticate(authenticators) == BiometricManager.BIOMETRIC_SUCCESS) {
             "Set up a secure device screen lock to use the signing key"
         }
@@ -88,12 +96,19 @@ class DeviceKeyAuthorization : SignatureAuthorization {
                 }
             }
             try {
-                val info = BiometricPrompt.PromptInfo.Builder()
+                val infoBuilder = BiometricPrompt.PromptInfo.Builder()
                     .setTitle(host.getString(R.string.device_key_authorize_title))
-                    .setSubtitle(host.getString(R.string.device_key_authorize_subtitle))
+                    .setSubtitle(host.getString(when (protection) {
+                        DeviceKeyProtection.BIOMETRIC -> R.string.device_key_authorize_biometric_subtitle
+                        DeviceKeyProtection.DEVICE_CREDENTIAL -> R.string.device_key_authorize_phone_pin_subtitle
+                        DeviceKeyProtection.BIOMETRIC_OR_DEVICE_CREDENTIAL -> R.string.device_key_authorize_subtitle
+                    }))
                     .setAllowedAuthenticators(authenticators)
                     .setConfirmationRequired(true)
-                    .build()
+                if (protection == DeviceKeyProtection.BIOMETRIC) {
+                    infoBuilder.setNegativeButtonText(host.getString(R.string.cancel))
+                }
+                val info = infoBuilder.build()
                 // Credential + CryptoObject is supported starting at API 30, never use a standalone prompt.
                 // https://developer.android.com/reference/androidx/biometric/BiometricPrompt#authenticate(androidx.biometric.BiometricPrompt.PromptInfo,androidx.biometric.BiometricPrompt.CryptoObject)
                 currentPrompt.authenticate(info, BiometricPrompt.CryptoObject(signature))

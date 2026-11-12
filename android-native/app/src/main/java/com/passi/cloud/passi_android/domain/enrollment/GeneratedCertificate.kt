@@ -11,4 +11,5 @@ data class GeneratedCertificate(
     val validTo: Instant,
     val keyAlias: String? = null,
     val keySecurityLevel: String? = null,
+    val keyProtection: DeviceKeyProtection? = null,
 )

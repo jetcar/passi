@@ -11,6 +11,7 @@ import com.passi.cloud.passi_android.domain.auth.AccountSigner
 import com.passi.cloud.passi_android.domain.enrollment.CertificateGenerator
 import com.passi.cloud.passi_android.domain.enrollment.GeneratedCertificate
 import com.passi.cloud.passi_android.domain.enrollment.checkpoint
+import com.passi.cloud.passi_android.domain.enrollment.DeviceKeyProtection
 import com.passi.cloud.passi_android.domain.model.Account
 import com.passi.cloud.passi_android.domain.model.ApiPaths
 import com.passi.cloud.passi_android.domain.model.NotificationSession
@@ -81,6 +82,7 @@ class DeviceKeyMigrationTests {
         val updated = service().rotateCertificate(old, "1234", null, false).getOrThrow()
         assertThat(observedCheckpoint.get()).isTrue()
         assertThat(updated.keyAlias).isEqualTo("passi.account.test-1")
+        assertThat(updated.keyProtection).isEqualTo(DeviceKeyProtection.DEVICE_CREDENTIAL)
         assertThat(updated.privateCertBinary).isNull()
         assertThat(updated.salt).isNull()
         assertThat(updated.pinLength).isEqualTo(0)
@@ -89,6 +91,13 @@ class DeviceKeyMigrationTests {
         assertThat(updated.legacyCleanupPending).isTrue()
         assertThat(repository.commits.first().privateCertBinary).isEqualTo(old.privateCertBinary)
         assertThat(repository.commits.last()).isEqualTo(updated)
+    }
+
+    @Test fun biometricChoiceIsBoundToTheReplacementKey() = runBlocking {
+        server.enqueue(acceptedResponse())
+        val updated = service().rotateCertificate(old, "1234", null, true).getOrThrow()
+        assertThat(updated.keyProtection).isEqualTo(DeviceKeyProtection.BIOMETRIC)
+        assertThat(updated.pendingKey).isNull()
     }
 
     @Test fun httpFailureKeepsOldMaterialAndRetryUsesExactCheckpoint() = runBlocking {
@@ -262,7 +271,10 @@ class DeviceKeyMigrationTests {
     }
 
     @Test fun deadUnsubmittedKeyIsReplacedBeforeSendingAnyCertificate() = runBlocking {
-        val stale = generator.generate(old.email, null)
+        val stale = generator.generate(
+            old.email,
+            com.passi.cloud.passi_android.domain.enrollment.DeviceKeyProtection.DEVICE_CREDENTIAL,
+        )
         old = old.copy(pendingKey = stale.checkpoint())
         repository = CommitStore(old)
         generator.invalidAliases.add(stale.keyAlias!!)
@@ -274,6 +286,23 @@ class DeviceKeyMigrationTests {
         assertThat(takeBody()).contains("public-certificate-2")
     }
 
+    @Test fun deadHistoricalUnsubmittedKeyKeepsCombinedProtectionWhenReplaced() = runBlocking {
+        val stale = generator.generate(
+            old.email,
+            DeviceKeyProtection.BIOMETRIC_OR_DEVICE_CREDENTIAL,
+        ).copy(keyProtection = null)
+        old = old.copy(pendingKey = stale.checkpoint())
+        repository = CommitStore(old)
+        generator.invalidAliases.add(stale.keyAlias!!)
+        server.enqueue(MockResponse().setResponseCode(200).setBody("{\"PublicCert\":\"public-certificate-2\"}"))
+
+        val result = service().rotateCertificate(old, "1234", null, false).getOrThrow()
+
+        assertThat(result.keyProtection).isEqualTo(DeviceKeyProtection.BIOMETRIC_OR_DEVICE_CREDENTIAL)
+        assertThat(generator.calls).isEqualTo(2)
+        assertThat(server.requestCount).isEqualTo(1)
+    }
+
     @Test fun submissionCheckpointFailureStopsBeforeHttpAndRetainsUnsubmittedKey() = runBlocking {
         repository.failAtCommit = 2
         assertThat(service().rotateCertificate(old, "1234", null, false).isFailure).isTrue()
@@ -283,7 +312,10 @@ class DeviceKeyMigrationTests {
     }
 
     @Test fun historicalUnknownSubmissionCannotBeSilentlyReplaced() = runBlocking {
-        val generated = generator.generate(old.email, null)
+        val generated = generator.generate(
+            old.email,
+            com.passi.cloud.passi_android.domain.enrollment.DeviceKeyProtection.DEVICE_CREDENTIAL,
+        )
         old = old.copy(pendingKey = generated.checkpoint().copy(submitted = null))
         repository = CommitStore(old)
         generator.valid = false
@@ -322,12 +354,14 @@ class DeviceKeyMigrationTests {
         var validations = 0
         var valid = true
         val invalidAliases = mutableSetOf<String>()
-        override fun generate(email: String, pin: String?): GeneratedCertificate {
-            check(pin == null)
+        override fun generate(
+            email: String,
+            protection: com.passi.cloud.passi_android.domain.enrollment.DeviceKeyProtection,
+        ): GeneratedCertificate {
             calls++
             return GeneratedCertificate(null, null, "public-certificate-$calls", "new-thumbprint-$calls",
                 Instant.parse("2026-01-01T00:00:00Z"), Instant.parse("2027-01-01T00:00:00Z"),
-                "passi.account.test-$calls", "TEE")
+                "passi.account.test-$calls", "TEE", protection)
         }
         override fun validate(certificate: GeneratedCertificate) {
             validations++

@@ -3,6 +3,7 @@ package com.passi.cloud.passi_android
 import android.content.SharedPreferences
 import com.google.common.truth.Truth.assertThat
 import com.passi.cloud.passi_android.data.local.PassiPreferences
+import com.passi.cloud.passi_android.domain.enrollment.DeviceKeyProtection
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import java.lang.reflect.Proxy
@@ -27,10 +28,28 @@ class AccountPreferencesCompatibilityTests {
         assertThat(account.pinLength).isEqualTo(4)
         assertThat(account.hasFingerprint).isTrue()
         assertThat(account.keyAlias).isNull()
+        assertThat(account.keyProtection).isNull()
         assertThat(account.pendingKey).isNull()
         assertThat(account.legacyCleanupPending).isFalse()
         assertThat(account.retiredKeyAliases).isNull()
         assertThat(account.cleanupAccountIds).isNull()
+        preferences.writeAccounts(listOf(account))
+        assertThat(preferences.readAccounts().single()).isEqualTo(account)
+    }
+
+    @Test fun selectedDeviceKeyProtectionRoundTrips() {
+        val plain = PreferencesDouble("plain").apply { values["allAccounts"] = oldJson }
+        val secure = PreferencesDouble("secure")
+        val preferences = PassiPreferences(plain.api, { secure.api })
+        val account = preferences.readAccounts().single().copy(
+            keyAlias = "passi.account.device-key",
+            keySecurityLevel = "TEE",
+            keyProtection = DeviceKeyProtection.BIOMETRIC,
+            privateCertBinary = null,
+            salt = null,
+            pinLength = 0,
+            hasFingerprint = false,
+        )
         preferences.writeAccounts(listOf(account))
         assertThat(preferences.readAccounts().single()).isEqualTo(account)
     }

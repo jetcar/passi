@@ -3,6 +3,7 @@ package com.passi.cloud.passi_android.data.auth
 import com.passi.cloud.passi_android.data.crypto.AndroidKeystoreCertificateGenerator
 import com.passi.cloud.passi_android.domain.auth.AccountSigner
 import com.passi.cloud.passi_android.domain.model.Account
+import com.passi.cloud.passi_android.domain.enrollment.DeviceKeyProtection
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
@@ -12,7 +13,7 @@ import java.util.Base64
 
 /** Only an authorization of this exact initialized operation may release its signature. */
 fun interface SignatureAuthorization {
-    suspend fun authorize(signature: Signature): Signature
+    suspend fun authorize(signature: Signature, protection: DeviceKeyProtection): Signature
 }
 
 class KeystoreAccountSigner internal constructor(
@@ -23,7 +24,10 @@ class KeystoreAccountSigner internal constructor(
 
     override suspend fun sign(account: Account, pin: String?, message: String): Result<String> = try {
         val signature = initialize(account)
-        val authorized = authorization.authorize(signature)
+        val authorized = authorization.authorize(
+            signature,
+            account.keyProtection ?: DeviceKeyProtection.BIOMETRIC_OR_DEVICE_CREDENTIAL,
+        )
         check(authorized === signature) { "Authorization returned a different signing operation" }
         currentCoroutineContext().ensureActive()
         authorized.update(message.toByteArray(Charsets.UTF_8))
@@ -40,6 +44,9 @@ private fun initializeDeviceSignature(account: Account): Signature {
     require(alias.startsWith(AndroidKeystoreCertificateGenerator.ALIAS_PREFIX)) { "Unexpected signing key alias" }
     val key = AndroidKeystoreCertificateGenerator.store().getKey(alias, null) as? PrivateKey
         ?: error("Device signing key is missing; recover the account on this device")
-    AndroidKeystoreCertificateGenerator.requireSecureSigningKey(key)
+    AndroidKeystoreCertificateGenerator.requireSecureSigningKey(
+        key,
+        expectedProtection = account.keyProtection,
+    )
     return Signature.getInstance("SHA512withRSA").apply { initSign(key) }
 }

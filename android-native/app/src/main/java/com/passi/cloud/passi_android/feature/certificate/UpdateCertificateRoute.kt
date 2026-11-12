@@ -19,6 +19,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.biometric.BiometricManager
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -40,6 +41,7 @@ import com.passi.cloud.passi_android.R
 import com.passi.cloud.passi_android.ui.NumberPad
 import com.passi.cloud.passi_android.ui.rememberBiometricPromptLauncher
 import com.passi.cloud.passi_android.localization.asString
+import com.passi.cloud.passi_android.ui.DeviceKeyProtectionChoice
 
 @Composable
 fun UpdateCertificateRoute(
@@ -56,6 +58,7 @@ fun UpdateCertificateRoute(
     )
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val account = uiState.account
+    val biometricManager = BiometricManager.from(LocalContext.current)
     val launchBiometricPrompt = rememberBiometricPromptLauncher(
         title = stringResource(R.string.biometric_update_certificate_title),
         subtitle = stringResource(R.string.biometric_update_certificate_subtitle),
@@ -70,6 +73,13 @@ fun UpdateCertificateRoute(
         onConfirmPinChanged = viewModel::onConfirmPinChanged,
         onLaunchBiometric = launchBiometricPrompt,
         onRotate = viewModel::rotate,
+        biometricAvailable = biometricManager.canAuthenticate(
+            BiometricManager.Authenticators.BIOMETRIC_STRONG,
+        ) == BiometricManager.BIOMETRIC_SUCCESS,
+        deviceCredentialAvailable = biometricManager.canAuthenticate(
+            BiometricManager.Authenticators.DEVICE_CREDENTIAL,
+        ) == BiometricManager.BIOMETRIC_SUCCESS,
+        onKeyProtectionSelected = viewModel::onKeyProtectionSelected,
         onDone = onBack,
         onCancel = onBack,
     )
@@ -85,6 +95,9 @@ internal fun UpdateCertificateScreen(
     onRotate: () -> Unit,
     onDone: () -> Unit,
     onCancel: () -> Unit,
+    biometricAvailable: Boolean = true,
+    deviceCredentialAvailable: Boolean = true,
+    onKeyProtectionSelected: (com.passi.cloud.passi_android.domain.enrollment.DeviceKeyProtection) -> Unit = {},
 ) {
     val account = uiState.account
     Column(modifier = Modifier.fillMaxSize().padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
@@ -121,7 +134,17 @@ internal fun UpdateCertificateScreen(
                 enabled = !uiState.isSubmitting,
             )
         }
-        Button(onClick = onRotate, enabled = account != null && !uiState.isSubmitting) {
+        DeviceKeyProtectionChoice(
+            selected = uiState.keyProtection,
+            biometricAvailable = biometricAvailable,
+            deviceCredentialAvailable = deviceCredentialAvailable,
+            enabled = !uiState.isSubmitting && !uiState.isProtectionLocked,
+            onSelected = onKeyProtectionSelected,
+        )
+        Button(
+            onClick = onRotate,
+            enabled = account != null && !uiState.isSubmitting && uiState.keyProtection != null,
+        ) {
             if (uiState.isSubmitting) {
                 CircularProgressIndicator(
                     modifier = Modifier.size(20.dp),

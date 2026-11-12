@@ -1,6 +1,5 @@
 package com.passi.cloud.passi_android.data.crypto
 
-import com.passi.cloud.passi_android.domain.enrollment.CertificateGenerator
 import com.passi.cloud.passi_android.domain.enrollment.GeneratedCertificate
 import org.bouncycastle.asn1.x500.X500Name
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter
@@ -20,7 +19,7 @@ import java.util.Base64
 import java.util.Date
 import java.util.UUID
 
-class BouncyCastleCertificateGenerator : CertificateGenerator {
+class BouncyCastleCertificateGenerator {
     private val provider: Provider = BouncyCastleProvider()
 
     init {
@@ -29,7 +28,7 @@ class BouncyCastleCertificateGenerator : CertificateGenerator {
         }
     }
 
-    override fun generate(email: String, pin: String?): GeneratedCertificate {
+    fun generate(email: String, pin: String?): GeneratedCertificate {
         val keyPairGenerator = KeyPairGenerator.getInstance(KEY_ALGORITHM)
         keyPairGenerator.initialize(KEY_SIZE)
         val keyPair = keyPairGenerator.generateKeyPair()

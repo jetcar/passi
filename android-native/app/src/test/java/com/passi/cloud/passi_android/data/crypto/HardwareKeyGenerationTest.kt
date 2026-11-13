@@ -27,6 +27,27 @@ class HardwareKeyGenerationTest {
         }
     }
 
+    @Test fun postGenerationStrongBoxValidationFailureCleansBeforeTeeFallback() {
+        val events = mutableListOf<String>()
+        val result = generateWithHardwareFallback(
+            strongBoxAvailable = true,
+            generate = { strongBox ->
+                (if (strongBox) "strongbox" else "tee").also { events += "generate:$it" }
+            },
+            cleanup = { events += "cleanup" },
+            validate = { key ->
+                events += "validate:$key"
+                if (key == "strongbox") throw ProviderException("Unsupported digest")
+            },
+        )
+
+        assertEquals("tee", result)
+        assertEquals(
+            listOf("generate:strongbox", "validate:strongbox", "cleanup", "generate:tee", "validate:tee"),
+            events,
+        )
+    }
+
     @Test fun unexpectedStrongBoxFailuresAlwaysCleanAndNeverFallback() {
         for (failure in listOf(IllegalStateException(), AssertionError())) {
             val events = mutableListOf<String>()

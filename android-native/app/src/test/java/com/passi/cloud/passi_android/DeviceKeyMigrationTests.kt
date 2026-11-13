@@ -204,6 +204,29 @@ class DeviceKeyMigrationTests {
         assertThat(server.requestCount).isEqualTo(0)
     }
 
+    @Test fun legacyCertificateWithoutPinMigratesToDeviceHeldKey() = runBlocking {
+        val unprotectedLegacy = BouncyCastleCertificateGenerator().generate(old.email, "")
+        old = old.copy(
+            privateCertBinary = unprotectedLegacy.privateCertBinary,
+            salt = unprotectedLegacy.salt,
+            publicCertBinary = unprotectedLegacy.publicCertBinary,
+            thumbprint = unprotectedLegacy.thumbprint,
+            pinLength = 0,
+            hasFingerprint = false,
+        )
+        repository = CommitStore(old)
+        server.enqueue(acceptedResponse())
+
+        val updated = service(Pkcs12AccountSigner())
+            .rotateCertificate(old, oldPin = null, newPin = null, useBiometric = false)
+            .getOrThrow()
+
+        assertThat(updated.keyAlias).isNotNull()
+        assertThat(updated.privateCertBinary).isNull()
+        assertThat(updated.pinLength).isEqualTo(0)
+        assertThat(server.requestCount).isEqualTo(1)
+    }
+
     @Test fun applicationPinCannotBeSelectedForReplacementKey() = runBlocking {
         assertThat(service().rotateCertificate(old, "1234", "5678", false).isFailure).isTrue()
         assertThat(generator.calls).isEqualTo(0)

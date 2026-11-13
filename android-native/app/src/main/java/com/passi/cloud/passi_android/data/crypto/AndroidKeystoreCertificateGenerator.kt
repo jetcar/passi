@@ -76,6 +76,10 @@ class AndroidKeystoreCertificateGenerator(context: Context) : CertificateGenerat
             strongBoxAvailable = strongBoxAvailable,
             generate = { strongBox -> generate(alias, email, protection, strongBox) },
             cleanup = { delete(alias) },
+            // Some StrongBox implementations accept SHA-512 during key generation but reject
+            // the first signing operation with UNSUPPORTED_DIGEST. Detect that before the key is
+            // checkpointed so the normal hardware-TEE fallback can replace it safely.
+            validate = ::validate,
         )
     }
 
@@ -188,6 +192,7 @@ internal fun <T> generateWithHardwareFallback(
     strongBoxAvailable: Boolean,
     generate: (strongBox: Boolean) -> T,
     cleanup: () -> Unit,
+    validate: (T) -> Unit = {},
 ): T {
     fun cleanFailedAttempt(failure: Throwable) {
         try {
@@ -202,14 +207,14 @@ internal fun <T> generateWithHardwareFallback(
         // SHA-512 is not a required StrongBox digest. Do not relax the key's policy for TEE.
         // https://developer.android.com/privacy-and-security/keystore#StrongBoxKeyMint
         try {
-            return generate(true)
+            return generate(true).also(validate)
         } catch (failure: Throwable) {
             cleanFailedAttempt(failure)
             if (failure !is GeneralSecurityException && failure !is ProviderException) throw failure
         }
     }
     try {
-        return generate(false)
+        return generate(false).also(validate)
     } catch (failure: Throwable) {
         cleanFailedAttempt(failure)
         throw failure

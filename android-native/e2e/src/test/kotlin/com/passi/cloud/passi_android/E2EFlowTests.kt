@@ -85,7 +85,7 @@ class E2EFlowTests {
                 "-e", "POSTGRES_PASSWORD=test1",
                 "-e", "POSTGRES_USER=postgres",
                 "-e", "POSTGRES_DB=Passi",
-                "postgres:15.19-bookworm",
+                "postgres:15.20-bookworm",
             )
             waitForLog(postgresName, "database system is ready to accept connections", occurrences = 2)
 

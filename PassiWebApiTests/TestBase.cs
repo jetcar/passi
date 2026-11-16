@@ -99,7 +99,7 @@ public class TestBase
     {
         var dockerEndpoint = Environment.GetEnvironmentVariable("DOCKER_HOST");
         var containerBuilder = new ContainerBuilder()
-            .WithImage("postgres:15.19-bookworm")
+            .WithImage("postgres:15.20-bookworm")
             .WithPortBinding(5432, true)
             .WithWaitStrategy(Wait.ForUnixContainer().UntilMessageIsLogged("database system is ready to accept connections"))
             .WithEnvironment("POSTGRES_PASSWORD", PgPassword);

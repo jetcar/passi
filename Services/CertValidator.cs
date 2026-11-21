@@ -1,6 +1,7 @@
 ﻿using Models;
 
 using System;
+using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using GoogleTracer;
 using WebApiDto.Certificate;
@@ -51,7 +52,13 @@ namespace Services
 
         public void ValidateCertificateChain(CertificateUpdateDto newCertificate, CertificateDb oldCertificate)
         {
-            var verify = CertHelper.VerifyData(newCertificate.PublicCert, newCertificate.ParentCertHashSignature,
+            // The unchanged signature primitive consumes ASCII and this envelope uses newlines.
+            // Reject ambiguous encodings rather than let different device identifiers sign alike.
+            if (newCertificate.RetireParent &&
+                (string.IsNullOrWhiteSpace(newCertificate.DeviceId) ||
+                 newCertificate.DeviceId.Any(c => c < ' ' || c > '~')))
+                throw new BadRequestException("Invalid retirement device identifier");
+            var verify = CertHelper.VerifyData(newCertificate.SigningPayload(), newCertificate.ParentCertHashSignature,
                 oldCertificate.PublicCert);
 
             if (!verify)

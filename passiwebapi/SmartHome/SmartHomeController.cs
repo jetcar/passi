@@ -21,6 +21,8 @@ public sealed class HomeErrorsAttribute : ExceptionFilterAttribute
 }
 
 [ApiController, Route("api/smarthome"), HomeErrors]
+// Header bearer authentication only; cookie-authenticated browser writes use the CSRF-protected WebApp BFF.
+[IgnoreAntiforgeryToken]
 [Authorize(Policy = SmartHomeRegistration.OwnerPolicy)]
 [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
 [RequestSizeLimit(64 * 1024)]
@@ -63,6 +65,8 @@ public sealed class EnrollHomeRequest
     [Required, StringLength(256, MinimumLength = 32)] public string EnrollmentSecret { get; set; }
 }
 
+// Enrollment requires a one-use secret in the JSON body and does not use browser cookies.
+[IgnoreAntiforgeryToken]
 [ApiController, Route("api/smarthome/agent"), HomeErrors]
 [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
 [RequestSizeLimit(4096)]

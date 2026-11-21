@@ -78,3 +78,11 @@ Designer миграции синхронизирован с актуальной
 Финальный полный запуск WebAPI на ветке PR: **166 passed**, включая оба сценария отозванного сертификата.
 
 После замечания GitGuardian фиксированный пароль временного PostgreSQL заменён случайным значением на каждый запуск. Повторная проверка SmartHomeTransportTests: 19 passed.
+
+После CodeQL добавлено экранирование CR/LF в логах WebAPI/WebApp с четырьмя регрессионными
+сценариями (обычный маршрут и исключение query для SmartHome). Для WebAPI явно указано отсутствие
+cookie-CSRF: owner endpoints принимают только Bearer, enrollment требует одноразовый секрет в JSON.
+WebApp BFF сохраняет обязательную antiforgery-проверку. Дублирующая проверка query в обработчике
+агентской авторизации убрана: запрет access_token остаётся в общей UseSmartHomeBoundary перед
+авторизацией endpoints; тест с действительным header-токеном и access_token в URL остаётся зелёным.
+Повторно: WebAPI transport/logging — 21 passed; полный WebApp — 77 passed.

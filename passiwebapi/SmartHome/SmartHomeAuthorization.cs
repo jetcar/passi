@@ -37,7 +37,9 @@ public sealed class HomeAgentAuthenticationHandler(
 {
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
-        if (!Request.IsHttps || Request.Query.ContainsKey("access_token"))
+        // UseSmartHomeBoundary rejects query credentials before endpoint authorization.
+        // This handler only reads the Authorization header and validates it against stored credentials.
+        if (!Request.IsHttps)
             return AuthenticateResult.Fail("Secure header authentication required");
         var authorization = Request.Headers.Authorization.ToString();
         if (!authorization.StartsWith("Bearer ", StringComparison.Ordinal) || authorization.Length > 512)

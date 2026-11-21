@@ -22,7 +22,8 @@ namespace Services
 
             if (publicCert == null)
                 throw new BadRequestException("Certificate is missing");
-            if (publicCert.NotAfter.ToUniversalTime() < DateTime.UtcNow || publicCert.NotBefore.ToUniversalTime() >= DateTime.UtcNow)
+            var now = DateTime.UtcNow;
+            if (publicCert.NotAfter.ToUniversalTime() < now || publicCert.NotBefore.ToUniversalTime() >= now)
                 throw new BadRequestException("Certificate is expired");
             var nameInfo = publicCert.GetNameInfo(X509NameType.SimpleName, true);
             if (nameInfo != email.Replace("@", ""))
@@ -39,9 +40,10 @@ namespace Services
 
             if (newPublicCert == null)
                 throw new BadRequestException("Certificate is missing");
-            if (newPublicCert.NotAfter.ToUniversalTime() < DateTime.UtcNow)
+            var now = DateTime.UtcNow;
+            if (newPublicCert.NotAfter.ToUniversalTime() < now)
                 throw new BadRequestException("Certificate is expired");
-            if (newPublicCert.NotBefore.ToUniversalTime() > DateTime.UtcNow)
+            if (newPublicCert.NotBefore.ToUniversalTime() > now)
                 throw new BadRequestException("Certificate is not started");
             if (newPublicCert.GetNameInfo(X509NameType.SimpleName, true) !=
                 oldpublicCert.GetNameInfo(X509NameType.SimpleName, true).Replace("@", ""))

@@ -56,6 +56,9 @@ namespace Repos
         public DbSet<AdminDb> Admins { get; set; }
         public DbSet<DataProtectionKey> DataProtectionKeys { get; set; }
         public DbSet<SimpleSessionDb> Sessions { get; set; }
+        public DbSet<SmartHomeOwnerDb> SmartHomeOwners { get; set; }
+        public DbSet<SmartHomeDb> SmartHomes { get; set; }
+        public DbSet<SmartHomeCommandDb> SmartHomeCommands { get; set; }
 
         public override int SaveChanges()
         {
@@ -320,6 +323,7 @@ namespace Repos
             }
             );
 
+            SmartHomeModel.Configure(modelBuilder);
             base.OnModelCreating(modelBuilder);
         }
     }

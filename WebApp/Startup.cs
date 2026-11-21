@@ -91,6 +91,13 @@ namespace WebApp
 
             services.AddHttpContextAccessor();
             services.AddHttpClient();
+            services.AddHttpClient<SmartHomeClient>(client => client.Timeout = TimeSpan.FromSeconds(10))
+                .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+                {
+                    AllowAutoRedirect = false,
+                    UseCookies = false,
+                })
+                .RedactLoggedHeaders(new[] { "Authorization" });
             services.AddHealthChecks()
                 .AddDbContextCheck<WebAppDbContext>("database", tags: new[] { "db", "ready" });
             services.AddAntiforgery();

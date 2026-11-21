@@ -4,6 +4,11 @@ const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
     routes: [
         {
+            path: '/smart-home',
+            name: 'SmartHome',
+            component: () => import('../views/SmartHomeView.vue')
+        },
+        {
             path: '/',
             name: 'Home',
             component: () => import('../views/HomeView.vue')

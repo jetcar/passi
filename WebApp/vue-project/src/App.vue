@@ -7,6 +7,7 @@ import { localeOptions, setLocale } from './i18n'
 const API_URL = `/api/UserLoggedIn`
 
 const isLoggedIn = ref(false)
+const smartHomeAllowed = ref(false)
 const webmailUrl = '/mailler'
 const { locale } = useI18n()
 const selectedLocale = computed({
@@ -18,6 +19,10 @@ const fetchData = async () => {
     try {
         const response = await fetch(API_URL)
         isLoggedIn.value = await response.json()
+        if (isLoggedIn.value) {
+            const access = await fetch('/api/smarthome/access', { cache: 'no-store', credentials: 'same-origin' })
+            smartHomeAllowed.value = access.ok && (await access.json()).allowed === true
+        }
     } catch (error) {
         console.error('Error fetching user data:', error)
     }
@@ -103,6 +108,11 @@ onMounted(() => {
                             <li class="nav-item" v-if="isLoggedIn">
                                 <router-link to="/UserInfo" class="nav-link">
                                     <i class="bi bi-person me-1"></i>{{ $t('navigation.userInfo') }}
+                                </router-link>
+                            </li>
+                            <li class="nav-item" v-if="isLoggedIn && smartHomeAllowed">
+                                <router-link to="/smart-home" class="nav-link">
+                                    <i class="bi bi-house-heart me-1" aria-hidden="true"></i>Умный дом
                                 </router-link>
                             </li>
                             <li class="nav-item" v-if="isLoggedIn">

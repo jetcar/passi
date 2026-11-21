@@ -19,8 +19,9 @@ namespace passi_webapi.Middleware
         {
             var stopwatch = Stopwatch.StartNew();
             var request = context.Request;
+            var query = request.Path.StartsWithSegments("/api/smarthome") ? "" : request.QueryString.ToString();
 
-            _logger.Info($"Incoming {request.Method} {request.Path}{request.QueryString} from {context.Connection.RemoteIpAddress}");
+            _logger.Info($"Incoming {request.Method} {request.Path}{query} from {context.Connection.RemoteIpAddress}");
 
             try
             {
@@ -29,7 +30,7 @@ namespace passi_webapi.Middleware
             finally
             {
                 stopwatch.Stop();
-                _logger.Info($"Completed {request.Method} {request.Path}{request.QueryString} - Status: {context.Response.StatusCode} - Duration: {stopwatch.ElapsedMilliseconds}ms");
+                _logger.Info($"Completed {request.Method} {request.Path}{query} - Status: {context.Response.StatusCode} - Duration: {stopwatch.ElapsedMilliseconds}ms");
             }
         }
     }

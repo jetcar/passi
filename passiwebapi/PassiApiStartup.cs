@@ -20,6 +20,8 @@ using RedisClient;
 using WebApiDto.Auth.Dto;
 using passi_webapi.Middleware;
 using passi_webapi.DeviceSecurity;
+using passi_webapi.SmartHome;
+using Microsoft.AspNetCore.Http.Connections;
 
 namespace passi_webapi
 {
@@ -114,6 +116,7 @@ namespace passi_webapi
             services.AddHealthChecks()
                 .AddDbContextCheck<PassiDbContext>("database", tags: new[] { "db", "ready" });
             services.AddAntiforgery();
+            services.AddSmartHome(new AppSetting(Configuration));
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
@@ -138,8 +141,11 @@ namespace passi_webapi
                 applicationBuilder.UseMiddleware<RequestLoggingMiddleware>();
                 applicationBuilder.UseCorrelationId(); // Add correlation ID tracking for all requests
                 applicationBuilder.UseMiddleware<ErrorHandlerMiddleware>();
+                applicationBuilder.UseMiddleware<SmartHomeForwardingMiddleware>();
                 applicationBuilder.UseForwardedHeaders();
                 applicationBuilder.UseAuthentication();
+                applicationBuilder.UseRateLimiter();
+                applicationBuilder.UseSmartHomeBoundary();
                 applicationBuilder.UseAuthorization();
                 applicationBuilder.UseCookiePolicy(
                     new CookiePolicyOptions
@@ -149,6 +155,12 @@ namespace passi_webapi
                 applicationBuilder.UseEndpoints(endpoints =>
                 {
                     endpoints.MapControllers();
+                    endpoints.MapHub<HomeAgentHub>("/api/smarthome/agent/hub", options =>
+                    {
+                        options.Transports = HttpTransportType.WebSockets;
+                        options.ApplicationMaxBufferSize = 64 * 1024;
+                        options.TransportMaxBufferSize = 64 * 1024;
+                    });
                 });
 
                 applicationBuilder.UseHealthChecks("/health");

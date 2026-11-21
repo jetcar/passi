@@ -15,12 +15,18 @@ namespace passi_webapi.Middleware
             _next = next;
         }
 
+        // Prevent request values from injecting additional entries into text logs.
+        private static string SafeLogValue(string value) => value?.Replace("\r", "\\r").Replace("\n", "\\n");
+
         public async Task InvokeAsync(HttpContext context)
         {
             var stopwatch = Stopwatch.StartNew();
             var request = context.Request;
+            var query = request.Path.StartsWithSegments("/api/smarthome") ? "" : SafeLogValue(request.QueryString.ToString());
+            var method = SafeLogValue(request.Method);
+            var path = SafeLogValue(request.Path.Value);
 
-            _logger.Info($"Incoming {request.Method} {request.Path}{request.QueryString} from {context.Connection.RemoteIpAddress}");
+            _logger.Info($"Incoming {method} {path}{query} from {context.Connection.RemoteIpAddress}");
 
             try
             {
@@ -29,7 +35,7 @@ namespace passi_webapi.Middleware
             finally
             {
                 stopwatch.Stop();
-                _logger.Info($"Completed {request.Method} {request.Path}{request.QueryString} - Status: {context.Response.StatusCode} - Duration: {stopwatch.ElapsedMilliseconds}ms");
+                _logger.Info($"Completed {method} {path}{query} - Status: {context.Response.StatusCode} - Duration: {stopwatch.ElapsedMilliseconds}ms");
             }
         }
     }

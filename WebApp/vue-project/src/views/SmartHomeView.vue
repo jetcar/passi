@@ -12,6 +12,10 @@ const name = ref('Дом')
 const enrollment = ref<HomeEnrollment | null>(null)
 const busy = ref(false)
 const refreshing = ref(false)
+const selectedHomeId = ref('')
+const pendingPower = ref(new Set<string>())
+const commandErrors = ref(new Map<string, string>())
+const commandUnavailable = ref(new Set<string>())
 // Keep receipts until a dashboard includes them; an older in-flight poll must not
 // re-enable a device immediately after its command has been accepted.
 const receipts = ref<HomeCommand[]>([])
@@ -22,6 +26,13 @@ let pollTimer: ReturnType<typeof setTimeout> | undefined
 let clockTimer: ReturnType<typeof setInterval> | undefined
 const requests = new Set<AbortController>()
 const homes = computed(() => dashboard.value?.homes ?? [])
+// Vue keeps this explicit selection while polling replaces the dashboard.
+// https://vuejs.org/guide/essentials/forms.html#select
+const visibleHomes = computed(() => selectedHomeId.value
+  ? homes.value.filter(home => home.id === selectedHomeId.value) : homes.value)
+const deviceCount = computed(() => homes.value.reduce((count, home) => count + home.devices.length, 0))
+const selectedHomeMissing = computed(() => !!selectedHomeId.value && !homes.value.some(home => home.id === selectedHomeId.value))
+const deviceKey = (home: HomeServer, device: HomeDevice) => JSON.stringify([home.id, device.id])
 
 class RequestError extends Error {
   constructor(public status: number) { super('Request failed') }
@@ -75,7 +86,8 @@ async function refresh() {
     now.value = Date.now() + serverOffset
     dashboard.value = data
     receipts.value = receipts.value.filter(local => !data.homes.some(home =>
-      home.commands.some(command => command.id === local.id)))
+      home.id === local.homeId && home.commands.some(command => command.id === local.id)))
+    commandUnavailable.value.clear()
     unavailable.value = false
     access.value = 'allowed'
     error.value = ''
@@ -110,25 +122,32 @@ async function manage(action: 'create' | 'enrollment' | 'revoke', home?: HomeSer
 
 async function power(home: HomeServer, device: HomeDevice, on: boolean) {
   if (busy.value || !controlAvailable(home, device)) return
+  const key = deviceKey(home, device)
   const command: HomeCommand = {
     id: crypto.randomUUID(), homeId: home.id, deviceId: device.id, operation: 'power.set', on,
     status: 'unknown', createdAt: new Date(now.value).toISOString(), expiresAt: new Date(now.value + 30_000).toISOString(),
   }
-  busy.value = true
-  error.value = ''
-  notice.value = ''
+  pendingPower.value.add(key)
+  commandErrors.value.delete(key)
   try {
     const result = await request<HomeCommand>(`/homes/${encodeURIComponent(home.id)}/devices/${encodeURIComponent(device.id)}/power`,
       { commandId: command.id, on })
     if (stopped) return
     receipts.value.push(result)
     home.commands = [result, ...home.commands.filter(item => item.id !== result.id)]
-    notice.value = 'Команда принята Passi. Фактическое состояние изменится только после сообщения устройства.'
     await refresh()
   } catch (reason) {
     if (!stopped && !(reason instanceof RequestError && reason.status < 500)) receipts.value.push(command)
-    reportFailure(reason)
-  } finally { busy.value = false }
+    if (!stopped) {
+      if (reason instanceof RequestError && (reason.status === 401 || reason.status === 403)) reportFailure(reason)
+      else {
+        commandUnavailable.value.add(key)
+        commandErrors.value.set(key, reason instanceof RequestError && reason.status === 409
+          ? 'Команда отклонена: устройство недоступно или уже выполняет команду. Обновите данные перед повтором.'
+          : 'Ответ на команду не получен. Результат неизвестен; автоматического повтора нет. Обновите данные перед новой командой.')
+      }
+    }
+  } finally { pendingPower.value.delete(key) }
 }
 
 function date(value?: string | null): string {
@@ -142,6 +161,7 @@ function commands(home: HomeServer) {
 
 function controlAvailable(home: HomeServer, device: HomeDevice) {
   return canControl(home, device, now.value, unavailable.value) &&
+    !pendingPower.value.has(deviceKey(home, device)) && !commandUnavailable.value.has(deviceKey(home, device)) &&
     !receipts.value.some(command => command.homeId === home.id && command.deviceId === device.id &&
       (command.status === 'queued' || command.status === 'sent'))
 }
@@ -203,15 +223,30 @@ onBeforeUnmount(() => {
         <div class="card-body p-4"><h2 class="h5">Домашний сервер ещё не зарегистрирован</h2><p class="mb-0 text-secondary">Добавьте сервер и зарегистрируйте локального агента. Устройства появятся после его подключения.</p></div>
       </div>
 
-      <section v-for="home in homes" :key="home.id" class="card border-0 shadow-sm mb-4" :aria-label="home.name">
+      <section class="card border-0 shadow-sm mb-4" aria-label="Выбор домашнего сервера">
+        <div class="card-body p-3 p-md-4">
+          <label for="server-filter" class="form-label fw-semibold">Домашний сервер</label>
+          <select id="server-filter" v-model="selectedHomeId" class="form-select" aria-describedby="server-counts">
+            <option value="">Все серверы · {{ homes.length }} · Устройств: {{ deviceCount }}</option>
+            <option v-if="selectedHomeMissing" :value="selectedHomeId" disabled>Выбранный сервер недоступен · {{ selectedHomeId }}</option>
+            <option v-for="home in homes" :key="home.id" :value="home.id">{{ home.name }} · {{ home.id.length > 8 ? `…${home.id.slice(-8)}` : home.id }} · Устройств: {{ home.devices.length }}</option>
+          </select>
+          <p id="server-counts" class="small text-secondary mt-2 mb-0" role="status">Серверов: {{ homes.length }} · Устройств: {{ deviceCount }} · Показано серверов: {{ visibleHomes.length }}</p>
+          <p v-if="selectedHomeMissing" class="small text-secondary mt-2 mb-0">Сервер отсутствует в текущем списке. Обновите данные или выберите другой сервер.</p>
+        </div>
+      </section>
+
+      <section v-for="home in visibleHomes" :key="home.id" class="card border-0 shadow-sm mb-4" :aria-label="home.name" :data-home-id="home.id">
         <div class="card-header bg-white p-4 border-bottom">
           <div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
             <div>
               <div class="d-flex align-items-center flex-wrap gap-2 mb-1">
                 <h2 class="h4 mb-0">{{ home.name }}</h2>
                 <span class="badge rounded-pill" :class="isOnline(home, now, unavailable) ? 'text-bg-success' : 'text-bg-secondary'">{{ unavailable ? 'Связь неизвестна' : isOnline(home, now, unavailable) ? 'Онлайн' : 'Офлайн' }}</span>
+                <span class="badge text-bg-light">Устройств: {{ home.devices.length }}</span>
               </div>
               <p class="small text-secondary mb-0">Последняя связь: {{ date(home.lastSeenAt) }}</p>
+              <p class="small text-secondary mb-0">Сервер: {{ home.id }}</p>
               <p class="small text-secondary mb-0">Снимок устройств: {{ date(home.snapshotAt) }}</p>
             </div>
             <div class="d-flex flex-wrap gap-2">
@@ -225,7 +260,7 @@ onBeforeUnmount(() => {
           <p v-if="home.devices.length === 0" class="text-secondary mb-0">Агент пока не передал зарегистрированные устройства.</p>
           <div class="row g-3">
             <div v-for="device in home.devices" :key="device.id" class="col-12 col-lg-6">
-              <article class="device-card border rounded-3 p-3 h-100" :class="{ 'device-stale': isStale(home, device, now, unavailable) }">
+              <article class="device-card border rounded-3 p-3 h-100" :data-device-id="device.id" :aria-busy="pendingPower.has(deviceKey(home, device))" :class="{ 'device-stale': isStale(home, device, now, unavailable) }">
                 <div class="d-flex align-items-start justify-content-between gap-2 mb-3">
                   <div><h3 class="h5 mb-1">{{ device.name }}</h3><span v-if="device.model" class="small text-secondary">{{ device.model }}</span></div>
                   <span class="badge" :class="isStale(home, device, now, unavailable) ? 'text-bg-warning' : 'text-bg-light'">{{ isStale(home, device, now, unavailable) ? 'Данные устарели' : 'Данные актуальны' }}</span>
@@ -246,6 +281,8 @@ onBeforeUnmount(() => {
                   <button type="button" class="btn btn-outline-dark flex-fill" :disabled="busy || !controlAvailable(home, device)" @click="power(home, device, false)">Выключить</button>
                 </div>
                 <p v-else class="small text-secondary mb-0">Только наблюдение</p>
+                <p v-if="pendingPower.has(deviceKey(home, device))" class="small text-secondary mt-2 mb-0" role="status">Отправляем команду этому устройству…</p>
+                <p v-if="commandErrors.has(deviceKey(home, device))" class="small text-danger mt-2 mb-0" role="alert">{{ commandErrors.get(deviceKey(home, device)) }}</p>
               </article>
             </div>
           </div>

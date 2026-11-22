@@ -9,7 +9,9 @@
 | home-ui | Existing-login BFF and Vue management page | home-exchange |
 
 Build order: access/storage → exchange/API → UI → emulator and independent security review.
-Only cloud code changes. No deployment, paid service, local-project edit or real device action.
+Initial scope was cloud-only. The 2026-11-22 extension coordinates the local agent's
+multi-device catalog with the existing v1 contract. No production cloud deployment,
+paid service or real device mutations are part of verification.
 
 ## Decisions and boundaries
 
@@ -40,6 +42,14 @@ Only cloud code changes. No deployment, paid service, local-project edit or real
   UI also marks cached values stale after API failure. Never fabricate Tuya/Midea devices.
 
 ## Structure and verification
+
+Multi-server extension: device identity is `(homeId, deviceId)`, with independent
+credentials and snapshots per server. The dashboard can filter by server without
+flattening device identity. Identical device IDs on two homes must retain independent
+pending commands, readings, result validation, connection fencing and revocation.
+Local agents publish only supported devices from their own LAN catalog; new device
+drivers and cloud schedule editing remain separate capabilities. V1 wire types and
+the existing database schema remain compatible.
 
 Models + Repos: additive EF models/migration, existing DB context. WebApiDto/SmartHome:
 wire types. passiwebapi/SmartHome: service, auth, hub and HTTP controllers. WebApp:

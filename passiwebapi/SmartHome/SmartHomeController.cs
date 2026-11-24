@@ -53,6 +53,14 @@ public sealed class SmartHomeController(SmartHomeService homes) : ControllerBase
     [HttpPost("homes/{homeId:guid}/devices/{deviceId}/power")]
     public async Task<IActionResult> Power(Guid homeId, string deviceId, PowerCommandRequest request) =>
         Ok(await homes.QueueCommandAsync(Owner, homeId, deviceId, request));
+
+    [HttpPost("homes/{homeId:guid}/devices/{deviceId}/schedule")]
+    public async Task<IActionResult> ReplaceSchedule(Guid homeId, string deviceId, ReplaceScheduleRequest request) =>
+        Ok(await homes.ReplaceScheduleAsync(Owner, homeId, deviceId, request));
+
+    [HttpPost("homes/{homeId:guid}/devices/{deviceId}/schedule/resume")]
+    public async Task<IActionResult> ResumeSchedule(Guid homeId, string deviceId, ResumeScheduleRequest request) =>
+        Ok(await homes.ResumeScheduleAsync(Owner, homeId, deviceId, request));
 }
 
 public sealed class CreateHomeRequest

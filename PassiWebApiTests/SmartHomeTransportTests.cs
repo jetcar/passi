@@ -38,7 +38,7 @@ namespace PassiWebApiTests;
 // Real PostgreSQL transactions, JWT signature validation, HTTP authorization and SignalR framing.
 // TestServer substitutes only the network transport; no physical-device endpoint is ever called.
 [TestFixture, NonParallelizable]
-public class SmartHomeTransportTests
+public partial class SmartHomeTransportTests
 {
     private const string Api = "/passiapi/api/smarthome";
     private const string Issuer = "https://identity.example/openidc";

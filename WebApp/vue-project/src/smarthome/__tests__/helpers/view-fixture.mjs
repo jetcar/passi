@@ -6,6 +6,7 @@ import { parse, compileScript } from '@vue/compiler-sfc'
 import ts from 'typescript'
 import * as vue from 'vue'
 import * as state from '../../state.ts'
+import * as schedules from '../../schedules.ts'
 
 const filename = new URL('../../../views/SmartHomeView.vue', import.meta.url)
 const { descriptor } = parse(fs.readFileSync(filename, 'utf8'))
@@ -16,6 +17,12 @@ const compiled = compileScript(descriptor, {
 const script = ts.transpileModule(compiled.content, {
   compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS },
 }).outputText
+const editorFile = new URL('../../ScheduleEditor.vue', import.meta.url)
+const editorDescriptor = parse(fs.readFileSync(editorFile, 'utf8')).descriptor
+const editorScript = ts.transpileModule(compileScript(editorDescriptor, {
+  id: 'schedule-editor-test', inlineTemplate: true,
+  templateOptions: { compilerOptions: { hoistStatic: false } },
+}).content, { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS } }).outputText
 
 export const settle = async () => { await new Promise(resolve => setImmediate(resolve)); await vue.nextTick() }
 export const reply = (data, status = 200) => ({ ok: status >= 200 && status < 300, status, json: async () => structuredClone(data) })
@@ -23,6 +30,9 @@ export const reply = (data, status = 200) => ({ ok: status >= 200 && status < 30
 // Exercise the real Vue setup, template, reactivity and model directives using
 // Vue's renderer API. Only host elements, timers and HTTP are synthetic.
 // https://vuejs.org/api/custom-renderer.html
+// v-model checks the root constructor when replacing a text input's value.
+globalThis.Document ??= class SyntheticDocument {}
+globalThis.ShadowRoot ??= class SyntheticShadowRoot {}
 class HostNode {
   constructor(tag, text = '') {
     this.tag = tag; this.tagName = tag.toUpperCase(); this.text = text
@@ -30,6 +40,7 @@ class HostNode {
     this.value = ''; this.selected = false; this.selectedIndex = -1
   }
   get textContent() { return this.text + this.children.map(child => child.textContent).join('') }
+  getRootNode() { return this.parent ? this.parent.getRootNode() : this }
   get options() { return this.children.filter(child => child.tag === 'option') }
   get selectedIndex() { return this.options.findIndex(option => option.selected) }
   set selectedIndex(index) { this.options.forEach((option, position) => { option.selected = position === index }) }
@@ -48,15 +59,19 @@ export async function mountView(t, respond) {
   const timers = new Map()
   let nextTimer = 0
   const exports = {}
+  const editorExports = {}
   const context = vm.createContext({
     exports,
     require(name) {
       if (name === 'vue') return vue
       if (name === '../smarthome/state') return state
+      if (name === './state') return state
+      if (name === '../smarthome/schedules' || name === './schedules') return schedules
+      if (name === '../smarthome/ScheduleEditor.vue') return editorExports
       throw new Error(`Unexpected import: ${name}`)
     },
     AbortController, crypto: webcrypto,
-    window: { confirm() { throw new Error('Server management is outside these tests') } },
+    window: { confirm() { return true } },
     setTimeout: (fn, delay) => { const id = ++nextTimer; timers.set(id, { fn, delay }); return id },
     clearTimeout: id => timers.delete(id),
     setInterval: (fn, delay) => { const id = ++nextTimer; timers.set(id, { fn, delay, repeat: true }); return id },
@@ -65,10 +80,13 @@ export async function mountView(t, respond) {
       const request = { url, ...options }
       requests.push(request)
       assert.ok(url === '/api/smarthome' || url === '/api/smarthome/csrf' ||
-        /^\/api\/smarthome\/homes\/[^/]+\/devices\/[^/]+\/power$/.test(url), `Unexpected endpoint: ${url}`)
+        /^\/api\/smarthome\/homes\/[^/]+\/devices\/[^/]+\/(power|schedule(?:\/resume)?)$/.test(url), `Unexpected endpoint: ${url}`)
       return respond(request)
     },
   })
+  context.exports = editorExports
+  vm.runInContext(`(function () { ${editorScript}\n})()`, context, { filename: 'ScheduleEditor.compiled.cjs' })
+  context.exports = exports
   vm.runInContext(script, context, { filename: 'SmartHomeView.compiled.cjs' })
   const detach = node => {
     if (node.parent) node.parent.children.splice(node.parent.children.indexOf(node), 1)

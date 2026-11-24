@@ -1,10 +1,15 @@
+import type { DeviceSchedule, ScheduleConfiguration } from './schedules'
+
 export type CommandStatus = 'queued' | 'sent' | 'confirmed' | 'failed' | 'unknown' | 'expired'
 
 export interface HomeCommand {
   id: string
   homeId: string
   deviceId: string
-  operation: 'power.set'
+  operation: 'power.set' | 'schedule.replace' | 'schedule.resume'
+  expectedVersion?: number | null
+  expectedRuntimeRevision?: number | null
+  configuration?: ScheduleConfiguration | null
   on: boolean
   createdAt: string
   expiresAt: string
@@ -33,6 +38,7 @@ export interface HomeServer {
   stale: boolean
   devices: HomeDevice[]
   commands: HomeCommand[]
+  schedules?: DeviceSchedule[]
 }
 
 export interface HomeDashboard { serverTime: string; homes: HomeServer[] }

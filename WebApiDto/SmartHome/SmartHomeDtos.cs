@@ -19,6 +19,7 @@ public class HomeDto
     public bool Stale { get; set; }
     public List<DeviceDto> Devices { get; set; } = new();
     public List<CommandDto> Commands { get; set; } = new();
+    public List<ScheduleSnapshotDto> Schedules { get; set; } = new();
 }
 public class DeviceDto
 {
@@ -81,4 +82,7 @@ public class CommandDto
     public string Status { get; set; }
     public DateTimeOffset? CompletedAt { get; set; }
     public string ErrorCode { get; set; }
+    public long? ExpectedVersion { get; set; }
+    public long? ExpectedRuntimeRevision { get; set; }
+    public ScheduleConfigurationDto Configuration { get; set; }
 }

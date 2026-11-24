@@ -2,6 +2,9 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { canControl, commandLabels, isOnline, isStale } from '../smarthome/state'
 import type { HomeCommand, HomeDashboard, HomeDevice, HomeEnrollment, HomeServer } from '../smarthome/state'
+import ScheduleEditor from '../smarthome/ScheduleEditor.vue'
+import { canAdvanceRevision, commandAction, observeSchedule, reloadDraft, scheduleCommandStatus, scheduleFresh, scheduleSnapshotStale, validateSchedule } from '../smarthome/schedules'
+import type { ScheduleDraft } from '../smarthome/schedules'
 
 const dashboard = ref<HomeDashboard | null>(null)
 const access = ref<'loading' | 'allowed' | 'denied' | 'login'>('loading')
@@ -16,6 +19,7 @@ const selectedHomeId = ref('')
 const pendingPower = ref(new Set<string>())
 const commandErrors = ref(new Map<string, string>())
 const commandUnavailable = ref(new Set<string>())
+const scheduleDrafts = ref(new Map<string, ScheduleDraft>())
 // Keep receipts until a dashboard includes them; an older in-flight poll must not
 // re-enable a device immediately after its command has been accepted.
 const receipts = ref<HomeCommand[]>([])
@@ -69,6 +73,7 @@ function reportFailure(reason: unknown) {
     dashboard.value = null
     enrollment.value = null
     receipts.value = []
+    scheduleDrafts.value.clear()
     return
   }
   error.value = reason instanceof RequestError && reason.status === 409
@@ -85,6 +90,8 @@ async function refresh() {
     serverOffset = Date.parse(data.serverTime) - Date.now()
     now.value = Date.now() + serverOffset
     dashboard.value = data
+    for (const home of data.homes) for (const snapshot of home.schedules ?? [])
+      observeSchedule(scheduleDrafts.value, home.id, snapshot, home.commands)
     receipts.value = receipts.value.filter(local => !data.homes.some(home =>
       home.id === local.homeId && home.commands.some(command => command.id === local.id)))
     commandUnavailable.value.clear()
@@ -152,6 +159,55 @@ async function power(home: HomeServer, device: HomeDevice, on: boolean) {
 
 function date(value?: string | null): string {
   return value && Number.isFinite(Date.parse(value)) ? new Date(value).toLocaleString('ru-RU') : 'ещё не получено'
+}
+
+const scheduleSnapshot = (home: HomeServer, device: HomeDevice) => home.schedules?.find(item => item.deviceId === device.id)
+function scheduleAvailable(home: HomeServer, device: HomeDevice) {
+  return !busy.value && controlAvailable(home, device) && scheduleFresh(home, device, scheduleSnapshot(home, device), now.value, unavailable.value)
+}
+function reloadSchedule(home: HomeServer, device: HomeDevice) {
+  const snapshot = scheduleSnapshot(home, device)
+  if (!snapshot || !scheduleAvailable(home, device)) return
+  scheduleDrafts.value.set(deviceKey(home, device), reloadDraft(snapshot))
+  commandErrors.value.delete(deviceKey(home, device))
+}
+async function sendSchedule(home: HomeServer, device: HomeDevice, operation: 'schedule.replace' | 'schedule.resume') {
+  const key = deviceKey(home, device), snapshot = scheduleSnapshot(home, device), draft = scheduleDrafts.value.get(key)
+  if (!snapshot || !draft || !scheduleAvailable(home, device) || draft.conflict || draft.requiresReload) return
+  if (draft.configuration.version !== snapshot.configuration.version) { draft.conflict = true; return }
+  if (operation === 'schedule.replace' && (validateSchedule(draft.configuration).length || !canAdvanceRevision(draft.configuration.version))) return
+  if (operation === 'schedule.resume' && (!snapshot.runtime.manualActive || !canAdvanceRevision(snapshot.runtime.revision))) return
+  const commandId = crypto.randomUUID()
+  const configuration = JSON.parse(JSON.stringify(draft.configuration))
+  const body = operation === 'schedule.replace'
+    ? { commandId, expectedVersion: configuration.version, configuration }
+    : { commandId, expectedVersion: snapshot.configuration.version, expectedRuntimeRevision: snapshot.runtime.revision }
+  const local: HomeCommand = { id: commandId, homeId: home.id, deviceId: device.id, operation, on: false,
+    expectedVersion: body.expectedVersion, expectedRuntimeRevision: body.expectedRuntimeRevision, configuration: operation === 'schedule.replace' ? configuration : undefined,
+    status: 'unknown', createdAt: new Date(now.value).toISOString(), expiresAt: new Date(now.value + 30_000).toISOString() }
+  draft.submitted = { id: commandId, operation, configuration: JSON.stringify(configuration) }
+  pendingPower.value.add(key)
+  commandErrors.value.delete(key)
+  try {
+    const result = await request<HomeCommand>(`/homes/${encodeURIComponent(home.id)}/devices/${encodeURIComponent(device.id)}/schedule${operation === 'schedule.resume' ? '/resume' : ''}`, body)
+    if (stopped) return
+    receipts.value.push(result)
+    home.commands = [result, ...home.commands.filter(item => item.id !== result.id)]
+    await refresh()
+  } catch (reason) {
+    if (stopped) return
+    if (reason instanceof RequestError && (reason.status === 401 || reason.status === 403)) { reportFailure(reason); return }
+    const conflict = reason instanceof RequestError && reason.status === 409
+    const rejected = reason instanceof RequestError && reason.status < 500
+    if (!rejected) receipts.value.push(local)
+    draft.requiresReload = true
+    draft.conflict = conflict
+    commandUnavailable.value.add(key)
+    commandErrors.value.set(key, conflict
+      ? 'Конфликт версии или выполняющаяся команда. Черновик сохранён; загрузите текущие настройки перед новой отправкой.'
+      : rejected ? 'Настройки отклонены. Черновик сохранён; проверьте его и загрузите текущие настройки.'
+        : 'Результат операции неизвестен. Автоматического повтора нет; дождитесь свежего снимка и загрузите текущие настройки.')
+  } finally { pendingPower.value.delete(key) }
 }
 
 function commands(home: HomeServer) {
@@ -283,6 +339,10 @@ onBeforeUnmount(() => {
                 <p v-else class="small text-secondary mb-0">Только наблюдение</p>
                 <p v-if="pendingPower.has(deviceKey(home, device))" class="small text-secondary mt-2 mb-0" role="status">Отправляем команду этому устройству…</p>
                 <p v-if="commandErrors.has(deviceKey(home, device))" class="small text-danger mt-2 mb-0" role="alert">{{ commandErrors.get(deviceKey(home, device)) }}</p>
+                <ScheduleEditor :snapshot="scheduleSnapshot(home, device)" :draft="scheduleDrafts.get(deviceKey(home, device))"
+                  :blocked="!scheduleAvailable(home, device)" :stale="scheduleSnapshotStale(home, device, scheduleSnapshot(home, device), now, unavailable)"
+                  :pending="pendingPower.has(deviceKey(home, device))" :command="commands(home).find(command => command.deviceId === device.id && command.operation !== 'power.set')"
+                  @save="sendSchedule(home, device, 'schedule.replace')" @resume="sendSchedule(home, device, 'schedule.resume')" @reload="reloadSchedule(home, device)" />
               </article>
             </div>
           </div>
@@ -292,8 +352,8 @@ onBeforeUnmount(() => {
             <p class="small text-secondary">Отправка не означает выполнение. При неизвестном результате автоматического повтора нет; новая команда требует вашего действия.</p>
             <ol class="list-group list-group-flush">
               <li v-for="command in commands(home)" :key="command.id" class="list-group-item px-0 py-3">
-                <div class="d-flex flex-wrap justify-content-between gap-2"><strong>{{ home.devices.find(device => device.id === command.deviceId)?.name ?? command.deviceId }} · {{ command.on ? 'Включить' : 'Выключить' }}</strong><small class="text-secondary">{{ date(command.createdAt) }}</small></div>
-                <div :class="{ 'text-success': command.status === 'confirmed', 'text-danger': command.status === 'failed', 'text-warning-emphasis': command.status === 'unknown' }">{{ commandLabels[command.status] }}</div>
+                <div class="d-flex flex-wrap justify-content-between gap-2"><strong>{{ home.devices.find(device => device.id === command.deviceId)?.name ?? command.deviceId }} · {{ commandAction(command) }}</strong><small class="text-secondary">{{ date(command.createdAt) }}</small></div>
+                <div :class="{ 'text-success': command.status === 'confirmed', 'text-danger': command.status === 'failed', 'text-warning-emphasis': command.status === 'unknown' }">{{ scheduleCommandStatus(command) ?? commandLabels[command.status] }}</div>
                 <div class="small text-secondary">Срок команды: {{ date(command.expiresAt) }}<span v-if="command.completedAt"> · Результат: {{ date(command.completedAt) }}</span></div>
               </li>
             </ol>

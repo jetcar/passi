@@ -32,6 +32,16 @@ public sealed class HomeAgentHub(SmartHomeService homes) : Hub
         }
     }
 
+    public async Task<ExchangeResponse> ExchangeSchedule(ExchangeScheduleRequest request)
+    {
+        try { return await homes.ExchangeScheduleAsync(Agent, Context.ConnectionId, request); }
+        catch (SmartHomeException error)
+        {
+            if (error.StatusCode is 401 or 403) Context.Abort();
+            throw new HubException(error.Code);
+        }
+    }
+
     public override async Task OnDisconnectedAsync(Exception exception)
     {
         if (Context.Items.TryGetValue(typeof(AgentIdentity), out var value))

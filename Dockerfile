@@ -1,4 +1,4 @@
-FROM node:24 AS vueWeb
+FROM node:24-bookworm-slim AS vueWeb
 COPY . /src
 WORKDIR /src/WebApp/vue-project
 RUN npm install

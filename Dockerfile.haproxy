@@ -2,6 +2,6 @@ FROM haproxy:3.2.26-trixie
 
 USER root
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends --only-upgrade zlib1g \
+    && apt-get upgrade -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 USER haproxy

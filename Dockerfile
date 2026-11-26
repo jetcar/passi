@@ -28,4 +28,5 @@ RUN dotnet publish WebApp/WebApp.csproj -c Release /p:UseAppHost=false \
     && dotnet publish OpenIDC/OpenIDC.csproj -c Release /p:UseAppHost=false
 
 
+USER 10001
 ENTRYPOINT ["sleep", "3600"]

@@ -3,7 +3,7 @@ version: '3.4'
 services:
   redis:
     ports:
-      - "6379:6379"
+      - "127.0.0.1:6379:6379"
     networks:
       - haproxy_net
 
@@ -11,7 +11,7 @@ services:
     logging:
       driver: json-file
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     networks:
       - haproxy_net
     env_file:
@@ -35,7 +35,7 @@ services:
       context: .
       dockerfile: WebApp/Dockerfile
     ports:
-      - "5002:5002"
+      - "127.0.0.1:5002:5002"
     env_file:
       - ./configs/variables/dev.env
       - ../passi_config/sendgrid.env
@@ -53,7 +53,7 @@ services:
       context: .
       dockerfile: OpenIDC/Dockerfile
     ports:
-      - "5005:5005"
+      - "127.0.0.1:5005:5005"
     env_file:
       - ./configs/variables/dev.env
     volumes:
@@ -73,7 +73,7 @@ services:
       context: .
       dockerfile: passiwebapi/Dockerfile
     ports:
-      - "5004:5004"
+      - "127.0.0.1:5004:5004"
     env_file:
       - ./configs/variables/dev.env
     volumes:

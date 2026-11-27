@@ -1,4 +1,9 @@
 FROM node:24-bookworm-slim AS vueWeb
+RUN apt-get update \
+    && apt-get upgrade -y --no-install-recommends \
+    && npm install --global npm@12.2.3 \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY . /src
 WORKDIR /src/WebApp/vue-project
 RUN npm install
@@ -25,7 +30,9 @@ COPY --from=vueWeb /src/OpenIDC/wwwroot ./OpenIDC/wwwroot
 # also restores and ships test-only tools (including Coverlet and its bundled dependencies).
 RUN dotnet publish WebApp/WebApp.csproj -c Release /p:UseAppHost=false \
     && dotnet publish passiwebapi/passiwebapi.csproj -c Release /p:UseAppHost=false \
-    && dotnet publish OpenIDC/OpenIDC.csproj -c Release /p:UseAppHost=false
+    && dotnet publish OpenIDC/OpenIDC.csproj -c Release /p:UseAppHost=false \
+    && dotnet nuget locals global-packages --clear
 
 
+USER 10001
 ENTRYPOINT ["sleep", "3600"]

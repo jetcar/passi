@@ -1,7 +1,7 @@
 version: '3.4'
 services:
   database:
-    image: 'postgres:15.20-bookworm'
+    image: 'postgres:15.20-trixie'
     container_name: postgres
     networks:
       - database_net
@@ -133,6 +133,8 @@ services:
   mailler-backend:
     image: jetcar/mailler-backend:latest
     container_name: mailler-backend
+    cap_add:
+      - NET_BIND_SERVICE
     networks:
       - haproxy_net
       - database_net

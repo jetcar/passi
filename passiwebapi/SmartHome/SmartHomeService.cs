@@ -34,7 +34,7 @@ public sealed class AgentIdentity
     public long Generation { get; set; }
 }
 
-public sealed class SmartHomeService
+public sealed partial class SmartHomeService
 {
     private readonly PassiDbContext db;
     private readonly TimeProvider clock;
@@ -108,7 +108,7 @@ public sealed class SmartHomeService
             {
                 Id = home.Id, Name = home.Name, Online = Online(home, now), LastSeenAt = home.LastSeenAt,
                 SnapshotAt = home.SnapshotAt, Stale = !Fresh(home, now), Devices = Devices(home),
-                Commands = commands.Select(ToDto).ToList()
+                Commands = commands.Select(ToDto).ToList(), Schedules = ScheduleViews(home, now)
             });
         }
         return dashboard;
@@ -231,7 +231,7 @@ public sealed class SmartHomeService
         var existing = await db.SmartHomeCommands.SingleOrDefaultAsync(x => x.Id == request.CommandId, ct);
         if (existing != null)
         {
-            if (existing.HomeId != homeId || existing.DeviceId != deviceId || existing.On != request.On)
+            if (existing.HomeId != homeId || existing.DeviceId != deviceId || existing.Operation != "power.set" || existing.On != request.On)
                 throw new SmartHomeException("command_id_conflict", 409);
             await Expire(home, clock.GetUtcNow(), ct);
             return ToDto(existing);
@@ -268,10 +268,12 @@ public sealed class SmartHomeService
         home.SnapshotAt = request.SnapshotAt.ToUniversalTime();
         home.AwaitingSnapshot = false;
         home.DevicesJson = JsonSerializer.Serialize(request.Devices);
+        InvalidateAbsentSchedules(home);
         foreach (var result in request.Results)
         {
             var command = await db.SmartHomeCommands.SingleOrDefaultAsync(x => x.Id == result.CommandId && x.HomeId == home.Id, ct);
             if (command == null) throw new SmartHomeException("unknown_command", 404);
+            if (command.Operation != "power.set") throw new SmartHomeException("command_operation_mismatch", 409);
             if (command.ConnectionId != connectionId) throw new SmartHomeException("command_connection_mismatch", 409);
             // Terminal records are immutable; retries of an acknowledgement are harmless.
             if (command.Status != "sent") continue;
@@ -287,7 +289,7 @@ public sealed class SmartHomeService
             command.ErrorCode = command.Status == "confirmed" ? null : result.ErrorCode ??
                 (command.Status == "unknown" ? "unconfirmed_result" : "device_rejected");
         }
-        var pending = await db.SmartHomeCommands.Where(x => x.HomeId == home.Id && x.Status == "queued")
+        var pending = await db.SmartHomeCommands.Where(x => x.HomeId == home.Id && x.Status == "queued" && x.Operation == "power.set")
             .OrderBy(x => x.CreatedAt).ToListAsync(ct);
         var response = new ExchangeResponse { ServerTime = now };
         foreach (var command in pending)
@@ -392,10 +394,16 @@ public sealed class SmartHomeService
     private static bool FixedEquals(string a, string b) => a != null && b != null && CryptographicOperations.FixedTimeEquals(Encoding.ASCII.GetBytes(a), Encoding.ASCII.GetBytes(b));
     private static bool Identifier(string value) => value != null && value.Length is > 0 and <= 80 &&
         Regex.IsMatch(value, "^[A-Za-z0-9][A-Za-z0-9_.:-]*$", RegexOptions.CultureInvariant);
-    private static CommandDto ToDto(SmartHomeCommandDb command) => new()
+    private static CommandDto ToDto(SmartHomeCommandDb command)
     {
-        Id = command.Id, HomeId = command.HomeId, DeviceId = command.DeviceId, On = command.On,
-        CreatedAt = command.CreatedAt, ExpiresAt = command.ExpiresAt, SentAt = command.SentAt, Status = command.Status,
-        CompletedAt = command.CompletedAt, ErrorCode = command.ErrorCode
-    };
+        var payload = command.PayloadJson == null ? null : JsonSerializer.Deserialize<ScheduleCommandPayload>(command.PayloadJson);
+        return new CommandDto
+        {
+            Id = command.Id, HomeId = command.HomeId, DeviceId = command.DeviceId, On = command.On, Operation = command.Operation,
+            CreatedAt = command.CreatedAt, ExpiresAt = command.ExpiresAt, SentAt = command.SentAt, Status = command.Status,
+            CompletedAt = command.CompletedAt, ErrorCode = command.ErrorCode,
+            ExpectedVersion = payload?.ExpectedVersion, ExpectedRuntimeRevision = payload?.ExpectedRuntimeRevision,
+            Configuration = payload?.Configuration
+        };
+    }
 }

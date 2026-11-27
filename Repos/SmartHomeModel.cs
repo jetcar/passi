@@ -22,6 +22,7 @@ public static class SmartHomeModel
             b.Property(x => x.TokenHash).HasMaxLength(64);
             b.Property(x => x.ConnectionId).HasMaxLength(128);
             b.Property(x => x.DevicesJson).IsRequired().HasColumnType("jsonb");
+            b.Property(x => x.SchedulesJson).IsRequired().HasColumnType("jsonb").HasDefaultValue("[]");
             b.HasIndex(x => x.TokenHash).IsUnique();
             b.HasIndex(x => x.OwnerId);
         });
@@ -31,6 +32,8 @@ public static class SmartHomeModel
             b.HasKey(x => x.Id);
             b.Property(x => x.DeviceId).IsRequired().HasMaxLength(80);
             b.Property(x => x.Status).IsRequired().HasMaxLength(16);
+            b.Property(x => x.Operation).IsRequired().HasMaxLength(32).HasDefaultValue("power.set");
+            b.Property(x => x.PayloadJson).HasColumnType("jsonb");
             b.Property(x => x.ConnectionId).HasMaxLength(128);
             b.Property(x => x.ErrorCode).HasMaxLength(80);
             b.HasIndex(x => new { x.HomeId, x.CreatedAt });

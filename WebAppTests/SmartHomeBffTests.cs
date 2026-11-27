@@ -158,22 +158,74 @@ public class SmartHomeBffTests
 
     private static StringContent Json(string body) => new(body, Encoding.UTF8, "application/json");
 
+    [TestCase("schedule")]
+    [TestCase("schedule/resume")]
+    public async Task ScheduleWritesRequireCsrf(string suffix)
+    {
+        await Login();
+        using var response = await _client.PostAsync(
+            $"/api/smarthome/homes/{Guid.NewGuid()}/devices/plug/{suffix}", Json("{}"));
+        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+        Assert.That(_downstream.Calls, Is.Zero);
+    }
+
+    [TestCase("schedule", HttpStatusCode.Conflict)]
+    [TestCase("schedule/resume", HttpStatusCode.Forbidden)]
+    public async Task ScheduleWritesPreserveVersionBodyAndServerDenial(string suffix, HttpStatusCode status)
+    {
+        await Login();
+        var csrf = await Csrf();
+        var home = Guid.NewGuid();
+        var body = $"{{\"commandId\":\"{Guid.NewGuid()}\",\"expectedVersion\":7,\"expectedRuntimeRevision\":12}}";
+        _downstream.Calls = 0;
+        _downstream.Status = status;
+        using var request = new HttpRequestMessage(HttpMethod.Post,
+            $"/api/smarthome/homes/{home}/devices/xiaomi-plug-123/{suffix}") { Content = Json(body) };
+        request.Headers.Add("RequestVerificationToken", csrf);
+        request.Headers.Add("Authorization", "Bearer client-forged-token");
+        using var response = await _client.SendAsync(request);
+        Assert.That(response.StatusCode, Is.EqualTo(status));
+        Assert.That(_downstream.Calls, Is.EqualTo(1));
+        Assert.That(_downstream.Authorization, Is.EqualTo("Bearer saved-user-token"));
+        Assert.That(_downstream.Url, Is.EqualTo($"https://cloud.test/passiapi/api/smarthome/homes/{home}/devices/xiaomi-plug-123/{suffix}"));
+        Assert.That(_downstream.Body, Is.EqualTo(body));
+        Assert.That(response.Headers.CacheControl?.NoStore, Is.True);
+    }
+
+    [TestCase("schedule")]
+    [TestCase("schedule/resume")]
+    public async Task ScheduleWriteTimeoutNeverRetries(string suffix)
+    {
+        await Login();
+        var csrf = await Csrf();
+        _downstream.Calls = 0;
+        _downstream.Timeout = true;
+        using var request = new HttpRequestMessage(HttpMethod.Post,
+            $"/api/smarthome/homes/{Guid.NewGuid()}/devices/plug/{suffix}") { Content = Json("{}") };
+        request.Headers.Add("RequestVerificationToken", csrf);
+        using var response = await _client.SendAsync(request);
+        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadGateway));
+        Assert.That(_downstream.Calls, Is.EqualTo(1));
+    }
+
     private sealed class Downstream : HttpMessageHandler
     {
         public int Calls;
         public string Authorization;
         public string Url;
+        public string Body;
         public bool Timeout;
         public HttpStatusCode Status = HttpStatusCode.OK;
-        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             Calls++;
             Authorization = request.Headers.Authorization?.ToString();
             Url = request.RequestUri.ToString();
+            Body = request.Content == null ? null : await request.Content.ReadAsStringAsync(cancellationToken);
             if (Timeout) throw new TaskCanceledException();
             var response = new HttpResponseMessage(Status) { Content = Json("{\"allowed\":true}") };
             if (Status == HttpStatusCode.Redirect) response.Headers.Location = new Uri("https://other.test");
-            return Task.FromResult(response);
+            return response;
         }
     }
 }

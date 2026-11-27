@@ -42,6 +42,15 @@ public sealed class SmartHomeController(SmartHomeClient client, IAntiforgery ant
     public Task<IActionResult> Power(Guid homeId, string deviceId, [FromBody] JsonElement body) =>
         Forward(HttpMethod.Post, $"homes/{homeId}/devices/{Uri.EscapeDataString(deviceId)}/power", body);
 
+    [HttpPost("homes/{homeId:guid}/devices/{deviceId}/schedule")]
+    [RequestSizeLimit(64 * 1024)]
+    public Task<IActionResult> ReplaceSchedule(Guid homeId, string deviceId, [FromBody] JsonElement body) =>
+        Forward(HttpMethod.Post, $"homes/{homeId}/devices/{Uri.EscapeDataString(deviceId)}/schedule", body);
+
+    [HttpPost("homes/{homeId:guid}/devices/{deviceId}/schedule/resume")]
+    public Task<IActionResult> ResumeSchedule(Guid homeId, string deviceId, [FromBody] JsonElement body) =>
+        Forward(HttpMethod.Post, $"homes/{homeId}/devices/{Uri.EscapeDataString(deviceId)}/schedule/resume", body);
+
     private async Task<IActionResult> Forward(HttpMethod method, string path, JsonElement? body = null)
     {
         Response.Headers.CacheControl = "no-store";

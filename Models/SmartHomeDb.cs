@@ -25,6 +25,7 @@ public class SmartHomeDb
     public DateTimeOffset? SnapshotAt { get; set; }
     public bool AwaitingSnapshot { get; set; }
     public string DevicesJson { get; set; } = "[]";
+    public string SchedulesJson { get; set; } = "[]";
 }
 
 public class SmartHomeCommandDb
@@ -33,6 +34,8 @@ public class SmartHomeCommandDb
     public Guid HomeId { get; set; }
     public string DeviceId { get; set; }
     public bool On { get; set; }
+    public string Operation { get; set; } = "power.set";
+    public string PayloadJson { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset ExpiresAt { get; set; }
     public DateTimeOffset? SentAt { get; set; }
